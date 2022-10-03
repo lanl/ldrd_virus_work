@@ -3,6 +3,11 @@ from pathlib import Path
 
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
+from Bio.SeqUtils import GC
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 
 
@@ -10,7 +15,7 @@ def main():
     # let's start off by scraping the pubmed
     # nucleotide database from genomic SARS-CoV-2 RNA
 
-    # restrict to 100 retrieved sequences
+    # restrict retrieved sequences
     # during early development
     retmax = 100
 
@@ -44,7 +49,6 @@ def main():
         handle.close()
         # a bit over 64,000 at the time of writing:
         print("total SARS-CoV-2 genomic RNA sequences found on Pubmed:", record["Count"])
-        # set to around 100 actually retrieved for now:
         print("total SARS-CoV-2 genomic RNA sequences *retrieved* from Pubmed:", record["RetMax"])
         assert len(record["IdList"]) == retmax
         # retrieve the sequence data
@@ -69,8 +73,27 @@ def main():
     assert len(records) == retmax
     for record in tqdm(records):
         # each record is a Bio.SeqRecord.SeqRecord
-        assert len(record) > 29000
-        assert len(record) < 30000
+        actual_len = len(record)
+        assert actual_len > 29000, f"Actual sequence length is {actual_len}"
+        assert actual_len < 30000, f"Actual sequence length is {actual_len}"
+
+
+    # next, try to plot the % GC content for the SARS-CoV-2
+    # RNA genomes currently getting pulled in
+    gc_content_data = np.empty(shape=(retmax,))
+    for idx, record in enumerate(records):
+        gc_content_data[idx] = GC(record.seq)
+
+    fig_gc_dist = plt.figure()
+    ax = fig_gc_dist.add_subplot(111)
+    ax.set_xlim(30, 50)
+    ax.set_xlabel("% GC content in SARS-CoV-2 RNA genome")
+    ax.set_ylabel("probability")
+    ax.set_title(f"% GC content histogram for SARS-CoV-2 RNA Genomes (N={retmax})")
+    ax.hist(gc_content_data,
+            bins=int(retmax/10))
+    fig_gc_dist.savefig("percent_gc_content_histogram.png",
+                dpi=300)
 
 
 if __name__ == "__main__":

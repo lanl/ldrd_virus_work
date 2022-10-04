@@ -17,7 +17,8 @@ def main():
 
     # restrict retrieved sequences
     # during early development
-    retmax = 100
+    retmax = 5000
+    print(f"Total records requested in search: {retmax}")
 
     # we only scrape if we don't have the local data
     # already though:
@@ -69,29 +70,40 @@ def main():
     # https://doi.org/10.1038/s41598-020-69342-y
     # there should be > 29,000 nucleotides in the
     # SARS-CoV-2 genome
-    print("Sanity checking retrieved SARS-CoV-2 RNA genome sizes:")
+    print("Sanity checking/filtering retrieved SARS-CoV-2 RNA genome sizes:")
     assert len(records) == retmax
+    retained_records = []
     for record in tqdm(records):
         # each record is a Bio.SeqRecord.SeqRecord
         actual_len = len(record)
+        if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+           in record.description):
+            # likely "data pollution"/bad sequences
+            # picked up in search
+            continue
         assert actual_len > 29000, f"Actual sequence length is {actual_len}"
         assert actual_len < 30000, f"Actual sequence length is {actual_len}"
+        retained_records.append(record)
+
+    filtered_rec_count = len(retained_records)
+    print("Total records retained after filtering:", filtered_rec_count)
 
 
     # next, try to plot the % GC content for the SARS-CoV-2
     # RNA genomes currently getting pulled in
-    gc_content_data = np.empty(shape=(retmax,))
-    for idx, record in enumerate(records):
+    gc_content_data = np.empty(shape=(filtered_rec_count,), dtype=np.float64)
+    for idx, record in enumerate(retained_records):
         gc_content_data[idx] = GC(record.seq)
 
     fig_gc_dist = plt.figure()
     ax = fig_gc_dist.add_subplot(111)
     ax.set_xlim(30, 50)
     ax.set_xlabel("% GC content in SARS-CoV-2 RNA genome")
-    ax.set_ylabel("probability")
-    ax.set_title(f"% GC content histogram for SARS-CoV-2 RNA Genomes (N={retmax})")
+    ax.set_ylabel("Frequency")
+    ax.set_title(f"% GC content histogram for SARS-CoV-2 RNA Genomes (N={filtered_rec_count})")
     ax.hist(gc_content_data,
-            bins=int(retmax/10))
+            bins=int(filtered_rec_count/10),
+            )
     fig_gc_dist.savefig("percent_gc_content_histogram.png",
                 dpi=300)
 

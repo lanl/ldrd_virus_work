@@ -104,6 +104,27 @@ def main():
     ax.hist(gc_content_data,
             bins=int(filtered_rec_count/10),
             )
+    # human genomic %GC content from
+    # Piovesan et al. (2019) BMC Research Notes
+    ax.vlines(x=40.9,
+              ymin=0,
+              ymax=2000,
+              ls="--",
+              color="green")
+    # bat genomic %GC content from
+    # Kasai et al. (2013) Chromosoma
+    ax.vlines(x=42.3,
+              ymin=0,
+              ymax=2000,
+              ls="--",
+              color="black")
+    # Arabidopsis thaliana % GC content from
+    # Michael et al. (2018)
+    ax.vlines(x=36,
+              ymin=0,
+              ymax=2000,
+              ls="--",
+              color="orange")
     fig_gc_dist.savefig("percent_gc_content_histogram.png",
                 dpi=300)
 

@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 
@@ -127,6 +128,29 @@ def main():
               color="orange")
     fig_gc_dist.savefig("percent_gc_content_histogram.png",
                 dpi=300)
+
+    # let's construct a pandas dataframe, since this is
+    # a reasonably convenient data structure for interacting
+    # with i.e., scikit-learn and also for general analysis/inspection/visualization
+
+    data_dict = {}
+    for record in retained_records:
+        data_dict[record.id] = GC(record.seq)
+
+    df = pd.DataFrame.from_dict(data_dict,
+                                orient="index",
+                                columns=["Genome %GC"])
+    df.columns.name = "Genome ID"
+    print("-" * 30)
+    print("df:\n", df)
+    print("-" * 30)
+    df.info()
+    print("-" * 30)
+    print(df.describe())
+    print("-" * 30)
+
+
+
 
 
 if __name__ == "__main__":

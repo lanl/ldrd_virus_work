@@ -43,19 +43,28 @@ def main():
         # available, but let's start with the smaller grab
         # from Pubmed initially at least...
 
-        handle = Entrez.esearch(db="nucleotide",
-                                term="SARS-CoV-2 genomic RNA",
-                                retmax=retmax,
-                                idtype="acc")
-        record = Entrez.read(handle)
-        handle.close()
-        # a bit over 64,000 at the time of writing:
-        print("total SARS-CoV-2 genomic RNA sequences found on Pubmed:", record["Count"])
-        print("total SARS-CoV-2 genomic RNA sequences *retrieved* from Pubmed:", record["RetMax"])
-        assert len(record["IdList"]) == retmax
-        # retrieve the sequence data
-        handle = Entrez.efetch(db="nuccore", id=record["IdList"], rettype="gb", retmode="text")
-        records = list(SeqIO.parse(handle, "gb"))
+        # in order to get multispecies data we combine searches
+        # for SARS-CoV-2 with searches for closely related
+        # viruses in bats and pangolins (just bats for now..)
+        # see: Nature volume 604, pages 330–336 (2022)
+        records = []
+        for search_term in ["SARS-CoV-2 genomic RNA",
+                            # 96.1% nucleotide similarity with SARS-CoV-2
+                            # for RatG13, but it has S mutations that suggest
+                            # it may not enter via ACE2 (also lacks furin cleavage site)
+                            "Bat coronavirus complete genome"]:
+            handle = Entrez.esearch(db="nucleotide",
+                                    term=search_term,
+                                    retmax=retmax,
+                                    idtype="acc")
+            record = Entrez.read(handle)
+            handle.close()
+            print(f"total {search_term} sequences found on Pubmed:", record["Count"])
+            print(f"total {search_term} sequences *retrieved* from Pubmed:", record["RetMax"])
+            assert len(record["IdList"]) <= retmax
+            # retrieve the sequence data
+            handle = Entrez.efetch(db="nuccore", id=record["IdList"], rettype="gb", retmode="text")
+            records += list(SeqIO.parse(handle, "gb"))
 
         # cache the sequence data so we don't overwhelm Pubmed
         # and get banned when iterating on the code
@@ -71,8 +80,10 @@ def main():
     # https://doi.org/10.1038/s41598-020-69342-y
     # there should be > 29,000 nucleotides in the
     # SARS-CoV-2 genome
-    print("Sanity checking/filtering retrieved SARS-CoV-2 RNA genome sizes:")
-    assert len(records) == retmax
+    # NOTE: relaxing the checks as I start incorporating viral
+    # sequences from other organisms, like bats
+    print("Sanity checking/filtering retrieved SARS-CoV-2 (and related) RNA genome sizes:")
+    assert len(records) <= retmax * 2
     retained_records = []
     for record in tqdm(records):
         # each record is a Bio.SeqRecord.SeqRecord
@@ -82,8 +93,8 @@ def main():
             # likely "data pollution"/bad sequences
             # picked up in search
             continue
-        assert actual_len > 29000, f"Actual sequence length is {actual_len}"
-        assert actual_len < 30000, f"Actual sequence length is {actual_len}"
+        assert actual_len > 26000, f"Actual sequence length is {actual_len}"
+        assert actual_len < 31000, f"Actual sequence length is {actual_len}"
         retained_records.append(record)
 
     filtered_rec_count = len(retained_records)
@@ -135,11 +146,18 @@ def main():
 
     data_dict = {}
     for record in retained_records:
-        data_dict[record.id] = GC(record.seq)
+        if "human" in record.description.lower():
+            organism_name = "human"
+        elif "bat" in record.description.lower():
+            organism_name = "bat"
+        else:
+            organism_name = "unknown"
+
+        data_dict[record.id] = [GC(record.seq), organism_name]
 
     df = pd.DataFrame.from_dict(data_dict,
                                 orient="index",
-                                columns=["Genome %GC"])
+                                columns=["Genome %GC", "Organism"])
     df.columns.name = "Genome ID"
     print("-" * 30)
     print("df:\n", df)
@@ -148,6 +166,16 @@ def main():
     print("-" * 30)
     print(df.describe())
     print("-" * 30)
+    # check number of genomes per organism
+    # in the dataset (DataFrame)
+    print("Breakdown of sample size (num genomes) per organism in SARS-CoV-2 (and related) dataset:\n", df.value_counts("Organism"))
+    # quick % GC distribution check per organism
+    # with box plot:
+    fig_gc_dist_box, ax = plt.subplots()
+    df.boxplot(ax=ax,
+               by="Organism")
+    ax.set_ylabel("% GC content in SARS-CoV-2 (and related animal) genome")
+    fig_gc_dist_box.savefig("dataset_gc_percent_box_plot.png", dpi=300)
 
 
 

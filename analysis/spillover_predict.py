@@ -9,10 +9,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+from numpy.random import default_rng
 
 
 
 def main():
+    rng = default_rng(676906)
     # let's start off by scraping the pubmed
     # nucleotide database from genomic SARS-CoV-2 RNA
 
@@ -176,6 +180,29 @@ def main():
                by="Organism")
     ax.set_ylabel("% GC content in SARS-CoV-2 (and related animal) genome")
     fig_gc_dist_box.savefig("dataset_gc_percent_box_plot.png", dpi=300)
+
+    # early/crude work with a random forest classifier, just to
+    # get a stats/ML workflow going...
+
+    print("Training a Random Forest Classifier on %GC content of viral genome")
+    # we temporarily reshape our data because it currently
+    # only has a single feature (GC content)
+    X = df["Genome %GC"].to_numpy().reshape(-1, 1)
+    Y = df["Organism"]
+    clf = RandomForestClassifier(n_estimators=10)
+    clf.fit(X, Y)
+
+    # let's perform 5-fold cross validation to get
+    # a sense for the estimator accuracy
+    scores = cross_val_score(clf, X, Y, cv=5)
+    print(f"Random Forest Cross Validation Accuracy has an average of {scores.mean()} and std dev of {scores.std()}:")
+
+    # the cross-validation accuracy should be much lower
+    # if we shuffle the features relative to the labels
+    X_shuffled = X.copy()
+    rng.shuffle(X_shuffled)
+    shuffle_scores = cross_val_score(clf, X_shuffled, Y, cv=5)
+    print(f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation Accuracy has an average of {shuffle_scores.mean()} and std dev of {shuffle_scores.std()}:")
 
 
 

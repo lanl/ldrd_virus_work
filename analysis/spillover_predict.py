@@ -173,6 +173,13 @@ def main():
     # check number of genomes per organism
     # in the dataset (DataFrame)
     print("Breakdown of sample size (num genomes) per organism in SARS-CoV-2 (and related) dataset:\n", df.value_counts("Organism"))
+    fig_sample_sizes, ax = plt.subplots()
+    df.groupby("Organism").count().plot.bar(ax=ax,
+                                            rot=0,
+                                            legend=False)
+    ax.set_ylabel("Sample Size (number of genomes)")
+    ax.set_title("Initial SARS-CoV-2 (and related animal) genome dataset")
+    fig_sample_sizes.savefig("sample_sizes.png", dpi=300)
     # quick % GC distribution check per organism
     # with box plot:
     fig_gc_dist_box, ax = plt.subplots()
@@ -194,16 +201,50 @@ def main():
 
     # let's perform 5-fold cross validation to get
     # a sense for the estimator accuracy
-    scores = cross_val_score(clf, X, Y, cv=5)
-    print(f"Random Forest Cross Validation Accuracy has an average of {scores.mean()} and std dev of {scores.std()}:")
+    fig_cross_val, (ax_macro, ax_micro) = plt.subplots(2, 1)
+    scores_macro = cross_val_score(clf, X, Y.values, cv=5, scoring="f1_macro")
+    print(f"Random Forest Cross Validation F1 macro has an average of {scores_macro.mean()} and std dev of {scores_macro.std()}:")
+    scores_micro = cross_val_score(clf, X, Y.values, cv=5, scoring="f1_micro")
+    print(f"Random Forest Cross Validation F1 micro has an average of {scores_micro.mean()} and std dev of {scores_micro.std()}:")
 
     # the cross-validation accuracy should be much lower
     # if we shuffle the features relative to the labels
     X_shuffled = X.copy()
     rng.shuffle(X_shuffled)
-    shuffle_scores = cross_val_score(clf, X_shuffled, Y, cv=5)
-    print(f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation Accuracy has an average of {shuffle_scores.mean()} and std dev of {shuffle_scores.std()}:")
+    shuffle_scores_macro = cross_val_score(clf, X_shuffled, Y.values, cv=5, scoring="f1_macro")
+    shuffle_scores_micro = cross_val_score(clf, X_shuffled, Y.values, cv=5, scoring="f1_micro")
+    print(f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 macro has an average of {shuffle_scores_macro.mean()} and std dev of {shuffle_scores_macro.std()}:")
+    print(f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 micro has an average of {shuffle_scores_micro.mean()} and std dev of {shuffle_scores_micro.std()}:")
 
+    # perhaps even worse would be a random set
+    # of % GC values?
+    X_random = rng.random(X.shape)
+    random_scores_macro = cross_val_score(clf, X_random, Y.values, cv=5, scoring="f1_macro")
+    random_scores_micro = cross_val_score(clf, X_random, Y.values, cv=5, scoring="f1_micro")
+    print(f"(Randomly generated % GC content) Random Forest Cross Validation F1 macro has an average of {random_scores_macro.mean()} and std dev of {random_scores_macro.std()}:")
+    print(f"(Randomly generated % GC content) Random Forest Cross Validation F1 micro has an average of {random_scores_micro.mean()} and std dev of {random_scores_micro.std()}:")
+
+    score_means_macro = [scores_macro.mean(), shuffle_scores_macro.mean(), random_scores_macro.mean()]
+    score_std_macro = [scores_macro.std(), shuffle_scores_macro.std(), random_scores_macro.std()]
+    x_lab = ["original data", "shuffled GC content", "randomized GC content"]
+
+    score_means_micro = [scores_micro.mean(), shuffle_scores_micro.mean(), random_scores_micro.mean()]
+    score_std_micro = [scores_micro.std(), shuffle_scores_micro.std(), random_scores_micro.std()]
+
+    ax_macro.bar(height=score_means_macro,
+           yerr=score_std_macro,
+           capsize=20.0,
+           x=x_lab)
+    ax_macro.set_title("5-fold cross validation of random forest")
+    ax_macro.set_ylabel("F1 macro of\n classification by % GC")
+    ax_micro.bar(height=score_means_micro,
+           yerr=score_std_micro,
+           capsize=20.0,
+           x=x_lab)
+    ax_micro.set_ylabel("F1 micro of\n classification by % GC")
+    for ax in [ax_micro, ax_macro]:
+        ax.set_ylim(0, 1)
+    fig_cross_val.savefig("cross_vali_rand_forest.png", dpi=300)
 
 
 

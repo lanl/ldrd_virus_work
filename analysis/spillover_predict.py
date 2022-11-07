@@ -22,7 +22,7 @@ def main():
 
     # restrict retrieved sequences
     # during early development
-    retmax = 5000
+    retmax = 10_000
     print(f"Total records requested in search: {retmax}")
 
     # we only scrape if we don't have the local data
@@ -52,7 +52,7 @@ def main():
         # viruses in bats and pangolins (just bats for now..)
         # see: Nature volume 604, pages 330–336 (2022)
         records = []
-        for search_term in ["SARS-CoV-2 genomic RNA",
+        for search_term in ['("Severe acute respiratory syndrome coronavirus 2"[Organism] OR sars-cov-2[All Fields]) AND genome[All Fields]',
                             # 96.1% nucleotide similarity with SARS-CoV-2
                             # for RatG13, but it has S mutations that suggest
                             # it may not enter via ACE2 (also lacks furin cleavage site)
@@ -60,15 +60,33 @@ def main():
             handle = Entrez.esearch(db="nucleotide",
                                     term=search_term,
                                     retmax=retmax,
-                                    idtype="acc")
-            record = Entrez.read(handle)
+                                    idtype="acc",
+                                    usehistory="y")
+            search_results = Entrez.read(handle)
             handle.close()
-            print(f"total {search_term} sequences found on Pubmed:", record["Count"])
-            print(f"total {search_term} sequences *retrieved* from Pubmed:", record["RetMax"])
-            assert len(record["IdList"]) <= retmax
+            acc_list = search_results["IdList"]
+            count = int(search_results["Count"])
+            webenv = search_results["WebEnv"]
+            query_key = search_results["QueryKey"]
+
+            print(f"total {search_term} sequences found on Pubmed:", count)
+            print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
+            assert len(acc_list) <= retmax
             # retrieve the sequence data
-            handle = Entrez.efetch(db="nuccore", id=record["IdList"], rettype="gb", retmode="text")
-            records += list(SeqIO.parse(handle, "gb"))
+            batch_size = 100
+            numrecs = min(retmax, count)
+            print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
+            for start in tqdm(range(0, numrecs, batch_size)):
+                handle = Entrez.efetch(db="nuccore",
+                                       retstart=start,
+                                       retmax=batch_size,
+                                       rettype="gb",
+                                       webenv=webenv,
+                                       query_key=query_key,
+                                       idtype="acc",
+                                       retmode="text")
+                records += list(SeqIO.parse(handle, "gb"))
+                handle.close()
 
         # cache the sequence data so we don't overwhelm Pubmed
         # and get banned when iterating on the code

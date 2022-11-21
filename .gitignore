@@ -17,3 +17,8 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+__pycache__/
+*.py[cod]
+build/
+*.egg-info/

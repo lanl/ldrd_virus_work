@@ -15,25 +15,52 @@ from numpy.random import default_rng
 
 
 
-def main():
+def main(download_recs: bool):
     rng = default_rng(676906)
     # let's start off by scraping the pubmed
     # nucleotide database from genomic SARS-CoV-2 RNA
 
     # restrict retrieved sequences
     # during early development
-    retmax = 10_000
-    print(f"Total records requested in search: {retmax}")
+    retmax = 10
+    print(f"Total records requested in search (per search term): {retmax}")
 
-    # we only scrape if we don't have the local data
-    # already though:
-    cache_path = Path(".cache/seqs.p")
-    if Path(".cache/seqs.p").exists():
-        print("Retrieving SARS-CoV-2 genomic RNA data from local cache.")
-        with open(cache_path, "rb") as records_cache:
-            records = pickle.load(records_cache)
-    else:
-        print("Retrieving SARS-CoV-2 genomic RNA remotely from Pubmed.")
+    # we only scrape from the online database if requested,
+    # and even if we requested we should only add sequences
+    # if they correspond to NCBI accession numbers we do not
+    # yet have (doing this periodically on a given machine/workspace
+    # probably makes sense, since NCBI sequence counts double every
+    # ~18 months and the local sequence cache may become outdated quickly)
+
+    cache_path = Path(".cache")
+    # envsioned local sequence cache layout:
+    # .cache/ folder
+    # subfolders are formatted as accession numbers
+    # and each subfolder should contain the FASTA and GENBANK
+    # sequences for that accession number
+
+    # if you try to run the analysis with no cache,
+    # and no request to fill the cache with new records,
+    # that's an error
+    if not cache_path.exists() and not download_recs:
+        raise ValueError("No local sequence cache exists and no request "
+                         "to populate the cache with new sequences was made.")
+
+    # if the ".cache" folder exists but there are no sequence
+    # records, that's also an error
+    local_records = []
+    # TODO: properly check that there are valid records present, rather
+    # than just any subfolders
+    if not cache_path.exists():
+        cache_path.mkdir(parents=False, exist_ok=False)
+    cache_subdirectories = [x for x in cache_path.iterdir() if x.is_dir()]
+    if not cache_subdirectories and not download_recs:
+        raise ValueError("No request to populate the local sequence cache "
+                         "was made and there are no local accession records "
+                         "available.")
+
+    if download_recs:
+        print("Retrieving sequence data remotely from Pubmed.")
 
         # let Pubmed team email us if they find
         # that our scraping is too aggressive
@@ -88,14 +115,30 @@ def main():
                 records += list(SeqIO.parse(handle, "gb"))
                 handle.close()
 
-        # cache the sequence data so we don't overwhelm Pubmed
-        # and get banned when iterating on the code
-        p = Path(".cache/")
-        p.mkdir()
-        cache_path = p / "seqs.p"
-        print("Serializing Pubmed SARS-CoV-2 records into pickle file.")
-        with cache_path.open("wb") as records_cache:
-            pickle.dump(records, records_cache)
+        # with the records list populated from the online
+        # search, we next want to grow the local cache with
+        # folders + FASTA/GENBANK format files that are not
+        # already there
+        for record in tqdm(records):
+            # we also sanity check each record before
+            # trying to cache it locally;
+            # each record is a Bio.SeqRecord.SeqRecord
+            actual_len = len(record)
+            if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+               in record.description):
+                # likely "data pollution"/bad sequences
+                # picked up in search
+                continue
+            assert actual_len > 26000, f"Actual sequence length is {actual_len}"
+            assert actual_len < 31000, f"Actual sequence length is {actual_len}"
+            record_cache_path = cache_path / f"{record.id}"
+            if record_cache_path not in cache_subdirectories:
+                print(f"adding record_cache_path: {record_cache_path}")
+                record_cache_path.mkdir(parents=False, exist_ok=False)
+                with open(record_cache_path / f"{record.id}.fasta", "w") as fasta_file:
+                    SeqIO.write(record, fasta_file, "fasta")
+                with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
+                    SeqIO.write(record, genbank_file, "genbank")
 
 
     # sanity check -- based on this manuscript:
@@ -263,9 +306,3 @@ def main():
     for ax in [ax_micro, ax_macro]:
         ax.set_ylim(0, 1)
     fig_cross_val.savefig("cross_vali_rand_forest.png", dpi=300)
-
-
-
-
-if __name__ == "__main__":
-    main()

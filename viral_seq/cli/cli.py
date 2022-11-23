@@ -16,11 +16,13 @@ click.rich_click.OPTION_GROUPS = {
 
 @click.command()
 @click.option('--download_recs',
-              is_flag=True,
+              type=int,
               show_default=True,
-              default=False,
-              help=("Attempt to download new sequence records, either generating "
-                    "or expanding the local cache with records it doesn't already have."))
+              default=0,
+              help=("Specify a number of sequence records "
+                    "to download (per search category), either generating "
+                    "or expanding the local cache with records it doesn't "
+                    "already have."))
 def viral_seq(download_recs):
     start_sec = perf_counter()
     main(download_recs=download_recs)

@@ -15,14 +15,23 @@ from numpy.random import default_rng
 
 
 
-def main(download_recs: bool):
+def main(download_recs: int):
+    """
+    Parameters
+    ----------
+    download_recs : int
+        The number of records (genetic sequences) to download per
+        search category. At the time of writing there are
+        two search categories (human, bat), so a value of ``100``
+        would attempt to retrive ``100`` records per search, though
+        less may be found and in theory a single record could contain
+        more than one genetic sequence.
+    """
     rng = default_rng(676906)
     # let's start off by scraping the pubmed
     # nucleotide database from genomic SARS-CoV-2 RNA
 
-    # restrict retrieved sequences
-    # during early development
-    retmax = 10
+    retmax = download_recs
     print(f"Total records requested in search (per search term): {retmax}")
 
     # we only scrape from the online database if requested,
@@ -59,7 +68,7 @@ def main(download_recs: bool):
                          "was made and there are no local accession records "
                          "available.")
 
-    if download_recs:
+    if download_recs > 0:
         print("Retrieving sequence data remotely from Pubmed.")
 
         # let Pubmed team email us if they find
@@ -100,7 +109,7 @@ def main(download_recs: bool):
             print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
             assert len(acc_list) <= retmax
             # retrieve the sequence data
-            batch_size = 100
+            batch_size = min(retmax, 100)
             numrecs = min(retmax, count)
             print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
             for start in tqdm(range(0, numrecs, batch_size)):
@@ -148,7 +157,9 @@ def main(download_recs: bool):
     # NOTE: relaxing the checks as I start incorporating viral
     # sequences from other organisms, like bats
     print("Sanity checking/filtering retrieved SARS-CoV-2 (and related) RNA genome sizes:")
-    assert len(records) <= retmax * 2
+    num_recs = len(records)
+    max_recs = retmax * 2 # 2 search terms (human + bat)
+    assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"
     retained_records = []
     for record in tqdm(records):
         # each record is a Bio.SeqRecord.SeqRecord

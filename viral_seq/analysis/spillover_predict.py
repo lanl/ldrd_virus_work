@@ -149,6 +149,43 @@ def main(download_recs: int):
                 with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
                     SeqIO.write(record, genbank_file, "genbank")
 
+        num_recs = len(records)
+        max_recs = retmax * 2 # 2 search terms (human + bat)
+        assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"
+
+
+    # whether download_recs > 0 or not, we will always
+    # consider the FASTA/GENBANK records stored in .cache
+    # as the source of genetic sequence data that we we are
+    # working with, which means doing some I/O now to pull
+    # that data in from disk
+
+    # some of the sequence-length/related sanity checking
+    # also should be guaranteed complete by now since we
+    # should have filtered the records before writing to disk;
+    # nonetheless, reapplying some sanity checks after/while
+    # reading the data back in probably makes sense (check for
+    # data/cache corruption, etc.)
+
+    print("populating cache_subdirectories object from the local cache")
+    cache_subdirectories = []
+    for entry in cache_path.iterdir():
+        if entry.is_dir():
+            cache_subdirectories.append(entry)
+    print("total number of records (sequence folders) in updated local cache:", len(cache_subdirectories))
+
+
+    print("loading the local records cache (genetic sequences) into memory")
+    records = []
+    for record_folder in tqdm(cache_subdirectories):
+        # genbank format has more metadata we can use so
+        # focus on that for now; eventually we might assert
+        # that the FASTA file has the same sequence read in
+        # as sanity check
+        genbank_file = list(record_folder.glob("*.genbank"))[0]
+        with open(genbank_file) as genfile:
+            record = list(SeqIO.parse(genfile, "genbank"))[0]
+            records.append(record)
 
     # sanity check -- based on this manuscript:
     # https://doi.org/10.1038/s41598-020-69342-y
@@ -156,31 +193,24 @@ def main(download_recs: int):
     # SARS-CoV-2 genome
     # NOTE: relaxing the checks as I start incorporating viral
     # sequences from other organisms, like bats
-    print("Sanity checking/filtering retrieved SARS-CoV-2 (and related) RNA genome sizes:")
-    num_recs = len(records)
-    max_recs = retmax * 2 # 2 search terms (human + bat)
-    assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"
-    retained_records = []
+    print("Sanity checking/filtering SARS-CoV-2 (and related) RNA genome records retrieved from the local cache:")
     for record in tqdm(records):
         # each record is a Bio.SeqRecord.SeqRecord
         actual_len = len(record)
-        if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
-           in record.description):
-            # likely "data pollution"/bad sequences
-            # picked up in search
-            continue
+        # likely "data pollution"/bad sequences
+        # picked up in search
+        assert not (record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+           in record.description))
         assert actual_len > 26000, f"Actual sequence length is {actual_len}"
         assert actual_len < 31000, f"Actual sequence length is {actual_len}"
-        retained_records.append(record)
 
-    filtered_rec_count = len(retained_records)
-    print("Total records retained after filtering:", filtered_rec_count)
-
+    filtered_rec_count = len(records)
+    print("Total records retained:", filtered_rec_count)
 
     # next, try to plot the % GC content for the SARS-CoV-2
     # RNA genomes currently getting pulled in
     gc_content_data = np.empty(shape=(filtered_rec_count,), dtype=np.float64)
-    for idx, record in enumerate(retained_records):
+    for idx, record in enumerate(records):
         gc_content_data[idx] = GC(record.seq)
 
     fig_gc_dist = plt.figure()
@@ -221,7 +251,7 @@ def main(download_recs: int):
     # with i.e., scikit-learn and also for general analysis/inspection/visualization
 
     data_dict = {}
-    for record in retained_records:
+    for record in records:
         if "human" in record.description.lower():
             organism_name = "human"
         elif "bat" in record.description.lower():

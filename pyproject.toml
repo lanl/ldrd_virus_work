@@ -1,0 +1,12 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>=61.0",
+]
+
+[project.scripts]
+viral_seq = "viral_seq.cli.cli:viral_seq"
+
+[project]
+name = "viral_seq"
+dynamic = ['version']

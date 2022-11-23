@@ -15,25 +15,61 @@ from numpy.random import default_rng
 
 
 
-def main():
+def main(download_recs: int):
+    """
+    Parameters
+    ----------
+    download_recs : int
+        The number of records (genetic sequences) to download per
+        search category. At the time of writing there are
+        two search categories (human, bat), so a value of ``100``
+        would attempt to retrive ``100`` records per search, though
+        less may be found and in theory a single record could contain
+        more than one genetic sequence.
+    """
     rng = default_rng(676906)
     # let's start off by scraping the pubmed
     # nucleotide database from genomic SARS-CoV-2 RNA
 
-    # restrict retrieved sequences
-    # during early development
-    retmax = 10_000
-    print(f"Total records requested in search: {retmax}")
+    retmax = download_recs
+    print(f"Total records requested in search (per search term): {retmax}")
 
-    # we only scrape if we don't have the local data
-    # already though:
-    cache_path = Path(".cache/seqs.p")
-    if Path(".cache/seqs.p").exists():
-        print("Retrieving SARS-CoV-2 genomic RNA data from local cache.")
-        with open(cache_path, "rb") as records_cache:
-            records = pickle.load(records_cache)
-    else:
-        print("Retrieving SARS-CoV-2 genomic RNA remotely from Pubmed.")
+    # we only scrape from the online database if requested,
+    # and even if we requested we should only add sequences
+    # if they correspond to NCBI accession numbers we do not
+    # yet have (doing this periodically on a given machine/workspace
+    # probably makes sense, since NCBI sequence counts double every
+    # ~18 months and the local sequence cache may become outdated quickly)
+
+    cache_path = Path(".cache")
+    # envsioned local sequence cache layout:
+    # .cache/ folder
+    # subfolders are formatted as accession numbers
+    # and each subfolder should contain the FASTA and GENBANK
+    # sequences for that accession number
+
+    # if you try to run the analysis with no cache,
+    # and no request to fill the cache with new records,
+    # that's an error
+    if not cache_path.exists() and not download_recs:
+        raise ValueError("No local sequence cache exists and no request "
+                         "to populate the cache with new sequences was made.")
+
+    # if the ".cache" folder exists but there are no sequence
+    # records, that's also an error
+    local_records = []
+    # TODO: properly check that there are valid records present, rather
+    # than just any subfolders
+    if not cache_path.exists():
+        cache_path.mkdir(parents=False, exist_ok=False)
+    cache_subdirectories = [x for x in cache_path.iterdir() if x.is_dir()]
+    if not cache_subdirectories and not download_recs:
+        raise ValueError("No request to populate the local sequence cache "
+                         "was made and there are no local accession records "
+                         "available.")
+
+    if download_recs > 0:
+        print("Retrieving sequence data remotely from Pubmed.")
 
         # let Pubmed team email us if they find
         # that our scraping is too aggressive
@@ -73,7 +109,7 @@ def main():
             print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
             assert len(acc_list) <= retmax
             # retrieve the sequence data
-            batch_size = 100
+            batch_size = min(retmax, 100)
             numrecs = min(retmax, count)
             print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
             for start in tqdm(range(0, numrecs, batch_size)):
@@ -88,15 +124,68 @@ def main():
                 records += list(SeqIO.parse(handle, "gb"))
                 handle.close()
 
-        # cache the sequence data so we don't overwhelm Pubmed
-        # and get banned when iterating on the code
-        p = Path(".cache/")
-        p.mkdir()
-        cache_path = p / "seqs.p"
-        print("Serializing Pubmed SARS-CoV-2 records into pickle file.")
-        with cache_path.open("wb") as records_cache:
-            pickle.dump(records, records_cache)
+        # with the records list populated from the online
+        # search, we next want to grow the local cache with
+        # folders + FASTA/GENBANK format files that are not
+        # already there
+        for record in tqdm(records):
+            # we also sanity check each record before
+            # trying to cache it locally;
+            # each record is a Bio.SeqRecord.SeqRecord
+            actual_len = len(record)
+            if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+               in record.description):
+                # likely "data pollution"/bad sequences
+                # picked up in search
+                continue
+            assert actual_len > 26000, f"Actual sequence length is {actual_len}"
+            assert actual_len < 31000, f"Actual sequence length is {actual_len}"
+            record_cache_path = cache_path / f"{record.id}"
+            if record_cache_path not in cache_subdirectories:
+                print(f"adding record_cache_path: {record_cache_path}")
+                record_cache_path.mkdir(parents=False, exist_ok=False)
+                with open(record_cache_path / f"{record.id}.fasta", "w") as fasta_file:
+                    SeqIO.write(record, fasta_file, "fasta")
+                with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
+                    SeqIO.write(record, genbank_file, "genbank")
 
+        num_recs = len(records)
+        max_recs = retmax * 2 # 2 search terms (human + bat)
+        assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"
+
+
+    # whether download_recs > 0 or not, we will always
+    # consider the FASTA/GENBANK records stored in .cache
+    # as the source of genetic sequence data that we we are
+    # working with, which means doing some I/O now to pull
+    # that data in from disk
+
+    # some of the sequence-length/related sanity checking
+    # also should be guaranteed complete by now since we
+    # should have filtered the records before writing to disk;
+    # nonetheless, reapplying some sanity checks after/while
+    # reading the data back in probably makes sense (check for
+    # data/cache corruption, etc.)
+
+    print("populating cache_subdirectories object from the local cache")
+    cache_subdirectories = []
+    for entry in cache_path.iterdir():
+        if entry.is_dir():
+            cache_subdirectories.append(entry)
+    print("total number of records (sequence folders) in updated local cache:", len(cache_subdirectories))
+
+
+    print("loading the local records cache (genetic sequences) into memory")
+    records = []
+    for record_folder in tqdm(cache_subdirectories):
+        # genbank format has more metadata we can use so
+        # focus on that for now; eventually we might assert
+        # that the FASTA file has the same sequence read in
+        # as sanity check
+        genbank_file = list(record_folder.glob("*.genbank"))[0]
+        with open(genbank_file) as genfile:
+            record = list(SeqIO.parse(genfile, "genbank"))[0]
+            records.append(record)
 
     # sanity check -- based on this manuscript:
     # https://doi.org/10.1038/s41598-020-69342-y
@@ -104,29 +193,24 @@ def main():
     # SARS-CoV-2 genome
     # NOTE: relaxing the checks as I start incorporating viral
     # sequences from other organisms, like bats
-    print("Sanity checking/filtering retrieved SARS-CoV-2 (and related) RNA genome sizes:")
-    assert len(records) <= retmax * 2
-    retained_records = []
+    print("Sanity checking/filtering SARS-CoV-2 (and related) RNA genome records retrieved from the local cache:")
     for record in tqdm(records):
         # each record is a Bio.SeqRecord.SeqRecord
         actual_len = len(record)
-        if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
-           in record.description):
-            # likely "data pollution"/bad sequences
-            # picked up in search
-            continue
+        # likely "data pollution"/bad sequences
+        # picked up in search
+        assert not (record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+           in record.description))
         assert actual_len > 26000, f"Actual sequence length is {actual_len}"
         assert actual_len < 31000, f"Actual sequence length is {actual_len}"
-        retained_records.append(record)
 
-    filtered_rec_count = len(retained_records)
-    print("Total records retained after filtering:", filtered_rec_count)
-
+    filtered_rec_count = len(records)
+    print("Total records retained:", filtered_rec_count)
 
     # next, try to plot the % GC content for the SARS-CoV-2
     # RNA genomes currently getting pulled in
     gc_content_data = np.empty(shape=(filtered_rec_count,), dtype=np.float64)
-    for idx, record in enumerate(retained_records):
+    for idx, record in enumerate(records):
         gc_content_data[idx] = GC(record.seq)
 
     fig_gc_dist = plt.figure()
@@ -167,7 +251,7 @@ def main():
     # with i.e., scikit-learn and also for general analysis/inspection/visualization
 
     data_dict = {}
-    for record in retained_records:
+    for record in records:
         if "human" in record.description.lower():
             organism_name = "human"
         elif "bat" in record.description.lower():
@@ -263,9 +347,3 @@ def main():
     for ax in [ax_micro, ax_macro]:
         ax.set_ylim(0, 1)
     fig_cross_val.savefig("cross_vali_rand_forest.png", dpi=300)
-
-
-
-
-if __name__ == "__main__":
-    main()

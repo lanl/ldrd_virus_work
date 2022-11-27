@@ -76,6 +76,15 @@ def main(download_recs: int):
         # (rather than ban us outright)
         Entrez.email = "treddy@lanl.gov"
 
+        # if we do already have a local cache, we want to avoid
+        # using search terms that would simply pull in the same
+        # records, so that we could request i.e., 100 NEW records
+        # to grow the local cache progressively if we want
+
+        list_local_accessions = []
+        if cache_path.exists():
+            list_local_accessions = [p.name for p in cache_path.iterdir()]
+
         # this manuscript:
         # https://doi.org/10.1126/science.abm1208
         # Obermeyer et al., Science 376, 1327–1332 (2022)
@@ -93,6 +102,11 @@ def main(download_recs: int):
                             # for RatG13, but it has S mutations that suggest
                             # it may not enter via ACE2 (also lacks furin cleavage site)
                             "Bat coronavirus complete genome"]:
+
+            # exclusion of local/cache records from online search
+            for local_accession in list_local_accessions:
+                search_term += f" NOT {local_accession}[Accession] "
+
             handle = Entrez.esearch(db="nucleotide",
                                     term=search_term,
                                     retmax=retmax,
@@ -105,8 +119,9 @@ def main(download_recs: int):
             webenv = search_results["WebEnv"]
             query_key = search_results["QueryKey"]
 
-            print(f"total {search_term} sequences found on Pubmed:", count)
-            print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
+            # these are too verbose now, maybe use logging DEBUG eventually
+            #print(f"total {search_term} sequences found on Pubmed:", count)
+            #print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
             assert len(acc_list) <= retmax
             # retrieve the sequence data
             batch_size = min(retmax, 100)
@@ -128,6 +143,8 @@ def main(download_recs: int):
         # search, we next want to grow the local cache with
         # folders + FASTA/GENBANK format files that are not
         # already there
+        num_recs_added = 0
+        num_recs_excluded = 0
         for record in tqdm(records):
             # we also sanity check each record before
             # trying to cache it locally;
@@ -137,18 +154,27 @@ def main(download_recs: int):
                in record.description):
                 # likely "data pollution"/bad sequences
                 # picked up in search
+                num_recs_excluded += 1
                 continue
-            assert actual_len > 26000, f"Actual sequence length is {actual_len}"
-            assert actual_len < 31000, f"Actual sequence length is {actual_len}"
+            # these aren't assertions yet at this point because
+            # we don't want to interrupt the population of the local
+            # cache because of a few bad apples from an online search
+            if actual_len < 26000 or actual_len > 31000:
+                num_recs_excluded += 1
+                continue
             record_cache_path = cache_path / f"{record.id}"
             if record_cache_path not in cache_subdirectories:
-                print(f"adding record_cache_path: {record_cache_path}")
                 record_cache_path.mkdir(parents=False, exist_ok=False)
                 with open(record_cache_path / f"{record.id}.fasta", "w") as fasta_file:
                     SeqIO.write(record, fasta_file, "fasta")
                 with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
                     SeqIO.write(record, genbank_file, "genbank")
+                num_recs_added += 1
+            else:
+                num_recs_excluded += 1
 
+        print(f"number of records added to the local cache from online search: {num_recs_added}")
+        print(f"number of records excluded from the online search because of QA: {num_recs_excluded}")
         num_recs = len(records)
         max_recs = retmax * 2 # 2 search terms (human + bat)
         assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"

@@ -93,9 +93,9 @@ def main(download_recs: int):
 
         # try to use approach 2) below...
 
-        list_local_accessions = []
+        set_local_accessions = set()
         if cache_path.exists():
-            list_local_accessions = [p.name for p in cache_path.iterdir()]
+            set_local_accessions = set([p.name for p in cache_path.iterdir()])
 
         # this manuscript:
         # https://doi.org/10.1126/science.abm1208
@@ -115,38 +115,47 @@ def main(download_recs: int):
                             # it may not enter via ACE2 (also lacks furin cleavage site)
                             "Bat coronavirus complete genome"]:
 
-            print("before Entrez esearch")
-            handle = Entrez.esearch(db="nucleotide",
-                                    term=search_term,
-                                    retmax=retmax,
-                                    idtype="acc",
-                                    usehistory="y")
-            search_results = Entrez.read(handle)
-            handle.close()
+            # try to prevent timeouts on large search queries
+            # by batching
+            search_batch_size = min(10_000, retmax)
+            acc_set = set()
+            count = 0
+            remaining = retmax
+            print(f"starting Entrez esearch (search batch size is: {search_batch_size})")
+            for retstart in tqdm(range(1, retmax + 1, search_batch_size)):
+                if remaining < search_batch_size:
+                    actual_retmax = remaining
+                else:
+                    actual_retmax = search_batch_size
+                handle = Entrez.esearch(db="nucleotide",
+                                        term=search_term,
+                                        retstart=retstart,
+                                        retmax=actual_retmax,
+                                        idtype="acc",
+                                        usehistory="y")
+                search_results = Entrez.read(handle)
+                acc_set = acc_set.union(search_results["IdList"])
+                count += int(search_results["Count"])
+                remaining -= search_batch_size
+                handle.close()
             print("after Entrez esearch")
-            acc_list = search_results["IdList"]
-            count = int(search_results["Count"])
 
-            # TODO: probably change to a more efficient setop
-            # for now, just brute force exclude fetching
-            # accession numbers we already have in the local cache
-            new_acc_list = []
-            for acc_id in acc_list:
-                if acc_id not in list_local_accessions:
-                    new_acc_list.append(acc_id)
+            print("filtering accession records already present locally")
+            new_acc_set = acc_set.difference(set_local_accessions)
 
-            print("number of new records from online search to consider for inclusion in local cache:", len(new_acc_list))
-            if len(new_acc_list) == 0:
+            print("number of new records from online search to consider for inclusion in local cache:", len(new_acc_set))
+            if len(new_acc_set) == 0:
                 continue
 
             # these are too verbose now, maybe use logging DEBUG eventually
             #print(f"total {search_term} sequences found on Pubmed:", count)
             #print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
-            assert len(acc_list) <= retmax
+            assert len(acc_set) <= retmax
             # retrieve the sequence data
-            batch_size = min(retmax, 100, len(new_acc_list))
-            numrecs = min(retmax, count, len(new_acc_list))
+            batch_size = min(retmax, 100, len(new_acc_set))
+            numrecs = min(retmax, count, len(new_acc_set))
             print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
+            new_acc_list = list(new_acc_set)
             for start in tqdm(range(0, numrecs, batch_size)):
                 handle = Entrez.efetch(db="nuccore",
                                        rettype="gb",
@@ -178,6 +187,16 @@ def main(download_recs: int):
             # we don't want to interrupt the population of the local
             # cache because of a few bad apples from an online search
             if actual_len < 26000 or actual_len > 31000:
+                num_recs_excluded += 1
+                continue
+            if ("DNA" in record.annotations["molecule_type"] or 
+                "Klebsiella" in record.annotations["organism"]):
+                # for now, exclude DNA and focus on RNA coronaviruses;
+                # this should help prevent the sequence that got pulled in
+                # for: https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/13
+                # TODO: if we expand to include i.e., DNA viral genomes, we'll
+                # almost certainly need more sophisticated filtering than just
+                # one bacterial species though
                 num_recs_excluded += 1
                 continue
             record_cache_path = cache_path / f"{record.id}"

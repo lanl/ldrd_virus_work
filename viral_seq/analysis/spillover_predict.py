@@ -76,10 +76,22 @@ def main(download_recs: int):
         # (rather than ban us outright)
         Entrez.email = "treddy@lanl.gov"
 
-        # if we do already have a local cache, we want to avoid
-        # using search terms that would simply pull in the same
-        # records, so that we could request i.e., 100 NEW records
-        # to grow the local cache progressively if we want
+        # through empirical testing, I determined that we can't really efficiently
+        # exclude the initial Entrez search from containing records/accession numbers
+        # we already have in the local cache, because the string of `NOT <accession no.>`
+        # elements explodes to a size the server can't handle, resulting in HTTP 500
+        # errors
+
+        # based on feedback from NCBI support, it sounds like there are two viable options
+        # 1) the most efficient is probably to search for new records based on the date they
+        # were updated, so that we only pull in new records we don't have locally--however,
+        # when starting with an empty or small initial local cache, this doesn't seem very 
+        # helpful/practical for building up progressively (we want all the dates at first...)
+        # 2) Instead of excluding by accession number on the initial search, we could perform
+        # the same search each time, but filter on accession number AFTER the initial search
+        # and BEFORE the actual *retrieval* of records
+
+        # try to use approach 2) below...
 
         list_local_accessions = []
         if cache_path.exists():
@@ -103,10 +115,7 @@ def main(download_recs: int):
                             # it may not enter via ACE2 (also lacks furin cleavage site)
                             "Bat coronavirus complete genome"]:
 
-            # exclusion of local/cache records from online search
-            for local_accession in list_local_accessions:
-                search_term += f" NOT {local_accession}[Accession] "
-
+            print("before Entrez esearch")
             handle = Entrez.esearch(db="nucleotide",
                                     term=search_term,
                                     retmax=retmax,
@@ -114,26 +123,34 @@ def main(download_recs: int):
                                     usehistory="y")
             search_results = Entrez.read(handle)
             handle.close()
+            print("after Entrez esearch")
             acc_list = search_results["IdList"]
             count = int(search_results["Count"])
-            webenv = search_results["WebEnv"]
-            query_key = search_results["QueryKey"]
+
+            # TODO: probably change to a more efficient setop
+            # for now, just brute force exclude fetching
+            # accession numbers we already have in the local cache
+            new_acc_list = []
+            for acc_id in acc_list:
+                if acc_id not in list_local_accessions:
+                    new_acc_list.append(acc_id)
+
+            print("number of new records from online search to consider for inclusion in local cache:", len(new_acc_list))
+            if len(new_acc_list) == 0:
+                continue
 
             # these are too verbose now, maybe use logging DEBUG eventually
             #print(f"total {search_term} sequences found on Pubmed:", count)
             #print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
             assert len(acc_list) <= retmax
             # retrieve the sequence data
-            batch_size = min(retmax, 100)
-            numrecs = min(retmax, count)
+            batch_size = min(retmax, 100, len(new_acc_list))
+            numrecs = min(retmax, count, len(new_acc_list))
             print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
             for start in tqdm(range(0, numrecs, batch_size)):
                 handle = Entrez.efetch(db="nuccore",
-                                       retstart=start,
-                                       retmax=batch_size,
                                        rettype="gb",
-                                       webenv=webenv,
-                                       query_key=query_key,
+                                       id=new_acc_list[start:start + batch_size],
                                        idtype="acc",
                                        retmode="text")
                 records += list(SeqIO.parse(handle, "gb"))
@@ -143,6 +160,7 @@ def main(download_recs: int):
         # search, we next want to grow the local cache with
         # folders + FASTA/GENBANK format files that are not
         # already there
+        print("performing quality analysis of sequences and adding to local cache if they pass...")
         num_recs_added = 0
         num_recs_excluded = 0
         for record in tqdm(records):

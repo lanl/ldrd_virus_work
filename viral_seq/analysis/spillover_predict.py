@@ -341,7 +341,8 @@ def main(download_recs: int):
     fig_sample_sizes, ax = plt.subplots()
     df.groupby("Organism").count().plot.bar(ax=ax,
                                             rot=0,
-                                            legend=False)
+                                            legend=False,
+                                            log=True)
     ax.set_ylabel("Sample Size (number of genomes)")
     ax.set_title("Initial SARS-CoV-2 (and related animal) genome dataset")
     fig_sample_sizes.savefig("sample_sizes.png", dpi=300)

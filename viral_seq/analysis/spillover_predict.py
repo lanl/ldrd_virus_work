@@ -1,4 +1,3 @@
-import pickle
 from pathlib import Path
 
 from tqdm import tqdm
@@ -9,6 +8,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from numpy.random import default_rng
@@ -362,8 +362,29 @@ def main(download_recs: int):
     # only has a single feature (GC content)
     X = df["Genome %GC"].to_numpy().reshape(-1, 1)
     Y = df["Organism"]
-    clf = RandomForestClassifier(n_estimators=10)
+    num_estimators = 10
+    clf = RandomForestClassifier(n_estimators=num_estimators)
     clf.fit(X, Y)
+
+    print("Plotting some sample trees from the forest")
+
+    for max_depth in [3, None]:
+        # we'll plot 1/num_estimators trees for now
+        # even a single tree with a single feature split
+        # can be overwhelming, so plot 1 overall tree and
+        # 1 shallower depth tree so we can actually zoom in
+        fig_trees, ax = plt.subplots(dpi=900)
+        tree.plot_tree(clf.estimators_[0],
+                       filled=True,
+                       ax=ax,
+                       # TODO: pull features/class names in from
+                       # data instead of hard coding here
+                       feature_names=["% GC"],
+                       class_names=["bat", "human", "unknown"],
+                       max_depth=max_depth,
+                       proportion=True)
+        fig_trees.savefig(f"sample_trees_max_depth_{max_depth}.png")
+
 
     # let's perform 5-fold cross validation to get
     # a sense for the estimator accuracy

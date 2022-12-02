@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.metrics import RocCurveDisplay
 from numpy.random import default_rng
 
 
@@ -239,6 +240,8 @@ def main(download_recs: int):
 
 
     print("loading the local records cache (genetic sequences) into memory")
+    # TODO: this is getting pretty slow--maybe we can split the work
+    # between cores and then fuse the lists after?
     records = []
     for record_folder in tqdm(cache_subdirectories):
         # genbank format has more metadata we can use so
@@ -385,29 +388,54 @@ def main(download_recs: int):
                        proportion=True)
         fig_trees.savefig(f"sample_trees_max_depth_{max_depth}.png")
 
+    print("Plotting ROC for random forest with cross-validation")
+    # need binary classification problem for ROC
+    for (comparison_class, exclude_class) in [["bat", "unknown"], ["unknown", "bat"]]:
+        fig_roc, ax = plt.subplots(dpi=300)
+        cv = StratifiedKFold(n_splits=5)
+        # new forest just in case
+        clf_roc = RandomForestClassifier(n_estimators=num_estimators)
+        df_binary = df[df["Organism"] != exclude_class]
+        X_bin = df_binary["Genome %GC"].to_numpy().reshape(-1, 1)
+        Y_bin = df_binary["Organism"]
+        for i, (train, test) in enumerate(cv.split(X_bin, Y_bin)):
+            clf_roc.fit(X_bin[train], Y_bin[train])
+            viz = RocCurveDisplay.from_estimator(clf_roc,
+                                                 X_bin[test],
+                                                 Y_bin[test],
+                                                 ax=ax,
+                                                 pos_label="human",
+                                                 lw=1,
+                                                 name=f"ROC fold {i}",
+                                                 alpha=0.8)
+        ax.set_title(f"ROC human vs. {comparison_class}")
+        fig_roc.savefig(f"Forest_ROC_human_vs_{comparison_class}.png")
+
 
     # let's perform 5-fold cross validation to get
     # a sense for the estimator accuracy
     fig_cross_val, (ax_macro, ax_micro) = plt.subplots(2, 1)
-    scores_macro = cross_val_score(clf, X, Y.values, cv=5, scoring="f1_macro")
+    # new forest just in case
+    clf_cv = RandomForestClassifier(n_estimators=num_estimators)
+    scores_macro = cross_val_score(clf_cv, X, Y.values, cv=5, scoring="f1_macro")
     print(f"Random Forest Cross Validation F1 macro has an average of {scores_macro.mean()} and std dev of {scores_macro.std()}:")
-    scores_micro = cross_val_score(clf, X, Y.values, cv=5, scoring="f1_micro")
+    scores_micro = cross_val_score(clf_cv, X, Y.values, cv=5, scoring="f1_micro")
     print(f"Random Forest Cross Validation F1 micro has an average of {scores_micro.mean()} and std dev of {scores_micro.std()}:")
 
     # the cross-validation accuracy should be much lower
     # if we shuffle the features relative to the labels
     X_shuffled = X.copy()
     rng.shuffle(X_shuffled)
-    shuffle_scores_macro = cross_val_score(clf, X_shuffled, Y.values, cv=5, scoring="f1_macro")
-    shuffle_scores_micro = cross_val_score(clf, X_shuffled, Y.values, cv=5, scoring="f1_micro")
+    shuffle_scores_macro = cross_val_score(clf_cv, X_shuffled, Y.values, cv=5, scoring="f1_macro")
+    shuffle_scores_micro = cross_val_score(clf_cv, X_shuffled, Y.values, cv=5, scoring="f1_micro")
     print(f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 macro has an average of {shuffle_scores_macro.mean()} and std dev of {shuffle_scores_macro.std()}:")
     print(f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 micro has an average of {shuffle_scores_micro.mean()} and std dev of {shuffle_scores_micro.std()}:")
 
     # perhaps even worse would be a random set
     # of % GC values?
     X_random = rng.random(X.shape)
-    random_scores_macro = cross_val_score(clf, X_random, Y.values, cv=5, scoring="f1_macro")
-    random_scores_micro = cross_val_score(clf, X_random, Y.values, cv=5, scoring="f1_micro")
+    random_scores_macro = cross_val_score(clf_cv, X_random, Y.values, cv=5, scoring="f1_macro")
+    random_scores_micro = cross_val_score(clf_cv, X_random, Y.values, cv=5, scoring="f1_micro")
     print(f"(Randomly generated % GC content) Random Forest Cross Validation F1 macro has an average of {random_scores_macro.mean()} and std dev of {random_scores_macro.std()}:")
     print(f"(Randomly generated % GC content) Random Forest Cross Validation F1 micro has an average of {random_scores_micro.mean()} and std dev of {random_scores_micro.std()}:")
 

@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 
 from tqdm import tqdm
@@ -16,7 +17,8 @@ from numpy.random import default_rng
 
 
 
-def main(download_recs: int):
+def main(download_recs: int,
+         save_model: bool = False):
     """
     Parameters
     ----------
@@ -387,6 +389,15 @@ def main(download_recs: int):
                        max_depth=max_depth,
                        proportion=True)
         fig_trees.savefig(f"sample_trees_max_depth_{max_depth}.png")
+
+    if save_model:
+        print("Serializing random forest model")
+        # save the model/classifier, typically for repackaging
+        # and reuse on the secure with Shannon
+        # for more details on model persistence, see:
+        # https://scikit-learn.org/stable/model_persistence.html
+        with open("random_forest_model.p", "wb") as outfile:
+            pickle.dump(clf, outfile)
 
     print("Plotting ROC for random forest with cross-validation")
     # need binary classification problem for ROC

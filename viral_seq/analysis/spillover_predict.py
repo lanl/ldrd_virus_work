@@ -1,5 +1,8 @@
+import os
 import pickle
 from pathlib import Path
+import concurrent.futures
+from multiprocessing import RLock
 
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
@@ -15,6 +18,16 @@ from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.metrics import RocCurveDisplay
 from numpy.random import default_rng
 
+
+def _append_recs(record_folder):
+    # genbank format has more metadata we can use so
+    # focus on that for now; eventually we might assert
+    # that the FASTA file has the same sequence read in
+    # as sanity check
+    genbank_file = list(record_folder.glob("*.genbank"))[0]
+    with open(genbank_file) as genfile:
+        record = list(SeqIO.parse(genfile, "genbank"))[0]
+    return record
 
 
 def main(download_recs: int,
@@ -244,16 +257,24 @@ def main(download_recs: int,
     print("loading the local records cache (genetic sequences) into memory")
     # TODO: this is getting pretty slow--maybe we can split the work
     # between cores and then fuse the lists after?
+
+    print("populating futures..", flush=True)
+    list_futures = []
     records = []
-    for record_folder in tqdm(cache_subdirectories):
-        # genbank format has more metadata we can use so
-        # focus on that for now; eventually we might assert
-        # that the FASTA file has the same sequence read in
-        # as sanity check
-        genbank_file = list(record_folder.glob("*.genbank"))[0]
-        with open(genbank_file) as genfile:
-            record = list(SeqIO.parse(genfile, "genbank"))[0]
-            records.append(record)
+    workers = os.cpu_count() - 1
+    tqdm.set_lock(RLock())
+    with concurrent.futures.ProcessPoolExecutor(initargs=(tqdm.get_lock(),),
+                                                initializer=tqdm.set_lock,
+                                                max_workers=workers) as executor:
+        for record_folder in tqdm(cache_subdirectories):
+            list_futures.append(executor.submit(
+                                _append_recs,
+                                record_folder,
+                                ))
+
+        print("waiting for futures to complete", flush=True)
+        for future in tqdm(concurrent.futures.as_completed(list_futures), total=len(list_futures)):
+            records.append(future.result())
 
     # sanity check -- based on this manuscript:
     # https://doi.org/10.1038/s41598-020-69342-y

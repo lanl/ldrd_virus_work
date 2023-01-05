@@ -294,22 +294,55 @@ def main(download_recs: int,
         assert actual_len < 31000, f"Actual sequence length is {actual_len}"
 
     filtered_rec_count = len(records)
-    print("Total records retained:", filtered_rec_count)
+    print("Total records from initial read-in:", filtered_rec_count)
 
-    # next, try to plot the % GC content for the SARS-CoV-2
-    # RNA genomes currently getting pulled in
-    gc_content_data = np.empty(shape=(filtered_rec_count,), dtype=np.float64)
-    for idx, record in enumerate(records):
-        gc_content_data[idx] = GC(record.seq)
 
+    # let's construct a pandas dataframe, since this is
+    # a reasonably convenient data structure for interacting
+    # with i.e., scikit-learn and also for general analysis/inspection/visualization
+
+    data_dict = {}
+    for record in records:
+        if "human" in record.description.lower():
+            organism_name = "human"
+        elif "bat" in record.description.lower():
+            organism_name = "bat"
+        else:
+            organism_name = "unknown"
+
+        data_dict[record.id] = [record.seq, GC(record.seq), organism_name]
+
+    df = pd.DataFrame.from_dict(data_dict,
+                                orient="index",
+                                columns=["Genome Sequence", "Genome %GC", "Organism"])
+    df.columns.name = "Genome ID"
+    print("Checking for exact duplicate Genome Sequences")
+    duplicate_series = df.duplicated(subset="Genome Sequence")
+    print("number of exact duplicate genomes found:", duplicate_series.sum())
+    df.drop_duplicates(subset=["Genome Sequence"], inplace=True)
+    duplicate_sum_after = df.duplicated(subset="Genome Sequence").sum()
+    print("number of exact duplicate genomes found AFTER dropping duplicates:", duplicate_sum_after)
+    assert duplicate_sum_after == 0
+
+    print("-" * 30)
+    print("df:\n", df)
+    print("-" * 30)
+    df.info()
+    print("-" * 30)
+    print(df.describe())
+    print("-" * 30)
+
+    # next, try to plot the % GC content for the SARS-CoV-2 (and related)
+    # RNA genomes currently getting pulled in, after filtering
+    num_recs = df.shape[0]
     fig_gc_dist = plt.figure()
     ax = fig_gc_dist.add_subplot(111)
     ax.set_xlim(30, 50)
-    ax.set_xlabel("% GC content in SARS-CoV-2 RNA genome")
+    ax.set_xlabel("% GC content in SARS-CoV-2 (and related) RNA genome")
     ax.set_ylabel("Frequency")
-    ax.set_title(f"% GC content histogram for SARS-CoV-2 RNA Genomes (N={filtered_rec_count})")
-    ax.hist(gc_content_data,
-            bins=int(filtered_rec_count/10),
+    ax.set_title(f"% GC content histogram for SARS-CoV-2 (and related) RNA Genomes (N={num_recs})")
+    ax.hist(df["Genome %GC"],
+            bins=int(num_recs/10),
             )
     # human genomic %GC content from
     # Piovesan et al. (2019) BMC Research Notes
@@ -334,33 +367,6 @@ def main(download_recs: int,
               color="orange")
     fig_gc_dist.savefig("percent_gc_content_histogram.png",
                 dpi=300)
-
-    # let's construct a pandas dataframe, since this is
-    # a reasonably convenient data structure for interacting
-    # with i.e., scikit-learn and also for general analysis/inspection/visualization
-
-    data_dict = {}
-    for record in records:
-        if "human" in record.description.lower():
-            organism_name = "human"
-        elif "bat" in record.description.lower():
-            organism_name = "bat"
-        else:
-            organism_name = "unknown"
-
-        data_dict[record.id] = [GC(record.seq), organism_name]
-
-    df = pd.DataFrame.from_dict(data_dict,
-                                orient="index",
-                                columns=["Genome %GC", "Organism"])
-    df.columns.name = "Genome ID"
-    print("-" * 30)
-    print("df:\n", df)
-    print("-" * 30)
-    df.info()
-    print("-" * 30)
-    print(df.describe())
-    print("-" * 30)
     # check number of genomes per organism
     # in the dataset (DataFrame)
     print("Breakdown of sample size (num genomes) per organism in SARS-CoV-2 (and related) dataset:\n", df.value_counts("Organism"))

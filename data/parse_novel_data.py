@@ -23,6 +23,7 @@ import time
 from tqdm import tqdm
 import pandas as pd
 from Bio import Entrez, SeqIO
+import numpy as np
 
 
 if __name__ == "__main__":
@@ -41,6 +42,16 @@ if __name__ == "__main__":
     # and then parse it, since the species data in the deposited CSV
     # appears to focus on the host only
 
+    # from personal correspondence with Nardus (see:
+    # https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/27#note_505320)
+    # it looks like I'll need to apply some filtering similar to the code
+    # here (to get the same dataset they used for Figure 3):
+    # https://github.com/Nardus/zoonotic_rank/blob/42f15a07ffdfc1ba425741233009f9c61bb3bf48/Scripts/Plotting/MakeFigure3.R#L62
+    # CAUTION: GPL-3 license...
+    df = df[(df["class"].isna()) | (df["class"] == "Mammalia") | (df["class"] == "Aves") | (df["order"] == "Diptera") |
+            (df["order"] == "Ixodida")]
+    print("filtered df:\n", df)
+    assert df.duplicated(subset=["accession"]).sum() == 0
 
     # on page 7/25 of the manuscript, the authors describe the human-origin
     # samples of the dataset as having the following zoonotic potentials:
@@ -56,7 +67,6 @@ if __name__ == "__main__":
     msg = f"Samples from humans (N={actual_human_origin_samples}) does not match description in manuscript (N={expected_human_origin_samples})"
     assert actual_human_origin_samples == expected_human_origin_samples, msg
 
-    """
     Entrez.email = "treddy@lanl.gov"
     accessions = df["accession"]
     viral_families = set()
@@ -90,4 +100,3 @@ if __name__ == "__main__":
     end = time.perf_counter()
     elapsed = end - start
     print(f"analysis complete in {elapsed:.1f} seconds")
-    """

@@ -122,7 +122,13 @@ if __name__ == "__main__":
     records = list(SeqIO.parse(handle, "gb"))
     df.set_index("SequenceID", inplace=True)
     for record in tqdm(records):
-        df.loc[record.id, "Genome Sequence"] = record.seq
+        # NOTE: for now, we don't store the record.seq object
+        # because parquet doesn't recognize it--we could probably
+        # store it as a plain string later if we want to avoid
+        # network ops in the main control flow (to pull in full
+        # sequences from accessions)
+        # df.loc[record.id, "Genome Sequence"] = record.seq
+
         # might as well add % GC content for now as well,
         # since that is what the current early-stage classifier
         # really uses
@@ -132,6 +138,10 @@ if __name__ == "__main__":
     assert_mollentze_fig3_case_study_properties(df_moll_fig3=df)
     print("**** filtered df that passed all assertions ***:\n", df)
     df.info()
+    print("**** writing the filtered df to a compressed parquet file ***")
+    df.to_parquet("df_moll_fig3.parquet.gzip",
+                  compression="gzip",
+                  index=True)
     end = time.perf_counter()
     elapsed = end - start
     print(f"analysis/processing complete in {elapsed:.1f} seconds")

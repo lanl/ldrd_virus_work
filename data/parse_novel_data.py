@@ -66,8 +66,6 @@ if __name__ == "__main__":
     # their R code to re-analyze/compare?
     df = pd.read_csv("NovelVirus_Hosts_Curated.csv")
     df["accession"] = df["accession"].astype("string")
-    print("df:\n", df)
-    df.info()
     # we'd like to confirm that there are indeed 758 unique viral species
     # present, as a sanity check that we have the exact data referred to in
     # the manuscript
@@ -84,8 +82,6 @@ if __name__ == "__main__":
     # CAUTION: GPL-3 license...
     df_meta = pd.read_csv("NovelViruses.csv")
     df_meta["SequenceID"] = df_meta["SequenceID"].astype("string")
-    print("df_meta:\n", df_meta)
-    df_meta.info()
     df = df.merge(df_meta,
                  how="right",
                  left_on="accession",

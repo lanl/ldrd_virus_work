@@ -23,6 +23,7 @@ import time
 from tqdm import tqdm
 import pandas as pd
 from Bio import Entrez, SeqIO
+from Bio.SeqUtils import GC
 import numpy as np
 
 
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     # used to produce Figure 3, so we will likely have to use
     # their R code to re-analyze/compare?
     df = pd.read_csv("NovelVirus_Hosts_Curated.csv")
+    df["accession"] = df["accession"].astype("string")
     print("df:\n", df)
     df.info()
     # we'd like to confirm that there are indeed 758 unique viral species
@@ -43,6 +45,24 @@ if __name__ == "__main__":
     # appears to focus on the host only
 
     # from personal correspondence with Nardus (see:
+    # https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/27#note_506903)
+    # some duplicate data was filtered using an additional file he emailed to me,
+    # and is based on the code here:
+    # https://github.com/Nardus/zoonotic_rank/blob/42f15a07ffdfc1ba425741233009f9c61bb3bf48/Scripts/Plotting/MakeFigure3.R#L55
+    # CAUTION: GPL-3 license...
+    df_meta = pd.read_csv("NovelViruses.csv")
+    df_meta["SequenceID"] = df_meta["SequenceID"].astype("string")
+    print("df_meta:\n", df_meta)
+    df_meta.info()
+    df = df.merge(df_meta,
+                 how="right",
+                 left_on="accession",
+                 right_on="SequenceID",
+                 ).drop(columns=["accession", "notes", "data_source", "host"])
+    # drop duplicated viral species as well
+    df.drop_duplicates(subset=["Name"], inplace=True)
+
+    # from personal correspondence with Nardus (see:
     # https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/27#note_505320)
     # it looks like I'll need to apply some filtering similar to the code
     # here (to get the same dataset they used for Figure 3):
@@ -50,8 +70,10 @@ if __name__ == "__main__":
     # CAUTION: GPL-3 license...
     df = df[(df["class"].isna()) | (df["class"] == "Mammalia") | (df["class"] == "Aves") | (df["order"] == "Diptera") |
             (df["order"] == "Ixodida")]
-    print("filtered df:\n", df)
-    assert df.duplicated(subset=["accession"]).sum() == 0
+    df = df[df["Name"] != "Vaccinia virus"]
+    assert df.duplicated(subset=["SequenceID"]).sum() == 0
+    assert df.duplicated(subset=["Name"]).sum() == 0
+
 
     # on page 7/25 of the manuscript, the authors describe the human-origin
     # samples of the dataset as having the following zoonotic potentials:
@@ -67,8 +89,14 @@ if __name__ == "__main__":
     msg = f"Samples from humans (N={actual_human_origin_samples}) does not match description in manuscript (N={expected_human_origin_samples})"
     assert actual_human_origin_samples == expected_human_origin_samples, msg
 
+    # the authors state in the manuscript that for this case study there were 758 unique
+    # viral *species*
+
+    # we're going to want the final dataframe/dataset to include
+    # the primary sequence data, because that is what the ML model
+    # in the main control flow uses for classification decisions
     Entrez.email = "treddy@lanl.gov"
-    accessions = df["accession"]
+    accessions = df["SequenceID"]
     viral_families = set()
     missing_taxonomies = 0
     print("retrieving records for Mollentze Figure 3 data")
@@ -79,24 +107,19 @@ if __name__ == "__main__":
                            retmode="text")
     print("parsing records for Mollentze Figure 3 data")
     records = list(SeqIO.parse(handle, "gb"))
+    df.set_index("SequenceID", inplace=True)
     for record in tqdm(records):
-        family_found = 0
-        taxonomy = record.annotations["taxonomy"]
-        for entry in taxonomy:
-            if "viridae" in entry:
-                viral_families.add(entry)
-                family_found += 1
-                break
-        if len(taxonomy) == 0 or family_found == 0:
-            missing_taxonomies += 1
-        # we're really just trying to assess the claim of 758
-        # unique species in the paper, so as long as the taxonomy
-        # has 758 unique entries of some sort, we'll probably
-        # be happy without additional hand curation here
-    print("Viral families:", viral_families)
-    print("Estimate of number of unique viral families:", len(viral_families))
-    print("Num records with missing taxonomies:", missing_taxonomies)
+        df.loc[record.id, "Genome Sequence"] = record.seq
+        # might as well add % GC content for now as well,
+        # since that is what the current early-stage classifier
+        # really uses
+        df.loc[record.id, "Genome %GC"] = GC(record.seq)
+
     handle.close()
+    print("new df:", df)
+    assert df.shape[0] == 758
+    print("**** filtered df that passed all assertions ***:\n", df)
+    df.info()
     end = time.perf_counter()
     elapsed = end - start
     print(f"analysis complete in {elapsed:.1f} seconds")

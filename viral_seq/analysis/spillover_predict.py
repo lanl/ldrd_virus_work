@@ -4,6 +4,8 @@ from pathlib import Path
 import concurrent.futures
 from multiprocessing import RLock
 
+from viral_seq.data.parse_novel_data import assert_mollentze_fig3_case_study_properties
+
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
 from Bio.SeqUtils import GC
@@ -498,3 +500,54 @@ def main(download_recs: int,
     for ax in [ax_micro, ax_macro]:
         ax.set_ylim(0, 1)
     fig_cross_val.savefig("cross_vali_rand_forest.png", dpi=300)
+
+    # compare our classifier performance vs. that of Mollentze et al. (2021)
+    # on their Figure 3 case study dataset with 758 unique viral species
+    fig_compare_mol_fig3, ax = plt.subplots()
+    df_moll_fig3 = pd.read_parquet(os.path.join("viral_seq", "data", "df_moll_fig3.parquet.gzip"))
+    assert_mollentze_fig3_case_study_properties(df_moll_fig3=df_moll_fig3)
+    print("df_moll_fig3:\n", df_moll_fig3)
+
+    # one thing they explicitly reported was % of human-infecting viral
+    # samples correctly labeled as such
+    our_predictions_mol_fig3 = clf.predict(df_moll_fig3["Genome %GC"].to_numpy().reshape(-1, 1))
+    print("our_predictions_mol_fig3:", our_predictions_mol_fig3)
+    print("our_predictions_mol_fig3.shape:", our_predictions_mol_fig3.shape)
+
+    true_human_samples = df_moll_fig3["host_corrected"] == "Homo sapiens"
+    print("true_human_samples:", true_human_samples)
+    print("true_human_samples.shape:", true_human_samples.shape)
+
+    our_human_predictions = our_predictions_mol_fig3[true_human_samples]
+    total_human_sample_count = true_human_samples.sum()
+    assert total_human_sample_count == 113
+    unique_labels, label_counts = np.unique(our_human_predictions, return_counts=True)
+    percent_human_true_positive = (label_counts[unique_labels == "human"] / total_human_sample_count) * 100
+    percent_human_false_negative = (label_counts[unique_labels != "human"].sum() / total_human_sample_count) * 100
+
+    # plot our classifications results vs. theirs on page 7/25
+    vals = [percent_human_true_positive,
+            percent_human_false_negative,
+            (36 / 113) * 100, # they classify as very high zoonotic potential
+            (44 / 113) * 100, # they classify as high ...
+            (30 / 113) * 100, # they classify as medium ...
+            (3 / 113) * 100, # they classify as low ...
+            ]
+    labels = ["Us (true positive)",
+              "Us (false negative)",
+              "Them (very high zoonotic)",
+              "Them (high zoonotic)",
+              "Them (medium zoonotic)",
+              "Them (low zoonotic)",
+              ]
+    ax.bar(x=np.arange(6),
+           height=vals,
+           color=["green", "red"] + ["blue"] * 3 + ["red"])
+    ax.set_xticks(np.arange(6))
+    ax.set_xticklabels(labels, rotation=90)
+    ax.set_ylabel("Percent of Known Human Isolates")
+    ax.set_ylim(0, 100)
+    ax.set_title("Comparing with Mollentze et al. (2021) Curated Case Study\n(758 unique viral species; true hosts verified by hand; 113 human isolations)")
+    fig_compare_mol_fig3.tight_layout()
+    fig_compare_mol_fig3.set_size_inches(12, 12)
+    fig_compare_mol_fig3.savefig("compare_moll_fig3.png", dpi=300)

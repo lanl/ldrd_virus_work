@@ -27,6 +27,38 @@ from Bio.SeqUtils import GC
 import numpy as np
 
 
+def assert_mollentze_fig3_case_study_properties(df_moll_fig3):
+    # make some assertions about the dataset related to the
+    # case study used for Figure of Mollentze et al. (2021)
+    # so that we can be reasonably confident that we are
+    # comparing with their results in a fair manner
+
+    # there should be no duplicate GenBank accession numbers in the
+    # final processed dataframe (the accession numbers should be
+    # the index)
+    assert df_moll_fig3.index.duplicated().sum() == 0
+    # there should be no duplicated viral species names in the
+    # final processed dataframe
+    assert df_moll_fig3.duplicated(subset=["Name"]).sum() == 0
+
+    # on page 7/25 of the manuscript, the authors describe the human-origin
+    # samples of the dataset as having the following zoonotic potentials:
+    # very high: N = 36
+    # high: N = 44
+    # medium: N = 30
+    # low: N = 3
+    expected_human_origin_samples = 36 + 44 + 30 + 3
+    actual_human_origin_samples = (df_moll_fig3["host_corrected"] == "Homo sapiens").sum()
+    msg = f"Samples from humans (N={actual_human_origin_samples}) does not match description in manuscript (N={expected_human_origin_samples})"
+    assert actual_human_origin_samples == expected_human_origin_samples, msg
+
+    # page 7/25 of the manuscript also clearly describes this case study
+    # dataset as having exactly 758 unique viral species
+    assert df_moll_fig3.shape[0] == 758
+    # none of the contributing viral species names should be NULL of course
+    assert df_moll_fig3["Name"].isna().sum() == 0
+
+
 if __name__ == "__main__":
     start = time.perf_counter()
     # this appears to be an "extended" version of the dataset
@@ -71,23 +103,8 @@ if __name__ == "__main__":
     df = df[(df["class"].isna()) | (df["class"] == "Mammalia") | (df["class"] == "Aves") | (df["order"] == "Diptera") |
             (df["order"] == "Ixodida")]
     df = df[df["Name"] != "Vaccinia virus"]
-    assert df.duplicated(subset=["SequenceID"]).sum() == 0
-    assert df.duplicated(subset=["Name"]).sum() == 0
 
 
-    # on page 7/25 of the manuscript, the authors describe the human-origin
-    # samples of the dataset as having the following zoonotic potentials:
-    # very high: N = 36
-    # high: N = 44
-    # medium: N = 30
-    # low: N = 3
-    # however, when I check this "extended" version of the dataset, it has clearly
-    # grown to include more human samples, so we'll have to repeat the analysis
-    # using their GitHub code perhaps?
-    expected_human_origin_samples = 36 + 44 + 30 + 3
-    actual_human_origin_samples = (df["host_corrected"] == "Homo sapiens").sum()
-    msg = f"Samples from humans (N={actual_human_origin_samples}) does not match description in manuscript (N={expected_human_origin_samples})"
-    assert actual_human_origin_samples == expected_human_origin_samples, msg
 
     # the authors state in the manuscript that for this case study there were 758 unique
     # viral *species*
@@ -116,10 +133,9 @@ if __name__ == "__main__":
         df.loc[record.id, "Genome %GC"] = GC(record.seq)
 
     handle.close()
-    print("new df:", df)
-    assert df.shape[0] == 758
+    assert_mollentze_fig3_case_study_properties(df_moll_fig3=df)
     print("**** filtered df that passed all assertions ***:\n", df)
     df.info()
     end = time.perf_counter()
     elapsed = end - start
-    print(f"analysis complete in {elapsed:.1f} seconds")
+    print(f"analysis/processing complete in {elapsed:.1f} seconds")

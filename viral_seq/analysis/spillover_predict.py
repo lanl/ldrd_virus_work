@@ -33,7 +33,8 @@ def _append_recs(record_folder):
 
 
 def main(download_recs: int,
-         save_model: bool = False):
+         save_model: bool = False,
+         load_model: bool = False):
     """
     Parameters
     ----------
@@ -46,285 +47,307 @@ def main(download_recs: int,
         more than one genetic sequence.
     """
     rng = default_rng(676906)
-    # let's start off by scraping the pubmed
-    # nucleotide database from genomic SARS-CoV-2 RNA
 
-    retmax = download_recs
-    print(f"Total records requested in search (per search term): {retmax}")
+    if load_model:
+        # load in the ML model(s) to reuse them rather than
+        # generating them from scratch
+        print("Loading saved random forest model")
+        with open("random_forest_model.p", "rb") as infile:
+            clf = pickle.load(infile)
+            print("clf:", clf)
+    else:
 
-    # we only scrape from the online database if requested,
-    # and even if we requested we should only add sequences
-    # if they correspond to NCBI accession numbers we do not
-    # yet have (doing this periodically on a given machine/workspace
-    # probably makes sense, since NCBI sequence counts double every
-    # ~18 months and the local sequence cache may become outdated quickly)
+        # let's start off by scraping the pubmed
+        # nucleotide database from genomic SARS-CoV-2 RNA
 
-    cache_path = Path(".cache")
-    # envsioned local sequence cache layout:
-    # .cache/ folder
-    # subfolders are formatted as accession numbers
-    # and each subfolder should contain the FASTA and GENBANK
-    # sequences for that accession number
+        retmax = download_recs
+        print(f"Total records requested in search (per search term): {retmax}")
 
-    # if you try to run the analysis with no cache,
-    # and no request to fill the cache with new records,
-    # that's an error
-    if not cache_path.exists() and not download_recs:
-        raise ValueError("No local sequence cache exists and no request "
-                         "to populate the cache with new sequences was made.")
+        # we only scrape from the online database if requested,
+        # and even if we requested we should only add sequences
+        # if they correspond to NCBI accession numbers we do not
+        # yet have (doing this periodically on a given machine/workspace
+        # probably makes sense, since NCBI sequence counts double every
+        # ~18 months and the local sequence cache may become outdated quickly)
 
-    # if the ".cache" folder exists but there are no sequence
-    # records, that's also an error
-    local_records = []
-    # TODO: properly check that there are valid records present, rather
-    # than just any subfolders
-    if not cache_path.exists():
-        cache_path.mkdir(parents=False, exist_ok=False)
-    cache_subdirectories = [x for x in cache_path.iterdir() if x.is_dir()]
-    if not cache_subdirectories and not download_recs:
-        raise ValueError("No request to populate the local sequence cache "
-                         "was made and there are no local accession records "
-                         "available.")
+        cache_path = Path(".cache")
+        # envsioned local sequence cache layout:
+        # .cache/ folder
+        # subfolders are formatted as accession numbers
+        # and each subfolder should contain the FASTA and GENBANK
+        # sequences for that accession number
 
-    if download_recs > 0:
-        print("Retrieving sequence data remotely from Pubmed.")
+        # if you try to run the analysis with no cache,
+        # and no request to fill the cache with new records,
+        # that's an error
+        if not cache_path.exists() and not download_recs:
+            raise ValueError("No local sequence cache exists and no request "
+                             "to populate the cache with new sequences was made.")
 
-        # let Pubmed team email us if they find
-        # that our scraping is too aggressive
-        # (rather than ban us outright)
-        Entrez.email = "treddy@lanl.gov"
+        # if the ".cache" folder exists but there are no sequence
+        # records, that's also an error
+        local_records = []
+        # TODO: properly check that there are valid records present, rather
+        # than just any subfolders
+        if not cache_path.exists():
+            cache_path.mkdir(parents=False, exist_ok=False)
+        cache_subdirectories = [x for x in cache_path.iterdir() if x.is_dir()]
+        if not cache_subdirectories and not download_recs:
+            raise ValueError("No request to populate the local sequence cache "
+                             "was made and there are no local accession records "
+                             "available.")
 
-        # through empirical testing, I determined that we can't really efficiently
-        # exclude the initial Entrez search from containing records/accession numbers
-        # we already have in the local cache, because the string of `NOT <accession no.>`
-        # elements explodes to a size the server can't handle, resulting in HTTP 500
-        # errors
+        if download_recs > 0:
+            print("Retrieving sequence data remotely from Pubmed.")
 
-        # based on feedback from NCBI support, it sounds like there are two viable options
-        # 1) the most efficient is probably to search for new records based on the date they
-        # were updated, so that we only pull in new records we don't have locally--however,
-        # when starting with an empty or small initial local cache, this doesn't seem very 
-        # helpful/practical for building up progressively (we want all the dates at first...)
-        # 2) Instead of excluding by accession number on the initial search, we could perform
-        # the same search each time, but filter on accession number AFTER the initial search
-        # and BEFORE the actual *retrieval* of records
+            # let Pubmed team email us if they find
+            # that our scraping is too aggressive
+            # (rather than ban us outright)
+            Entrez.email = "treddy@lanl.gov"
 
-        # try to use approach 2) below...
+            # through empirical testing, I determined that we can't really efficiently
+            # exclude the initial Entrez search from containing records/accession numbers
+            # we already have in the local cache, because the string of `NOT <accession no.>`
+            # elements explodes to a size the server can't handle, resulting in HTTP 500
+            # errors
 
-        set_local_accessions = set()
-        if cache_path.exists():
-            set_local_accessions = set([p.name for p in cache_path.iterdir()])
+            # based on feedback from NCBI support, it sounds like there are two viable options
+            # 1) the most efficient is probably to search for new records based on the date they
+            # were updated, so that we only pull in new records we don't have locally--however,
+            # when starting with an empty or small initial local cache, this doesn't seem very 
+            # helpful/practical for building up progressively (we want all the dates at first...)
+            # 2) Instead of excluding by accession number on the initial search, we could perform
+            # the same search each time, but filter on accession number AFTER the initial search
+            # and BEFORE the actual *retrieval* of records
 
-        # this manuscript:
-        # https://doi.org/10.1126/science.abm1208
-        # Obermeyer et al., Science 376, 1327–1332 (2022)
-        # cites more than 6 million SARS-CoV-2 genomes
-        # available, but let's start with the smaller grab
-        # from Pubmed initially at least...
+            # try to use approach 2) below...
 
-        # in order to get multispecies data we combine searches
-        # for SARS-CoV-2 with searches for closely related
-        # viruses in bats and pangolins (just bats for now..)
-        # see: Nature volume 604, pages 330–336 (2022)
-        records = []
-        for search_term in ['("Severe acute respiratory syndrome coronavirus 2"[Organism] OR sars-cov-2[All Fields]) AND genome[All Fields]',
-                            # 96.1% nucleotide similarity with SARS-CoV-2
-                            # for RatG13, but it has S mutations that suggest
-                            # it may not enter via ACE2 (also lacks furin cleavage site)
-                            "Bat coronavirus complete genome"]:
+            set_local_accessions = set()
+            if cache_path.exists():
+                set_local_accessions = set([p.name for p in cache_path.iterdir()])
 
-            # try to prevent timeouts on large search queries
-            # by batching
-            search_batch_size = min(10_000, retmax)
-            acc_set = set()
-            count = 0
-            remaining = retmax
-            print(f"starting Entrez esearch (search batch size is: {search_batch_size})")
-            for retstart in tqdm(range(1, retmax + 1, search_batch_size)):
-                if remaining < search_batch_size:
-                    actual_retmax = remaining
+            # this manuscript:
+            # https://doi.org/10.1126/science.abm1208
+            # Obermeyer et al., Science 376, 1327–1332 (2022)
+            # cites more than 6 million SARS-CoV-2 genomes
+            # available, but let's start with the smaller grab
+            # from Pubmed initially at least...
+
+            # in order to get multispecies data we combine searches
+            # for SARS-CoV-2 with searches for closely related
+            # viruses in bats and pangolins (just bats for now..)
+            # see: Nature volume 604, pages 330–336 (2022)
+            records = []
+            for search_term in ['("Severe acute respiratory syndrome coronavirus 2"[Organism] OR sars-cov-2[All Fields]) AND genome[All Fields]',
+                                # 96.1% nucleotide similarity with SARS-CoV-2
+                                # for RatG13, but it has S mutations that suggest
+                                # it may not enter via ACE2 (also lacks furin cleavage site)
+                                "Bat coronavirus complete genome"]:
+
+                # try to prevent timeouts on large search queries
+                # by batching
+                search_batch_size = min(10_000, retmax)
+                acc_set = set()
+                count = 0
+                remaining = retmax
+                print(f"starting Entrez esearch (search batch size is: {search_batch_size})")
+                for retstart in tqdm(range(1, retmax + 1, search_batch_size)):
+                    if remaining < search_batch_size:
+                        actual_retmax = remaining
+                    else:
+                        actual_retmax = search_batch_size
+                    handle = Entrez.esearch(db="nucleotide",
+                                            term=search_term,
+                                            retstart=retstart,
+                                            retmax=actual_retmax,
+                                            idtype="acc",
+                                            usehistory="y")
+                    search_results = Entrez.read(handle)
+                    acc_set = acc_set.union(search_results["IdList"])
+                    count += int(search_results["Count"])
+                    remaining -= search_batch_size
+                    handle.close()
+                print("after Entrez esearch")
+
+                print("filtering accession records already present locally")
+                new_acc_set = acc_set.difference(set_local_accessions)
+
+                print("number of new records from online search to consider for inclusion in local cache:", len(new_acc_set))
+                if len(new_acc_set) == 0:
+                    continue
+
+                # these are too verbose now, maybe use logging DEBUG eventually
+                #print(f"total {search_term} sequences found on Pubmed:", count)
+                #print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
+                assert len(acc_set) <= retmax
+                # retrieve the sequence data
+                batch_size = min(retmax, 100, len(new_acc_set))
+                numrecs = min(retmax, count, len(new_acc_set))
+                print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
+                new_acc_list = list(new_acc_set)
+                for start in tqdm(range(0, numrecs, batch_size)):
+                    handle = Entrez.efetch(db="nuccore",
+                                           rettype="gb",
+                                           id=new_acc_list[start:start + batch_size],
+                                           idtype="acc",
+                                           retmode="text")
+                    records += list(SeqIO.parse(handle, "gb"))
+                    handle.close()
+
+            # with the records list populated from the online
+            # search, we next want to grow the local cache with
+            # folders + FASTA/GENBANK format files that are not
+            # already there
+            print("performing quality analysis of sequences and adding to local cache if they pass...")
+            num_recs_added = 0
+            num_recs_excluded = 0
+            for record in tqdm(records):
+                # we also sanity check each record before
+                # trying to cache it locally;
+                # each record is a Bio.SeqRecord.SeqRecord
+                actual_len = len(record)
+                if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+                   in record.description):
+                    # likely "data pollution"/bad sequences
+                    # picked up in search
+                    num_recs_excluded += 1
+                    continue
+                # these aren't assertions yet at this point because
+                # we don't want to interrupt the population of the local
+                # cache because of a few bad apples from an online search
+                if actual_len < 26000 or actual_len > 31000:
+                    num_recs_excluded += 1
+                    continue
+                if ("DNA" in record.annotations["molecule_type"] or 
+                    "Klebsiella" in record.annotations["organism"]):
+                    # for now, exclude DNA and focus on RNA coronaviruses;
+                    # this should help prevent the sequence that got pulled in
+                    # for: https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/13
+                    # TODO: if we expand to include i.e., DNA viral genomes, we'll
+                    # almost certainly need more sophisticated filtering than just
+                    # one bacterial species though
+                    num_recs_excluded += 1
+                    continue
+                record_cache_path = cache_path / f"{record.id}"
+                if record_cache_path not in cache_subdirectories:
+                    record_cache_path.mkdir(parents=False, exist_ok=False)
+                    with open(record_cache_path / f"{record.id}.fasta", "w") as fasta_file:
+                        SeqIO.write(record, fasta_file, "fasta")
+                    with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
+                        SeqIO.write(record, genbank_file, "genbank")
+                    num_recs_added += 1
                 else:
-                    actual_retmax = search_batch_size
-                handle = Entrez.esearch(db="nucleotide",
-                                        term=search_term,
-                                        retstart=retstart,
-                                        retmax=actual_retmax,
-                                        idtype="acc",
-                                        usehistory="y")
-                search_results = Entrez.read(handle)
-                acc_set = acc_set.union(search_results["IdList"])
-                count += int(search_results["Count"])
-                remaining -= search_batch_size
-                handle.close()
-            print("after Entrez esearch")
+                    num_recs_excluded += 1
 
-            print("filtering accession records already present locally")
-            new_acc_set = acc_set.difference(set_local_accessions)
+            print(f"number of records added to the local cache from online search: {num_recs_added}")
+            print(f"number of records excluded from the online search because of QA: {num_recs_excluded}")
+            num_recs = len(records)
+            max_recs = retmax * 2 # 2 search terms (human + bat)
+            assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"
 
-            print("number of new records from online search to consider for inclusion in local cache:", len(new_acc_set))
-            if len(new_acc_set) == 0:
-                continue
 
-            # these are too verbose now, maybe use logging DEBUG eventually
-            #print(f"total {search_term} sequences found on Pubmed:", count)
-            #print(f"total {search_term} sequences *retrieved* from Pubmed:", search_results["RetMax"])
-            assert len(acc_set) <= retmax
-            # retrieve the sequence data
-            batch_size = min(retmax, 100, len(new_acc_set))
-            numrecs = min(retmax, count, len(new_acc_set))
-            print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
-            new_acc_list = list(new_acc_set)
-            for start in tqdm(range(0, numrecs, batch_size)):
-                handle = Entrez.efetch(db="nuccore",
-                                       rettype="gb",
-                                       id=new_acc_list[start:start + batch_size],
-                                       idtype="acc",
-                                       retmode="text")
-                records += list(SeqIO.parse(handle, "gb"))
-                handle.close()
+        # whether download_recs > 0 or not, we will always
+        # consider the FASTA/GENBANK records stored in .cache
+        # as the source of genetic sequence data that we we are
+        # working with, which means doing some I/O now to pull
+        # that data in from disk
 
-        # with the records list populated from the online
-        # search, we next want to grow the local cache with
-        # folders + FASTA/GENBANK format files that are not
-        # already there
-        print("performing quality analysis of sequences and adding to local cache if they pass...")
-        num_recs_added = 0
-        num_recs_excluded = 0
+        # some of the sequence-length/related sanity checking
+        # also should be guaranteed complete by now since we
+        # should have filtered the records before writing to disk;
+        # nonetheless, reapplying some sanity checks after/while
+        # reading the data back in probably makes sense (check for
+        # data/cache corruption, etc.)
+
+        print("populating cache_subdirectories object from the local cache")
+        cache_subdirectories = []
+        for entry in cache_path.iterdir():
+            if entry.is_dir():
+                cache_subdirectories.append(entry)
+        print("total number of records (sequence folders) in updated local cache:", len(cache_subdirectories))
+
+
+        print("loading the local records cache (genetic sequences) into memory")
+        # TODO: this is getting pretty slow--maybe we can split the work
+        # between cores and then fuse the lists after?
+
+        print("populating futures..", flush=True)
+        list_futures = []
+        records = []
+        workers = os.cpu_count() - 1
+        tqdm.set_lock(RLock())
+        with concurrent.futures.ProcessPoolExecutor(initargs=(tqdm.get_lock(),),
+                                                    initializer=tqdm.set_lock,
+                                                    max_workers=workers) as executor:
+            for record_folder in tqdm(cache_subdirectories):
+                list_futures.append(executor.submit(
+                                    _append_recs,
+                                    record_folder,
+                                    ))
+
+            print("waiting for futures to complete", flush=True)
+            for future in tqdm(concurrent.futures.as_completed(list_futures), total=len(list_futures)):
+                records.append(future.result())
+
+        # sanity check -- based on this manuscript:
+        # https://doi.org/10.1038/s41598-020-69342-y
+        # there should be > 29,000 nucleotides in the
+        # SARS-CoV-2 genome
+        # NOTE: relaxing the checks as I start incorporating viral
+        # sequences from other organisms, like bats
+        print("Sanity checking/filtering SARS-CoV-2 (and related) RNA genome records retrieved from the local cache:")
         for record in tqdm(records):
-            # we also sanity check each record before
-            # trying to cache it locally;
             # each record is a Bio.SeqRecord.SeqRecord
             actual_len = len(record)
-            if record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
-               in record.description):
-                # likely "data pollution"/bad sequences
-                # picked up in search
-                num_recs_excluded += 1
-                continue
-            # these aren't assertions yet at this point because
-            # we don't want to interrupt the population of the local
-            # cache because of a few bad apples from an online search
-            if actual_len < 26000 or actual_len > 31000:
-                num_recs_excluded += 1
-                continue
-            if ("DNA" in record.annotations["molecule_type"] or 
-                "Klebsiella" in record.annotations["organism"]):
-                # for now, exclude DNA and focus on RNA coronaviruses;
-                # this should help prevent the sequence that got pulled in
-                # for: https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/13
-                # TODO: if we expand to include i.e., DNA viral genomes, we'll
-                # almost certainly need more sophisticated filtering than just
-                # one bacterial species though
-                num_recs_excluded += 1
-                continue
-            record_cache_path = cache_path / f"{record.id}"
-            if record_cache_path not in cache_subdirectories:
-                record_cache_path.mkdir(parents=False, exist_ok=False)
-                with open(record_cache_path / f"{record.id}.fasta", "w") as fasta_file:
-                    SeqIO.write(record, fasta_file, "fasta")
-                with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
-                    SeqIO.write(record, genbank_file, "genbank")
-                num_recs_added += 1
-            else:
-                num_recs_excluded += 1
+            # likely "data pollution"/bad sequences
+            # picked up in search
+            assert not (record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
+               in record.description))
+            assert actual_len > 26000, f"Actual sequence length is {actual_len}"
+            assert actual_len < 31000, f"Actual sequence length is {actual_len}"
 
-        print(f"number of records added to the local cache from online search: {num_recs_added}")
-        print(f"number of records excluded from the online search because of QA: {num_recs_excluded}")
-        num_recs = len(records)
-        max_recs = retmax * 2 # 2 search terms (human + bat)
-        assert num_recs <= max_recs, f"num_recs={num_recs} is larger than max expected of {max_recs}"
-
-
-    # whether download_recs > 0 or not, we will always
-    # consider the FASTA/GENBANK records stored in .cache
-    # as the source of genetic sequence data that we we are
-    # working with, which means doing some I/O now to pull
-    # that data in from disk
-
-    # some of the sequence-length/related sanity checking
-    # also should be guaranteed complete by now since we
-    # should have filtered the records before writing to disk;
-    # nonetheless, reapplying some sanity checks after/while
-    # reading the data back in probably makes sense (check for
-    # data/cache corruption, etc.)
-
-    print("populating cache_subdirectories object from the local cache")
-    cache_subdirectories = []
-    for entry in cache_path.iterdir():
-        if entry.is_dir():
-            cache_subdirectories.append(entry)
-    print("total number of records (sequence folders) in updated local cache:", len(cache_subdirectories))
-
-
-    print("loading the local records cache (genetic sequences) into memory")
-    # TODO: this is getting pretty slow--maybe we can split the work
-    # between cores and then fuse the lists after?
-
-    print("populating futures..", flush=True)
-    list_futures = []
-    records = []
-    workers = os.cpu_count() - 1
-    tqdm.set_lock(RLock())
-    with concurrent.futures.ProcessPoolExecutor(initargs=(tqdm.get_lock(),),
-                                                initializer=tqdm.set_lock,
-                                                max_workers=workers) as executor:
-        for record_folder in tqdm(cache_subdirectories):
-            list_futures.append(executor.submit(
-                                _append_recs,
-                                record_folder,
-                                ))
-
-        print("waiting for futures to complete", flush=True)
-        for future in tqdm(concurrent.futures.as_completed(list_futures), total=len(list_futures)):
-            records.append(future.result())
-
-    # sanity check -- based on this manuscript:
-    # https://doi.org/10.1038/s41598-020-69342-y
-    # there should be > 29,000 nucleotides in the
-    # SARS-CoV-2 genome
-    # NOTE: relaxing the checks as I start incorporating viral
-    # sequences from other organisms, like bats
-    print("Sanity checking/filtering SARS-CoV-2 (and related) RNA genome records retrieved from the local cache:")
-    for record in tqdm(records):
-        # each record is a Bio.SeqRecord.SeqRecord
-        actual_len = len(record)
-        # likely "data pollution"/bad sequences
-        # picked up in search
-        assert not (record.description.startswith("Homo sapiens") or record.description.endswith("mRNA") or ("partial"
-           in record.description))
-        assert actual_len > 26000, f"Actual sequence length is {actual_len}"
-        assert actual_len < 31000, f"Actual sequence length is {actual_len}"
-
-    filtered_rec_count = len(records)
-    print("Total records from initial read-in:", filtered_rec_count)
+        filtered_rec_count = len(records)
+        print("Total records from initial read-in:", filtered_rec_count)
 
 
     # let's construct a pandas dataframe, since this is
     # a reasonably convenient data structure for interacting
     # with i.e., scikit-learn and also for general analysis/inspection/visualization
 
-    data_dict = {}
-    for record in records:
-        if "human" in record.description.lower():
-            organism_name = "human"
-        elif "bat" in record.description.lower():
-            organism_name = "bat"
-        else:
-            organism_name = "unknown"
+    if not load_model:
+        data_dict = {}
+        for record in records:
+            if "human" in record.description.lower():
+                organism_name = "human"
+            elif "bat" in record.description.lower():
+                organism_name = "bat"
+            else:
+                organism_name = "unknown"
 
-        data_dict[record.id] = [record.seq, GC(record.seq), organism_name]
+            data_dict[record.id] = [str(record.seq), GC(record.seq), organism_name]
 
-    df = pd.DataFrame.from_dict(data_dict,
-                                orient="index",
-                                columns=["Genome Sequence", "Genome %GC", "Organism"])
-    df.columns.name = "Genome ID"
-    print("Checking for exact duplicate Genome Sequences")
-    duplicate_series = df.duplicated(subset="Genome Sequence")
-    print("number of exact duplicate genomes found:", duplicate_series.sum())
-    df.drop_duplicates(subset=["Genome Sequence"], inplace=True)
-    duplicate_sum_after = df.duplicated(subset="Genome Sequence").sum()
-    print("number of exact duplicate genomes found AFTER dropping duplicates:", duplicate_sum_after)
-    assert duplicate_sum_after == 0
+        df = pd.DataFrame.from_dict(data_dict,
+                                    orient="index",
+                                    columns=["Genome Sequence", "Genome %GC", "Organism"])
+        df.columns.name = "Genome ID"
+        print("Checking for exact duplicate Genome Sequences")
+        duplicate_series = df.duplicated(subset="Genome Sequence")
+        print("number of exact duplicate genomes found:", duplicate_series.sum())
+        df.drop_duplicates(subset=["Genome Sequence"], inplace=True)
+        duplicate_sum_after = df.duplicated(subset="Genome Sequence").sum()
+        print("number of exact duplicate genomes found AFTER dropping duplicates:", duplicate_sum_after)
+        assert duplicate_sum_after == 0
+
+    if save_model:
+        print("Saving the pandas DataFrame of genomic data to a parquet file")
+        df.to_parquet("df.parquet.gzip",
+                      engine="pyarrow",
+                      compression="gzip")
+
+    if load_model:
+        print("Loading the pandas DataFrame of genomic data from a parquet file")
+        df = pd.read_parquet("df.parquet.gzip",
+                             engine="pyarrow")
 
     print("-" * 30)
     print("df:\n", df)
@@ -551,3 +574,70 @@ def main(download_recs: int,
     fig_compare_mol_fig3.tight_layout()
     fig_compare_mol_fig3.set_size_inches(12, 12)
     fig_compare_mol_fig3.savefig("compare_moll_fig3.png", dpi=300)
+
+    # based on feedback from Nick H., we also decided it would be sensible to
+    # check the overlap with the Mollentze et al. predictions--for example, how
+    # many of their "very high" zoonotic potential classifications do we overlap
+    # with? etc.
+    mollentze_actual_classifications_df = pd.read_csv(os.path.join("viral_seq", "data", "s11_fig.csv"))
+    print("mollentze_actual_classifications_df:\n", mollentze_actual_classifications_df)
+    # "Name" and "zoonotic_potential" columns are of interest
+
+    # to compare with our zoonotic classification results, let me first expand
+    # df_moll_fig3 to include our results alongside the viral species names
+    df_moll_fig3["our_zoonotic_classification"] = our_predictions_mol_fig3
+    print("updated df_moll_fig3 columns of interest:\n", df_moll_fig3[["Name", "our_zoonotic_classification"]])
+
+    df_moll_merged = df_moll_fig3[["Name", "our_zoonotic_classification"]].merge(mollentze_actual_classifications_df[["Name", "zoonotic_potential"]],
+                                        on="Name")
+    assert df_moll_merged.shape[0] == 758
+    print("df_moll_merged:\n", df_moll_merged)
+    very_high_mask = df_moll_merged["zoonotic_potential"] == "Very high"
+    high_mask = df_moll_merged["zoonotic_potential"] == "High"
+    medium_mask = df_moll_merged["zoonotic_potential"] == "Medium"
+    low_mask = df_moll_merged["zoonotic_potential"] == "Low"
+    assert (very_high_mask.sum() + high_mask.sum() + medium_mask.sum() + low_mask.sum()) == 758
+
+    mollentze_very_high_count = very_high_mask.sum()
+    mollentze_high_count = high_mask.sum()
+    mollentze_medium_count = medium_mask.sum()
+    mollentze_low_count = low_mask.sum()
+
+    our_very_high_overlap_count = (df_moll_merged[very_high_mask]["our_zoonotic_classification"] == "human").sum()
+    our_high_overlap_count = (df_moll_merged[high_mask]["our_zoonotic_classification"] == "human").sum()
+    our_medium_overlap_count = (df_moll_merged[medium_mask]["our_zoonotic_classification"] == "human").sum()
+    our_low_overlap_count = (df_moll_merged[low_mask]["our_zoonotic_classification"] == "human").sum()
+
+    fig_overlap_mollentze, ax = plt.subplots()
+    our_vals = [our_very_high_overlap_count,
+                our_high_overlap_count,
+                our_medium_overlap_count,
+                our_low_overlap_count]
+    their_vals = [mollentze_very_high_count,
+                  mollentze_high_count,
+                  mollentze_medium_count,
+                  mollentze_low_count]
+    labels = [
+              "Very High",
+              "High",
+              "Medium",
+              "Low"]
+    ax.bar(x=np.arange(4),
+           height=their_vals,
+           color="green",
+           alpha=0.2,
+           label="Mollentze et al.")
+    ax.bar(x=np.arange(4),
+           height=our_vals,
+           color="blue",
+           alpha=0.8,
+           label="our overlap")
+    ax.set_xticks(np.arange(4))
+    ax.set_xticklabels(labels, rotation=0)
+    ax.set_ylabel("Sample Count")
+    ax.set_xlabel("Mollentze et al. (2021) zoonotic category")
+    ax.set_title("Our % GC human/not-human zoonotic overlap with categories from Mollentze et al. (2021)", fontsize=8)
+    ax.legend()
+    fig_overlap_mollentze.tight_layout()
+    #fig_overlap_mollentze.set_size_inches(10, 10)
+    fig_overlap_mollentze.savefig("overlap_moll_fig3.png", dpi=300)

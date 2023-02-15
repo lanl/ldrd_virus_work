@@ -29,11 +29,21 @@ click.rich_click.OPTION_GROUPS = {
               default=False,
               help=("Serialize (pickle) the trained ML model(s) to"
                     " disk so that they can be packaged/reused elsewhere"))
+@click.option('--load_model',
+              is_flag=True,
+              show_default=True,
+              default=False,
+              help=("Load the trained (serialized/pickled) ML model(s) in to"
+                    " memory so that they can be used immediately in cases where"
+                    " it is not necessary to iterate on the model proper. This will"
+                    " require that `save_model` has been used locally first."))
 def viral_seq(download_recs,
-              save_model):
+              save_model,
+              load_model):
     start_sec = perf_counter()
     main(download_recs=download_recs,
-         save_model=save_model)
+         save_model=save_model,
+         load_model=load_model)
     end_sec = perf_counter()
     execution_time_sec = end_sec - start_sec
     print(f"viral_seq execution time (s): {execution_time_sec:.2f}")

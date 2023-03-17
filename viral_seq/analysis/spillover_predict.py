@@ -396,7 +396,7 @@ def main(download_recs: int,
     # in the dataset (DataFrame)
     print("Breakdown of sample size (num genomes) per organism in SARS-CoV-2 (and related) dataset:\n", df.value_counts("Organism"))
     fig_sample_sizes, ax = plt.subplots()
-    df.groupby("Organism").count().plot.bar(ax=ax,
+    df.groupby("Organism").count().iloc[..., :1].plot.bar(ax=ax,
                                             rot=0,
                                             legend=False,
                                             log=True)

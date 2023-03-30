@@ -17,7 +17,7 @@ import pandas as pd
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.metrics import RocCurveDisplay, roc_curve
+from sklearn.metrics import RocCurveDisplay, roc_curve, roc_auc_score
 from numpy.random import default_rng
 
 
@@ -582,6 +582,7 @@ def main(download_recs: int,
     # many of their "very high" zoonotic potential classifications do we overlap
     # with? etc.
     mollentze_actual_classifications_df = pd.read_csv(os.path.join("viral_seq", "data", "s11_fig.csv"))
+
     print("mollentze_actual_classifications_df:\n", mollentze_actual_classifications_df)
     # "Name" and "zoonotic_potential" columns are of interest
 
@@ -591,7 +592,7 @@ def main(download_recs: int,
     df_moll_fig3["our_zoonotic_classification_proba"] = our_prob_predictions_mol_fig3
     print("updated df_moll_fig3 columns of interest:\n", df_moll_fig3[["Name", "our_zoonotic_classification"]])
 
-    df_moll_merged = df_moll_fig3[["Name", "host_corrected", "our_zoonotic_classification", "our_zoonotic_classification_proba"]].merge(mollentze_actual_classifications_df[["Name", "zoonotic_potential"]],
+    df_moll_merged = df_moll_fig3[["Name", "host_corrected", "our_zoonotic_classification", "our_zoonotic_classification_proba"]].merge(mollentze_actual_classifications_df[["Name", "zoonotic_potential", "calibrated_score_mean", "calibrated_score_lower", "calibrated_score_upper"]],
                                         on="Name")
     assert df_moll_merged.shape[0] == 758
     print("df_moll_merged:\n", df_moll_merged)
@@ -657,35 +658,33 @@ def main(download_recs: int,
     #2        Anatid alphaherpesvirus 1                    Duck                         bat             Medium
     #3      Columbid alphaherpesvirus 1           feral pigeons                         bat               High
     fig_roc_vs_mollentze, ax = plt.subplots(dpi=300)
-    zoo_cats = ["Low", "Medium", "High", "Very high"]
+    score_categories = ["calibrated_score_mean", "calibrated_score_lower", "calibrated_score_upper"]
     binary_ground_truth = df_moll_merged["host_corrected"] == "Homo sapiens"
-    for zoo_pot in zoo_cats:
+    markersize=10
+    for score_category in score_categories:
         # progressively stricter thresholds:
-        if zoo_pot == "Low":
-            effective_positive = df_moll_merged["zoonotic_potential"].isin(zoo_cats)
-        elif zoo_pot == "Medium":
-            effective_positive = df_moll_merged["zoonotic_potential"].isin(zoo_cats[1:])
-        elif zoo_pot == "High":
-            effective_positive = df_moll_merged["zoonotic_potential"].isin(zoo_cats[2:])
-        elif zoo_pot == "Very high":
-            effective_positive = df_moll_merged["zoonotic_potential"].isin(zoo_cats[3:])
-
+        scores = df_moll_merged[score_category]
         fpr, tpr, thresholds = roc_curve(y_true=binary_ground_truth,
-                                         y_score=effective_positive)
+                                         y_score=scores)
+        auc = roc_auc_score(y_true=binary_ground_truth,
+                            y_score=scores)
+        label = score_category.split("_")[2]
         ax.plot(fpr,
                 tpr,
                 marker=".",
-                ms=15,
-                label=f"Mollentze et al. {zoo_pot}")
+                ms=markersize,
+                label=f"Mollentze et al. {label} (AUC = {auc:.2f})")
 
     fpr, tpr, thresholds = roc_curve(y_true=binary_ground_truth,
                                      y_score=df_moll_merged["our_zoonotic_classification_proba"])
+    auc = roc_auc_score(y_true=binary_ground_truth,
+                        y_score=df_moll_merged["our_zoonotic_classification_proba"])
     ax.plot(fpr,
             tpr,
-            label=f"Us",
+            label=f"Us (AUC = {auc:.2f})",
             ls="-",
             marker=".",
-            ms=15)
+            ms=markersize)
     # random chance:
     r_c = np.linspace(0, 1.0, num=20)
     ax.plot(r_c,

@@ -17,7 +17,7 @@ import pandas as pd
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.metrics import RocCurveDisplay
+from sklearn.metrics import RocCurveDisplay, roc_curve, roc_auc_score
 from numpy.random import default_rng
 
 
@@ -534,6 +534,8 @@ def main(download_recs: int,
     # one thing they explicitly reported was % of human-infecting viral
     # samples correctly labeled as such
     our_predictions_mol_fig3 = clf.predict(df_moll_fig3["Genome %GC"].to_numpy().reshape(-1, 1))
+    our_prob_predictions_mol_fig3 = clf.predict_proba(df_moll_fig3["Genome %GC"].to_numpy().reshape(-1, 1))[..., np.nonzero(clf.classes_ == "human")[0][0]]
+    print("our_prob_predictions_mol_fig3:", our_prob_predictions_mol_fig3)
     print("our_predictions_mol_fig3:", our_predictions_mol_fig3)
     print("our_predictions_mol_fig3.shape:", our_predictions_mol_fig3.shape)
 
@@ -580,15 +582,17 @@ def main(download_recs: int,
     # many of their "very high" zoonotic potential classifications do we overlap
     # with? etc.
     mollentze_actual_classifications_df = pd.read_csv(os.path.join("viral_seq", "data", "s11_fig.csv"))
+
     print("mollentze_actual_classifications_df:\n", mollentze_actual_classifications_df)
     # "Name" and "zoonotic_potential" columns are of interest
 
     # to compare with our zoonotic classification results, let me first expand
     # df_moll_fig3 to include our results alongside the viral species names
     df_moll_fig3["our_zoonotic_classification"] = our_predictions_mol_fig3
+    df_moll_fig3["our_zoonotic_classification_proba"] = our_prob_predictions_mol_fig3
     print("updated df_moll_fig3 columns of interest:\n", df_moll_fig3[["Name", "our_zoonotic_classification"]])
 
-    df_moll_merged = df_moll_fig3[["Name", "our_zoonotic_classification"]].merge(mollentze_actual_classifications_df[["Name", "zoonotic_potential"]],
+    df_moll_merged = df_moll_fig3[["Name", "host_corrected", "our_zoonotic_classification", "our_zoonotic_classification_proba"]].merge(mollentze_actual_classifications_df[["Name", "zoonotic_potential", "calibrated_score_mean", "calibrated_score_lower", "calibrated_score_upper"]],
                                         on="Name")
     assert df_moll_merged.shape[0] == 758
     print("df_moll_merged:\n", df_moll_merged)
@@ -641,3 +645,57 @@ def main(download_recs: int,
     fig_overlap_mollentze.tight_layout()
     #fig_overlap_mollentze.set_size_inches(10, 10)
     fig_overlap_mollentze.savefig("overlap_moll_fig3.png", dpi=300)
+
+    # one other useful comparison with Mollentze may be ROC:
+    # https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/29#note_592115
+    # the idea is to have a number of plots/metrics that we aim to improve
+    # as we generalize/improve our ML model
+    print("producing ROC vs. Mollentze")
+    print("df_moll_merged:\n", df_moll_merged)
+    #                              Name          host_corrected our_zoonotic_classification zoonotic_potential
+    #0        Gallid alphaherpesvirus 1           Gallus gallus                         bat             Medium
+    #1     Psittacid alphaherpesvirus 1         Amazona oratrix                         bat             Medium
+    #2        Anatid alphaherpesvirus 1                    Duck                         bat             Medium
+    #3      Columbid alphaherpesvirus 1           feral pigeons                         bat               High
+    fig_roc_vs_mollentze, ax = plt.subplots(dpi=300)
+    score_categories = ["calibrated_score_mean", "calibrated_score_lower", "calibrated_score_upper"]
+    binary_ground_truth = df_moll_merged["host_corrected"] == "Homo sapiens"
+    markersize=10
+    for score_category in score_categories:
+        # progressively stricter thresholds:
+        scores = df_moll_merged[score_category]
+        fpr, tpr, thresholds = roc_curve(y_true=binary_ground_truth,
+                                         y_score=scores)
+        auc = roc_auc_score(y_true=binary_ground_truth,
+                            y_score=scores)
+        label = score_category.split("_")[2]
+        ax.plot(fpr,
+                tpr,
+                marker=".",
+                ms=markersize,
+                label=f"Mollentze et al. {label} (AUC = {auc:.2f})")
+
+    fpr, tpr, thresholds = roc_curve(y_true=binary_ground_truth,
+                                     y_score=df_moll_merged["our_zoonotic_classification_proba"])
+    auc = roc_auc_score(y_true=binary_ground_truth,
+                        y_score=df_moll_merged["our_zoonotic_classification_proba"])
+    ax.plot(fpr,
+            tpr,
+            label=f"Us (AUC = {auc:.2f})",
+            ls="-",
+            marker=".",
+            ms=markersize)
+    # random chance:
+    r_c = np.linspace(0, 1.0, num=20)
+    ax.plot(r_c,
+            r_c,
+            label="chance level (AUC=0.5)",
+            ls="--",
+            color="k")
+    ax.legend()
+    ax.set_title("Zoonotic ROC vs. Mollentze et al. on 758 viral species")
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_aspect("equal")
+    fig_roc_vs_mollentze.set_size_inches(6, 6)
+    fig_roc_vs_mollentze.savefig("ROC_vs_mollentze.png")

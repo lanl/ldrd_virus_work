@@ -23,6 +23,14 @@ click.rich_click.OPTION_GROUPS = {
                     "to download (per search category), either generating "
                     "or expanding the local cache with records it doesn't "
                     "already have."))
+@click.option('--email',
+              type=str,
+              show_default=True,
+              default='arhall@lanl.gov',
+              help=("Email used when retrieving data from Pubmed."
+                    " Should be set to users email."
+                    " Downloading too many records with the same email may"
+                    " result in requests being refused by the server."))                    
 @click.option('--save_model',
               is_flag=True,
               show_default=True,
@@ -38,10 +46,12 @@ click.rich_click.OPTION_GROUPS = {
                     " it is not necessary to iterate on the model proper. This will"
                     " require that `save_model` has been used locally first."))
 def viral_seq(download_recs,
+              email,
               save_model,
               load_model):
     start_sec = perf_counter()
     main(download_recs=download_recs,
+         email=email,
          save_model=save_model,
          load_model=load_model)
     end_sec = perf_counter()

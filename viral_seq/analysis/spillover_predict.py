@@ -547,7 +547,7 @@ def main(download_recs: int,
     total_human_sample_count = true_human_samples.sum()
     assert total_human_sample_count == 113
     unique_labels, label_counts = np.unique(our_human_predictions, return_counts=True)
-    percent_human_true_positive = (label_counts[unique_labels == "human"] / total_human_sample_count) * 100
+    percent_human_true_positive = (label_counts[unique_labels == "human"][0] / total_human_sample_count) * 100
     percent_human_false_negative = (label_counts[unique_labels != "human"].sum() / total_human_sample_count) * 100
 
     # plot our classifications results vs. theirs on page 7/25

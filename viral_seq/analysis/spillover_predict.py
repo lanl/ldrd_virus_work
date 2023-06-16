@@ -33,6 +33,7 @@ def _append_recs(record_folder):
 
 
 def main(download_recs: int,
+         email: str,
          save_model: bool = False,
          load_model: bool = False):
     """
@@ -98,13 +99,11 @@ def main(download_recs: int,
                              "available.")
 
         if download_recs > 0:
-            print("Retrieving sequence data remotely from Pubmed.")
-
             # let Pubmed team email us if they find
             # that our scraping is too aggressive
             # (rather than ban us outright)
-            Entrez.email = "treddy@lanl.gov"
-
+            Entrez.email = email
+            print("Retrieving sequence data remotely from Pubmed as",email)
             # through empirical testing, I determined that we can't really efficiently
             # exclude the initial Entrez search from containing records/accession numbers
             # we already have in the local cache, because the string of `NOT <accession no.>`

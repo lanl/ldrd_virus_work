@@ -24,7 +24,6 @@ from tqdm import tqdm
 import pandas as pd
 from Bio import Entrez, SeqIO
 from Bio.SeqUtils import GC
-import numpy as np
 
 
 def assert_mollentze_fig3_case_study_properties(df_moll_fig3):
@@ -48,7 +47,9 @@ def assert_mollentze_fig3_case_study_properties(df_moll_fig3):
     # medium: N = 30
     # low: N = 3
     expected_human_origin_samples = 36 + 44 + 30 + 3
-    actual_human_origin_samples = (df_moll_fig3["host_corrected"] == "Homo sapiens").sum()
+    actual_human_origin_samples = (
+        df_moll_fig3["host_corrected"] == "Homo sapiens"
+    ).sum()
     msg = f"Samples from humans (N={actual_human_origin_samples}) does not match description in manuscript (N={expected_human_origin_samples})"
     assert actual_human_origin_samples == expected_human_origin_samples, msg
 
@@ -82,11 +83,12 @@ if __name__ == "__main__":
     # CAUTION: GPL-3 license...
     df_meta = pd.read_csv("NovelViruses.csv")
     df_meta["SequenceID"] = df_meta["SequenceID"].astype("string")
-    df = df.merge(df_meta,
-                 how="right",
-                 left_on="accession",
-                 right_on="SequenceID",
-                 ).drop(columns=["accession", "notes", "data_source", "host"])
+    df = df.merge(
+        df_meta,
+        how="right",
+        left_on="accession",
+        right_on="SequenceID",
+    ).drop(columns=["accession", "notes", "data_source", "host"])
     # drop duplicated viral species as well
     df.drop_duplicates(subset=["Name"], inplace=True)
 
@@ -96,11 +98,14 @@ if __name__ == "__main__":
     # here (to get the same dataset they used for Figure 3):
     # https://github.com/Nardus/zoonotic_rank/blob/42f15a07ffdfc1ba425741233009f9c61bb3bf48/Scripts/Plotting/MakeFigure3.R#L62
     # CAUTION: GPL-3 license...
-    df = df[(df["class"].isna()) | (df["class"] == "Mammalia") | (df["class"] == "Aves") | (df["order"] == "Diptera") |
-            (df["order"] == "Ixodida")]
+    df = df[
+        (df["class"].isna())
+        | (df["class"] == "Mammalia")
+        | (df["class"] == "Aves")
+        | (df["order"] == "Diptera")
+        | (df["order"] == "Ixodida")
+    ]
     df = df[df["Name"] != "Vaccinia virus"]
-
-
 
     # the authors state in the manuscript that for this case study there were 758 unique
     # viral *species*
@@ -110,14 +115,12 @@ if __name__ == "__main__":
     # in the main control flow uses for classification decisions
     Entrez.email = "treddy@lanl.gov"
     accessions = df["SequenceID"]
-    viral_families = set()
+    # viral_families = set()
     missing_taxonomies = 0
     print("retrieving records for Mollentze Figure 3 data")
-    handle = Entrez.efetch(db="nuccore",
-                           rettype="gb",
-                           id=accessions,
-                           idtype="acc",
-                           retmode="text")
+    handle = Entrez.efetch(
+        db="nuccore", rettype="gb", id=accessions, idtype="acc", retmode="text"
+    )
     print("parsing records for Mollentze Figure 3 data")
     records = list(SeqIO.parse(handle, "gb"))
     df.set_index("SequenceID", inplace=True)
@@ -139,9 +142,7 @@ if __name__ == "__main__":
     print("**** filtered df that passed all assertions ***:\n", df)
     df.info()
     print("**** writing the filtered df to a compressed parquet file ***")
-    df.to_parquet("df_moll_fig3.parquet.gzip",
-                  compression="gzip",
-                  index=True)
+    df.to_parquet("df_moll_fig3.parquet.gzip", compression="gzip", index=True)
     end = time.perf_counter()
     elapsed = end - start
     print(f"analysis/processing complete in {elapsed:.1f} seconds")

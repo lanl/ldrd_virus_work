@@ -35,7 +35,7 @@ test:
       when: always
   allow_failure: false    
   script:
-    - mypy viral_seq
+    - mypy -p viral_seq
     - ruff check viral_seq
     - black viral_seq --check
 

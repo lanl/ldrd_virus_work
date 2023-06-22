@@ -11,6 +11,7 @@ mdurl==0.1.2
 numpy==1.25.0
 packaging==23.1
 pandas==2.0.2
+pandas-stubs==2.0.2.230605
 Pillow==9.5.0
 Pygments==2.15.1
 pyparsing==3.1.0
@@ -23,4 +24,6 @@ scipy==1.10.1
 six==1.16.0
 threadpoolctl==3.1.0
 tqdm==4.65.0
+types-pytz==2023.3.0.0
+types-tqdm==4.65.0.1
 tzdata==2023.3

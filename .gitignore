@@ -22,7 +22,6 @@ __pycache__/
 *.py[cod]
 build/
 *.egg-info/
-venv/
 .DS_Store
 .cache/
 

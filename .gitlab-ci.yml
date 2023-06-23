@@ -1,6 +1,6 @@
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: python:latest
+image: python:3.10.8
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -22,13 +22,13 @@ before_script:
   - python -m venv venv
   - source venv/bin/activate
   - pip install -r requirements.txt
-  - pip install mypy black ruff
+  - pip install mypy==1.3.0 black==23.3.0 ruff==0.0.272
 
 stages:
   - test
   - run
 
-test:
+lint:
   stage: test
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == 'merge_request_event'
@@ -42,7 +42,7 @@ test:
 run:
   stage: run
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == 'merge_request_event'
       when: on_success
   allow_failure: false    
   script:

@@ -115,7 +115,6 @@ if __name__ == "__main__":
     # in the main control flow uses for classification decisions
     Entrez.email = "treddy@lanl.gov"
     accessions = df["SequenceID"]
-    # viral_families = set()
     missing_taxonomies = 0
     print("retrieving records for Mollentze Figure 3 data")
     handle = Entrez.efetch(

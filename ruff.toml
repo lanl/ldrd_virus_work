@@ -1,0 +1,2 @@
+# Never enforce `E501` (line length violations). Handled by Black
+ignore = ["E501"]

@@ -22,3 +22,11 @@ __pycache__/
 *.py[cod]
 build/
 *.egg-info/
+.DS_Store
+.cache/
+
+# Plots
+*png
+
+# To flag generated output, etc to ignore
+*pleaseignore*

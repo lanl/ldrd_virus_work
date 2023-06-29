@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def test_features():
-    accession_path = Path(".cache/NC_019843.3")
+    accession_path = Path("viral_seq/tests")
     test_record = _append_recs(accession_path)
     start = perf_counter()
     result = get_genomic_features(test_record)

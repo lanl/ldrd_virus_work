@@ -1,9 +1,4 @@
-from time import perf_counter
 import re
-import argparse
-from pathlib import Path
-from viral_seq.analysis.spillover_predict import _append_recs
-import pandas as pd
 
 # hard-coded lookup tables
 codontab = {
@@ -72,6 +67,7 @@ codontab = {
     "TGA": "STOP",
     "TAG": "STOP",
 }
+# Currently unused, but may be useful later
 aminotab = {
     "F": ["TTT", "TTC"],
     "L": ["TTA", "TTG", "CTT", "CTC", "CTA", "CTG"],
@@ -96,14 +92,8 @@ aminotab = {
     "STOP": ["TAA", "TGA", "TAG"],
 }
 
-# cli
-parser = argparse.ArgumentParser(description="Test feature extraction functions")
-parser.add_argument(
-    "--cache", "-c", type=str, help="Relative path of data cache", default=".cache"
-)
-args = parser.parse_args()
 
-
+# Calculates all genomic features for a given record
 def get_genomic_features(record):
     coding_dict = {}
     coding_pairs = []
@@ -150,6 +140,7 @@ def get_genomic_features(record):
     return {**coding_ret, **all_ret, **bridge_ret, **nonbridge_ret, **codon_ret}
 
 
+# Keeps a running count of the sequence length and number of A,T,G,C
 def get_cnt_dict(seq: str, cnt_dict=None):
     if cnt_dict is None:
         cnt_dict = {}
@@ -219,7 +210,7 @@ def get_codon_amino_bias(codons):
         else:
             codon_count[codon] = 1.0
         amino = codontab[codon]
-        total_amino = total_amino + 1.0
+        total_amino = total_amino + 1.0  # this includes STOP codon as defined in ref
         if amino in amino_count:
             amino_count[amino] = amino_count[amino] + 1.0
         else:
@@ -253,30 +244,3 @@ def split_seq(seq: str, coding: bool = False):
         codons = [seq[i : i + 3] for i in range(0, seq_len, 3)]
     pairs = [seq[i : i + 2] for i in range(0, seq_len - 1)]
     return pairs, bridge_pairs, nonbridge_pairs, codons
-
-
-# tests
-if __name__ == "__main__":
-    # load a test Accession to run analysis on (Covid 19, NC_045512.2)
-    accession_path = Path(args.cache + "/NC_045512.2")
-    test_record1 = _append_recs(accession_path)
-    # just checking performance of calculation
-    start_sec = perf_counter()
-    res = get_genomic_features(test_record1)
-    end_sec = perf_counter()
-    execution_time_sec = end_sec - start_sec
-    print(
-        "Calculated", len(res), "features for test record in", execution_time_sec, "s"
-    )
-    # build a dataframe
-    df1 = pd.DataFrame(res, index=[test_record1.id])
-    # Try another record (Mers, NC_019843.3)
-    # This record is in Mollentze et al. Plos Biol. 2021 and
-    # the results have been verified against those.
-    accession_path = Path(args.cache + "/NC_019843.3")
-    test_record2 = _append_recs(accession_path)
-    res = get_genomic_features(test_record2)
-    df2 = pd.DataFrame(res, index=[test_record2.id])
-    df = pd.concat([df1, df2], axis=0).reset_index()
-    print(df)
-    df.to_csv("test_features_pleaseignore.csv")

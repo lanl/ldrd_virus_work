@@ -46,6 +46,7 @@ test:
       when: always
   allow_failure: false
   script:
+    - pip install .
     - pytest
 
 run:
@@ -55,6 +56,5 @@ run:
       when: on_success
   allow_failure: false    
   script:
-    - pip install .
     - viral_seq --help
 

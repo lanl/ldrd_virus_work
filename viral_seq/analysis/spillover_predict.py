@@ -6,16 +6,18 @@ from multiprocessing import RLock
 from viral_seq.data.parse_novel_data import assert_mollentze_fig3_case_study_properties
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
-from Bio.SeqUtils import GC
+from Bio.SeqUtils import gc_fraction
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.model_selection import cross_val_score, StratifiedKFold, train_test_split
 from sklearn.metrics import RocCurveDisplay, roc_curve, roc_auc_score
 from numpy.random import default_rng
+from urllib.request import HTTPError
+import time
 
 matplotlib.use("Agg")
 
@@ -29,6 +31,449 @@ def _append_recs(record_folder):
     with open(genbank_file) as genfile:
         record = list(SeqIO.parse(genfile, "genbank"))[0]
     return record
+
+
+def run_search(
+    search_terms: list[str],
+    retmax: int,
+    email: str,
+    must: bool = False,
+    attempts: int = 3,
+) -> set[str]:
+    Entrez.email = email
+    records = []
+    acc_set: set[str] = set()
+    for search_term in search_terms:
+        # try to prevent timeouts on large search queries
+        # by batching
+        search_batch_size = min(10_000, retmax)
+        count = 0
+        remaining = retmax
+        print(f"starting Entrez esearch (search batch size is: {search_batch_size})")
+        print("Search term:", search_term)
+        for retstart in tqdm(range(0, retmax, search_batch_size)):
+            if remaining < search_batch_size:
+                actual_retmax = remaining
+            else:
+                actual_retmax = search_batch_size
+            # We should handle network exceptions
+            for attempt in range(attempts):
+                try:
+                    handle = Entrez.esearch(
+                        db="nucleotide",
+                        term=search_term,
+                        retstart=retstart,
+                        retmax=actual_retmax,
+                        idtype="acc",
+                        usehistory="y",
+                    )
+                except HTTPError as err:
+                    # Wait and try again
+                    print(
+                        "Attempt", attempt + 1, "/", attempts, "failed with error:", err
+                    )
+                    # We might want to enforce that this succeeds
+                    if attempt == attempts - 1 and must:
+                        raise
+                    time.sleep(1)
+                else:
+                    search_results = Entrez.read(handle)
+                    acc_set = acc_set.union(search_results["IdList"])
+                    count += int(search_results["Count"])
+                    remaining -= search_batch_size
+                    handle.close()
+                    break
+        print("after Entrez esearch")
+
+    return acc_set
+
+
+def load_results(acc_set: set[str], email: str, must: bool = False, attempts: int = 3):
+    Entrez.email = email
+    records = []
+    batch_size = min(100, len(acc_set))
+    numrecs = len(acc_set)
+    print(f"fetching {numrecs} Entrez records with batch_size {batch_size}:")
+    acc_list = list(acc_set)
+    for start in tqdm(range(0, numrecs, batch_size)):
+        # make a few attempts and handle exceptions
+        for attempt in range(attempts):
+            try:
+                handle = Entrez.efetch(
+                    db="nuccore",
+                    rettype="gb",
+                    id=acc_list[start : start + batch_size],
+                    idtype="acc",
+                    retmode="text",
+                )
+            except HTTPError as err:
+                # Wait and try again
+                print("Attempt", attempt + 1, "/", attempts, "failed with error:", err)
+                # require success if must
+                if attempt == attempts - 1 and must:
+                    raise
+                time.sleep(1)
+            else:
+                records += list(SeqIO.parse(handle, "gb"))
+                handle.close()
+                break
+    return records
+
+
+def init_cache(folder=".cache"):
+    cache_path = Path(folder)
+    # envisioned local sequence cache layout:
+    # .cache/ folder
+    # subfolders are formatted as accession numbers
+    # and each subfolder should contain the FASTA and GENBANK
+    # sequences for that accession number
+
+    if not cache_path.exists():
+        cache_path.mkdir(parents=False, exist_ok=False)
+    cache_subdirectories = [x for x in cache_path.iterdir() if x.is_dir()]
+    return cache_path, cache_subdirectories
+
+
+def filter_records(records, just_assert=False):
+    # Checks the records satisfy the conditions defined
+    # If just_assert, it will throw an exception if a record is bad
+    # Otherwise, it will return the records that pass
+
+    # TODO: some of these filters seem too specific to the original search terms used in testing
+
+    # sanity check -- based on this manuscript:
+    # https://doi.org/10.1038/s41598-020-69342-y
+    # there should be > 29,000 nucleotides in the
+    # SARS-CoV-2 genome
+    # NOTE: relaxing the checks as I start incorporating viral
+    # sequences from other organisms, like bats
+    filtered_records = []
+    for record in tqdm(records):
+        # we also sanity check each record before
+        # trying to cache it locally;
+        # each record is a Bio.SeqRecord.SeqRecord
+        actual_len = len(record)
+        if (
+            record.description.startswith("Homo sapiens")
+            or record.description.endswith("mRNA")
+            or ("partial" in record.description)
+        ):
+            # likely "data pollution"/bad sequences
+            # picked up in search
+            if just_assert:
+                raise Exception(
+                    "Record description started with Homo sapiens, ended with mRNA, or included partial"
+                )
+            continue
+        # these aren't assertions yet at this point because
+        # we don't want to interrupt the population of the local
+        # cache because of a few bad apples from an online search
+        if actual_len < 26000 or actual_len > 31000:
+            if just_assert:
+                raise Exception(
+                    "Record length was too short or too long (outside of 26000, 31000)"
+                )
+            continue
+        if (
+            "DNA" in record.annotations["molecule_type"]
+            or "Klebsiella" in record.annotations["organism"]
+        ):
+            # for now, exclude DNA and focus on RNA coronaviruses;
+            # this should help prevent the sequence that got pulled in
+            # for: https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/13
+            # TODO: if we expand to include i.e., DNA viral genomes, we'll
+            # almost certainly need more sophisticated filtering than just
+            # one bacterial species though
+            if just_assert:
+                raise Exception("Record annotation included DNA or Klebsiella")
+            continue
+        if not just_assert:
+            filtered_records.append(record)
+    if not just_assert:
+        print(len(filtered_records), "retained of", len(records), "checked")
+        return filtered_records
+
+
+def add_to_cache(records):
+    cache_path, cache_subdirectories = init_cache()
+    # with the records list populated from the online
+    # search, we next want to grow the local cache with
+    # folders + FASTA/GENBANK format files that are not
+    # already there
+    print(
+        "performing quality analysis of sequences and adding to local cache if they pass..."
+    )
+    records = filter_records(records)
+    num_recs_added = 0
+    num_recs_excluded = 0
+    for record in tqdm(records):
+        record_cache_path = cache_path / f"{record.id}"
+        if record_cache_path not in cache_subdirectories:
+            record_cache_path.mkdir(parents=False, exist_ok=False)
+            with open(record_cache_path / f"{record.id}.fasta", "w") as fasta_file:
+                SeqIO.write(record, fasta_file, "fasta")
+            with open(record_cache_path / f"{record.id}.genbank", "w") as genbank_file:
+                SeqIO.write(record, genbank_file, "genbank")
+            num_recs_added += 1
+        else:
+            num_recs_excluded += 1
+    print(
+        f"number of records added to the local cache from online search: {num_recs_added}"
+    )
+    print(
+        f"number of records excluded from the online search because they were already present: {num_recs_excluded}"
+    )
+
+    # is this check needed? num_recs should only ever drop from max_recs
+    # num_recs = len(records)
+    # max_recs = retmax * 2  # 2 search terms (human + bat)
+    # assert (
+    #    num_recs <= max_recs
+    # ), f"num_recs={num_recs} is larger than max expected of {max_recs}"
+
+
+def load_from_cache(accessions=None):
+    cache_path, cache_subdirectories = init_cache()
+    directories_to_load = []
+    # TODO: if there is nothing in the cache, fail
+    if accessions is None:
+        print("Loading entire cache")
+        directories_to_load = cache_subdirectories[:]
+    else:
+        print("Will attempt to load selected accessions from local cache")
+        for accession in accessions:
+            this_record_cache_path = cache_path / f"{accession}"
+            # we can only load what exists
+            assert this_record_cache_path in cache_subdirectories
+            directories_to_load.append(this_record_cache_path)
+    print(
+        "total number of records (sequence folders) to load from local cache:",
+        len(directories_to_load),
+    )
+
+    print("loading the local records cache (genetic sequences) into memory")
+    # TODO: this is getting pretty slow--maybe we can split the work
+    # between cores and then fuse the lists after?
+
+    print("populating futures..", flush=True)
+    list_futures = []
+    records = []
+    num_cpus = os.cpu_count()
+    assert num_cpus is not None
+    workers = num_cpus - 1
+    tqdm.set_lock(RLock())
+    with concurrent.futures.ProcessPoolExecutor(
+        initargs=(tqdm.get_lock(),), initializer=tqdm.set_lock, max_workers=workers
+    ) as executor:
+        for record_folder in tqdm(directories_to_load):
+            list_futures.append(
+                executor.submit(
+                    _append_recs,
+                    record_folder,
+                )
+            )
+
+        print("waiting for futures to complete", flush=True)
+        for future in tqdm(
+            concurrent.futures.as_completed(list_futures), total=len(list_futures)
+        ):
+            records.append(future.result())
+    # TODO: if we change data retention filters when scraping, we will possibly need to update the cache
+    print("Asserting records loaded from cache conform to quality standards...")
+    filter_records(records, just_assert=True)
+    return records
+
+
+def build_table(records, save: bool = False, filename: str = "df.parquet.gzip"):
+    print("Calculating features and building pandas DataFrame")
+    data_dict = {}
+    for record in records:
+        # TODO: This should be determined and stored as opposed to being inferred this way
+        if "human" in record.description.lower():
+            human_host = True
+        else:
+            human_host = False
+        # TODO: feature calculation goes here
+        data_dict[record.id] = [human_host, gc_fraction(record.seq), str(record.seq)]
+
+    df = pd.DataFrame.from_dict(
+        data_dict,
+        orient="index",
+        columns=["Human Host", "Genome %GC", "Genome Sequence"],
+    )
+    df.columns.name = "Genome ID"
+
+    # TODO: If possible/efficient this check should be done in filter_records
+
+    print("Checking for exact duplicate Genome Sequences")
+    duplicate_series = df.duplicated(subset="Genome Sequence")
+    print("number of exact duplicate genomes found:", duplicate_series.sum())
+    df.drop_duplicates(subset=["Genome Sequence"], inplace=True)
+    duplicate_sum_after = df.duplicated(subset="Genome Sequence").sum()
+    print(
+        "number of exact duplicate genomes found AFTER dropping duplicates:",
+        duplicate_sum_after,
+    )
+    assert duplicate_sum_after == 0
+    # Drop sequence as it is not used after this point
+    df = df.drop("Genome Sequence", axis=1)
+    if save:
+        print(
+            "Saving the pandas DataFrame of genomic data to a parquet file:", filename
+        )
+        df.to_parquet(filename, engine="pyarrow", compression="gzip")
+    return df
+
+
+def get_training_columns(
+    df=None, class_column: str = "Human Host", table_filename: str = ""
+):
+    # Check if we are using data from file or a passed DataFrame
+    if table_filename == "" and df is None:
+        raise Exception("No data provided to train random forest model.")
+    elif df is None:
+        print("Loading the pandas DataFrame from a parquet file:", table_filename)
+        df = pd.read_parquet(table_filename, engine="pyarrow")
+    elif table_filename == "":
+        print("Using provided DataFrame")
+    else:
+        raise Exception("Ambiguous request; both DataFrame and file passed.")
+    if class_column not in df.columns:
+        raise Exception("Can't find class column to train random forest model.")
+    # Expected format of DataFrame assumes all columns except the class column are features
+    # TODO: Categorical data will need to use one hot encoding
+    df_features = df.drop(class_column, axis=1)
+    if len(df_features.columns) < 1:
+        raise Exception("Data contains no features.")
+    elif len(df_features.columns) == 1:
+        X = df_features.to_numpy().reshape(-1, 1)
+    else:
+        X = df_features.to_numpy()
+    y = df[class_column]
+    return X, y
+
+
+def train_random_forest(
+    X,
+    y,
+    estimators: int = 10,
+    rand: int = 123,
+    save: bool = False,
+    filename: str = "random_forest_model.p",
+):
+    # Trains a random forest model with all available data
+    # Quality of parameters should validated using cross_validation_random_forest
+    print("Training random forest with", estimators, "estimators")
+    clf = RandomForestClassifier(n_estimators=estimators)
+    clf.fit(X, y)
+    if save:
+        print("Saving random forest model to file:", filename)
+        with open(filename, "wb") as outfile:
+            pickle.dump(clf, outfile)
+    return clf
+
+
+def cross_validation_random_forest(
+    X,
+    y,
+    estimators: int = 10,
+    rand: int = 123,
+    plot: bool = False,
+    filename: str = "cross_vali_rand_forest.png",
+):
+    # let's perform 5-fold cross validation to get
+    # a sense for the estimator accuracy
+    # new forest just in case
+    clf = RandomForestClassifier(n_estimators=estimators)
+
+    scores_macro = cross_val_score(clf, X, y.values, cv=5, scoring="f1_macro")
+    print(
+        f"Random Forest Cross Validation F1 macro has an average of {scores_macro.mean()} and std dev of {scores_macro.std()}:"
+    )
+    scores_micro = cross_val_score(clf, X, y.values, cv=5, scoring="f1_micro")
+    print(
+        f"Random Forest Cross Validation F1 micro has an average of {scores_micro.mean()} and std dev of {scores_micro.std()}:"
+    )
+
+    # the cross-validation accuracy should be much lower
+    # if we shuffle the features relative to the labels
+    X_shuffled = X.copy()
+    rng = default_rng(rand)
+    rng.shuffle(X_shuffled)
+    shuffle_scores_macro = cross_val_score(
+        clf, X_shuffled, y.values, cv=5, scoring="f1_macro"
+    )
+    shuffle_scores_micro = cross_val_score(
+        clf, X_shuffled, y.values, cv=5, scoring="f1_micro"
+    )
+    print(
+        f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 macro has an average of {shuffle_scores_macro.mean()} and std dev of {shuffle_scores_macro.std()}:"
+    )
+    print(
+        f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 micro has an average of {shuffle_scores_micro.mean()} and std dev of {shuffle_scores_micro.std()}:"
+    )
+
+    # perhaps even worse would be a random set
+    # of % GC values?
+    X_random = rng.random(X.shape)
+    random_scores_macro = cross_val_score(
+        clf, X_random, y.values, cv=5, scoring="f1_macro"
+    )
+    random_scores_micro = cross_val_score(
+        clf, X_random, y.values, cv=5, scoring="f1_micro"
+    )
+    print(
+        f"(Randomly generated % GC content) Random Forest Cross Validation F1 macro has an average of {random_scores_macro.mean()} and std dev of {random_scores_macro.std()}:"
+    )
+    print(
+        f"(Randomly generated % GC content) Random Forest Cross Validation F1 micro has an average of {random_scores_micro.mean()} and std dev of {random_scores_micro.std()}:"
+    )
+
+    if plot:
+        # Plotting
+        score_means_macro = [
+            scores_macro.mean(),
+            shuffle_scores_macro.mean(),
+            random_scores_macro.mean(),
+        ]
+        score_std_macro = [
+            scores_macro.std(),
+            shuffle_scores_macro.std(),
+            random_scores_macro.std(),
+        ]
+        x_lab = ["original data", "shuffled GC content", "randomized GC content"]
+
+        score_means_micro = [
+            scores_micro.mean(),
+            shuffle_scores_micro.mean(),
+            random_scores_micro.mean(),
+        ]
+        score_std_micro = [
+            scores_micro.std(),
+            shuffle_scores_micro.std(),
+            random_scores_micro.std(),
+        ]
+
+        fig_cross_val, (ax_macro, ax_micro) = plt.subplots(2, 1)
+        ax_macro.bar(
+            height=score_means_macro, yerr=score_std_macro, capsize=20.0, x=x_lab
+        )
+        ax_macro.set_title("5-fold cross validation of random forest")
+        ax_macro.set_ylabel("F1 macro of\n classification by % GC")
+        ax_micro.bar(
+            height=score_means_micro, yerr=score_std_micro, capsize=20.0, x=x_lab
+        )
+        ax_micro.set_ylabel("F1 micro of\n classification by % GC")
+        for ax in [ax_micro, ax_macro]:
+            ax.set_ylim(0, 1)
+        fig_cross_val.savefig(filename, dpi=300)
+
+
+def compare_with_mollentze():
+    # To compare with Mollentze et al.
+    # Compare features: Use training and test data from Mollentze et al., but our features
+    # Compare data: Use all of our data but withhold test set used in Mollentze et al., match features from Mollentze et al.
+    return
 
 
 def main(

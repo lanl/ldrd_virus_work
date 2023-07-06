@@ -1,25 +1,24 @@
 from viral_seq.analysis.get_features import get_genomic_features
-from pathlib import Path
 from viral_seq.analysis.spillover_predict import _append_recs
-from time import perf_counter
 import pandas as pd
-from numpy.testing import assert_allclose
+from pandas.testing import assert_frame_equal
+from importlib.resources import files
 
 
 def test_features():
-    accession_path = Path("viral_seq/tests")
-    test_record = _append_recs(accession_path)
-    start = perf_counter()
-    result = get_genomic_features(test_record)
-    end = perf_counter()
-    print("Calculated genomic features for one record in", end - start, "s")
-    df_test = pd.read_csv("viral_seq/tests/MERS-CoV_features.csv", sep="\t")
-    df = pd.DataFrame(result, index=["NC_019843.3"]).reset_index()
-    # Check our features match published results for NC_019843.3 (MERS-CoV)
-    for column in df_test:
-        test_val = df_test[column]
-        res_val = df[column]
-        if isinstance(test_val, str):
-            assert test_val == res_val
-        elif isinstance(test_val, float):
-            assert_allclose(test_val, res_val, rtol=1e-9, atol=0)
+    tests_dir = files("viral_seq") / "tests"
+    test_record = _append_recs(tests_dir)
+    # Calculate features for NC_019843.3 (MERS-CoV)
+    df = get_genomic_features(test_record)
+    # Check our calculation matches published results in
+    # https://doi.org/10.1371/journal.pbio.3001390
+    df_expected = pd.read_csv(
+        files("viral_seq.tests").joinpath("MERS-CoV_features.csv"), sep="\t"
+    )
+    assert_frame_equal(
+        df.sort_index(axis=1),
+        df_expected.sort_index(axis=1),
+        check_names=True,
+        rtol=1e-9,
+        atol=1e-9,
+    )

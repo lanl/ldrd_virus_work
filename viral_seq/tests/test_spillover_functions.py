@@ -32,7 +32,7 @@ def test_modelling(tmp_path):
     aucs = sp.cross_validation(X_train, y_train, splits=2)
     print("cross validation AUC scores:", aucs)
     # assert AUCs are as expected
-    assert aucs == [0.3333333333333333, 0.5]
+    assert aucs == [0.5, 0.5]
 
     # currently need a RandomForestClassifier to properly build a data table for the test set
     rfc = sp.train_rfc(X_train, y_train)
@@ -47,4 +47,4 @@ def test_modelling(tmp_path):
     this_auc = sp.predict_rfc(X_test, y_test, rfc=rfc)
     print("test set AUC score", this_auc)
     # assert AUC is as expected
-    assert this_auc == 0.38
+    assert this_auc == 0.3

@@ -78,7 +78,6 @@ def get_genomic_features(records):
         print("No CDSs in features")
         print("Exiting..")
         return None
-    GC_content = {"GC_content": gc_fraction(full_sequence)}
     all_pairs = split_seq(full_sequence, coding=False)[0]
     all_cnt_dict = get_cnt_dict(full_sequence)
     # get bias for each category
@@ -100,7 +99,7 @@ def get_genomic_features(records):
         **bridge_ret,
         **nonbridge_ret,
         **codon_ret,
-        **GC_content,
+        # **GC_content,
     }
 
 

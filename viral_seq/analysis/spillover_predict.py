@@ -343,10 +343,6 @@ def build_table(
             if this_result is not None:
                 rows.append(this_result)
     table = pd.DataFrame.from_records(rows)
-    # required for repeatability, but may be slow
-    if ordered:
-        table.sort_values(by=["Unnamed: 0"], inplace=True)
-        table = table.reindex(sorted(table.columns), axis=1)
     if rfc is not None:
         # add columns from training if missing
         table = pd.concat(

@@ -1,5 +1,4 @@
-from viral_seq.analysis.get_features import get_genomic_features, get_kmers
-import viral_seq.analysis.spillover_predict as sp
+from viral_seq.analysis.get_features import get_genomic_features
 from viral_seq.analysis.spillover_predict import _append_recs
 import pandas as pd
 from pandas.testing import assert_frame_equal

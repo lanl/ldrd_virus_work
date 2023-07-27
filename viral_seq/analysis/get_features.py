@@ -99,7 +99,6 @@ def get_genomic_features(records):
         **bridge_ret,
         **nonbridge_ret,
         **codon_ret,
-        # **GC_content,
     }
 
 

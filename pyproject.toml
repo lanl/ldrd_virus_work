@@ -6,7 +6,7 @@ requires = [
 ]
 
 [project.scripts]
-viral_seq = "viral_seq.cli.cli:viral_seq"
+viral_seq = "viral_seq.cli.cli:cli"
 
 [project]
 name = "viral_seq"

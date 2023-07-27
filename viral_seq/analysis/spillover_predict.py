@@ -1,20 +1,30 @@
 import os
+import json
 import pickle
 from pathlib import Path
 import concurrent.futures
 from multiprocessing import RLock
 from viral_seq.data.parse_novel_data import assert_mollentze_fig3_case_study_properties
+from viral_seq.analysis.get_features import get_genomic_features, get_kmers, get_gc
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
-from Bio.SeqUtils import gc_fraction
+from Bio.SeqUtils import GC
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, StratifiedKFold, train_test_split
-from sklearn.metrics import RocCurveDisplay, roc_curve, roc_auc_score
+from sklearn.model_selection import (
+    cross_val_score,
+    StratifiedKFold,
+)
+from sklearn.metrics import (
+    RocCurveDisplay,
+    roc_curve,
+    roc_auc_score,
+    auc,
+)
 from numpy.random import default_rng
 from urllib.request import HTTPError
 import time
@@ -41,7 +51,6 @@ def run_search(
     attempts: int = 3,
 ) -> set[str]:
     Entrez.email = email
-    records = []
     acc_set: set[str] = set()
     for search_term in search_terms:
         # try to prevent timeouts on large search queries
@@ -134,68 +143,52 @@ def init_cache(folder=".cache"):
     return cache_path, cache_subdirectories
 
 
-def filter_records(records, just_assert=False):
+def filter_records(
+    records, just_assert: bool = False, just_warn: bool = False, verbose: bool = True
+):
     # Checks the records satisfy the conditions defined
     # If just_assert, it will throw an exception if a record is bad
+    # If just_warn, it will print warnings for bad records but take no action
     # Otherwise, it will return the records that pass
 
-    # TODO: some of these filters seem too specific to the original search terms used in testing
+    # TODO: current work flow uses hand-picked sequences so these filters are very lenient. Will need stronger filters if workflow changes
 
-    # sanity check -- based on this manuscript:
-    # https://doi.org/10.1038/s41598-020-69342-y
-    # there should be > 29,000 nucleotides in the
-    # SARS-CoV-2 genome
-    # NOTE: relaxing the checks as I start incorporating viral
-    # sequences from other organisms, like bats
     filtered_records = []
-    for record in tqdm(records):
+    for record in tqdm(records, disable=not verbose):
         # we also sanity check each record before
         # trying to cache it locally;
         # each record is a Bio.SeqRecord.SeqRecord
-        actual_len = len(record)
-        if (
-            record.description.startswith("Homo sapiens")
-            or record.description.endswith("mRNA")
-            or ("partial" in record.description)
-        ):
-            # likely "data pollution"/bad sequences
-            # picked up in search
-            if just_assert:
-                raise Exception(
-                    "Record description started with Homo sapiens, ended with mRNA, or included partial"
-                )
-            continue
-        # these aren't assertions yet at this point because
-        # we don't want to interrupt the population of the local
-        # cache because of a few bad apples from an online search
-        if actual_len < 26000 or actual_len > 31000:
-            if just_assert:
-                raise Exception(
-                    "Record length was too short or too long (outside of 26000, 31000)"
-                )
-            continue
-        if (
-            "DNA" in record.annotations["molecule_type"]
-            or "Klebsiella" in record.annotations["organism"]
-        ):
-            # for now, exclude DNA and focus on RNA coronaviruses;
+        len(record)
+        msg = ""
+        if record.description.startswith("Homo sapiens"):
+            msg += "Record is human in origin. "
+        if "partial" in record.description:
+            msg += "Record is not a complete genome. "
+        if record.description.endswith("mRNA"):
+            msg += "Record description ends with mRNA. "
+        if "Klebsiella" in record.annotations["organism"]:
             # this should help prevent the sequence that got pulled in
             # for: https://re-git.lanl.gov/treddy/ldrd_virus_work/-/issues/13
             # TODO: if we expand to include i.e., DNA viral genomes, we'll
             # almost certainly need more sophisticated filtering than just
             # one bacterial species though
-            if just_assert:
-                raise Exception("Record annotation included DNA or Klebsiella")
-            continue
-        if not just_assert:
+            msg += "Organism is Klebsiella. "
+        if len(msg) > 0:
+            if just_warn:
+                print("Warning:", record.id, msg)
+            elif just_assert:
+                raise Exception(record.id, msg)
+            else:
+                continue
+        if not just_assert and not just_warn:
             filtered_records.append(record)
-    if not just_assert:
+    if not just_assert and not just_warn:
         print(len(filtered_records), "retained of", len(records), "checked")
         return filtered_records
 
 
-def add_to_cache(records):
-    cache_path, cache_subdirectories = init_cache()
+def add_to_cache(records, cache: str = ".cache"):
+    cache_path, cache_subdirectories = init_cache(cache)
     # with the records list populated from the online
     # search, we next want to grow the local cache with
     # folders + FASTA/GENBANK format files that are not
@@ -224,38 +217,31 @@ def add_to_cache(records):
         f"number of records excluded from the online search because they were already present: {num_recs_excluded}"
     )
 
-    # is this check needed? num_recs should only ever drop from max_recs
-    # num_recs = len(records)
-    # max_recs = retmax * 2  # 2 search terms (human + bat)
-    # assert (
-    #    num_recs <= max_recs
-    # ), f"num_recs={num_recs} is larger than max expected of {max_recs}"
 
-
-def load_from_cache(accessions=None):
-    cache_path, cache_subdirectories = init_cache()
+def load_from_cache(accessions=None, cache: str = ".cache", verbose: bool = True):
+    # TODO: Verbose flag added as this call prints too much in certain circumstances but should implement a proper verbose mode
+    cache_path, cache_subdirectories = init_cache(cache)
     directories_to_load = []
     # TODO: if there is nothing in the cache, fail
     if accessions is None:
-        print("Loading entire cache")
+        if verbose:
+            print("Loading entire cache")
         directories_to_load = cache_subdirectories[:]
     else:
-        print("Will attempt to load selected accessions from local cache")
+        if verbose:
+            print("Will attempt to load selected accessions from local cache")
         for accession in accessions:
             this_record_cache_path = cache_path / f"{accession}"
             # we can only load what exists
-            assert this_record_cache_path in cache_subdirectories
-            directories_to_load.append(this_record_cache_path)
-    print(
-        "total number of records (sequence folders) to load from local cache:",
-        len(directories_to_load),
-    )
-
-    print("loading the local records cache (genetic sequences) into memory")
-    # TODO: this is getting pretty slow--maybe we can split the work
-    # between cores and then fuse the lists after?
-
-    print("populating futures..", flush=True)
+            if this_record_cache_path in cache_subdirectories:
+                directories_to_load.append(this_record_cache_path)
+    if verbose:
+        print(
+            "total number of records (sequence folders) to load from local cache:",
+            len(directories_to_load),
+        )
+        print("loading the local records cache (genetic sequences) into memory")
+        print("populating futures..", flush=True)
     list_futures = []
     records = []
     num_cpus = os.cpu_count()
@@ -265,7 +251,7 @@ def load_from_cache(accessions=None):
     with concurrent.futures.ProcessPoolExecutor(
         initargs=(tqdm.get_lock(),), initializer=tqdm.set_lock, max_workers=workers
     ) as executor:
-        for record_folder in tqdm(directories_to_load):
+        for record_folder in tqdm(directories_to_load, disable=not verbose):
             list_futures.append(
                 executor.submit(
                     _append_recs,
@@ -273,56 +259,125 @@ def load_from_cache(accessions=None):
                 )
             )
 
+        if verbose:
+            print("waiting for futures to complete", flush=True)
+        for future in tqdm(
+            concurrent.futures.as_completed(list_futures),
+            total=len(list_futures),
+            disable=not verbose,
+        ):
+            records.append(future.result())
+    # TODO: if we change data retention filters when scraping, we will possibly need to update the cache
+    if verbose:
+        print("Asserting records loaded from cache conform to quality standards...")
+    filter_records(records, just_assert=True, verbose=verbose)
+    return records
+
+
+def _grab_features(features, records, row, genomic, kmers, kmer_k, gc):
+    feat_genomic = None
+    feat_kmers = None
+    feat_gc = None
+    if genomic:
+        feat_genomic = get_genomic_features(records)
+        if feat_genomic is None:
+            return None
+    if kmers:
+        feat_kmers = get_kmers(records, k=kmer_k)
+        if feat_kmers is None:
+            return None
+    if gc:
+        feat_gc = get_gc(records)
+        if feat_gc is None:
+            return None
+    if feat_genomic is not None:
+        features.update(feat_genomic)
+    if feat_kmers is not None:
+        features.update(feat_kmers)
+    if feat_gc is not None:
+        features.update(feat_gc)
+    return features
+
+
+def build_table(
+    df,
+    rfc=None,
+    save: bool = False,
+    filename: str = "df.parquet.gzip",
+    cache: str = ".cache",
+    genomic: bool = True,
+    kmers: bool = True,
+    kmer_k: int = 10,
+    gc: bool = True,
+    ordered: bool = True,
+):
+    rows = []
+    list_futures = []
+    num_cpus = os.cpu_count()
+    meta_data = list(df.columns)
+    assert num_cpus is not None
+    workers = num_cpus - 1
+    tqdm.set_lock(RLock())
+    with concurrent.futures.ProcessPoolExecutor(
+        initargs=(tqdm.get_lock(),), initializer=tqdm.set_lock, max_workers=workers
+    ) as executor:
+        for index, row in tqdm(df.iterrows(), total=df.shape[0]):
+            features = row.to_dict()
+            # TODO: It would be best to load all records at once,
+            # but this is somewhat difficult as we need to keep
+            # track of which records are associated with which
+            # virus (viruses with multiple segments)
+            records = load_from_cache(
+                row["Accessions"].split(), cache=cache, verbose=False
+            )
+            list_futures.append(
+                executor.submit(
+                    _grab_features, features, records, row, genomic, kmers, kmer_k, gc
+                )
+            )
         print("waiting for futures to complete", flush=True)
         for future in tqdm(
             concurrent.futures.as_completed(list_futures), total=len(list_futures)
         ):
-            records.append(future.result())
-    # TODO: if we change data retention filters when scraping, we will possibly need to update the cache
-    print("Asserting records loaded from cache conform to quality standards...")
-    filter_records(records, just_assert=True)
-    return records
-
-
-def build_table(records, save: bool = False, filename: str = "df.parquet.gzip"):
-    print("Calculating features and building pandas DataFrame")
-    data_dict = {}
-    for record in records:
-        # TODO: This should be determined and stored as opposed to being inferred this way
-        if "human" in record.description.lower():
-            human_host = True
-        else:
-            human_host = False
-        # TODO: feature calculation goes here
-        data_dict[record.id] = [human_host, gc_fraction(record.seq), str(record.seq)]
-
-    df = pd.DataFrame.from_dict(
-        data_dict,
-        orient="index",
-        columns=["Human Host", "Genome %GC", "Genome Sequence"],
-    )
-    df.columns.name = "Genome ID"
-
-    # TODO: If possible/efficient this check should be done in filter_records
-
-    print("Checking for exact duplicate Genome Sequences")
-    duplicate_series = df.duplicated(subset="Genome Sequence")
-    print("number of exact duplicate genomes found:", duplicate_series.sum())
-    df.drop_duplicates(subset=["Genome Sequence"], inplace=True)
-    duplicate_sum_after = df.duplicated(subset="Genome Sequence").sum()
-    print(
-        "number of exact duplicate genomes found AFTER dropping duplicates:",
-        duplicate_sum_after,
-    )
-    assert duplicate_sum_after == 0
-    # Drop sequence as it is not used after this point
-    df = df.drop("Genome Sequence", axis=1)
+            this_result = future.result()
+            if this_result is not None:
+                rows.append(this_result)
+    table = pd.DataFrame.from_records(rows)
+    # required for repeatability, but may be slow
+    if ordered:
+        table.sort_values(by=["Unnamed: 0"], inplace=True)
+        table = table.reindex(sorted(table.columns), axis=1)
+    if rfc is not None:
+        # add columns from training if missing
+        table = pd.concat(
+            [
+                table,
+                pd.DataFrame(
+                    [[0] * len(rfc.feature_names)],
+                    index=[-1],
+                    columns=rfc.feature_names,
+                ),
+            ]
+        )
+        table.drop(index=-1, inplace=True)
+        # only retain columns from training
+        table = table[meta_data + rfc.feature_names]
+    else:
+        # drop a column if 1 or less row has a value
+        # this should only affect kmers
+        table.dropna(axis=1, thresh=2, inplace=True)
+    table.fillna(0, inplace=True)
+    # required for repeatability, but may be slow
+    if ordered:
+        table.sort_values(by=["Unnamed: 0"], inplace=True)
+        table = table.reindex(sorted(table.columns), axis=1)
+    table.reset_index(drop=True, inplace=True)
     if save:
         print(
             "Saving the pandas DataFrame of genomic data to a parquet file:", filename
         )
-        df.to_parquet(filename, engine="pyarrow", compression="gzip")
-    return df
+        table.to_parquet(filename, engine="pyarrow", compression="gzip")
+    return table
 
 
 def get_training_columns(
@@ -333,147 +388,204 @@ def get_training_columns(
         raise Exception("No data provided to train random forest model.")
     elif df is None:
         print("Loading the pandas DataFrame from a parquet file:", table_filename)
-        df = pd.read_parquet(table_filename, engine="pyarrow")
+        df = pd.read_parquet(table_filename, engine="fastparquet")
     elif table_filename == "":
         print("Using provided DataFrame")
     else:
         raise Exception("Ambiguous request; both DataFrame and file passed.")
     if class_column not in df.columns:
         raise Exception("Can't find class column to train random forest model.")
-    # Expected format of DataFrame assumes all columns except the class column are features
-    # TODO: Categorical data will need to use one hot encoding
+    # Any columns not dropped here are assumed to be features
     df_features = df.drop(class_column, axis=1)
+    df_features.drop("index", axis=1, errors="ignore", inplace=True)
+    df_features.drop("Species", axis=1, errors="ignore", inplace=True)
+    df_features.drop("Accessions", axis=1, errors="ignore", inplace=True)
+    df_features.drop("Unnamed: 0", axis=1, errors="ignore", inplace=True)
     if len(df_features.columns) < 1:
         raise Exception("Data contains no features.")
     elif len(df_features.columns) == 1:
         X = df_features.to_numpy().reshape(-1, 1)
     else:
-        X = df_features.to_numpy()
+        X = df_features
     y = df[class_column]
     return X, y
 
 
-def train_random_forest(
+def train_rfc(
     X,
     y,
-    estimators: int = 10,
-    rand: int = 123,
     save: bool = False,
     filename: str = "random_forest_model.p",
+    **kwargs,
 ):
-    # Trains a random forest model with all available data
-    # Quality of parameters should validated using cross_validation_random_forest
-    print("Training random forest with", estimators, "estimators")
-    clf = RandomForestClassifier(n_estimators=estimators)
-    clf.fit(X, y)
+    # kwargs override default hyperparameters
+    # TODO: add other tunable hyperparameters
+    hype = {
+        "estimators": 70,
+        "rand": 123,
+    }
+    for key in hype:
+        if key in kwargs:
+            hype[key] = kwargs[key]
+    rfc = RandomForestClassifier(
+        n_estimators=hype["estimators"], random_state=hype["rand"]
+    )
+    rfc.fit(X, y)
+    # keep track of what features we trained
+    if isinstance(X, pd.DataFrame):
+        rfc.feature_names = list(X.columns)
     if save:
         print("Saving random forest model to file:", filename)
         with open(filename, "wb") as outfile:
-            pickle.dump(clf, outfile)
-    return clf
+            pickle.dump(rfc, outfile)
+    return rfc
 
 
-def cross_validation_random_forest(
+def predict_rfc(
     X,
     y,
-    estimators: int = 10,
-    rand: int = 123,
+    rfc=None,
+    filename: str = "random_forest_model.p",
     plot: bool = False,
-    filename: str = "cross_vali_rand_forest.png",
+    out_prefix="",
+    file_predict_proba: str = "predictions.csv",
+    file_roc_curve: str = "roc_curve.csv",
+    file_metrics: str = "metrics.json",
 ):
-    # let's perform 5-fold cross validation to get
-    # a sense for the estimator accuracy
-    # new forest just in case
-    clf = RandomForestClassifier(n_estimators=estimators)
-
-    scores_macro = cross_val_score(clf, X, y.values, cv=5, scoring="f1_macro")
-    print(
-        f"Random Forest Cross Validation F1 macro has an average of {scores_macro.mean()} and std dev of {scores_macro.std()}:"
-    )
-    scores_micro = cross_val_score(clf, X, y.values, cv=5, scoring="f1_micro")
-    print(
-        f"Random Forest Cross Validation F1 micro has an average of {scores_micro.mean()} and std dev of {scores_micro.std()}:"
-    )
-
-    # the cross-validation accuracy should be much lower
-    # if we shuffle the features relative to the labels
-    X_shuffled = X.copy()
-    rng = default_rng(rand)
-    rng.shuffle(X_shuffled)
-    shuffle_scores_macro = cross_val_score(
-        clf, X_shuffled, y.values, cv=5, scoring="f1_macro"
-    )
-    shuffle_scores_micro = cross_val_score(
-        clf, X_shuffled, y.values, cv=5, scoring="f1_micro"
-    )
-    print(
-        f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 macro has an average of {shuffle_scores_macro.mean()} and std dev of {shuffle_scores_macro.std()}:"
-    )
-    print(
-        f"(Randomly shuffled features, relative to labels) Random Forest Cross Validation F1 micro has an average of {shuffle_scores_micro.mean()} and std dev of {shuffle_scores_micro.std()}:"
-    )
-
-    # perhaps even worse would be a random set
-    # of % GC values?
-    X_random = rng.random(X.shape)
-    random_scores_macro = cross_val_score(
-        clf, X_random, y.values, cv=5, scoring="f1_macro"
-    )
-    random_scores_micro = cross_val_score(
-        clf, X_random, y.values, cv=5, scoring="f1_micro"
-    )
-    print(
-        f"(Randomly generated % GC content) Random Forest Cross Validation F1 macro has an average of {random_scores_macro.mean()} and std dev of {random_scores_macro.std()}:"
-    )
-    print(
-        f"(Randomly generated % GC content) Random Forest Cross Validation F1 micro has an average of {random_scores_micro.mean()} and std dev of {random_scores_micro.std()}:"
-    )
-
+    file_predict_proba = out_prefix + file_predict_proba
+    file_roc_curve = out_prefix + file_roc_curve
+    file_metrics = out_prefix + file_metrics
+    if rfc is None:
+        with open(filename, "rb") as rfc_file:
+            rfc = pickle.load(rfc_file)
+    # Add features from Random Forest Classifier that may be missing from validation features
+    # This should be redundant
+    if isinstance(X, pd.DataFrame):
+        X = pd.concat(
+            [
+                X,
+                pd.DataFrame(
+                    [[0] * len(rfc.feature_names)],
+                    index=[-1],
+                    columns=rfc.feature_names,
+                ),
+            ]
+        )
+        X.drop(index=-1, inplace=True)
+        X.fillna(0, inplace=True)
+        # Only predict on features trained in Random Forest Classifier
+        y_scores = rfc.predict_proba(X[rfc.feature_names])
+    else:
+        y_scores = rfc.predict_proba(X)
+    y_scores = y_scores[:, 1].reshape(-1, 1)
+    this_auc = roc_auc_score(y.astype(bool), y_scores)
     if plot:
-        # Plotting
-        score_means_macro = [
-            scores_macro.mean(),
-            shuffle_scores_macro.mean(),
-            random_scores_macro.mean(),
-        ]
-        score_std_macro = [
-            scores_macro.std(),
-            shuffle_scores_macro.std(),
-            random_scores_macro.std(),
-        ]
-        x_lab = ["original data", "shuffled GC content", "randomized GC content"]
+        with open(file_predict_proba, "w") as f:
+            # individual predictions
+            # TODO: in order to check which prediction corresponds to which virus, you need to cross-reference the data table (if they are in the same order)
+            print("index", "ground_truth", "probability", sep=",", file=f)
+            for i, y_val in enumerate(y):
+                print(i, y_val, y_scores[i], sep=",", file=f)
+        fpr, tpr, thresholds = roc_curve(y, y_scores)
+        with open(file_roc_curve, "w") as f:
+            # ROC curve for plotting
+            print("index", "fpr", "tpr", "thresholds", sep=",", file=f)
+            for i in range(len(fpr)):
+                print(i, fpr[i], tpr[i], thresholds[i], sep=",", file=f)
+        with open(file_metrics, "w") as f:
+            # This file should be used to store any metrics of interest
+            # using json as it can be easily loaded if needed
+            json.dump({"AUC": this_auc}, f)
+    return this_auc
 
-        score_means_micro = [
-            scores_micro.mean(),
-            shuffle_scores_micro.mean(),
-            random_scores_micro.mean(),
-        ]
-        score_std_micro = [
-            scores_micro.std(),
-            shuffle_scores_micro.std(),
-            random_scores_micro.std(),
-        ]
 
-        fig_cross_val, (ax_macro, ax_micro) = plt.subplots(2, 1)
-        ax_macro.bar(
-            height=score_means_macro, yerr=score_std_macro, capsize=20.0, x=x_lab
+def cross_validation(
+    X,
+    y,
+    splits=5,
+    plot: bool = False,
+    prefix="cv_",
+    **kwargs,
+):
+    # TODO: this function should be expanded to allow for hyperparameter search
+    cv = StratifiedKFold(n_splits=splits)
+    aucs = []
+    for fold, (train, test) in enumerate(cv.split(X, y)):
+        if isinstance(X, pd.DataFrame):
+            X_train = X.iloc[train]
+            X_test = X.iloc[test]
+        else:
+            X_train = X[train]
+            X_test = X[test]
+        rfc = train_rfc(X_train, y[train], **kwargs)
+        this_prefix = prefix + str(fold) + "_"
+        this_auc = predict_rfc(
+            X_test, y[test], rfc=rfc, plot=plot, out_prefix=this_prefix
         )
-        ax_macro.set_title("5-fold cross validation of random forest")
-        ax_macro.set_ylabel("F1 macro of\n classification by % GC")
-        ax_micro.bar(
-            height=score_means_micro, yerr=score_std_micro, capsize=20.0, x=x_lab
+        aucs.append(this_auc)
+    return aucs
+
+
+def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
+    """Basic ROC plotting function with little customization for rapid visualization needs"""
+    # TODO: if there are many plots, such functions should be relocated
+    fig, ax = plt.subplots(figsize=(6, 6))
+    mean_fpr = np.linspace(0, 1, 100)
+    aucs = []
+    tprs = []
+    # Fold plots
+    for i, file in enumerate(roc_files):
+        df = pd.read_csv(file)
+        this_auc = auc(df["fpr"], df["tpr"])
+        aucs.append(this_auc)
+        label = r"Fold %d (AUC = %0.2f)" % (i, this_auc)
+        ax.plot(df["fpr"], df["tpr"], label=label)
+        mean_fpr = np.linspace(0, 1, 100)
+        interp_tpr = np.interp(mean_fpr, df["fpr"], df["tpr"])
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+
+    if len(roc_files) > 1:
+        # mean plot
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_tpr[-1] = 1.0
+        mean_auc = auc(mean_fpr, mean_tpr)
+        std_auc = np.std(aucs)
+        ax.plot(
+            mean_fpr,
+            mean_tpr,
+            color="b",
+            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+            lw=2,
+            alpha=0.8,
         )
-        ax_micro.set_ylabel("F1 micro of\n classification by % GC")
-        for ax in [ax_micro, ax_macro]:
-            ax.set_ylim(0, 1)
-        fig_cross_val.savefig(filename, dpi=300)
+        # +/- std plot
+        std_tpr = np.std(tprs, axis=0)
+        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+        ax.fill_between(
+            mean_fpr,
+            tprs_lower,
+            tprs_upper,
+            color="grey",
+            alpha=0.2,
+            label=r"$\pm$ 1 std. dev.",
+        )
 
+    # chance
+    ax.plot([0, 1], [0, 1], "r--")
 
-def compare_with_mollentze():
-    # To compare with Mollentze et al.
-    # Compare features: Use training and test data from Mollentze et al., but our features
-    # Compare data: Use all of our data but withhold test set used in Mollentze et al., match features from Mollentze et al.
-    return
+    ax.set(
+        xlim=[-0.05, 1.05],
+        ylim=[-0.05, 1.05],
+        xlabel="False Positive Rate",
+        ylabel="True Positive Rate",
+        title=title,
+    )
+    ax.axis("square")
+    ax.legend(loc="lower right")
+
+    fig.savefig(filename)
 
 
 def main(

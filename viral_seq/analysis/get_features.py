@@ -1,14 +1,33 @@
 from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
-import pandas as pd
+from Bio.SeqUtils import gc_fraction
+from skbio import Sequence
 
 codontab = standard_dna_table.forward_table.copy()
 for codon in standard_dna_table.stop_codons:
     codontab[codon] = "STOP"
 
 
+def get_kmers(records, k=10):
+    kmers = defaultdict(int)
+    for record in records:
+        for feature in record.features:
+            if feature.type == "CDS":
+                this_seq = feature.location.extract(record.seq).translate()
+                for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
+                    kmers[str(kmer)] += 1
+    return kmers
+
+
+def get_gc(records):
+    full_sequence = ""
+    for record in records:
+        full_sequence += str(record.seq)
+    return {"GC Content": gc_fraction(full_sequence)}
+
+
 # Calculates all genomic features for a given record
-def get_genomic_features(record):
+def get_genomic_features(records):
     coding_pairs = []
     bridge_pairs = []
     nonbridge_pairs = []
@@ -16,27 +35,52 @@ def get_genomic_features(record):
     coding_cnt_dict = defaultdict(float)
     bridge_cnt_dict = defaultdict(float)
     codons = []
-    # get cds for each protein so we can count bias
-    for feature in record.features:
-        if feature.type == "CDS":
-            # need to use extract because location can be complicated
-            this_seq = feature.location.extract(record.seq)
-            # add pairs to lists
-            (
-                these_coding_pairs,
-                these_bridge_pairs,
-                these_nonbridge_pairs,
-                these_codons,
-            ) = split_seq(str(this_seq), coding=True)
-            coding_pairs = coding_pairs + these_coding_pairs
-            bridge_pairs = bridge_pairs + these_bridge_pairs
-            nonbridge_pairs = nonbridge_pairs + these_nonbridge_pairs
-            codons = codons + these_codons
-            # store information about these sequences need for calculating bias
-            coding_cnt_dict = get_cnt_dict(str(this_seq), coding_cnt_dict)
-            bridge_cnt_dict = get_cnt_dict("".join(these_bridge_pairs), bridge_cnt_dict)
-    all_pairs = split_seq(str(record.seq), coding=False)[0]
-    all_cnt_dict = get_cnt_dict(str(record.seq))
+    allowed = set("ACTG")
+    full_sequence = ""
+    for record in records:
+        full_sequence += str(record.seq)
+        if set(record.seq) > allowed:
+            print(record.id, "contains ambiguous nucleotides")
+            print("Exiting..")
+            return None
+        # get cds for each protein so we can count bias
+        for feature in record.features:
+            if feature.type == "CDS":
+                # need to use extract because location can be complicated
+                this_seq = feature.location.extract(record.seq)
+                # add pairs to lists
+                try:
+                    (
+                        these_coding_pairs,
+                        these_bridge_pairs,
+                        these_nonbridge_pairs,
+                        these_codons,
+                    ) = split_seq(str(this_seq), coding=True)
+                except AssertionError:
+                    print(
+                        "Error asserting CDS for",
+                        record.id,
+                        "at location",
+                        feature.location,
+                    )
+                    print("Exiting..")
+                    return None
+                coding_pairs = coding_pairs + these_coding_pairs
+                bridge_pairs = bridge_pairs + these_bridge_pairs
+                nonbridge_pairs = nonbridge_pairs + these_nonbridge_pairs
+                codons = codons + these_codons
+                # store information about these sequences need for calculating bias
+                coding_cnt_dict = get_cnt_dict(str(this_seq), coding_cnt_dict)
+                bridge_cnt_dict = get_cnt_dict(
+                    "".join(these_bridge_pairs), bridge_cnt_dict
+                )
+    if len(codons) == 0:
+        print("No CDSs in features")
+        print("Exiting..")
+        return None
+    GC_content = {"GC_content": gc_fraction(full_sequence)}
+    all_pairs = split_seq(full_sequence, coding=False)[0]
+    all_cnt_dict = get_cnt_dict(full_sequence)
     # get bias for each category
     coding_ret = get_dinucleotide_bias(
         coding_pairs, coding_cnt_dict, key_prefix="coding_"
@@ -50,10 +94,14 @@ def get_genomic_features(record):
         nonbridge_pairs, coding_cnt_dict, key_prefix="nonbridge_"
     )
     codon_ret = get_codon_amino_bias(codons)
-    return pd.DataFrame(
-        {**coding_ret, **all_ret, **bridge_ret, **nonbridge_ret, **codon_ret},
-        index=[record.id],
-    ).reset_index()
+    return {
+        **coding_ret,
+        **all_ret,
+        **bridge_ret,
+        **nonbridge_ret,
+        **codon_ret,
+        **GC_content,
+    }
 
 
 # Keeps a running count of the sequence length and number of A,T,G,C
@@ -100,6 +148,8 @@ def get_codon_amino_bias(codons):
     total_amino = 0.0
     bias_ret = {}
     for codon in codons:
+        if codon not in codontab:
+            continue
         # non-redundant codons should not be features
         if codon not in ["ATG", "TGG"]:
             codon_count[codon] = codon_count[codon] + 1.0

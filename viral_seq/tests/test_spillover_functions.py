@@ -1,40 +1,50 @@
 import viral_seq.analysis.spillover_predict as sp
+import pandas as pd
+from importlib.resources import files
 
 
-def search_handling():
+def test_modelling(tmp_path):
+    df_train = pd.read_csv(files("viral_seq.tests").joinpath("TrainingSet.csv"))
+    df_test = pd.read_csv(files("viral_seq.tests").joinpath("TestSet.csv"))
+    accessions_train = (" ".join(df_train["Accessions"].values)).split()
+    print("training list")
+    print(accessions_train)
+    accessions_test = (" ".join(df_test["Accessions"].values)).split()
+    print("test list")
+    print(accessions_test)
+    this_cache = tmp_path.absolute()
+    print("temp cache location", this_cache)
+    # retrieve records from online and store in a cache for later use
     email = "arhall@lanl.gov"
-    # Only two search terms so we don't tax the search just for testing
-    search_terms = ["NC_045512.2", "NC_019843.3"]
+    search_terms = accessions_test + accessions_train
     results = sp.run_search(search_terms, 1, email)
-    # as we looked for the accessions, the results should exactly match
-    print("Accessions retrieved:", results)
-    for result in results:
-        assert result in search_terms
-    # load into memory
     records = sp.load_results(results, email)
-    # check they are the right accessions again
-    record_ids = []
-    for record in records:
-        print("record.id of loaded", record.id)
-        assert record.id in search_terms
-        record_ids.append(record.id)
-    # run record filters
-    records = sp.filter_records(records)
-    # also just assert them
-    sp.filter_records(records, just_assert=True)
-    # try to add to cache but this should fail as they already exist
-    sp.add_to_cache(records)
-    # lets just load the records from the cache now, and check they match the online record
-    records_cached = sp.load_from_cache(results)
-    for record in records_cached:
-        print("Checking", record.id, "in cache matches record pulled from online")
-        assert record.id in record_ids
+    sp.add_to_cache(records, cache=this_cache)
 
+    # build data table of training data
+    table_train = sp.build_table(
+        df_train, cache=this_cache, genomic=True, gc=True, kmers=True, kmer_k=2
+    )
+    print("training table")
+    print(table_train)
+    X_train, y_train = sp.get_training_columns(table_train)
+    # cross validate
+    aucs = sp.cross_validation(X_train, y_train, splits=2)
+    print("cross validation AUC scores:", aucs)
+    # assert AUCs are as expected
+    assert aucs == [0.3333333333333333, 0.5]
 
-def test_modelling():
-    print("Loading entire cache to test model building")
-    records_cached = sp.load_from_cache()
-    df = sp.build_table(records_cached)
-    X, y = sp.get_training_columns(df)
-    sp.cross_validation_random_forest(X, y, plot=True)
-    clf = sp.train_random_forest(X, y)
+    # currently need a RandomForestClassifier to properly build a data table for the test set
+    rfc = sp.train_rfc(X_train, y_train)
+
+    # build data table of test data and run predict
+    table_test = sp.build_table(
+        df_test, rfc=rfc, cache=this_cache, genomic=True, gc=True, kmers=True, kmer_k=2
+    )
+    print("testing table")
+    print(table_test)
+    X_test, y_test = sp.get_training_columns(table_test)
+    this_auc = sp.predict_rfc(X_test, y_test, rfc=rfc)
+    print("test set AUC score", this_auc)
+    # assert AUC is as expected
+    assert this_auc == 0.38

@@ -1,0 +1,79 @@
+LOCUS       HM566148                1790 bp    RNA     linear   VRL 03-MAY-2012
+DEFINITION  Chagres virus segment S, complete sequence.
+ACCESSION   HM566148
+VERSION     HM566148.1
+KEYWORDS    .
+SOURCE      Chagres virus
+  ORGANISM  Chagres virus
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Phenuiviridae;
+            Phlebovirus; Phlebovirus chagresense.
+REFERENCE   1  (bases 1 to 1790)
+  AUTHORS   Palacios,G., Savji,N., Sze,W., Hutchinson,S., Tesh,R., Travassos da
+            Rosa,A. and Lipkin,W.
+  TITLE     Genetic diversity of the Phlebovirus genus
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 1790)
+  AUTHORS   Palacios,G., Savji,N., Sze,W., Hutchinson,S., Tesh,R., Travassos da
+            Rosa,A. and Lipkin,W.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (19-JUN-2010) Center for Infection and Immunity, Columbia
+            University, 722 West 168th Street, New York City, NY 10032, USA
+COMMENT     GenBank Accession Numbers HM566146-HM566148 represent the complete
+            genome of Chagres virus.
+FEATURES             Location/Qualifiers
+     source          1..1790
+                     /organism="Chagres virus"
+                     /mol_type="genomic RNA"
+                     /db_xref="taxon:629727"
+                     /segment="S"
+     CDS             60..800
+                     /codon_start=1
+                     /product="nucleocapsid"
+                     /protein_id="AEL29643.1"
+                     /translation="MANYQDIAVEFAGDLPTEAIIRTWVEEFAYQGFDASQVLRILAER
+                     GGANWREDAKKMIILSLTRGNKPSKMMERMSEAGKATVSSLMTRYNLKSGNPGRNDLTL
+                     SRVATALAGWTCQAIPIVQDFLPVTGVVMDGLSPAYPRPMMHPCFAGLIDPSLPKKTVD
+                     ELVAAFSLYMLQFSKTINPSLRAAKREDIISSFRQPMQAAINSTFLTGAQRRQFLRTLG
+                     VVNDNLEPSQNVVAAARVFRGTGV"
+     CDS             complement(956..1756)
+                     /codon_start=1
+                     /product="nonstructural protein"
+                     /protein_id="AEL29644.1"
+                     /translation="MNYYATDIPLVSFSACQLRRIQVDYIPFNKQATEPHSNYSGMEFP
+                     VTSYTQVPGIRSKLQDFYNHNQLPVSWGSGRPGVVNDSSSKYESLIKEISKLELRDVVK
+                     HNEPNIRRALCWPYSYPTLIFFDLCGNKDSMGPWMFKGAAMTSFMRAGKCAQIDRSLVN
+                     FHRMIVREAIELGENEAEFTGKDIIMECCSVICRRLLRAYPFDRTYDKPHSRLLTILED
+                     FDNHFKFDYGESSELRVAVDEFDIHMKRREAEETFWGSDFTDSD"
+ORIGIN
+        1 acacaaagac cctcgaagtc tatacaactt actattatct aaaccacatt ccggaagcca
+       61 tggctaacta tcaggacatt gctgttgagt ttgcgggtga tctgcctact gaagctatca
+      121 tcagaacctg ggtagaggag tttgcctatc aagggtttga cgcttcccag gtactgagaa
+      181 tcttggctga gagaggtgga gctaactggc gtgaggatgc caagaaaatg attattctct
+      241 ctctcactag gggcaataaa ccctctaaga tgatggagag aatgtctgag gctggaaagg
+      301 caactgtgtc gtcgctaatg actcgctaca accttaaatc tggaaacccc gggaggaatg
+      361 atctgactct gtctagagtg gcaactgccc ttgctggatg gacatgtcag gcaattccaa
+      421 ttgtccaaga ctttcttcca gttactggtg tagtgatgga cggtctctct cctgcttacc
+      481 cgaggccgat gatgcatcct tgctttgcag gactgattga tccgtctttg cccaagaaga
+      541 cagttgatga gcttgttgca gcgttcagct tatacatgct tcagttttca aagactataa
+      601 atccttctct ccgtgctgct aagagagagg acatcatctc aagcttccgt cagcccatgc
+      661 aagcagctat caacagcaca ttcctaactg gtgctcagcg tcgccagttc ttgagaactc
+      721 tcggtgtggt caatgacaat cttgagccat ctcagaatgt cgttgccgct gcccgggtct
+      781 tcagaggaac tggagtctga gctgctgcca tctccctccc ttatttgtga ttaattggca
+      841 ttccattttg tttgttaaat ttaattaata taatttgatt aataatttgt atatagagca
+      901 attaggctaa attggggtta aattggcttt aattaaccag gggaaactgg cagtatcaat
+      961 cactatctgt gaaatcagaa ccccagaaag tctcttctgc ctctcttctt ttcatatgaa
+     1021 tgtcaaactc atctacagca actctcaact ctgagctctc accatagtca aatttaaagt
+     1081 gattatcaaa gtcttctaaa atcgttagca atcgtgaatg tggcttgtca taagtcctat
+     1141 caaaagggta tgctctaagc aatctcctac atattacact acagcattcc attattatgt
+     1201 cctttcctgt aaactcagcc tcattctctc ccaactcaat agcctctcgc actatcatcc
+     1261 tgtggaagtt cactaggctt ctatctatct gagcacattt gcctgctcgc ataaaggagg
+     1321 tcattgctgc tcccttgaac atccatggcc ccattgaatc tttgttccca cacagatcaa
+     1381 agaatattag tgttggatat gagtaaggcc agcaaagggc tctcctgata tttggttcat
+     1441 tgtgttttac tacatcgcgc agttcaagtt ttgagatctc ttttattagt gactcatatt
+     1501 tacttgacga gtcattgaca actccaggcc tccctgatcc ccatgagact ggtagctggt
+     1561 tgtgattgta aaaatcttgt agtttagagc gaattcctgg gacctgtgtg tatgaggtaa
+     1621 ctgggaactc catgccagag tagtttgagt gtggttcagt agcctgttta ttgaacggga
+     1681 tataatctac ctgaatgcgc cgtaactgac aggctgaaaa tgaaaccaac ggtatgtctg
+     1741 tggcatagta gttcattttt aactgatttt cgttcgaggg gtctttgtgt
+//

@@ -1,0 +1,99 @@
+LOCUS       NC_033831               1806 bp    RNA     linear   VRL 13-AUG-2018
+DEFINITION  Munguba virus segment S, complete sequence.
+ACCESSION   NC_033831
+VERSION     NC_033831.1
+DBLINK      BioProject: PRJNA485481
+KEYWORDS    RefSeq.
+SOURCE      Munguba virus
+  ORGANISM  Munguba virus
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Phenuiviridae;
+            Phlebovirus; Phlebovirus mungubaense.
+REFERENCE   1  (bases 1 to 1806)
+  AUTHORS   Palacios,G., Savji,N., Sze,W., Hutchinson,S., Tesh,R., Travassos da
+            Rosa,A. and Lipkin,W.
+  TITLE     Genetic diversity of the Phlebovirus genus
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 1806)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (27-FEB-2017) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 1806)
+  AUTHORS   Palacios,G., Savji,N., Sze,W., Hutchinson,S., Tesh,R., Travassos da
+            Rosa,A. and Lipkin,W.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (19-JUN-2010) Center for Infection and Immunity, Columbia
+            University, 722 West 168th Street, New York City, NY 10032, USA
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to HM566166.
+            GenBank Accession Numbers HM566164-HM566166 represent the complete
+            genome of Munguba virus.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..1806
+                     /organism="Munguba virus"
+                     /mol_type="genomic RNA"
+                     /db_xref="taxon:1048854"
+                     /segment="S"
+     gene            28..768
+                     /locus_tag="B2K43_sSgp1"
+                     /db_xref="GeneID:31079623"
+     CDS             28..768
+                     /locus_tag="B2K43_sSgp1"
+                     /codon_start=1
+                     /product="nucleocapsid"
+                     /protein_id="YP_009346011.1"
+                     /db_xref="GeneID:31079623"
+                     /translation="MSADYQRIAIEFGSEPIDRDAITLWVNEFAYQGFDASNVLRLLQQ
+                     RGGATWKEDAKKMIILVLTRGNKPENMVKRMSEAGKRTVEALVVKYQLKSGNPGRDDLT
+                     LARVAAALAPWTCQAAFVVSEFMPVTGRAMDDHAASYPRGMMHTSFAGLIDPTLPQSTY
+                     SDLVAAHSLFLYYFSKTINVGLRGKTKAEVEASFSQPMQAAINSGFISGSQRRQFLQNL
+                     GIIDRNSVAVPAVATAAAAYRALS"
+     gene            complement(951..1760)
+                     /locus_tag="B2K43_sSgp2"
+                     /db_xref="GeneID:31079622"
+     CDS             complement(951..1760)
+                     /locus_tag="B2K43_sSgp2"
+                     /codon_start=1
+                     /product="nonstructural protein"
+                     /protein_id="YP_009346012.1"
+                     /db_xref="GeneID:31079622"
+                     /translation="MSFLWNLPVVRPSSCFLGLPSVNYVAFNKMATFEACKVNGAEIPL
+                     KHLKLCYDKRPTLFDFLRNREVPVSWGDHTDDQILNRSPRTFEGLMFGLSEIEEVEYGR
+                     YNEPYLKKAVSWPLSYPSHTFFNLAVRKTEMGNWLHSSMWATMMLRMSHTDNLEESIIK
+                     VRKRIIEKANDMGLDLSLFTGENLILEIAHLQCLRLIYASRKERERGVNHSKTYSIVRS
+                     YDCFSVISDVNFDPMIADSLFGSNDGTMSGESDVDQLRVDLERYLSL"
+ORIGIN
+        1 acacaaagta cccctaatac gttaacaatg tctgctgatt accagaggat tgctattgag
+       61 ttcggttctg aaccgatcga cagagatgca ataactctgt gggtgaatga attcgcctat
+      121 cagggatttg atgcatccaa tgttctgcga cttctgcagc agagaggagg tgccacatgg
+      181 aaagaagatg ctaaaaaaat gatcatcctg gttcttacaa gaggaaataa gcctgaaaac
+      241 atggtaaaaa gaatgtctga ggctggaaag agaacagttg aggctcttgt tgtcaagtat
+      301 cagctgaagt caggaaatcc tggcagagac gacctaacac tagcccgggt agctgctgcc
+      361 ttagccccat ggacatgcca ggctgccttt gttgtgagtg agttcatgcc tgtgacagga
+      421 agagcaatgg atgaccatgc agcttcctac ccacggggga tgatgcacac tagctttgct
+      481 ggattgattg atcccacatt gcctcaatcc acatattctg atctagtggc tgctcacagc
+      541 ctgtttttgt actatttctc aaagaccata aatgtgggat taagaggaaa aacaaaagca
+      601 gaagttgaag cctccttcag ccagcctatg caggctgcaa taaatagtgg tttcataagc
+      661 gggagccaga ggagacagtt tctgcagaac ctcggcatta ttgacagaaa ctcagtggcg
+      721 gtgcctgctg ttgcaacagc agctgctgcg tatagagctc tgtcttaata ccgacatgct
+      781 gcccagaaag gggagggtag ggaaaggggg gttgtgacaa tggggtgaat ggggttgaat
+      841 cacatgttga ttctaatggg attatgatct tgggaggggt tgattgggtt ggggggcttg
+      901 gggacaggga tctgagggga ggggggtcgg gcagctgcaa ccagtgcttc tcatagtgat
+      961 agatatcttt ctaagtctac tctcagttgg tcaacatcag actcaccaga cattgtgcca
+     1021 tcattagatc caaaaaggga atcagctatc atgggatcaa aattgacatc tgagataaca
+     1081 gagaagcaat cataagatct cacaattgaa taagtttttg aatgattcac tcctctctct
+     1141 ctttcttttc ttgaagcata tatcaacctg aggcactgca aatgtgcaat ctcaaggatg
+     1201 agattttccc ctgtaaagag agagagatcc agtcccatat cattggcctt ttctattatc
+     1261 ctttttctga ctttaatgat agactcctcg agattgtcag tgtgagacat tctcagcatc
+     1321 atagttgccc acatgctaga atgcagccag ttccccattt ctgtttttcg aacagcaaga
+     1381 ttaaagaaag tatgggatgg ataactaaga ggccaagaga cagctttctt taaataaggc
+     1441 tcattatacc tcccatactc cacctcttca atctcagaca agccaaacat aagtccctca
+     1501 aaagttcttg gacttctatt gagtatttga tcatctgtat gatctcccca agatactggc
+     1561 acctccctgt tcctcaagaa atcaaaaagt gttggtctct tatcatagca tagcttcaag
+     1621 tgcttcaaag ggatctcagc accattcact ttgcatgctt caaaagtggc catcttgttg
+     1681 aatgccacat agttaactga cgggagcccc aggaagcagg agcttggtct cactactggg
+     1741 agattccaaa ggaaactcat tatgtgtagt attgtcactt atcacgcaga aggggggtct
+     1801 ttgtgt
+//

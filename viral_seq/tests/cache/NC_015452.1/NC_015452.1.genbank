@@ -1,0 +1,109 @@
+LOCUS       NC_015452               1830 bp    RNA     linear   VRL 13-AUG-2018
+DEFINITION  Aguacate virus segment S, complete genome.
+ACCESSION   NC_015452
+VERSION     NC_015452.1
+DBLINK      BioProject: PRJNA485481
+KEYWORDS    RefSeq.
+SOURCE      Aguacate virus
+  ORGANISM  Aguacate virus
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Phenuiviridae;
+            Phlebovirus; Phlebovirus aguacateense.
+REFERENCE   1  (bases 1 to 1830)
+  AUTHORS   Palacios,G., Travassos da Rosa,A., Savji,N., Sze,W., Wick,I.,
+            Guzman,H., Hutchison,S., Tesh,R. and Lipkin,W.I.
+  TITLE     Aguacate virus, a new antigenic complex of the genus Phlebovirus
+            (family Bunyaviridae)
+  JOURNAL   J. Gen. Virol. 92 (PT 6), 1445-1453 (2011)
+   PUBMED   21325481
+REFERENCE   2  (bases 1 to 1830)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (27-APR-2011) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 1830)
+  AUTHORS   Palacios,G., Savji,N., Sze,W., Hutchinson,S., Tesh,R., Travassos da
+            Rosa,A. and Lipkin,W.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (19-JUN-2010) Center for Infection and Immunity, Columbia
+            University, 722 West 168th Street, 17th Floor, New York, NY 10032,
+            USA
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to HM566139.
+            GenBank Accession Numbers HM566137-HM566139 represent the complete
+            genome of Aguacate virus strain VP-175A.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..1830
+                     /organism="Aguacate virus"
+                     /mol_type="genomic RNA"
+                     /strain="VP-175A"
+                     /host="Lutzomyia sp."
+                     /db_xref="taxon:1006583"
+                     /segment="S"
+                     /serogroup="Aguacate"
+     gene            36..866
+                     /gene="NS"
+                     /locus_tag="AGUVsS_gp1"
+                     /db_xref="GeneID:10498577"
+     CDS             36..866
+                     /gene="NS"
+                     /locus_tag="AGUVsS_gp1"
+                     /codon_start=1
+                     /product="nonstructural protein"
+                     /protein_id="YP_004414704.1"
+                     /db_xref="GeneID:10498577"
+                     /translation="MTSYLFDTPVIVRPNGYFDREVYVTYMAHNKYCEHPVSVHNCMEI
+                     PVKNFGVSLLHKESLSDFYILGLLPFRWGDRMGNSRVTRESFPFMKDLLKDINDMHDSE
+                     FFRSFLPNVKKALSWPLGYPTLEFIRMTRSDLDLPHFKEISANATLIMQMGQPALDLDQ
+                     GFVNAHKRIVMESITRGFGHKDFPGKNIIFEVASLQCVRLLNAVPADLLYCQVPNSLTS
+                     TVMKHRSILEDHPQQPLGNQKWTPDPDSWLLDDQAATLHEEFALILSESEDDED"
+     gene            complement(1041..1778)
+                     /gene="NP"
+                     /locus_tag="AGUVsS_gp2"
+                     /db_xref="GeneID:10498576"
+     CDS             complement(1041..1778)
+                     /gene="NP"
+                     /locus_tag="AGUVsS_gp2"
+                     /codon_start=1
+                     /product="nucleocapsid"
+                     /protein_id="YP_004414705.1"
+                     /db_xref="GeneID:10498576"
+                     /translation="MADFERLAIEFSEAGVNIADVVNWVNEFAYQGFDAKRVLELLQQR
+                     GGSSWQEDARKMIVLALTRGNKIEKMILKMSEEGKKTVLALKKKYQLKSGNPGRDDLTL
+                     SRVAAALAGWTCQALPHVENFLPVTGEAMDALSPGFPRCLMHPSFAGLVDTTLPPETQD
+                     AILAAHSLFLVQFSKVINPSLRGKPKGEVVASFKQPMLAAVNGGFIGPDKRRKMLQSLG
+                     VVDVNGVPSEAVKVAANKFRSSQ"
+ORIGIN
+        1 acacaaagac cccccgtgat ttctcaaaca acaagatgac tagctatcta ttcgacacac
+       61 ctgtcatagt gaggcccaat ggttactttg accgagaagt ctatgtgaca tatatggctc
+      121 acaataagta ttgtgaacat cctgtgtcag tacataactg catggagatt cctgtcaaaa
+      181 actttggagt ctctctgctg cataaggagt ctctgtctga cttctacatt cttggcctcc
+      241 taccattcag gtggggagat agaatgggca actccagggt cacccgggaa agcttcccat
+      301 tcatgaaaga cttactcaaa gacatcaatg acatgcatga ctcagaattt tttagatcct
+      361 tcctccccaa cgtgaaaaag gcattgtcgt ggccacttgg ataccctact cttgagttca
+      421 ttagaatgac aagatcagac cttgaccttc cacactttaa ggaaatctct gccaacgcca
+      481 cactaattat gcagatgggt cagccagcac ttgacctcga ccaagggttt gttaatgccc
+      541 acaagagaat agtgatggag tccataacta gagggtttgg tcataaagac ttcccaggga
+      601 agaatataat attcgaagtt gcttcactac agtgtgttag acttcttaat gctgtccctg
+      661 cagatctctt gtattgtcag gtgccaaact ctctcacttc cacagtgatg aagcacagat
+      721 ccatcttaga ggaccaccct cagcagccct taggcaatca gaagtggaca ccagatcctg
+      781 attcctggct tctggatgac caagctgcca ctctgcatga agagttcgct ctaatcttat
+      841 ctgagtctga ggatgatgag gattgacacg ctgccgaatc cccctgatct taatcccccc
+      901 tccccctaat cacatgtatg tacatatatt gatttagatc acattcccat gtatatagcc
+      961 ccaccaaacc ccatcgccca acacccaaac ccccagccca agccctcacc cacaaaaccc
+     1021 acccctccct ttcaggcagc ctattgagag ctcctgaatt tgttggcagc cactttaaca
+     1081 gcctctgagg gcacaccatt cacatcaaca accccaagag attggagcat cttcctcctc
+     1141 ttgtctggcc cgataaaccc accattgact gctgccagca ttggctgctt gaacgaagct
+     1201 acaacctctc cctttggctt gcctctcaga ctagggttta tcaccttcga aaattgtacc
+     1261 aagaagaggc tatgagcagc cagtatggca tcctgagttt caggcgggag agttgtgtcc
+     1321 acaagcccgg caaagctggg atgcattaag catcttggaa atccaggaga taaggcatcc
+     1381 attgcttcgc cggtcactgg cagaaagttc tctacatgag gtaatgcctg gcaagtccag
+     1441 ccagctagag cagcggcaac acgagacagg gtgagatcgt ctcttccagg atttccagac
+     1501 ttcaactgat acttcttctt cagggccaag acagtcttct tcccttcttc tgacatctta
+     1561 agaatcatct tctctatttt gttccctcta gtcaaggcca atacaatcat cttcctagca
+     1621 tcttcttgcc aggatgagcc acctctctgt tgtagcagtt caagcaccct cttggcgtca
+     1681 aatccctgat aagcaaattc attaacccaa ttcacgacat ctgctatatt aacacctgct
+     1741 tcactaaact caatagctag tcgctcaaag tcagccattg caagaattaa ttcacttgat
+     1801 aattaagaag taattcgggg ttctttgtgt
+//

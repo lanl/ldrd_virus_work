@@ -1,0 +1,93 @@
+LOCUS       NC_034481                902 bp    RNA     linear   VRL 13-AUG-2018
+DEFINITION  Nyando virus strain MP401 segment S nucleoprotein and nonstructural
+            protein NSs genes, complete cds.
+ACCESSION   NC_034481
+VERSION     NC_034481.1
+DBLINK      BioProject: PRJNA485481
+KEYWORDS    RefSeq.
+SOURCE      Nyando virus
+  ORGANISM  Nyando virus
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Peribunyaviridae;
+            Orthobunyavirus; Orthobunyavirus nyandoense.
+REFERENCE   1  (bases 1 to 902)
+  AUTHORS   Groseth,A., Mampilli,V., Weisend,C., Dahlstrom,E., Porcella,S.F.,
+            Russell,B.J., Tesh,R.B. and Ebihara,H.
+  TITLE     Molecular characterization of human pathogenic bunyaviruses of the
+            nyando and bwamba/pongola virus groups leads to the genetic
+            identification of mojui dos campos and kaeng khoi virus
+  JOURNAL   PLoS Negl Trop Dis 8 (9), E3147 (2014)
+   PUBMED   25188437
+  REMARK    Publication Status: Online-Only
+REFERENCE   2  (bases 1 to 902)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (02-JUL-2017) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 902)
+  AUTHORS   Groseth,A., Mampilli,V., Weisend,C., Dahlstrom,E., Porcella,S.F.,
+            Russell,B.J., Tesh,R.B. and Ebihara,H.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (22-MAY-2014) Laboratory of Virology, Molecular VIrology &
+            Host-Pathogen Interactions Unit, NIAID, NIH, 903 S 4th St.,
+            Hamilton, MT 59840, USA
+COMMENT     ##Assembly-Data-START##
+            Assembly Method       :: GS De Novo Assembler v. v2.6
+            Sequencing Technology :: 454; Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+            PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to KJ867188.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..902
+                     /organism="Nyando virus"
+                     /mol_type="genomic RNA"
+                     /strain="MP401"
+                     /host="Anopheles funestus"
+                     /db_xref="taxon:35316"
+                     /segment="S"
+                     /country="Kenya"
+                     /collection_date="1959"
+     gene            46..747
+                     /locus_tag="CAU79_sSgp1"
+                     /db_xref="GeneID:32708001"
+     CDS             46..747
+                     /locus_tag="CAU79_sSgp1"
+                     /codon_start=1
+                     /product="nucleoprotein"
+                     /protein_id="YP_009362052.1"
+                     /db_xref="GeneID:32708001"
+                     /translation="MSELVFYDVEPTAQNGFDPDKQYVAFKASAGAGLNIVSARIFFLN
+                     ARKAKDQLARRPEPKVGLKFGTWQVEVVNNHFQGNRDNPIGDSDLTMHRLSGYIARYIL
+                     DQYLAGNSVAQAGIQLQIINPIAESNGIKWSAGAEVYLSFFPGTEMFLEKFNFYPLAIG
+                     IYRVKKGMMEAQFLKKSLRQRYGQMTADQWMQTKSDDVMRAVAVLEKLSWGRSGLSEAA
+                     RQFLGRFGIVI"
+     gene            65..343
+                     /locus_tag="CAU79_sSgp2"
+                     /db_xref="GeneID:32708000"
+     CDS             65..343
+                     /locus_tag="CAU79_sSgp2"
+                     /codon_start=1
+                     /product="nonstructural protein NSs"
+                     /protein_id="YP_009362053.1"
+                     /db_xref="GeneID:32708000"
+                     /translation="MMSSQLPKMDLILISSMWHLKLQLEQGLTLFPLGSSSSMPGKPKI
+                     NSLVDQSRRLVLNLEHGRWKWSITIFKETGTILSATQISQCIDSQDI"
+ORIGIN
+        1 agtagtgtac tccacaattg aattctattt ttgaactgct attaaatgtc ggaactggtg
+       61 ttctatgatg tcgagccaac tgcccaaaat ggatttgatc ctgataagca gtatgtggca
+      121 tttaaagctt cagctggagc agggcttaac attgtttccg ctaggatctt cttcctcaat
+      181 gccaggaaag ccaaagatca actcgctcgt agaccagagc cgaaggttgg tcttaaattt
+      241 ggaacatggc aggtggaagt ggtcaataac cattttcaag gaaaccggga caatcctatc
+      301 ggcgactcag atctcacaat gcatagactc tcaggatata tagcccggta tatcttagat
+      361 caatatctag ctgggaatag tgttgcacaa gctggcatcc agcttcagat catcaatcca
+      421 atagcagaat caaatggaat aaagtggagt gctggtgcag aggtgtacct atcttttttc
+      481 ccaggcacag aaatgttctt agaaaaattt aatttttacc ccttggcaat tggaatatac
+      541 agagtaaaaa aagggatgat ggaagcccaa ttcttgaaga aatctctcag acaaagatat
+      601 ggccaaatga cagcagatca atggatgcag acaaaatcgg atgatgtgat gagggcagta
+      661 gcagttcttg aaaaattgag ttggggaaga tcaggtctga gtgaagctgc ccgtcaattc
+      721 ctgggccgat tcgggattgt tatctaattc ataaaatata cgcctattcg actccaaatt
+      781 ctaaaatatt taatttgaca ccaaaagacc ttcgggtcaa agccgacagc ttaatgggtg
+      841 ggtggttggg gaaacatagc ttcaaaagca ttttttcaaa attcattgtg gagcacacta
+      901 ct
+//

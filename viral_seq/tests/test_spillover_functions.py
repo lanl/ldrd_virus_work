@@ -65,7 +65,7 @@ def test_verify_cache_cli():
     assert result.exit_code == 0
 
 
-def test_modelling_cli(tmp_path):
+def test_modelling_cli():
     this_cache = files("viral_seq.tests") / "cache"
     runner = CliRunner()
     # we will test most/all of the modeling commands which use the output files of previous commands

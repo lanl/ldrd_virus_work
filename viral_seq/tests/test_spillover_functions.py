@@ -69,7 +69,7 @@ def test_modelling_cli(tmp_path):
     this_cache = files("viral_seq.tests") / "cache"
     runner = CliRunner()
     # we will test most/all of the modeling commands which use the output files of previous commands
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+    with runner.isolated_filesystem():
         result = runner.invoke(
             cli,
             [
@@ -95,7 +95,7 @@ def test_modelling_cli(tmp_path):
         )
         aucs = []
         for i in range(2):
-            with open(td + "/cv_" + str(i) + "_metrics.json", "r") as f:
+            with open("cv_" + str(i) + "_metrics.json", "r") as f:
                 data = json.load(f)
             aucs.append(data["AUC"])
         assert aucs == pytest.approx([0.5, 0.5])

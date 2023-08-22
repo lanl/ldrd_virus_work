@@ -177,7 +177,7 @@ def filter_records(
             if just_warn:
                 print("Warning:", record.id, msg)
             elif just_assert:
-                raise Exception(record.id, msg)
+                raise AssertionError(record.id, msg)
             else:
                 continue
         if not just_assert and not just_warn:
@@ -381,24 +381,25 @@ def get_training_columns(
 ):
     # Check if we are using data from file or a passed DataFrame
     if table_filename == "" and df is None:
-        raise Exception("No data provided to train random forest model.")
+        raise ValueError("No data provided to train random forest model.")
     elif df is None:
         print("Loading the pandas DataFrame from a parquet file:", table_filename)
         df = pd.read_parquet(table_filename, engine="fastparquet")
     elif table_filename == "":
         print("Using provided DataFrame")
     else:
-        raise Exception("Ambiguous request; both DataFrame and file passed.")
+        raise ValueError("Ambiguous request; both DataFrame and file passed.")
     if class_column not in df.columns:
-        raise Exception("Can't find class column to train random forest model.")
+        raise ValueError("Can't find class column to train random forest model.")
     # Any columns not dropped here are assumed to be features
     df_features = df.drop(class_column, axis=1)
-    df_features.drop("index", axis=1, errors="ignore", inplace=True)
-    df_features.drop("Species", axis=1, errors="ignore", inplace=True)
-    df_features.drop("Accessions", axis=1, errors="ignore", inplace=True)
-    df_features.drop("Unnamed: 0", axis=1, errors="ignore", inplace=True)
+    df_features.drop(
+        columns=["index", "Species", "Accessions", "Unnamed: 0"],
+        errors="ignore",
+        inplace=True,
+    )
     if len(df_features.columns) < 1:
-        raise Exception("Data contains no features.")
+        raise ValueError("Data contains no features.")
     elif len(df_features.columns) == 1:
         X = df_features.to_numpy().reshape(-1, 1)
     else:
@@ -443,7 +444,7 @@ def predict_rfc(
     rfc=None,
     filename: str = "random_forest_model.p",
     plot: bool = False,
-    out_prefix="",
+    out_prefix: str = "",
     file_predict_proba: str = "predictions.csv",
     file_roc_curve: str = "roc_curve.csv",
     file_metrics: str = "metrics.json",
@@ -476,18 +477,19 @@ def predict_rfc(
     y_scores = y_scores[:, 1].reshape(-1, 1)
     this_auc = roc_auc_score(y.astype(bool), y_scores)
     if plot:
-        with open(file_predict_proba, "w") as f:
-            # individual predictions
-            # TODO: in order to check which prediction corresponds to which virus, you need to cross-reference the data table (if they are in the same order)
-            print("index", "ground_truth", "probability", sep=",", file=f)
-            for i, y_val in enumerate(y):
-                print(i, y_val, y_scores[i], sep=",", file=f)
+        # individual predictions
+        # TODO: in order to check which prediction corresponds to which virus, you need to cross-reference the data table (if they are in the same order)
+        df_predictions = pd.DataFrame()
+        df_predictions["ground_truth"] = y
+        df_predictions["probability"] = y_scores
+        df_predictions.to_csv(file_predict_proba)
+        # ROC curve for plotting
+        df_roc_curve = pd.DataFrame()
         fpr, tpr, thresholds = roc_curve(y, y_scores)
-        with open(file_roc_curve, "w") as f:
-            # ROC curve for plotting
-            print("index", "fpr", "tpr", "thresholds", sep=",", file=f)
-            for i in range(len(fpr)):
-                print(i, fpr[i], tpr[i], thresholds[i], sep=",", file=f)
+        df_roc_curve["fpr"] = fpr
+        df_roc_curve["tpr"] = tpr
+        df_roc_curve["thresholds"] = thresholds
+        df_roc_curve.to_csv(file_roc_curve)
         with open(file_metrics, "w") as f:
             # This file should be used to store any metrics of interest
             # using json as it can be easily loaded if needed
@@ -536,7 +538,6 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
         aucs.append(this_auc)
         label = r"Fold %d (AUC = %0.2f)" % (i, this_auc)
         ax.plot(df["fpr"], df["tpr"], label=label)
-        mean_fpr = np.linspace(0, 1, 100)
         interp_tpr = np.interp(mean_fpr, df["fpr"], df["tpr"])
         interp_tpr[0] = 0.0
         tprs.append(interp_tpr)

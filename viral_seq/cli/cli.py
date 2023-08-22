@@ -125,9 +125,9 @@ def search_data(email, query, retmax, cache):
     required=True,
     help=("Provide a .csv file that contains an 'Accessions' column. "),
 )
-def pull_data(email, cache, load):
+def pull_data(email, cache, file):
     """Retrieve accessions from Pubmed and store locally for further use."""
-    df = pd.read_csv(load)
+    df = pd.read_csv(file)
     assert "Accessions" in df
     # Entries in 'Accessions' column may be space delimited accessions for species with multiple segments
     accessions = set((" ".join(df["Accessions"].values)).split())
@@ -228,7 +228,7 @@ def calculate_table(
     "-p",
     default="cv_",
     show_default=True,
-    help=("Prefix appended to output files."),
+    help=("Prefix prepended to output filenames."),
 )
 def cross_validation(file, prefix):
     """Run 5 fold cross validation on the data table using default parameters"""

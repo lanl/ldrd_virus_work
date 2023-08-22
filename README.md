@@ -2,8 +2,14 @@
 
 ## LDRD DR Computational Work Repo
 
-**Pre-Commit Linting Procedure**
+**Pre-Commit Procedure**
+- Linting
 ```
 >black viral_seq
 >ruff check viral_seq --fix
+```
+
+- Testing
+```
+>pytest viral_seq
 ```

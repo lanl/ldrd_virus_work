@@ -110,7 +110,8 @@ def main(download_recs, email, save_model, load_model):
 )
 def search_data(email, query, retmax, cache):
     """Scrape data results of a search term from Pubmed and store locally for further use."""
-    results = sp.run_search(search_terms=query, retmax=retmax, email=email)
+    search_terms = query.split()
+    results = sp.run_search(search_terms=search_terms, retmax=retmax, email=email)
     records = sp.load_results(results, email=email)
     sp.add_to_cache(records, cache=cache)
 
@@ -230,10 +231,17 @@ def calculate_table(
     show_default=True,
     help=("Prefix prepended to output filenames."),
 )
-def cross_validation(file, prefix):
-    """Run 5 fold cross validation on the data table using default parameters"""
+@click.option(
+    "--splits",
+    "-s",
+    default=5,
+    show_default=True,
+    help=("Number of folds to use for cross validation."),
+)
+def cross_validation(file, prefix, splits):
+    """Run cross validation on the data table using default parameters"""
     X, y = sp.get_training_columns(table_filename=file)
-    sp.cross_validation(X, y, plot=True, prefix=prefix)
+    sp.cross_validation(X, y, plot=True, prefix=prefix, splits=splits)
 
 
 # --- train ---

@@ -1,48 +1,141 @@
-import viral_seq.analysis.spillover_predict as sp
-import pandas as pd
 from importlib.resources import files
 import pytest
+from click.testing import CliRunner
+from viral_seq.cli.cli import cli
+import json
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
+email = "arhall@lanl.gov"
 
 
 @pytest.mark.slow
-def test_network(tmp_path):
-    df_train = pd.read_csv(csv_train)
-    df_test = pd.read_csv(csv_test)
-    accessions_train = (" ".join(df_train["Accessions"].values)).split()
-    accessions_test = (" ".join(df_test["Accessions"].values)).split()
-    this_cache = tmp_path.absolute()
-    # retrieve records from online and store in a cache for later use
-    email = "arhall@lanl.gov"
-    search_terms = accessions_test + accessions_train
-    results = sp.run_search(search_terms, 1, email)
-    records = sp.load_results(results, email)
-    sp.add_to_cache(records, cache=this_cache)
+def test_network_cli_search(tmp_path):
+    runner = CliRunner()
+    search_terms = "NC_045512.2"
+    result = runner.invoke(
+        cli,
+        [
+            "search-data",
+            "--email",
+            email,
+            "--cache",
+            tmp_path.absolute().as_posix(),
+            "--query",
+            search_terms,
+            "--retmax",
+            "1",
+        ],
+    )
+    assert (
+        "number of records added to the local cache from online search: 1"
+        in result.output
+    )
+    assert result.exit_code == 0
 
 
-def test_modelling():
-    df_train = pd.read_csv(csv_train)
-    df_test = pd.read_csv(csv_test)
+@pytest.mark.slow
+def test_network_cli_pull(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "pull-data",
+            "--email",
+            email,
+            "--cache",
+            tmp_path.absolute().as_posix(),
+            "--file",
+            csv_train.absolute().as_posix(),
+        ],
+    )
+    assert (
+        "number of records added to the local cache from online search: 14"
+        in result.output
+    )
+    assert result.exit_code == 0
+
+
+def test_verify_cache_cli():
     this_cache = files("viral_seq.tests") / "cache"
-
-    # build data table of training data
-    table_train = sp.build_table(
-        df_train, cache=this_cache, genomic=True, gc=True, kmers=True, kmer_k=2
+    runner = CliRunner()
+    result = runner.invoke(
+        cli, ["verify-cache", "--cache", this_cache.absolute().as_posix()]
     )
-    X_train, y_train = sp.get_training_columns(table_train)
-    # cross validate
-    aucs = sp.cross_validation(X_train, y_train, splits=2)
-    assert aucs == pytest.approx([0.5, 0.5])
+    assert result.exit_code == 0
 
-    # currently need a RandomForestClassifier to properly build a data table for the test set
-    rfc = sp.train_rfc(X_train, y_train)
 
-    # build data table of test data and run predict
-    table_test = sp.build_table(
-        df_test, rfc=rfc, cache=this_cache, genomic=True, gc=True, kmers=True, kmer_k=2
-    )
-    X_test, y_test = sp.get_training_columns(table_test)
-    this_auc = sp.predict_rfc(X_test, y_test, rfc=rfc)
-    assert this_auc == pytest.approx(0.3)
+def test_modelling_cli(tmp_path):
+    this_cache = files("viral_seq.tests") / "cache"
+    runner = CliRunner()
+    # we will test most/all of the modeling commands which use the output files of previous commands
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                this_cache.absolute().as_posix(),
+                "--file",
+                csv_train.absolute().as_posix(),
+                "-g",
+                "-gc",
+                "-kmers",
+                "-k",
+                "2",
+            ],
+        )
+        assert (
+            "Saving the pandas DataFrame of genomic data to a parquet file"
+            in result.output
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
+        )
+        print(result.output)
+        aucs = []
+        for i in range(2):
+            with open("cv_" + str(i) + "_metrics.json", "r") as f:
+                data = json.load(f)
+            aucs.append(data["AUC"])
+        assert aucs == pytest.approx([0.5, 0.5])
+        assert result.exit_code == 0
+        # we can't check the image generated easily so we only verify the plot generation doesn't fail
+        result = runner.invoke(
+            cli, ["plot-roc", "cv_0_roc_curve.csv", "cv_1_roc_curve.csv"]
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(cli, ["train", "--file", "table.parquet.gzip"])
+        assert "Saving random forest model to file" in result.output
+        assert result.exit_code == 0
+        # table caclulation of a test set, which utilizes a trained random forest model
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                this_cache.absolute().as_posix(),
+                "--file",
+                csv_test.absolute().as_posix(),
+                "--rfc-file",
+                "rfc.p",
+                "-g",
+                "-gc",
+                "-kmers",
+                "-k",
+                "2",
+            ],
+        )
+        assert (
+            "Saving the pandas DataFrame of genomic data to a parquet file"
+            in result.output
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli, ["predict", "--file", "table.parquet.gzip", "--rfc-file", "rfc.p"]
+        )
+        with open("cli_metrics.json", "r") as f:
+            data = json.load(f)
+        assert data["AUC"] == pytest.approx(0.3)
+        assert result.exit_code == 0

@@ -93,6 +93,7 @@ def test_modelling_cli():
         result = runner.invoke(
             cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
         )
+        print(result.output)
         aucs = []
         for i in range(2):
             with open("cv_" + str(i) + "_metrics.json", "r") as f:

@@ -2,7 +2,7 @@ from importlib.resources import files
 import pytest
 from click.testing import CliRunner
 from viral_seq.cli.cli import cli
-import json
+import pandas as pd
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -96,9 +96,8 @@ def test_modelling_cli():
         print(result.output)
         aucs = []
         for i in range(2):
-            with open("cv_" + str(i) + "_metrics.json", "r") as f:
-                data = json.load(f)
-            aucs.append(data["AUC"])
+            data = pd.read_csv("cv_" + str(i) + "_metrics.csv")
+            aucs.append(data["AUC"].values[0])
         assert aucs == pytest.approx([0.5, 0.5])
         assert result.exit_code == 0
         # we can't check the image generated easily so we only verify the plot generation doesn't fail
@@ -135,7 +134,6 @@ def test_modelling_cli():
         result = runner.invoke(
             cli, ["predict", "--file", "table.parquet.gzip", "--rfc-file", "rfc.p"]
         )
-        with open("cli_metrics.json", "r") as f:
-            data = json.load(f)
-        assert data["AUC"] == pytest.approx(0.3)
+        data = pd.read_csv("cli_metrics.csv")
+        assert data["AUC"].values[0] == pytest.approx(0.3)
         assert result.exit_code == 0

@@ -1,5 +1,4 @@
 import os
-import json
 import pickle
 from pathlib import Path
 import concurrent.futures
@@ -447,7 +446,7 @@ def predict_rfc(
     out_prefix: str = "",
     file_predict_proba: str = "predictions.csv",
     file_roc_curve: str = "roc_curve.csv",
-    file_metrics: str = "metrics.json",
+    file_metrics: str = "metrics.csv",
 ):
     file_predict_proba = out_prefix + file_predict_proba
     file_roc_curve = out_prefix + file_roc_curve
@@ -490,11 +489,11 @@ def predict_rfc(
         df_roc_curve["tpr"] = tpr
         df_roc_curve["thresholds"] = thresholds
         df_roc_curve.to_csv(file_roc_curve)
-        with open(file_metrics, "w") as f:
-            print(os.path.realpath(f.name))  # debug
-            # This file should be used to store any metrics of interest
-            # using json as it can be easily loaded if needed
-            json.dump({"AUC": this_auc}, f)
+        # This file should be used to store any metrics of interest
+        df_metrics = pd.DataFrame()
+        df_metrics["AUC"] = [this_auc]
+        df_metrics.to_csv(file_metrics)
+
     return this_auc
 
 

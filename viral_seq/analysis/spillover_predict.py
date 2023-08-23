@@ -491,6 +491,7 @@ def predict_rfc(
         df_roc_curve["thresholds"] = thresholds
         df_roc_curve.to_csv(file_roc_curve)
         with open(file_metrics, "w") as f:
+            print("Path of metrics file:", os.path.realpath(f))  # debug
             # This file should be used to store any metrics of interest
             # using json as it can be easily loaded if needed
             json.dump({"AUC": this_auc}, f)

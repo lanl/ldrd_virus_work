@@ -448,9 +448,10 @@ def predict_rfc(
     file_roc_curve: str = "roc_curve.csv",
     file_metrics: str = "metrics.csv",
 ):
-    file_predict_proba = out_prefix + file_predict_proba
-    file_roc_curve = out_prefix + file_roc_curve
-    file_metrics = out_prefix + file_metrics
+    wd = Path.cwd()
+    file_predict_proba = wd / (out_prefix + file_predict_proba)
+    file_roc_curve = wd / (out_prefix + file_roc_curve)
+    file_metrics = wd / (out_prefix + file_metrics)
     if rfc is None:
         with open(filename, "rb") as rfc_file:
             rfc = pickle.load(rfc_file)
@@ -476,6 +477,9 @@ def predict_rfc(
     y_scores = y_scores[:, 1].reshape(-1, 1)
     this_auc = roc_auc_score(y.astype(bool), y_scores)
     if plot:
+        print(
+            "Writting plots to files", file_predict_proba, file_roc_curve, file_metrics
+        )
         # individual predictions
         # TODO: in order to check which prediction corresponds to which virus, you need to cross-reference the data table (if they are in the same order)
         df_predictions = pd.DataFrame()

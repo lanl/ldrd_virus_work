@@ -71,7 +71,7 @@ def test_modelling_cli():
     runner = CliRunner()
     # we will test most/all of the modeling commands which use the output files of previous commands
     with runner.isolated_filesystem():
-        print("Working dir:", Path.cwd())
+        print("Working dir:", Path.cwd())  # debug
         result = runner.invoke(
             cli,
             [
@@ -95,10 +95,10 @@ def test_modelling_cli():
         result = runner.invoke(
             cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
         )
-        print(result.output)
-        print("Files in", Path.cwd())
-        x = Path("./")
-        print(list(filter(lambda y: y.is_file(), x.iterdir())))
+        print(result.output)  # debug
+        print("Files in", Path.cwd())  # debug
+        x = Path("./")  # debug
+        print(list(filter(lambda y: y.is_file(), x.iterdir())))  # debug
         aucs = []
         for i in range(2):
             data = pd.read_csv("cv_" + str(i) + "_metrics.csv")

@@ -476,10 +476,11 @@ def predict_rfc(
         y_scores = rfc.predict_proba(X)
     y_scores = y_scores[:, 1].reshape(-1, 1)
     this_auc = roc_auc_score(y.astype(bool), y_scores)
+    print("Prediction, plot=", plot)  # debug
     if plot:
         print(
             "Writting plots to files", file_predict_proba, file_roc_curve, file_metrics
-        )
+        )  # debug
         # individual predictions
         # TODO: in order to check which prediction corresponds to which virus, you need to cross-reference the data table (if they are in the same order)
         df_predictions = pd.DataFrame()
@@ -512,6 +513,7 @@ def cross_validation(
     # TODO: this function should be expanded to allow for hyperparameter search
     cv = StratifiedKFold(n_splits=splits)
     aucs = []
+    print("Starting cross-validation...")  # debug
     for fold, (train, test) in enumerate(cv.split(X, y)):
         if isinstance(X, pd.DataFrame):
             X_train = X.iloc[train]
@@ -519,8 +521,10 @@ def cross_validation(
         else:
             X_train = X[train]
             X_test = X[test]
+        print("CV training...")  # debug
         rfc = train_rfc(X_train, y[train], **kwargs)
         this_prefix = prefix + str(fold) + "_"
+        print("CV prediction, plot=", plot)  # debug
         this_auc = predict_rfc(
             X_test, y[test], rfc=rfc, plot=plot, out_prefix=this_prefix
         )

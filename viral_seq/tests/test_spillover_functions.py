@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from viral_seq.cli.cli import cli
 import pandas as pd
 from pathlib import Path
+import os  # debug
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -91,6 +92,7 @@ def test_modelling_cli():
             ],
         )
         print(result.output)  # debug
+        print(os.path.getsize("table.parquet.gzip"))  # debug
         assert (
             "Saving the pandas DataFrame of genomic data to a parquet file"
             in result.output

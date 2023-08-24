@@ -404,6 +404,9 @@ def get_training_columns(
     else:
         X = df_features
     y = df[class_column]
+    print("Features head:", X.head())  # debug
+    print("Features shape:", X.shape)  # debug
+    print("y length: ", len(y))  # debug
     return X, y
 
 

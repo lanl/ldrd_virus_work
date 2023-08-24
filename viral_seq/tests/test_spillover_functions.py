@@ -2,9 +2,7 @@ from importlib.resources import files
 import pytest
 from click.testing import CliRunner
 from viral_seq.cli.cli import cli
-import pandas as pd
-from pathlib import Path
-import os  # debug
+import json
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -75,7 +73,6 @@ def test_modelling_cli():
     runner = CliRunner()
     # we will test most/all of the modeling commands which use the output files of previous commands
     with runner.isolated_filesystem():
-        print("Working dir:", Path.cwd())  # debug
         result = runner.invoke(
             cli,
             [
@@ -91,8 +88,6 @@ def test_modelling_cli():
                 "2",
             ],
         )
-        print(result.output)  # debug
-        print(os.path.getsize("table.parquet.gzip"))  # debug
         assert (
             "Saving the pandas DataFrame of genomic data to a parquet file"
             in result.output
@@ -101,14 +96,11 @@ def test_modelling_cli():
         result = runner.invoke(
             cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
         )
-        print(result.output)  # debug
-        print("Files in", Path.cwd())  # debug
-        x = Path("./")  # debug
-        print(list(filter(lambda y: y.is_file(), x.iterdir())))  # debug
         aucs = []
         for i in range(2):
-            data = pd.read_csv("cv_" + str(i) + "_metrics.csv")
-            aucs.append(data["AUC"].values[0])
+            with open("cv_" + str(i) + "_metrics.json", "r") as f:
+                data = json.load(f)
+            aucs.append(data["AUC"])
         assert aucs == pytest.approx([0.5, 0.5])
         assert result.exit_code == 0
         # we can't check the image generated easily so we only verify the plot generation doesn't fail
@@ -145,6 +137,7 @@ def test_modelling_cli():
         result = runner.invoke(
             cli, ["predict", "--file", "table.parquet.gzip", "--rfc-file", "rfc.p"]
         )
-        data = pd.read_csv("cli_metrics.csv")
-        assert data["AUC"].values[0] == pytest.approx(0.3)
+        with open("cli_metrics.json", "r") as f:
+            data = json.load(f)
+        assert data["AUC"] == pytest.approx(0.3)
         assert result.exit_code == 0

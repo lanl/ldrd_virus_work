@@ -27,11 +27,11 @@ def test_network_cli_search(tmp_path):
             "1",
         ],
     )
+    assert result.exit_code == 0
     assert (
         "number of records added to the local cache from online search: 1"
         in result.output
     )
-    assert result.exit_code == 0
 
 
 @pytest.mark.slow
@@ -49,11 +49,11 @@ def test_network_cli_pull(tmp_path):
             csv_train.absolute().as_posix(),
         ],
     )
+    assert result.exit_code == 0
     assert (
         "number of records added to the local cache from online search: 14"
         in result.output
     )
-    assert result.exit_code == 0
 
 
 def test_verify_cache_cli():
@@ -88,29 +88,29 @@ def test_modelling_cli():
                 "2",
             ],
         )
+        assert result.exit_code == 0
         assert (
             "Saving the pandas DataFrame of genomic data to a parquet file"
             in result.output
         )
-        assert result.exit_code == 0
         result = runner.invoke(
             cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
         )
+        assert result.exit_code == 0
         aucs = []
         for i in range(2):
             with open("cv_" + str(i) + "_metrics.json", "r") as f:
                 data = json.load(f)
             aucs.append(data["AUC"])
         assert aucs == pytest.approx([0.5, 0.5])
-        assert result.exit_code == 0
         # we can't check the image generated easily so we only verify the plot generation doesn't fail
         result = runner.invoke(
             cli, ["plot-roc", "cv_0_roc_curve.csv", "cv_1_roc_curve.csv"]
         )
         assert result.exit_code == 0
         result = runner.invoke(cli, ["train", "--file", "table.parquet.gzip"])
-        assert "Saving random forest model to file" in result.output
         assert result.exit_code == 0
+        assert "Saving random forest model to file" in result.output
         # table caclulation of a test set, which utilizes a trained random forest model
         result = runner.invoke(
             cli,
@@ -129,15 +129,15 @@ def test_modelling_cli():
                 "2",
             ],
         )
+        assert result.exit_code == 0
         assert (
             "Saving the pandas DataFrame of genomic data to a parquet file"
             in result.output
         )
-        assert result.exit_code == 0
         result = runner.invoke(
             cli, ["predict", "--file", "table.parquet.gzip", "--rfc-file", "rfc.p"]
         )
+        assert result.exit_code == 0
         with open("cli_metrics.json", "r") as f:
             data = json.load(f)
         assert data["AUC"] == pytest.approx(0.3)
-        assert result.exit_code == 0

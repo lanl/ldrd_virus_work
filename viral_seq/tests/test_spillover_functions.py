@@ -3,6 +3,7 @@ import pytest
 from click.testing import CliRunner
 from viral_seq.cli.cli import cli
 import pandas as pd
+from pathlib import Path
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -70,6 +71,7 @@ def test_modelling_cli():
     runner = CliRunner()
     # we will test most/all of the modeling commands which use the output files of previous commands
     with runner.isolated_filesystem():
+        print("Working dir:", Path.cwd())
         result = runner.invoke(
             cli,
             [
@@ -94,6 +96,9 @@ def test_modelling_cli():
             cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
         )
         print(result.output)
+        print("Files in", Path.cwd())
+        x = Path("./")
+        print(list(filter(lambda y: y.is_file(), x.iterdir())))
         aucs = []
         for i in range(2):
             data = pd.read_csv("cv_" + str(i) + "_metrics.csv")

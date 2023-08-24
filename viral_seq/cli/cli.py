@@ -129,7 +129,8 @@ def search_data(email, query, retmax, cache):
 def pull_data(email, cache, file):
     """Retrieve accessions from Pubmed and store locally for further use."""
     df = pd.read_csv(file)
-    assert "Accessions" in df
+    if "Accessions" not in df:
+        raise ValueError("Provided .csv must contain an Accessions column.")
     # Entries in 'Accessions' column may be space delimited accessions for species with multiple segments
     accessions = set((" ".join(df["Accessions"].values)).split())
     records = sp.load_results(accessions, email=email)
@@ -201,8 +202,12 @@ def calculate_table(
     if rfc_file is not None:
         with open(rfc_file, "rb") as f:
             rfc = pickle.load(f)
-    assert set(["Species", "Accessions", "Human Host"]).issubset(df.columns)
-    assert features_genomic or features_gc or features_kmers
+    if set(["Species", "Accessions", "Human Host"]).issubset(df.columns) is False:
+        raise ValueError(
+            "Provided .csv file must contain 'Species', 'Accessions', and 'Human Host' columns."
+        )
+    if not features_genomic and not features_gc and not features_kmers:
+        raise ValueError("No features selected.")
     sp.build_table(
         df,
         rfc=rfc,

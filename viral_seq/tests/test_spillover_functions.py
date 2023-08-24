@@ -90,6 +90,7 @@ def test_modelling_cli():
                 "2",
             ],
         )
+        print(result.output)  # debug
         assert (
             "Saving the pandas DataFrame of genomic data to a parquet file"
             in result.output

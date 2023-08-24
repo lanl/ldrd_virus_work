@@ -68,6 +68,9 @@ def test_verify_cache_cli():
 
 def test_modelling_cli():
     this_cache = files("viral_seq.tests") / "cache"
+    cache_str = str(this_cache.resolve())
+    csv_train_str = str(csv_train.resolve())
+    csv_test_str = str(csv_test.resolve())
     runner = CliRunner()
     # we will test most/all of the modeling commands which use the output files of previous commands
     with runner.isolated_filesystem():
@@ -77,9 +80,9 @@ def test_modelling_cli():
             [
                 "calculate-table",
                 "--cache",
-                this_cache.absolute().as_posix(),
+                cache_str,
                 "--file",
-                csv_train.absolute().as_posix(),
+                csv_train_str,
                 "-g",
                 "-gc",
                 "-kmers",
@@ -119,9 +122,9 @@ def test_modelling_cli():
             [
                 "calculate-table",
                 "--cache",
-                this_cache.absolute().as_posix(),
+                cache_str,
                 "--file",
-                csv_test.absolute().as_posix(),
+                csv_test_str,
                 "--rfc-file",
                 "rfc.p",
                 "-g",

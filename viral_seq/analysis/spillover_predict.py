@@ -312,9 +312,9 @@ def build_table(
     ordered: bool = True,
 ):
     # make a list of all the accessions and a dict to keep track of which species an accession belongs to
-    records_dict = {}
-    accessions_dict = {}
-    row_dict = {}
+    records_dict: dict[str, list] = {}
+    accessions_dict: dict[str, str] = {}
+    row_dict: dict[str, pd.Series] = {}
     accessions = []
     for index, row in df.iterrows():
         records_dict[row["Species"]] = []

@@ -274,7 +274,7 @@ def load_from_cache(accessions=None, cache: str = ".cache", verbose: bool = True
     return records
 
 
-def _grab_features(features, records, row, genomic, kmers, kmer_k, gc):
+def _grab_features(features, records, genomic, kmers, kmer_k, gc):
     feat_genomic = None
     feat_kmers = None
     feat_gc = None
@@ -311,8 +311,23 @@ def build_table(
     gc: bool = True,
     ordered: bool = True,
 ):
-    rows = []
+    # make a list of all the accessions and a dict to keep track of which species an accession belongs to
+    records_dict = {}
+    accessions_dict = {}
+    row_dict = {}
+    accessions = []
+    for index, row in df.iterrows():
+        records_dict[row["Species"]] = []
+        row_dict[row["Species"]] = row
+        for accession in row["Accessions"].split():
+            accessions.append(accession)
+            accessions_dict[accession] = row["Species"]
+    calculated_feature_rows = []
     list_futures = []
+    # we do one call to load all records from cache
+    records_unordered = load_from_cache(accessions, cache=cache, verbose=False)
+    for record in records_unordered:
+        records_dict[accessions_dict[record.id]].append(record)
     num_cpus = os.cpu_count()
     meta_data = list(df.columns)
     assert num_cpus is not None
@@ -321,18 +336,11 @@ def build_table(
     with concurrent.futures.ProcessPoolExecutor(
         initargs=(tqdm.get_lock(),), initializer=tqdm.set_lock, max_workers=workers
     ) as executor:
-        for index, row in tqdm(df.iterrows(), total=df.shape[0]):
-            features = row.to_dict()
-            # TODO: It would be best to load all records at once,
-            # but this is somewhat difficult as we need to keep
-            # track of which records are associated with which
-            # virus (viruses with multiple segments)
-            records = load_from_cache(
-                row["Accessions"].split(), cache=cache, verbose=False
-            )
+        for species, records in records_dict.items():
+            features = row_dict[species].to_dict()
             list_futures.append(
                 executor.submit(
-                    _grab_features, features, records, row, genomic, kmers, kmer_k, gc
+                    _grab_features, features, records, genomic, kmers, kmer_k, gc
                 )
             )
         print("waiting for futures to complete", flush=True)
@@ -341,8 +349,9 @@ def build_table(
         ):
             this_result = future.result()
             if this_result is not None:
-                rows.append(this_result)
-    table = pd.DataFrame.from_records(rows)
+                calculated_feature_rows.append(this_result)
+
+    table = pd.DataFrame.from_records(calculated_feature_rows)
     if rfc is not None:
         # add columns from training if missing
         table = pd.concat(

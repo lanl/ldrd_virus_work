@@ -149,7 +149,6 @@ def filter_records(
         # we also sanity check each record before
         # trying to cache it locally;
         # each record is a Bio.SeqRecord.SeqRecord
-        len(record)
         msg = ""
         if record.description.startswith("Homo sapiens"):
             msg += "Record is human in origin. "
@@ -250,20 +249,20 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc):
         feat_genomic = get_genomic_features(records)
         if feat_genomic is None:
             return None
+        else:
+            features.update(feat_genomic)
     if kmers:
         feat_kmers = get_kmers(records, k=kmer_k)
         if feat_kmers is None:
             return None
+        else:
+            features.update(feat_kmers)
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:
             return None
-    if feat_genomic is not None:
-        features.update(feat_genomic)
-    if feat_kmers is not None:
-        features.update(feat_kmers)
-    if feat_gc is not None:
-        features.update(feat_gc)
+        else:
+            features.update(feat_gc)
     return features
 
 

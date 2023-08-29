@@ -237,7 +237,7 @@ def train(file, outfile):
     "-o",
     default="cli_",
     show_default=True,
-    help=("Prefix appended to output files."),
+    help=("Prefix prepended to output files."),
 )
 def predict(file, rfc_file, out_prefix):
     X, y = sp.get_training_columns(table_filename=file)

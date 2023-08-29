@@ -1,0 +1,86 @@
+LOCUS       HM119412                1818 bp    RNA     linear   VRL 02-APR-2011
+DEFINITION  Echarte virus segment S, complete sequence.
+ACCESSION   HM119412
+VERSION     HM119412.1
+KEYWORDS    .
+SOURCE      Echarate virus
+  ORGANISM  Echarate virus
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Phenuiviridae;
+            Phlebovirus; Phlebovirus echarateense.
+REFERENCE   1  (bases 1 to 1818)
+  AUTHORS   Palacios,G., Tesh,R., Travassos da Rosa,A., Savji,N., Sze,W.,
+            Jain,K., Serge,R., Guzman,H., Guevara,C., Nunes,M.R.,
+            Nunes-Neto,J.P., Kochel,T., Hutchison,S., Vasconcelos,P.F. and
+            Lipkin,W.I.
+  TITLE     Characterization of the candiru antigenic complex (bunyaviridae:
+            phlebovirus), a highly diverse and reassorting group of viruses
+            affecting humans in tropical america
+  JOURNAL   J. Virol. 85 (8), 3811-3820 (2011)
+   PUBMED   21289119
+REFERENCE   2  (bases 1 to 1818)
+  AUTHORS   Palacios,G., Savji,N., Sze,W. and Lipkin,W.I.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (14-APR-2010) Center for Infection and Immunity, 722 West
+            168th Street, New York City, NY 10032, USA
+FEATURES             Location/Qualifiers
+     source          1..1818
+                     /organism="Echarate virus"
+                     /mol_type="genomic RNA"
+                     /host="Homo sapiens"
+                     /db_xref="taxon:1000646"
+                     /segment="S"
+                     /country="Peru"
+                     /collection_date="1998"
+     CDS             51..785
+                     /codon_start=1
+                     /product="nucleocapsid"
+                     /protein_id="AEA30073.1"
+                     /translation="MSFEQLAIELAGHEVDANTIASWVQAFAYQGFDARRVIELLKTRG
+                     GDTWMEDAKQMIILCLTRGNKPSKMVNKMSEKGKKIVNGLIKKYSLKEGNPSRDDLTLS
+                     RITAALAGYTCQATEVVEEYLPVTGRHMDGLSKNYPRPMMHPSFAGLIDPSLPSDVLSF
+                     ITDAFSLFMVQFSRTINPRNRGLSTAEVVSTFDRPMNAAINSSFLSHEQRKSFLKNLGI
+                     LDSNMQAAEHVKAAAKVFRNQK"
+     CDS             complement(913..1773)
+                     /codon_start=1
+                     /product="nonstructural protein"
+                     /protein_id="AEA30072.1"
+                     /translation="MSQLLCYAFDLPHITRSATDRSRVYVEYSAHNGSYHTPICRYRGA
+                     EFPCSSFAVSERSSYRLLNFIEKGQLPKAWGKPFLQVRGKSPSFFDTTIEKISYLNIER
+                     QLKWSEPNIKEALSWPLGVPTLAFFKLSRVESYDYNWEEKCYFMTLVMRCGEGEQIDDS
+                     LVNLYKKMIVELNERDISHLNFTGQFIEKEIAYVQILRMLTALPYDYYESEFHSMIYDY
+                     VKELSLVISPDLLGNRKWKPLCTMDPLFDRLVDDWDSDLDPEEPMETEDYGAACCLGLG
+                     KDKGE"
+ORIGIN
+        1 gaaacacaaa gctcctcaag gattttaaca aagtaagaat aacaagcata atgtcatttg
+       61 aacaacttgc catcgaatta gctggtcatg aagtggatgc taataccatt gcttcatggg
+      121 tgcaggcatt tgcgtaccaa ggtttcgacg cccgtcgggt gatcgaatta ctgaagacca
+      181 gagggggtga cacctggatg gaagatgcga agcagatgat catcctatgc ttgaccagag
+      241 gaaacaagcc atcaaagatg gtgaacaaaa tgtcagaaaa gggcaagaag attgtcaatg
+      301 gcctgataaa aaaatattct ctaaaagagg gtaatccatc tcgagatgat ctgactctgt
+      361 ccaggattac agctgcactt gcaggttata cttgccaagc cactgaagtg gttgaggagt
+      421 atctgcctgt tacagggagg catatggacg gattgtctaa aaactaccct agaccgatga
+      481 tgcatcctag ttttgctgga ttgatagatc ccagcctgcc ttctgacgtg ctgtccttta
+      541 tcactgatgc tttcagcctc ttcatggtcc agttctctag gacaatcaac cccagaaaca
+      601 gagggctgag cacggctgaa gtggttagca catttgacag acccatgaat gctgccatca
+      661 atagctcctt cctgagtcac gaacaaagga aatcattttt gaagaatctg gggatccttg
+      721 actccaacat gcaggctgct gagcacgtca aggctgctgc caaggtgttc agaaatcaga
+      781 agtaattaat agctaattat agcctattaa tcatcattga ttgaattcct tgaaattaaa
+      841 tggattaaaa taaagctaaa aaccagaaaa aaacaaaaaa acaacaaaac ccaataaaaa
+      901 gaaacccatg acctactccc ctttatcctt ccccaacccc agacaacagg cagccccgta
+      961 gtcttcggtt tccataggtt cttctgggtc caagtctgaa tcccagtcat ccactaatct
+     1021 atcaaataat ggatccattg tgcatagagg tttccatttt ctatttccaa gcagatctgg
+     1081 ggagatcact aaggagagtt ccttaacata gtcgtagatc atagaatgaa attcagattc
+     1141 ataataatca taaggtagtg ctgtcagcat cctcaagatt tgcacataag caatctcctt
+     1201 ttctataaat tgtccagtaa agttgaggtg gcttatgtcc ctctcattca actccactat
+     1261 cattttctta tacagattta ctaatgaatc atctatctgc tccccttctc cgcatctcat
+     1321 gactagggtc atgaagtagc atttctcttc ccaattgtaa tcatagcttt caactctgga
+     1381 cagtttgaaa aatgcaagcg ttggcactcc taaaggccag ctgagggctt ctttgatgtt
+     1441 gggctctgac catttaagct gtctctctat atttaaatat gagatctttt ctatagttgt
+     1501 gtcaaaaaaa gatggtgatt ttcctcttac ttgcaggaaa ggtttgcccc aagcctttgg
+     1561 gagttgtccc ttttcaataa agttcagcaa tctgtaagat gatctttcag acacagcaaa
+     1621 agaagaacat ggaaactcag cacctctgta tctacaaata ggagtatgat aggatccgtt
+     1681 gtgagcagaa tactccacat acactctgga tctatccgta gcggatctag taatgtgtgg
+     1741 tagatcaaaa gcatagcaca gcaactgact catatttgct agtgttctgt gtttatatct
+     1801 caagagggga ctttgtgt
+//

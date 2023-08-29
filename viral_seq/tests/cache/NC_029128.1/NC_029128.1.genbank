@@ -1,0 +1,155 @@
+LOCUS       NC_029128               4229 bp    RNA     linear   VRL 13-AUG-2018
+DEFINITION  Adana virus strain 195 segment M, complete sequence.
+ACCESSION   NC_029128
+VERSION     NC_029128.1
+DBLINK      BioProject: PRJNA485481
+KEYWORDS    RefSeq.
+SOURCE      Adana virus
+  ORGANISM  Adana virus
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Phenuiviridae;
+            Phlebovirus; Phlebovirus adanaense.
+REFERENCE   1  (bases 1 to 4229)
+  AUTHORS   Alkan,C., Alwassouf,S., Piorkowski,G., Bichaud,L., Tezcan,S.,
+            Dincer,E., Ergunay,K., Ozbel,Y., Alten,B., de Lamballerie,X. and
+            Charrel,R.N.
+  TITLE     Isolation, genetic characterization, and seroprevalence of adana
+            virus, a novel phlebovirus belonging to the salehabad virus complex,
+            in Turkey
+  JOURNAL   J. Virol. 89 (8), 4080-4091 (2015)
+   PUBMED   25653443
+REFERENCE   2  (bases 1 to 4229)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-FEB-2016) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 4229)
+  AUTHORS   Alkan,C., Alwassouf,S., De Lamballerie,X., Alten,B., Ergunay,K. and
+            Charrel,R.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-JUN-2014) Aix Marseille Univ, Ird French Institute of
+            Research for Development, Ehesp French School of Public Health,
+            Umr_D 190 'Emergence des Pathologies Virales', Jean Moulin,
+            Marseille, Bouches du Rhone 13005, France
+COMMENT     ##Assembly-Data-START##
+            Assembly Method       :: CLC Genomics Workbench 6 v. Version 6
+            Sequencing Technology :: IonTorrent; Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+            PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to KJ939331.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..4229
+                     /organism="Adana virus"
+                     /mol_type="genomic RNA"
+                     /strain="195"
+                     /host="Phlebotomus sp."
+                     /db_xref="taxon:1611877"
+                     /segment="M"
+                     /country="Turkey"
+                     /collection_date="2012"
+     gene            20..4027
+                     /locus_tag="AXI91_sMgp1"
+                     /db_xref="GeneID:26798119"
+     CDS             20..4027
+                     /locus_tag="AXI91_sMgp1"
+                     /codon_start=1
+                     /product="glycoprotein precursor complex"
+                     /protein_id="YP_009227128.1"
+                     /db_xref="GeneID:26798119"
+                     /translation="MYQLIVLILQRIVLAESKVSLTITSPDYSSLSCFNSAVSAKFVQR
+                     KWATEVSKMGDFDQFCYYNNDIPKRSTGENSQGIMTFVVLSDVPYTFSCVSEDRSKLAI
+                     VHNDGVPSDGEPAYIDCEKGSMIHLLSSSDPDVPKSNPALEEEHELLKERFDDLQLKFN
+                     DNVRRLEAENQDLKVRLDQLHSSRESLKLQKSEQEGNLTQLNAIIHDLTKKVRDGENAV
+                     LNLLSEARRDKEALIQLEEDTDRRLEENDRLIASLKARAHNIIRAPTTVKPLITTAIAV
+                     TLLSSALLVAADREHIDNRPGNGKYHSKQNTYDDNCNLILYNSKCGGWNLQKNQTKYPF
+                     FNSHYHKYSLVEAMHNTILALSNKGVCKILNDSAQRYTECVKDLMPMELECPEGYRYGY
+                     YLNNKGTISGIECDTRYQLSRDCKMCIKTTSEVKGVLPLQDVFCQTGAINYSGPVMTLR
+                     GVCSIGTKRFRECSQVSSSIEKVPFITFDKHQKLYLDSLVMRNVETKSPDNFLCFERKG
+                     QFGAQDQHHTEHATMRRIDPKECKSVTENKQRSCTGDIAFCSAYTCYREYPDTTCEVAP
+                     GSGPVEVFYGGVWTRPSCIGYENTMVTREAVKTLTPRETPCTACVWSCEKEGIKVTSHG
+                     FKMFSAVACAKGSCISTHQEGSTEILIPYPGLTKMSGGKIGIHISHDDQSVSAHLIVRC
+                     KPKPACEVDECTFCFHGLINYQCHTAVSSLIVTTIVVGLIIMIMAIITKMLKIMKLLPS
+                     FTRKPVVWVSLLAKWLVRVCRRVFTARIEGINNAIGWNQDVERPPEVAVRERGRARPVQ
+                     YYLYANAILCLLTTPALCCTENVVASSKISKCVNQGVKTTCRLSGVVTLRAGSIGSEAC
+                     LTIKGPSDDQVEFLTIRTVSSDLVCHEGDSFWTNHFTPKCLSSRRCHLVSECTGDNCQK
+                     WDNRTVSKEFEHMTDNSLMTENVCFEQCGAAGCGCFNVNPSCLFGHTYLMPTRSEAVKI
+                     FECVSWTHRIVLEVSGPNINTREIVLSALSTQIAEWGSITLNLDAEVMNLGNPITFMRT
+                     SSGAMAIVDEPFSRSPRKGFIGEVRCSSEAHAARGDSSCLRAPDLIKYKPQLDMLGCTS
+                     SLIDPYAILLRSSLPQKRGNHVFTTTKDGHSVQAMTSGSVNAEFSILLDSYEVEFKSDQ
+                     TSCDAAFVNITGCYSCNEGAEVCVKVVTTGAGSFFAISDESNQAIQFKVQTGETSRCKI
+                     LHFNKPEVEESFTYSCGGDRKPMIVRGTLIAVGPHDDRVAGGTSVVVNPRASSWSASGW
+                     FSGFISWLGGPLRAFGMIVLYITIAVIIIIIIVLLIRALMIRAAIARAKMQ"
+ORIGIN
+        1 acacaaagtc ggcttgtata tgtatcaact gatagttttg attttacaga gaatcgtttt
+       61 agctgagtct aaagttagtc tcactataac atccccagat tactcatctc ttagttgttt
+      121 taactctgca gtgagtgcta agtttgtgca aagaaagtgg gcaacagaag tttccaaaat
+      181 gggagacttt gaccaattct gctattacaa caatgacatc ccaaagcgct ctacaggaga
+      241 aaactctcag ggcataatga catttgtcgt cctctctgat gtcccctaca cattttcttg
+      301 tgtgagcgaa gacaggtcta agctggctat tgttcataat gatggggttc ccagtgatgg
+      361 cgagccagcg tacatcgatt gtgagaaagg cagcatgata catctcctct cttcctcgga
+      421 ccctgatgtg cccaagtcca atccagcact agaagaggaa catgaactgc taaaggagag
+      481 atttgatgat ttacagctca aattcaatga caatgtgagg cgccttgagg ctgaaaatca
+      541 ggatcttaaa gttagacttg accagctaca tagttctaga gaatctctca aactacagaa
+      601 gtctgagcaa gaaggcaact tgacacagct gaatgcaata attcatgacc tgactaagaa
+      661 ggtcagagat ggtgagaatg ctgtgttgaa tctcttatca gaggccagga gagacaagga
+      721 agccttgatt cagctggagg aagacacgga cagacgactt gaagaaaatg ataggttgat
+      781 agcctctcta aaggctcgag ctcacaacat tatcagagca ccaaccacag tcaagccatt
+      841 gataaccaca gctatagccg ttaccctcct ctcatctgct ttgcttgtag ctgcagacag
+      901 ggagcacata gacaatcgac caggaaacgg aaagtatcat tcaaagcaaa acacctatga
+      961 tgataactgc aacttaattc tatacaacag caagtgtgga gggtggaatc ttcagaaaaa
+     1021 ccaaaccaaa tacccgttct tcaattccca ctaccataag tattctctgg tcgaggcaat
+     1081 gcacaacacc attctagctt tgagtaacaa gggtgtgtgc aaaattctca atgacagtgc
+     1141 ccagcgatac acagagtgtg taaaggacct aatgccaatg gaactagagt gtccagaagg
+     1201 ttaccgctat gggtactatt taaacaataa gggcacaata tcaggtattg agtgtgatac
+     1261 tagatatcaa ttgtcgagag attgcaagat gtgcatcaag actactagtg aagtgaaagg
+     1321 agttctaccc ctgcaagatg ttttttgcca aacaggagct ataaattatt ctggccccgt
+     1381 gatgacgcta agaggagttt gttcaattgg aacaaagagg tttagagagt gctctcaggt
+     1441 ttcatcttct atagagaagg tgcctttcat aacatttgac aaacaccaga aactttatct
+     1501 tgactcattg gttatgagga atgttgagac caaatcacca gataacttcc tgtgctttga
+     1561 gcgtaaaggg cagtttggtg ctcaggacca acaccatacg gagcatgcca ccatgaggag
+     1621 gattgaccca aaggagtgca agagtgtgac agagaataag cagagatcct gcacaggaga
+     1681 catagcattc tgttctgcat acacttgcta cagggaatat ccggatacaa cctgcgaggt
+     1741 ggctcctggt tctggcccag tggaagtctt ctatggtgga gtgtggacac gcccttcttg
+     1801 cataggttat gagaacacca tggtcactcg agaagcagtt aagaccttaa ctcctagaga
+     1861 aaccccatgt actgcctgtg tctggtcctg cgagaaggag ggcatcaaag tgacctccca
+     1921 tggattcaag atgttctctg ctgtggcatg cgcaaaaggt tcatgcatct caactcacca
+     1981 ggaggggtca actgagatat tgataccata cccaggctta acaaagatga gtggagggaa
+     2041 aatagggatt catatttctc atgacgacca gtcagttagt gctcatctaa tagtgagatg
+     2101 caaacctaaa cctgcttgtg aagttgatga gtgcactttc tgcttccatg gattaattaa
+     2161 ctaccagtgt catacagcag tgagctcctt gattgtgaca actatagttg ttggcctcat
+     2221 aatcatgatc atggccatca tcactaagat gttgaagatc atgaagctct taccttcttt
+     2281 caccagaaag ccagttgtct gggtgagcct gcttgctaaa tggcttgtta gagtgtgcag
+     2341 aagagttttc acagctagaa ttgagggaat caacaacgca ataggatgga accaagatgt
+     2401 tgaaagacca cctgaggttg ctgtcaggga gagaggcaga gccagacctg tccaatacta
+     2461 cctatatgcc aatgcaatct tatgcctgct cacgacacct gccctgtgct gtactgaaaa
+     2521 tgtggtggct tcttcaaaga tctccaaatg tgtaaaccaa ggcgtcaaaa ccacttgtag
+     2581 gctttcaggt gttgtgacct tgagagctgg gagcatagga tcagaagcat gtctgacaat
+     2641 taaggggcca tctgatgatc aggttgaatt tctaactatt aggactgtgt ctagtgactt
+     2701 agtgtgtcat gagggtgata gcttctggac aaatcatttc acaccaaagt gcttaagctc
+     2761 aaggagatgt cacttagtct ctgaatgtac aggggacaac tgccagaagt gggacaatag
+     2821 aacggtttca aaagagtttg agcacatgac tgacaactcc ctaatgacag aaaatgtatg
+     2881 ttttgagcag tgtggtgcgg caggatgcgg atgttttaac gtgaacccgt catgcttgtt
+     2941 tggacacacg tacctgatgc ccacacggtc agaggctgtt aaaatatttg agtgtgtttc
+     3001 gtggactcat agaattgttc tagaggtgtc tggccctaac ataaacacaa gggaaattgt
+     3061 actatcagca ctcagcactc agatagcaga gtggggtagt atcacactga atttagatgc
+     3121 tgaagtgatg aacttaggaa accccataac cttcatgaga acttctagtg gagccatggc
+     3181 tattgtggat gaacctttct ctaggtcacc aagaaaagga tttatagggg aggttaggtg
+     3241 ctcatcagaa gcccatgctg caagaggtga tagctcatgt ctgagagctc cagacctgat
+     3301 aaaatacaag cctcaactgg acatgctagg atgcacatct tctttgattg atccttatgc
+     3361 aatattattg cgcagttcac tacctcaaaa gagaggcaat catgtattca ccacaacaaa
+     3421 agatggtcat agcgttcagg caatgacctc tgggtcggtg aacgctgaat tctcaatcct
+     3481 gttggattct tatgaggtag aattcaaatc agatcagacc tcttgtgatg cagcctttgt
+     3541 caatataaca gggtgttact cctgtaatga aggggctgaa gtttgtgtaa aagtagtcac
+     3601 tacaggggct ggatccttct ttgccataag tgatgagtca aatcaagcca ttcagtttaa
+     3661 ggtgcagaca ggagaaactt ccagatgcaa gatcctgcac tttaacaagc ctgaagttga
+     3721 agagagcttc acatactcat gtggaggaga cagaaagcca atgattgtga ggggcaccct
+     3781 cattgctgtt gggcctcatg atgacagggt ggcagggggc acatcagtag ttgttaaccc
+     3841 tagagcaagt tcctggagtg ctagtggctg gttttcagga ttcatttcct ggctaggagg
+     3901 cccactaaga gcttttggca tgatagtgct gtatataacc attgcggtca tcatcattat
+     3961 cataattgtg cttttgatta gagctctgat gatacgagct gccatagcga gagcaaaaat
+     4021 gcaataacct tatctaggcc cttactatca ctctcatcct tccatccact ttcacttacc
+     4081 caatcacctc atccttgggc agcagctctg gctctcacaa agtcagtata gcaatcactg
+     4141 acacaaacac ataacgctct caaatcatca atctcaattg tattaatgtt atgattaatg
+     4201 atggtagttg ttcaagccgg tctttgtgt
+//

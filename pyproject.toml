@@ -12,7 +12,3 @@ viral_seq = "viral_seq.cli.cli:cli"
 name = "viral_seq"
 dynamic = ['version']
 
-[tool.pytest.ini_options]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-]

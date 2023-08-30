@@ -86,6 +86,8 @@ def run_search(
                 else:
                     search_results = Entrez.read(handle)
                     acc_set = acc_set.union(search_results["IdList"])
+                    if int(search_results["Count"]) == 0:
+                        print("Nothing returned for search term:", search_term)
                     count += int(search_results["Count"])
                     remaining -= search_batch_size
                     handle.close()

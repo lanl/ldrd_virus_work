@@ -19,6 +19,7 @@ from sklearn.metrics import (
 )
 from urllib.request import HTTPError
 import time
+from typing import Any
 
 matplotlib.use("Agg")
 
@@ -43,15 +44,21 @@ def run_search(
 ) -> set[str]:
     Entrez.email = email
     acc_set: set[str] = set()
-    for search_term in search_terms:
+    big_search = False
+    if len(search_terms) > 10:
+        big_search = True
+    for search_term in tqdm(search_terms, disable=not big_search):
         # try to prevent timeouts on large search queries
         # by batching
         search_batch_size = min(10_000, retmax)
         count = 0
         remaining = retmax
-        print(f"starting Entrez esearch (search batch size is: {search_batch_size})")
-        print("Search term:", search_term)
-        for retstart in tqdm(range(0, retmax, search_batch_size)):
+        if not big_search:
+            print(
+                f"starting Entrez esearch (search batch size is: {search_batch_size})"
+            )
+            print("Search term:", search_term)
+        for retstart in tqdm(range(0, retmax, search_batch_size), disable=big_search):
             if remaining < search_batch_size:
                 actual_retmax = remaining
             else:
@@ -83,7 +90,8 @@ def run_search(
                     remaining -= search_batch_size
                     handle.close()
                     break
-        print("after Entrez esearch")
+        if not big_search:
+            print("after Entrez esearch")
 
     return acc_set
 
@@ -139,7 +147,7 @@ def filter_records(
 ):
     # Checks the records satisfy the conditions defined
     # If just_assert, it will throw an exception if a record is bad
-    # If just_warn, it will print warnings for bad records but take no action
+    # If just_warn, it will print warnings for bad records but still return them
     # Otherwise, it will return the records that pass
 
     # TODO: current work flow uses hand-picked sequences so these filters are very lenient. Will need stronger filters if workflow changes
@@ -170,14 +178,19 @@ def filter_records(
                 raise AssertionError(record.id, msg)
             else:
                 continue
-        if not just_assert and not just_warn:
-            filtered_records.append(record)
+        filtered_records.append(record)
     if not just_assert and not just_warn:
         print(len(filtered_records), "retained of", len(records), "checked")
         return filtered_records
+    elif just_warn:
+        print(len(filtered_records), " of", len(records), "triggered no warnings")
+        return records
+    elif just_assert:
+        print("All records verified")
+        return records
 
 
-def add_to_cache(records, cache: str = ".cache"):
+def add_to_cache(records, just_warn: bool = False, cache: str = ".cache"):
     cache_path, cache_subdirectories = init_cache(cache)
     # with the records list populated from the online
     # search, we next want to grow the local cache with
@@ -186,7 +199,7 @@ def add_to_cache(records, cache: str = ".cache"):
     print(
         "performing quality analysis of sequences and adding to local cache if they pass..."
     )
-    records = filter_records(records)
+    records = filter_records(records, just_warn=just_warn, verbose=just_warn)
     num_recs_added = 0
     num_recs_excluded = 0
     for record in tqdm(records):
@@ -208,7 +221,9 @@ def add_to_cache(records, cache: str = ".cache"):
     )
 
 
-def load_from_cache(accessions=None, cache: str = ".cache", verbose: bool = True):
+def load_from_cache(
+    accessions=None, cache: str = ".cache", verbose: bool = True, filter: bool = True
+):
     # TODO: Verbose flag added as this call prints too much in certain circumstances but should implement a proper verbose mode
     cache_path, cache_subdirectories = init_cache(cache)
     directories_to_load = []
@@ -235,9 +250,10 @@ def load_from_cache(accessions=None, cache: str = ".cache", verbose: bool = True
     for record_folder in tqdm(directories_to_load, disable=not verbose):
         records.append(_append_recs(record_folder))
     # TODO: if we change data retention filters when scraping, we will possibly need to update the cache
-    if verbose:
-        print("Asserting records loaded from cache conform to quality standards...")
-    filter_records(records, just_assert=True, verbose=verbose)
+    if filter:
+        if verbose:
+            print("Asserting records loaded from cache conform to quality standards...")
+        filter_records(records, just_assert=True, verbose=verbose)
     return records
 
 
@@ -326,6 +342,48 @@ def build_table(
         table.sort_values(by=["Unnamed: 0"], inplace=True)
         table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
+    if save:
+        print(
+            "Saving the pandas DataFrame of genomic data to a parquet file:", filename
+        )
+        table.to_parquet(filename, engine="pyarrow", compression="gzip")
+    return table
+
+
+def build_table_human(
+    rfc=None,
+    save: bool = False,
+    filename: str = "df_human.parquet.gzip",
+    cache: str = ".cache",
+    genomic: bool = True,
+    kmers: bool = True,
+    kmer_k: int = 10,
+    gc: bool = True,
+):
+    records = load_from_cache(cache=cache, filter=False, verbose=False)
+    calculated_feature_rows = []
+    for record in tqdm(records):
+        features: dict[str, Any] = {}
+        this_result = _grab_features(features, [record], genomic, kmers, kmer_k, gc)
+        if this_result is not None:
+            calculated_feature_rows.append(this_result)
+    table = pd.DataFrame.from_records(calculated_feature_rows)
+    if rfc is not None:
+        # add columns from training if missing
+        table = pd.concat(
+            [
+                table,
+                pd.DataFrame(
+                    [[0] * len(rfc.feature_names)],
+                    index=[-1],
+                    columns=rfc.feature_names,
+                ),
+            ]
+        )
+        table.drop(index=-1, inplace=True)
+        # only retain columns from training
+        table = table[rfc.feature_names]
+    table.fillna(0, inplace=True)
     if save:
         print(
             "Saving the pandas DataFrame of genomic data to a parquet file:", filename

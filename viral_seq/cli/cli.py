@@ -86,6 +86,28 @@ def pull_data(email, cache, file):
     sp.add_to_cache(records, cache=cache)
 
 
+# --- pull-search-terms ---
+@cli.command()
+@shared_options(_option_email)
+@shared_options(_option_cache)
+@click.option(
+    "--file",
+    "-f",
+    required=True,
+    help=("Provide a .csv file that contains an 'Search Terms' column. "),
+)
+def pull_search_terms(email, cache, file):
+    """Retrieve the first result from each search term from Pubmed and store locally for further use."""
+    df = pd.read_csv(file)
+    if "Search Terms" not in df:
+        raise ValueError("Provided .csv must contain an 'Search Terms' column.")
+    results = sp.run_search(
+        search_terms=df["Search Terms"].values, retmax=1, email=email
+    )
+    records = sp.load_results(results, email=email)
+    sp.add_to_cache(records, just_warn=True, cache=cache)
+
+
 # --- calculate-table ---
 @cli.command()
 @shared_options(_option_cache)
@@ -159,6 +181,73 @@ def calculate_table(
         raise ValueError("No features selected.")
     sp.build_table(
         df,
+        rfc=rfc,
+        cache=cache,
+        save=True,
+        filename=outfile,
+        genomic=features_genomic,
+        gc=features_gc,
+        kmers=features_kmers,
+        kmer_k=kmer_k,
+    )
+
+
+# --- calculate-table-human ---
+@cli.command()
+@shared_options(_option_cache)
+@click.option(
+    "--rfc-file",
+    default=None,
+    help=("Pickle file of a RandomForestClassifier containing columns to be retained."),
+)
+@click.option(
+    "--outfile",
+    "-o",
+    default="table_human.parquet.gzip",
+    show_default=True,
+    help=(
+        "Output data table contains calculated feature values for each genome in the cache. "
+    ),
+)
+@click.option(
+    "--features-genomic",
+    "-g",
+    is_flag=True,
+    help=("Calculate viral genomic features, including: ..."),
+)
+@click.option(
+    "--features-gc", "-gc", is_flag=True, help=("Calculate GC content feature. ")
+)
+@click.option(
+    "--features-kmers",
+    "-kmers",
+    is_flag=True,
+    help=("Calculate amino acid Kmer features."),
+)
+@click.option(
+    "--kmer-k",
+    "-k",
+    default=10,
+    show_default=True,
+    help=("K value to use for amino acid Kmer calculation."),
+)
+def calculate_table_human(
+    cache,
+    rfc_file,
+    outfile,
+    features_genomic,
+    features_gc,
+    features_kmers,
+    kmer_k,
+):
+    """Build a data table of the selected features from a given cache containing human genes."""
+    rfc = None
+    if rfc_file is not None:
+        with open(rfc_file, "rb") as f:
+            rfc = pickle.load(f)
+    if not features_genomic and not features_gc and not features_kmers:
+        raise ValueError("No features selected.")
+    sp.build_table_human(
         rfc=rfc,
         cache=cache,
         save=True,

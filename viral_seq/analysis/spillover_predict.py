@@ -466,10 +466,22 @@ def cross_validation(
     # TODO: this function should be expanded to allow for hyperparameter search
     cv = StratifiedKFold(n_splits=splits)
     aucs = []
+    print("Number of features in entire dataset:", len(X.columns))
     for fold, (train, test) in enumerate(cv.split(X, y)):
         if isinstance(X, pd.DataFrame):
             X_train = X.iloc[train]
+            # Ensure shared kmers are only those shared in training
+            drop_cols = X_train.columns[(X_train == 0).sum() > X_train.shape[0] - 2]
+            X_train = X_train.drop(columns=drop_cols)
+            print(
+                "Shared features in training retained for fold",
+                fold,
+                ":",
+                len(X_train.columns),
+            )
             X_test = X.iloc[test]
+            # Drop features in test that aren't in training
+            X_test = X_test.drop(columns=drop_cols)
         else:
             X_train = X[train]
             X_test = X[test]

@@ -2,40 +2,94 @@ import rich_click as click
 import viral_seq.analysis.spillover_predict as sp
 import pandas as pd
 import pickle
-
-
-# Function to allow defining click options that can be used for multiple commands
-def shared_options(options):
-    def _add_options(func):
-        for option in reversed(options):
-            func = option(func)
-        return func
-
-    return _add_options
+from functools import partial
 
 
 # Shared options
-_option_email = [
-    click.option(
-        "--email",
-        show_default=True,
-        default="arhall@lanl.gov",
-        help=(
-            "Email used when communicating with Pubmed. "
-            "You may be contacted if requests are deemed excessive. "
-        ),
-    )
-]
+_option_email = partial(
+    click.option,
+    "--email",
+    show_default=True,
+    default="arhall@lanl.gov",
+    help=(
+        "Email used when communicating with Pubmed. "
+        "You may be contacted if requests are deemed excessive. "
+    ),
+)
 
-_option_cache = [
-    click.option(
-        "--cache",
-        "-c",
-        default=".cache",
-        show_default=True,
-        help=("Specify local cache to use for this command. "),
-    )
-]
+_option_cache = partial(
+    click.option,
+    "--cache",
+    "-c",
+    default=".cache",
+    show_default=True,
+    help=("Specify local cache to use for this command. "),
+)
+
+_option_file = partial(
+    click.option,
+    "--file",
+    "-f",
+    required=True,
+    help=("Provide a file to use for this command. "),
+)
+
+_option_rfc_file = partial(
+    click.option,
+    "--rfc-file",
+    default=None,
+    required=True,
+    help=("Pickle file of a RandomForestClassifier to be used for this command. "),
+)
+_option_outfile = partial(
+    click.option,
+    "--outfile",
+    "-o",
+    show_default=True,
+    help=("Name of output file to be saved for this command. "),
+)
+
+_option_features_genomic = partial(
+    click.option,
+    "--features-genomic",
+    "-g",
+    is_flag=True,
+    help=("Calculate viral genomic features, including: ..."),
+)
+
+_option_features_gc = partial(
+    click.option,
+    "--features-gc",
+    "-gc",
+    is_flag=True,
+    help=("Calculate GC content feature. "),
+)
+
+_option_features_kmers = partial(
+    click.option,
+    "--features-kmers",
+    "-kmers",
+    is_flag=True,
+    help=("Calculate amino acid Kmer features."),
+)
+
+_option_kmers_k = partial(
+    click.option,
+    "--kmer-k",
+    "-k",
+    default=10,
+    show_default=True,
+    help=("K value to use for amino acid Kmer calculation."),
+)
+
+_option_prefix = partial(
+    click.option,
+    "--prefix",
+    "-p",
+    default="cli_",
+    show_default=True,
+    help=("Prefix prepended to output files."),
+)
 
 
 @click.group()
@@ -45,8 +99,8 @@ def cli():
 
 # --- search-data ---
 @cli.command()
-@shared_options(_option_email)
-@shared_options(_option_cache)
+@_option_email()
+@_option_cache()
 @click.option(
     "--query", "-q", required=True, help=("Search used on Pubmed to pull records.")
 )
@@ -67,14 +121,9 @@ def search_data(email, query, retmax, cache):
 
 # --- pull-data ---
 @cli.command()
-@shared_options(_option_email)
-@shared_options(_option_cache)
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Provide a .csv file that contains an 'Accessions' column. "),
-)
+@_option_email()
+@_option_cache()
+@_option_file(help=("Provide a .csv file that contains an 'Accessions' column. "))
 def pull_data(email, cache, file):
     """Retrieve accessions from Pubmed and store locally for further use."""
     df = pd.read_csv(file)
@@ -88,14 +137,9 @@ def pull_data(email, cache, file):
 
 # --- pull-search-terms ---
 @cli.command()
-@shared_options(_option_email)
-@shared_options(_option_cache)
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Provide a .csv file that contains an 'Search Terms' column. "),
-)
+@_option_email()
+@_option_cache()
+@_option_file(help=("Provide a .csv file that contains an 'Search Terms' column. "))
 def pull_search_terms(email, cache, file):
     """Retrieve the first result from each search term from Pubmed and store locally for further use."""
     df = pd.read_csv(file)
@@ -110,53 +154,28 @@ def pull_search_terms(email, cache, file):
 
 # --- calculate-table ---
 @cli.command()
-@shared_options(_option_cache)
-@click.option(
-    "--file",
-    "-f",
-    required=True,
+@_option_cache()
+@_option_file(
     help=(
         "A .csv file with the following columns: 'Species', 'Accessions', 'Human Host'. "
-    ),
+    )
 )
-@click.option(
-    "--rfc-file",
-    default=None,
+@_option_rfc_file(
+    required=False,
     help=(
         "Pickle file of a RandomForestClassifier containing columns to be used for training."
     ),
 )
-@click.option(
-    "--outfile",
-    "-o",
+@_option_outfile(
     default="table.parquet.gzip",
-    show_default=True,
     help=(
         "Output data table contains the following columns: 'Species', 'Human Host' and all calculated feature values. "
     ),
 )
-@click.option(
-    "--features-genomic",
-    "-g",
-    is_flag=True,
-    help=("Calculate viral genomic features, including: ..."),
-)
-@click.option(
-    "--features-gc", "-gc", is_flag=True, help=("Calculate GC content feature. ")
-)
-@click.option(
-    "--features-kmers",
-    "-kmers",
-    is_flag=True,
-    help=("Calculate amino acid Kmer features."),
-)
-@click.option(
-    "--kmer-k",
-    "-k",
-    default=10,
-    show_default=True,
-    help=("K value to use for amino acid Kmer calculation."),
-)
+@_option_features_genomic()
+@_option_features_gc()
+@_option_features_kmers()
+@_option_kmers_k()
 def calculate_table(
     cache,
     file,
@@ -194,43 +213,21 @@ def calculate_table(
 
 # --- calculate-table-human ---
 @cli.command()
-@shared_options(_option_cache)
-@click.option(
-    "--rfc-file",
-    default=None,
+@_option_cache()
+@_option_rfc_file(
+    required=False,
     help=("Pickle file of a RandomForestClassifier containing columns to be retained."),
 )
-@click.option(
-    "--outfile",
-    "-o",
+@_option_outfile(
     default="table_human.parquet.gzip",
-    show_default=True,
     help=(
         "Output data table contains calculated feature values for each genome in the cache. "
     ),
 )
-@click.option(
-    "--features-genomic",
-    "-g",
-    is_flag=True,
-    help=("Calculate viral genomic features, including: ..."),
-)
-@click.option(
-    "--features-gc", "-gc", is_flag=True, help=("Calculate GC content feature. ")
-)
-@click.option(
-    "--features-kmers",
-    "-kmers",
-    is_flag=True,
-    help=("Calculate amino acid Kmer features."),
-)
-@click.option(
-    "--kmer-k",
-    "-k",
-    default=10,
-    show_default=True,
-    help=("K value to use for amino acid Kmer calculation."),
-)
+@_option_features_genomic()
+@_option_features_gc()
+@_option_features_kmers()
+@_option_kmers_k()
 def calculate_table_human(
     cache,
     rfc_file,
@@ -261,19 +258,10 @@ def calculate_table_human(
 
 # --- cross-validation ---
 @cli.command()
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Parquet file that contains the data table to run cross validation on."),
+@_option_file(
+    help=("Parquet file that contains the data table to run cross validation on.")
 )
-@click.option(
-    "--prefix",
-    "-p",
-    default="cv_",
-    show_default=True,
-    help=("Prefix prepended to output filenames."),
-)
+@_option_prefix(default="cv_")
 @click.option(
     "--splits",
     "-s",
@@ -289,17 +277,9 @@ def cross_validation(file, prefix, splits):
 
 # --- train ---
 @cli.command()
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Parquet file that contains data table to use for training."),
-)
-@click.option(
-    "--outfile",
-    "-o",
+@_option_file(help=("Parquet file that contains data table to use for training."))
+@_option_outfile(
     default="rfc.p",
-    show_default=True,
     help=("Pickle file of trained RandomForestClassifier."),
 )
 def train(file, outfile):
@@ -310,32 +290,19 @@ def train(file, outfile):
 
 # --- predict ---
 @cli.command()
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Parquet file that contains data table to use for prediction."),
+@_option_file(help=("Parquet file that contains data table to use for prediction."))
+@_option_rfc_file(
+    help=("Pickle file of trained RandomForestClassifer to use for prediction.")
 )
-@click.option(
-    "--rfc-file",
-    required=True,
-    help=("Pickle file of trained RandomForestClassifer to use for prediction."),
-)
-@click.option(
-    "--out-prefix",
-    "-o",
-    default="cli_",
-    show_default=True,
-    help=("Prefix prepended to output files."),
-)
-def predict(file, rfc_file, out_prefix):
+@_option_prefix()
+def predict(file, rfc_file, prefix):
     X, y = sp.get_training_columns(table_filename=file)
-    sp.predict_rfc(X, y, filename=rfc_file, plot=True, out_prefix=out_prefix)
+    sp.predict_rfc(X, y, filename=rfc_file, plot=True, out_prefix=prefix)
 
 
 # --- verify-cache ---
 @cli.command()
-@shared_options(_option_cache)
+@_option_cache()
 def verify_cache(cache):
     """Check local cache for records that do not satisfy filters."""
     records = sp.load_from_cache(cache=cache)
@@ -348,11 +315,8 @@ def verify_cache(cache):
     "files",
     nargs=-1,
 )
-@click.option(
-    "--outfile",
-    "-o",
+@_option_outfile(
     default="roc_plot.png",
-    show_default=True,
     help=("File name of generated plot."),
 )
 @click.option(

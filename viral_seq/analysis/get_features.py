@@ -15,7 +15,7 @@ def get_kmers(records, k=10):
             if feature.type == "CDS":
                 this_seq = feature.location.extract(record.seq).translate()
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                    kmers[str(kmer)] += 1
+                    kmers["kmer_" + str(kmer)] += 1
     return kmers
 
 

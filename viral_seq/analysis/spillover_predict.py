@@ -266,6 +266,17 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc):
     return features
 
 
+def drop_unshared_kmers(df: pd.DataFrame):
+    drop_cols = []
+    for col in df.columns:
+        # checks if column is a kmer column
+        # and, if there are less than two nonzero entries (the number of zeros is greater than total entries minus 2)
+        if col.startswith("kmer_") and (df[col] == 0).sum() > df.shape[0] - 2:
+            drop_cols.append(col)
+    ret = df.drop(columns=drop_cols)
+    return ret
+
+
 def build_table(
     df,
     rfc=None,
@@ -316,11 +327,11 @@ def build_table(
         table.drop(index=-1, inplace=True)
         # only retain columns from training
         table = table[meta_data + rfc.feature_names]
+        table.fillna(0, inplace=True)
     else:
-        # drop a column if 1 or less row has a value
-        # this should only affect kmers
-        table.dropna(axis=1, thresh=2, inplace=True)
-    table.fillna(0, inplace=True)
+        # if we aren't keeping specific columns from a previously trained model, we should drop shared kmers
+        table.fillna(0, inplace=True)
+        table = drop_unshared_kmers(table)
     # required for repeatability, but may be slow
     if ordered:
         table.sort_values(by=["Unnamed: 0"], inplace=True)
@@ -466,10 +477,21 @@ def cross_validation(
     # TODO: this function should be expanded to allow for hyperparameter search
     cv = StratifiedKFold(n_splits=splits)
     aucs = []
+    print("Number of features in entire dataset:", len(X.columns))
     for fold, (train, test) in enumerate(cv.split(X, y)):
         if isinstance(X, pd.DataFrame):
             X_train = X.iloc[train]
+            # After splitting data, kmers may no longer be shared in training
+            X_train = drop_unshared_kmers(X_train)
+            print(
+                "Shared features in training retained for fold",
+                fold,
+                ":",
+                len(X_train.columns),
+            )
             X_test = X.iloc[test]
+            # Drop features in test that aren't in training
+            X_test = X_test[X_train.columns]
         else:
             X_train = X[train]
             X_test = X[test]

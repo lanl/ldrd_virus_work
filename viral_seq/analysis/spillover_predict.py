@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
+import polars as pl
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
     StratifiedKFold,
@@ -353,7 +354,9 @@ def get_training_columns(
         raise ValueError("No data provided to train random forest model.")
     elif df is None:
         print("Loading the pandas DataFrame from a parquet file:", table_filename)
-        df = pd.read_parquet(table_filename, engine="fastparquet")
+        # polars is about 10 minutes faster here for large files
+        # per https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/18#note_258600
+        df = pl.read_parquet(table_filename).to_pandas()
     elif table_filename == "":
         print("Using provided DataFrame")
     else:

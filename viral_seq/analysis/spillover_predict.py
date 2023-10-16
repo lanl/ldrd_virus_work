@@ -259,9 +259,10 @@ def load_from_cache(
     return records
 
 
-def _grab_features(features, records, genomic, kmers, kmer_k, gc):
+def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
     feat_genomic = None
     feat_kmers = None
+    feat_kmers_pc = None
     feat_gc = None
     if genomic:
         feat_genomic = get_genomic_features(records)
@@ -275,6 +276,12 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc):
             return None
         else:
             features.update(feat_kmers)
+    if kmers_pc:
+        feat_kmers_pc = get_kmers(records, k=kmer_k_pc, kmer_type="PC")
+        if feat_kmers_pc is None:
+            return None
+        else:
+            features.update(feat_kmers_pc)
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:
@@ -304,6 +311,8 @@ def build_table(
     genomic: bool = True,
     kmers: bool = True,
     kmer_k: int = 10,
+    kmers_pc: bool = False,
+    kmer_k_pc: int = 10,
     gc: bool = True,
     ordered: bool = True,
 ):
@@ -326,7 +335,9 @@ def build_table(
     meta_data = list(df.columns)
     for species, records in tqdm(records_dict.items()):
         features = row_dict[species].to_dict()
-        this_result = _grab_features(features, records, genomic, kmers, kmer_k, gc)
+        this_result = _grab_features(
+            features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+        )
         if this_result is not None:
             calculated_feature_rows.append(this_result)
     table = pd.DataFrame.from_records(calculated_feature_rows)
@@ -371,13 +382,17 @@ def build_table_human(
     genomic: bool = True,
     kmers: bool = True,
     kmer_k: int = 10,
+    kmers_pc: bool = False,
+    kmer_k_pc: int = 7,
     gc: bool = True,
 ):
     records = load_from_cache(cache=cache, filter=False, verbose=False)
     calculated_feature_rows = []
     for record in tqdm(records):
         features: dict[str, Any] = {}
-        this_result = _grab_features(features, [record], genomic, kmers, kmer_k, gc)
+        this_result = _grab_features(
+            features, [record], genomic, kmers, kmer_k, kmers_pc, kmer_k_pc, gc
+        )
         if this_result is not None:
             calculated_feature_rows.append(this_result)
     table = pd.DataFrame.from_records(calculated_feature_rows)

@@ -73,6 +73,16 @@ _option_features_kmers = partial(
     help=("Calculate amino acid Kmer features."),
 )
 
+_option_features_kmers_pc = partial(
+    click.option,
+    "--features-kmers-pc",
+    "-kmerspc",
+    is_flag=True,
+    help=(
+        "Calculate amino acid Kmer features grouped based on physio-chemical properties."
+    ),
+)
+
 _option_kmers_k = partial(
     click.option,
     "--kmer-k",
@@ -80,6 +90,17 @@ _option_kmers_k = partial(
     default=10,
     show_default=True,
     help=("K value to use for amino acid Kmer calculation."),
+)
+
+_option_kmers_k_pc = partial(
+    click.option,
+    "--kmer-k-pc",
+    "-kpc",
+    default=10,
+    show_default=True,
+    help=(
+        "K value to use for amino acid Kmer calculation grouped based on physio-chemical properties."
+    ),
 )
 
 _option_prefix = partial(
@@ -176,6 +197,8 @@ def pull_search_terms(email, cache, file):
 @_option_features_gc()
 @_option_features_kmers()
 @_option_kmers_k()
+@_option_features_kmers_pc()
+@_option_kmers_k_pc()
 def calculate_table(
     cache,
     file,
@@ -185,6 +208,8 @@ def calculate_table(
     features_gc,
     features_kmers,
     kmer_k,
+    features_kmers_pc,
+    kmer_k_pc,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -196,7 +221,12 @@ def calculate_table(
         raise ValueError(
             "Provided .csv file must contain 'Species', 'Accessions', and 'Human Host' columns."
         )
-    if not features_genomic and not features_gc and not features_kmers:
+    if (
+        not features_genomic
+        and not features_gc
+        and not features_kmers
+        and not features_kmers_pc
+    ):
         raise ValueError("No features selected.")
     sp.build_table(
         df,
@@ -208,6 +238,8 @@ def calculate_table(
         gc=features_gc,
         kmers=features_kmers,
         kmer_k=kmer_k,
+        kmers_pc=features_kmers_pc,
+        kmer_k_pc=kmer_k_pc,
     )
 
 

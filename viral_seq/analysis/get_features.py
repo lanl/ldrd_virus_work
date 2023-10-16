@@ -29,14 +29,34 @@ def get_similarity_features(df_similarity: pd.DataFrame, df_features: pd.DataFra
     return df_features.join(df_simfeats, rsuffix="_sim")
 
 
-def get_kmers(records, k=10):
+def get_kmers(records, k=10, kmer_type="AA"):
     kmers = defaultdict(int)
     for record in records:
         for feature in record.features:
             if feature.type == "CDS":
                 this_seq = feature.location.extract(record.seq).translate()
+                if kmer_type == "PC":
+                    new_seq = ""
+                    for each in this_seq:
+                        if each in "AGV":
+                            new_seq += "A"
+                        elif each in "C":
+                            new_seq += "B"
+                        elif each in "FLIP":
+                            new_seq += "C"
+                        elif each in "MSTY":
+                            new_seq += "D"
+                        elif each in "HNQW":
+                            new_seq += "E"
+                        elif each in "DE":
+                            new_seq += "F"
+                        elif each in "KR":
+                            new_seq += "G"
+                        else:
+                            new_seq += "*"
+                    this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                    kmers["kmer_" + str(kmer)] += 1
+                    kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
     return kmers
 
 

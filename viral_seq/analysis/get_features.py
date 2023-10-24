@@ -12,7 +12,9 @@ for codon in standard_dna_table.stop_codons:
     codontab[codon] = "STOP"
 
 
-def get_similarity_features(df_similarity: pd.DataFrame, df_features: pd.DataFrame):
+def get_similarity_features(
+    df_similarity: pd.DataFrame, df_features: pd.DataFrame, suffix="_sim"
+):
     rows = []
     for i, row in df_features.iterrows():
         feature_row: dict[str, Any] = {}
@@ -26,7 +28,7 @@ def get_similarity_features(df_similarity: pd.DataFrame, df_features: pd.DataFra
             feature_row[feature] = hist_dist.pdf(row[feature])
         rows.append(feature_row)
     df_simfeats = pd.DataFrame.from_records(rows, index="index")
-    return df_features.join(df_simfeats, rsuffix="_sim")
+    return df_features.join(df_simfeats, rsuffix=suffix)
 
 
 def get_kmers(records, k=10):

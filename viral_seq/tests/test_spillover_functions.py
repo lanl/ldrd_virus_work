@@ -3,6 +3,8 @@ import pytest
 from click.testing import CliRunner
 from viral_seq.cli.cli import cli
 import json
+import pandas as pd
+from pandas.testing import assert_frame_equal
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -144,3 +146,55 @@ def test_modelling_cli():
             data = json.load(f)
 
         assert data["AUC"] == pytest.approx(0.38)
+
+
+@pytest.mark.slow
+def test_human_similarity_features(tmp_path):
+    # regression test calculating similarity features
+    search_file = str(
+        files("viral_seq.tests").joinpath("HumanGene_SearchTest.csv").resolve()
+    )
+    expected_table = str(
+        files("viral_seq.tests").joinpath("test_similarity.csv").resolve()
+    )
+    csv_train_str = str(csv_train.resolve())
+    this_cache = files("viral_seq.tests") / "cache"
+    cache_str = str(this_cache.resolve())
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "pull-search-terms",
+                "--file",
+                search_file,
+                "--cache",
+                tmp_path.absolute().as_posix(),
+            ],
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_train_str,
+                "-o",
+                "table.parquet.gzip",
+                "-g",
+                "-sg",
+                "-sc",
+                tmp_path.absolute().as_posix(),
+            ],
+        )
+        assert result.exit_code == 0
+        df_test = pd.read_parquet("table.parquet.gzip")
+        df_expected = pd.read_csv(expected_table)
+        assert_frame_equal(
+            df_test,
+            df_expected,
+            rtol=1e-9,
+            atol=1e-9,
+        )

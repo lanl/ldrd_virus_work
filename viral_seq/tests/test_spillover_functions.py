@@ -151,12 +151,16 @@ def test_modelling_cli():
 @pytest.mark.slow
 def test_human_similarity_features(tmp_path):
     # regression test calculating similarity features
-    search_file = str(
-        files("viral_seq.tests").joinpath("HumanGene_SearchTest.csv").resolve()
+    data_file = str(
+        files("viral_seq.data").joinpath("ISG_transcript_ids.txt").resolve()
     )
     expected_table = str(
         files("viral_seq.tests").joinpath("test_similarity.csv").resolve()
     )
+    search_file = tmp_path / "ids.txt"
+    with open(data_file) as f:
+        with open(search_file, "w") as o:
+            o.writelines(" ".join(f.readlines()[0].split()[:100]))
     csv_train_str = str(csv_train.resolve())
     this_cache = files("viral_seq.tests") / "cache"
     cache_str = str(this_cache.resolve())
@@ -165,7 +169,7 @@ def test_human_similarity_features(tmp_path):
         result = runner.invoke(
             cli,
             [
-                "pull-search-terms",
+                "pull-ensembl-transcripts",
                 "--file",
                 search_file,
                 "--cache",

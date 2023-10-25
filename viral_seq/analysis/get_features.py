@@ -16,16 +16,18 @@ def get_similarity_features(
     df_similarity: pd.DataFrame, df_features: pd.DataFrame, suffix="_sim"
 ):
     rows = []
+    hist_dists = []
+    mask = (df_similarity != 0).to_numpy()
+    for j, feature in enumerate(df_similarity.columns):
+        this_col = df_similarity[feature][mask[..., j]]
+        hist = np.histogram(this_col, bins="auto", density=True)
+        hist_dists.append(scipy.stats.rv_histogram(hist, density=True))
+
     for i, row in df_features.iterrows():
         feature_row: dict[str, Any] = {}
         feature_row["index"] = i
-        for feature in df_similarity.columns:
-            this_col = (
-                df_similarity[feature].loc[df_similarity[feature] != 0].to_numpy()
-            )
-            hist = np.histogram(this_col, bins="auto", density=True)
-            hist_dist = scipy.stats.rv_histogram(hist, density=True)
-            feature_row[feature] = hist_dist.pdf(row[feature])
+        for j, feature in enumerate(df_similarity.columns):
+            feature_row[feature] = hist_dists[j].pdf(row[feature])
         rows.append(feature_row)
     df_simfeats = pd.DataFrame.from_records(rows, index="index")
     return df_features.join(df_simfeats, rsuffix=suffix)

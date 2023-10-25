@@ -87,7 +87,7 @@ def pull_data(email, cache, file):
     sp.add_to_cache(records, cache=cache)
 
 
-# --- pull-search-terms
+# --- pull-ensembl-transcripts
 @cli.command()
 @shared_options(_option_email)
 @shared_options(_option_cache)
@@ -95,15 +95,24 @@ def pull_data(email, cache, file):
     "--file",
     "-f",
     required=True,
-    help=("A .csv file with the following column: 'Search Terms'"),
+    help=("A .txt file of white space delimited ensemble transcript ids"),
 )
-def pull_search_terms(email, cache, file):
-    """Retrieve the first result from each search term from Pubmed and store locally for further use."""
-    df = pd.read_csv(file)
-    if "Search Terms" not in df:
-        raise ValueError("Provided .csv must contain a 'Search Terms' column.")
+def pull_ensembl_transcripts(email, cache, file):
+    """Retrieve the refseq results from Pubmed for the provided transcripts and store locally for further use."""
+    with open(file, "r") as f:
+        lines = f.readlines()
+    search_term = "(biomol_mrna[PROP] AND refseq[filter]) AND("
+    transcripts = lines[0].split()
+    first = True
+    for transcript in transcripts:
+        if first:
+            first = False
+        else:
+            search_term += "OR "
+        search_term += transcript + "[All Fields] "
+    search_term += ")"
     results = sp.run_search(
-        search_terms=df["Search Terms"].values, retmax=1, email=email
+        search_terms=[search_term], retmax=len(transcripts), email=email
     )
     records = sp.load_results(results, email=email)
     sp.add_to_cache(records, just_warn=True, cache=cache)

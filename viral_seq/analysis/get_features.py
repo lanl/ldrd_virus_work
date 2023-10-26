@@ -15,21 +15,22 @@ for codon in standard_dna_table.stop_codons:
 def get_similarity_features(
     df_similarity: pd.DataFrame, df_features: pd.DataFrame, suffix="_sim"
 ):
-    rows = []
-    hist_dists = []
-    mask = (df_similarity != 0).to_numpy()
-    for j, feature in enumerate(df_similarity.columns):
-        this_col = df_similarity[feature][mask[..., j]]
-        hist = np.histogram(this_col, bins="auto", density=True)
-        hist_dists.append(scipy.stats.rv_histogram(hist, density=True))
-
-    for i, row in df_features.iterrows():
-        feature_row: dict[str, Any] = {}
-        feature_row["index"] = i
-        for j, feature in enumerate(df_similarity.columns):
-            feature_row[feature] = hist_dists[j].pdf(row[feature])
-        rows.append(feature_row)
-    df_simfeats = pd.DataFrame.from_records(rows, index="index")
+    hist_dists = np.array([])
+    hists = (
+        df_similarity.where(df_similarity != 0)
+        .apply(
+            lambda x: np.histogram(x[~np.isnan(x)], bins="auto", density=True), axis=0
+        )
+        .values
+    )
+    hist_dists = np.apply_along_axis(
+        scipy.stats.rv_histogram, axis=0, arr=hists, density=True
+    )
+    simfeats: dict[str, Any] = {}
+    for i, feature in enumerate(df_similarity.columns):
+        if feature in df_features:
+            simfeats[feature] = df_features[feature].apply(hist_dists[i].pdf)
+    df_simfeats = pd.DataFrame.from_dict(simfeats)
     return df_features.join(df_simfeats, rsuffix=suffix)
 
 

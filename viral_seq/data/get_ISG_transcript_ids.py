@@ -9,7 +9,6 @@ dataset = mart["hsapiens_gene_ensembl"]
 # retrieved from http://isg.data.cvr.ac.uk/
 df = pd.read_csv("ISG_source.csv")
 ISG_transcript_ids = set()
-bad_not_present: list[str] = []
 batch_size = 100
 genes = list(df["ENSEMBL ID"].values)
 for i in range(0, len(genes), batch_size):

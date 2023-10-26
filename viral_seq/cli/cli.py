@@ -3,6 +3,7 @@ import viral_seq.analysis.spillover_predict as sp
 import viral_seq.analysis.get_features as gf
 import pandas as pd
 import pickle
+import os
 
 
 # Function to allow defining click options that can be used for multiple commands
@@ -234,7 +235,7 @@ def calculate_table(
                 ordered=False,
             )
             df_feats = gf.get_similarity_features(
-                this_table, df_feats, suffix=sim_cache
+                this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
         df_feats.to_parquet(outfile, engine="pyarrow", compression="gzip")
 

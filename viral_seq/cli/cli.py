@@ -233,7 +233,9 @@ def calculate_table(
                 kmers=False,
                 ordered=False,
             )
-            df_feats = gf.get_similarity_features(this_table, df_feats)
+            df_feats = gf.get_similarity_features(
+                this_table, df_feats, suffix=sim_cache
+            )
         df_feats.to_parquet(outfile, engine="pyarrow", compression="gzip")
 
 

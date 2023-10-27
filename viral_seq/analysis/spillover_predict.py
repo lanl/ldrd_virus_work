@@ -402,7 +402,7 @@ def build_table(
                 table.columns[x : x + chunk_size]
                 for x in range(0, len(table.columns), chunk_size)
             ]
-            for i, each in tqdm(enumerate(split_cols)):
+            for i, each in enumerate(split_cols):
                 df = table[each]
                 this_filename = f_list[:]
                 this_filename.insert(-1, "%.2d" % i)

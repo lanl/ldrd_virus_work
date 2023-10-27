@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
+import polars as pl
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
     StratifiedKFold,
@@ -192,7 +193,7 @@ def filter_records(
         return records
 
 
-def add_to_cache(records, just_warn: bool = False, cache: str = ".cache"):
+def add_to_cache(records, cache: str = ".cache", just_warn: bool = False):
     cache_path, cache_subdirectories = init_cache(cache)
     # with the records list populated from the online
     # search, we next want to grow the local cache with
@@ -303,7 +304,7 @@ def drop_unshared_kmers(df: pd.DataFrame):
 
 
 def build_table(
-    df,
+    df=None,
     rfc=None,
     save: bool = False,
     filename: str = "df.parquet.gzip",
@@ -316,30 +317,43 @@ def build_table(
     gc: bool = True,
     ordered: bool = True,
 ):
-    # make a list of all the accessions and a dict to keep track of which species an accession belongs to
-    records_dict: dict[str, list] = {}
-    accessions_dict: dict[str, str] = {}
-    row_dict: dict[str, pd.Series] = {}
-    accessions = []
-    for index, row in df.iterrows():
-        records_dict[row["Species"]] = []
-        row_dict[row["Species"]] = row
-        for accession in row["Accessions"].split():
-            accessions.append(accession)
-            accessions_dict[accession] = row["Species"]
+    features: dict[str, Any] = {}
     calculated_feature_rows = []
-    # we do one call to load all records from cache
-    records_unordered = load_from_cache(accessions, cache=cache, verbose=False)
-    for record in records_unordered:
-        records_dict[accessions_dict[record.id]].append(record)
-    meta_data = list(df.columns)
-    for species, records in tqdm(records_dict.items()):
-        features = row_dict[species].to_dict()
-        this_result = _grab_features(
-            features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
-        )
-        if this_result is not None:
-            calculated_feature_rows.append(this_result)
+    if df is not None:
+        # make a list of all the accessions and a dict to keep track of which species an accession belongs to
+        records_dict: dict[str, list] = {}
+        accessions_dict: dict[str, str] = {}
+        row_dict: dict[str, pd.Series] = {}
+        accessions = []
+        for index, row in df.iterrows():
+            records_dict[row["Species"]] = []
+            row_dict[row["Species"]] = row
+            for accession in row["Accessions"].split():
+                accessions.append(accession)
+                accessions_dict[accession] = row["Species"]
+        # we do one call to load all records from cache
+        records_unordered = load_from_cache(accessions, cache=cache, verbose=False)
+        for record in records_unordered:
+            records_dict[accessions_dict[record.id]].append(record)
+        meta_data = list(df.columns)
+        for species, records in tqdm(records_dict.items()):
+            features = row_dict[species].to_dict()
+            this_result = _grab_features(
+                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+            )
+            if this_result is not None:
+                calculated_feature_rows.append(this_result)
+    else:
+        # build feature table from the entire cache
+        # we don't know what accessions are associated with, treated as one entry (e.g. human features)
+        records = load_from_cache(cache=cache, filter=False, verbose=False)
+        for record in tqdm(records):
+            features = {}
+            this_result = _grab_features(
+                features, [record], genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+            )
+            if this_result is not None:
+                calculated_feature_rows.append(this_result)
     table = pd.DataFrame.from_records(calculated_feature_rows)
     if rfc is not None:
         # add columns from training if missing
@@ -374,52 +388,6 @@ def build_table(
     return table
 
 
-def build_table_human(
-    rfc=None,
-    save: bool = False,
-    filename: str = "df_human.parquet.gzip",
-    cache: str = ".cache",
-    genomic: bool = True,
-    kmers: bool = True,
-    kmer_k: int = 10,
-    kmers_pc: bool = False,
-    kmer_k_pc: int = 7,
-    gc: bool = True,
-):
-    records = load_from_cache(cache=cache, filter=False, verbose=False)
-    calculated_feature_rows = []
-    for record in tqdm(records):
-        features: dict[str, Any] = {}
-        this_result = _grab_features(
-            features, [record], genomic, kmers, kmer_k, kmers_pc, kmer_k_pc, gc
-        )
-        if this_result is not None:
-            calculated_feature_rows.append(this_result)
-    table = pd.DataFrame.from_records(calculated_feature_rows)
-    if rfc is not None:
-        # add columns from training if missing
-        table = pd.concat(
-            [
-                table,
-                pd.DataFrame(
-                    [[0] * len(rfc.feature_names)],
-                    index=[-1],
-                    columns=rfc.feature_names,
-                ),
-            ]
-        )
-        table.drop(index=-1, inplace=True)
-        # only retain columns from training
-        table = table[rfc.feature_names]
-    table.fillna(0, inplace=True)
-    if save:
-        print(
-            "Saving the pandas DataFrame of genomic data to a parquet file:", filename
-        )
-        table.to_parquet(filename, engine="pyarrow", compression="gzip")
-    return table
-
-
 def get_training_columns(
     df=None, class_column: str = "Human Host", table_filename: str = ""
 ):
@@ -428,7 +396,9 @@ def get_training_columns(
         raise ValueError("No data provided to train random forest model.")
     elif df is None:
         print("Loading the pandas DataFrame from a parquet file:", table_filename)
-        df = pd.read_parquet(table_filename, engine="fastparquet")
+        # polars is about 10 minutes faster here for large files
+        # per https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/18#note_258600
+        df = pl.read_parquet(table_filename).to_pandas()
     elif table_filename == "":
         print("Using provided DataFrame")
     else:

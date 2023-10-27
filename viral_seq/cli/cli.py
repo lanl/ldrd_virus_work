@@ -164,9 +164,11 @@ def pull_ensembl_transcripts(email, cache, file):
 @click.option(
     "--kmer-k",
     "-k",
-    default=10,
+    default="10",
     show_default=True,
-    help=("K value to use for amino acid Kmer calculation."),
+    help=(
+        "K value to use for amino acid Kmer calculation. For multiple, enter a whitespace delimited list."
+    ),
 )
 @click.option(
     "--features-kmers-pc",
@@ -177,9 +179,11 @@ def pull_ensembl_transcripts(email, cache, file):
 @click.option(
     "--kmer-k-pc",
     "-kpc",
-    default=10,
+    default="10",
     show_default=True,
-    help=("K value to use for amino acid PC-Kmer calculation."),
+    help=(
+        "K value to use for amino acid PC-Kmer calculation. For multiple, enter a whitespace delimited list."
+    ),
 )
 @click.option(
     "--similarity-genomic",
@@ -233,6 +237,14 @@ def calculate_table(
         raise ValueError(
             "To calculate similarity features, you must provide at least one cache."
         )
+    if features_kmers:
+        kmer_k = [int(i) for i in kmer_k.split()]
+        if len(kmer_k) == 1:
+            kmer_k = kmer_k[0]
+    if features_kmers_pc:
+        kmer_k_pc = [int(i) for i in kmer_k_pc.split()]
+        if len(kmer_k_pc) == 1:
+            kmer_k_pc = kmer_k_pc[0]
     df_feats = sp.build_table(
         df,
         rfc=rfc,

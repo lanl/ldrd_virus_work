@@ -262,8 +262,6 @@ def load_from_cache(
 
 def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
     feat_genomic = None
-    feat_kmers = None
-    feat_kmers_pc = None
     feat_gc = None
     if genomic:
         feat_genomic = get_genomic_features(records)
@@ -272,17 +270,27 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
         else:
             features.update(feat_genomic)
     if kmers:
-        feat_kmers = get_kmers(records, k=kmer_k)
-        if feat_kmers is None:
-            return None
-        else:
-            features.update(feat_kmers)
+        if not isinstance(kmer_k, list):
+            kmer_k = [kmer_k]
+        feat_kmers: dict[str, Any] = {}
+        for this_k in kmer_k:
+            this_res = get_kmers(records, k=this_k)
+            if this_res is None:
+                return None
+            else:
+                feat_kmers.update(this_res)
+        features.update(feat_kmers)
     if kmers_pc:
-        feat_kmers_pc = get_kmers(records, k=kmer_k_pc, kmer_type="PC")
-        if feat_kmers_pc is None:
-            return None
-        else:
-            features.update(feat_kmers_pc)
+        if not isinstance(kmer_k_pc, list):
+            kmer_k_pc = [kmer_k_pc]
+        feat_kmers_pc: dict[str, Any] = {}
+        for this_k in kmer_k_pc:
+            this_res = get_kmers(records, k=this_k, kmer_type="PC")
+            if this_res is None:
+                return None
+            else:
+                feat_kmers_pc.update(this_res)
+        features.update(feat_kmers_pc)
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:

@@ -42,6 +42,7 @@ def get_kmers(records, k=10, kmer_type="AA"):
                 this_seq = feature.location.extract(record.seq).translate()
                 if kmer_type == "PC":
                     new_seq = ""
+                    # Categories defined in https://doi.org/10.1073/pnas.0607879104
                     for each in this_seq:
                         if each in "AGV":
                             new_seq += "A"

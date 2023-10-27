@@ -213,7 +213,6 @@ def test_expanded_kmers(tmp_path):
         files("viral_seq.tests").joinpath("test_expanded_kmers.csv").resolve()
     )
     runner = CliRunner()
-    # we will test most/all of the modeling commands which use the output files of previous commands
     with runner.isolated_filesystem():
         result = runner.invoke(
             cli,

@@ -277,11 +277,15 @@ def calculate_table(
 
 # --- cross-validation ---
 @cli.command()
+@click.argument(
+    "files",
+    nargs=-1,
+)
 @click.option(
     "--file",
     "-f",
-    required=True,
-    help=("Parquet file that contains the data table to run cross validation on."),
+    required=False,
+    help=("Parquet file(s) that contains data table to use for training."),
 )
 @click.option(
     "--prefix",
@@ -297,19 +301,27 @@ def calculate_table(
     show_default=True,
     help=("Number of folds to use for cross validation."),
 )
-def cross_validation(file, prefix, splits):
+def cross_validation(files, file, prefix, splits):
     """Run cross validation on the data table using default parameters"""
+    if file is None:
+        if files is None:
+            raise ValueError("Provide parquet file(s)")
+        file = files
     X, y = sp.get_training_columns(table_filename=file)
     sp.cross_validation(X, y, plot=True, prefix=prefix, splits=splits)
 
 
 # --- train ---
 @cli.command()
+@click.argument(
+    "files",
+    nargs=-1,
+)
 @click.option(
     "--file",
     "-f",
-    required=True,
-    help=("Parquet file that contains data table to use for training."),
+    required=False,
+    help=("Parquet file(s) that contains data table to use for training."),
 )
 @click.option(
     "--outfile",
@@ -318,19 +330,27 @@ def cross_validation(file, prefix, splits):
     show_default=True,
     help=("Pickle file of trained RandomForestClassifier."),
 )
-def train(file, outfile):
+def train(files, file, outfile):
     """Train and save a RandomForestClassifier on the given data table using default parameters"""
+    if file is None:
+        if files is None:
+            raise ValueError("Provide parquet file(s)")
+        file = files
     X, y = sp.get_training_columns(table_filename=file)
     sp.train_rfc(X, y, save=True, filename=outfile)
 
 
 # --- predict ---
 @cli.command()
+@click.argument(
+    "files",
+    nargs=-1,
+)
 @click.option(
     "--file",
     "-f",
-    required=True,
-    help=("Parquet file that contains data table to use for prediction."),
+    required=False,
+    help=("Parquet file(s) that contains data table to use for prediction."),
 )
 @click.option(
     "--rfc-file",
@@ -344,7 +364,11 @@ def train(file, outfile):
     show_default=True,
     help=("Prefix prepended to output files."),
 )
-def predict(file, rfc_file, out_prefix):
+def predict(files, file, rfc_file, out_prefix):
+    if file is None:
+        if files is None:
+            raise ValueError("Provide parquet file(s)")
+        file = files
     X, y = sp.get_training_columns(table_filename=file)
     sp.predict_rfc(X, y, filename=rfc_file, plot=True, out_prefix=out_prefix)
 

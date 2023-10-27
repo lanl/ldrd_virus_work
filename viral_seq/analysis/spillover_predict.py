@@ -324,6 +324,7 @@ def build_table(
     kmer_k_pc: int = 10,
     gc: bool = True,
     ordered: bool = True,
+    chunk_size: int = 20_000,
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
@@ -389,11 +390,47 @@ def build_table(
         table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
     if save:
-        print(
-            "Saving the pandas DataFrame of genomic data to a parquet file:", filename
-        )
-        table.to_parquet(filename, engine="pyarrow", compression="gzip")
+        if len(table.columns) > chunk_size:
+            f_list = filename.split(".")
+            f_print = f_list[:]
+            f_print.insert(-1, "**")
+            print(
+                "Saving the pandas DataFrame of genomic data to a parquet file with pattern:",
+                ".".join(f_print),
+            )
+            split_cols = [
+                table.columns[x : x + chunk_size]
+                for x in range(0, len(table.columns), chunk_size)
+            ]
+            for i, each in tqdm(enumerate(split_cols)):
+                df = table[each]
+                this_filename = f_list[:]
+                this_filename.insert(-1, "%.2d" % i)
+                df.to_parquet(
+                    ".".join(this_filename), engine="pyarrow", compression="gzip"
+                )
+        else:
+            print(
+                "Saving the pandas DataFrame of genomic data to a parquet file:",
+                filename,
+            )
+            table.to_parquet(filename, engine="pyarrow", compression="gzip")
     return table
+
+
+def load_files(files: Any):
+    if isinstance(files, str):
+        file_list = files.split()
+    else:
+        file_list = list(files)
+    # polars is about 10 minutes faster here for large files
+    # per https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/18#note_258600
+    df = pl.read_parquet(file_list[0]).to_pandas()
+    if len(file_list) > 1:
+        for i in range(1, len(file_list)):
+            df_temp = pl.read_parquet(file_list[i]).to_pandas()
+            df = df.join(df_temp)
+    return df
 
 
 def get_training_columns(
@@ -404,9 +441,7 @@ def get_training_columns(
         raise ValueError("No data provided to train random forest model.")
     elif df is None:
         print("Loading the pandas DataFrame from a parquet file:", table_filename)
-        # polars is about 10 minutes faster here for large files
-        # per https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/18#note_258600
-        df = pl.read_parquet(table_filename).to_pandas()
+        df = load_files(table_filename)
     elif table_filename == "":
         print("Using provided DataFrame")
     else:

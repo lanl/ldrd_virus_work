@@ -243,3 +243,42 @@ def test_expanded_kmers(tmp_path):
             rtol=1e-9,
             atol=1e-9,
         )
+
+
+@pytest.mark.slow
+def test_save_load_split_parquet(tmp_path):
+    """Regression test the file splitting of large parquet files"""
+    this_cache = files("viral_seq.tests") / "cache"
+    cache_str = str(this_cache.resolve())
+    csv_train_str = str(csv_train.resolve())
+    str(files("viral_seq.tests").joinpath("test_expanded_kmers.csv").resolve())
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_train_str,
+                "-g",
+                "-gc",
+                "-kmers",
+                "-k",
+                "2 3 4 5 6 7 8 9 10",
+                "-kmerspc",
+                "-kpc",
+                "2 3 4 5 6 7",
+            ],
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli,
+            [
+                "train",
+                "-f",
+                "table.parquet.00.gzip table.parquet.01.gzip",
+            ],
+        )
+        assert result.exit_code == 0

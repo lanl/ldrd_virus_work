@@ -2,10 +2,36 @@ from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
 from Bio.SeqUtils import gc_fraction
 from skbio import Sequence
+from typing import Any
+import pandas as pd
+import numpy as np
+import scipy.stats
 
 codontab = standard_dna_table.forward_table.copy()
 for codon in standard_dna_table.stop_codons:
     codontab[codon] = "STOP"
+
+
+def get_similarity_features(
+    df_similarity: pd.DataFrame, df_features: pd.DataFrame, suffix="_sim"
+):
+    hist_dists = np.array([])
+    hists = (
+        df_similarity.where(df_similarity != 0)
+        .apply(
+            lambda x: np.histogram(x[~np.isnan(x)], bins="auto", density=True), axis=0
+        )
+        .values
+    )
+    hist_dists = np.apply_along_axis(
+        scipy.stats.rv_histogram, axis=0, arr=hists, density=True
+    )
+    simfeats: dict[str, Any] = {}
+    for i, feature in enumerate(df_similarity.columns):
+        if feature in df_features:
+            simfeats[feature] = df_features[feature].apply(hist_dists[i].pdf)
+    df_simfeats = pd.DataFrame.from_dict(simfeats)
+    return df_features.join(df_simfeats, rsuffix=suffix)
 
 
 def get_kmers(records, k=10):

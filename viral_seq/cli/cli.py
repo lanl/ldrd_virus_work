@@ -1,7 +1,9 @@
 import rich_click as click
 import viral_seq.analysis.spillover_predict as sp
+import viral_seq.analysis.get_features as gf
 import pandas as pd
 import pickle
+import os
 
 
 # Function to allow defining click options that can be used for multiple commands
@@ -86,6 +88,37 @@ def pull_data(email, cache, file):
     sp.add_to_cache(records, cache=cache)
 
 
+# --- pull-ensembl-transcripts
+@cli.command()
+@shared_options(_option_email)
+@shared_options(_option_cache)
+@click.option(
+    "--file",
+    "-f",
+    required=True,
+    help=("A .txt file of white space delimited ensemble transcript ids"),
+)
+def pull_ensembl_transcripts(email, cache, file):
+    """Retrieve the refseq results from Pubmed for the provided transcripts and store locally for further use."""
+    with open(file, "r") as f:
+        lines = f.readlines()
+    search_term = "(biomol_mrna[PROP] AND refseq[filter]) AND("
+    transcripts = lines[0].split()
+    first = True
+    for transcript in transcripts:
+        if first:
+            first = False
+        else:
+            search_term += "OR "
+        search_term += transcript + "[All Fields] "
+    search_term += ")"
+    results = sp.run_search(
+        search_terms=[search_term], retmax=len(transcripts), email=email
+    )
+    records = sp.load_results(results, email=email)
+    sp.add_to_cache(records, just_warn=True, cache=cache)
+
+
 # --- calculate-table ---
 @cli.command()
 @shared_options(_option_cache)
@@ -135,6 +168,19 @@ def pull_data(email, cache, file):
     show_default=True,
     help=("K value to use for amino acid Kmer calculation."),
 )
+@click.option(
+    "--similarity-genomic",
+    "-sg",
+    is_flag=True,
+    help=("Calculate genomic similarity features"),
+)
+@click.option(
+    "--similarity-cache",
+    "-sc",
+    help=(
+        "Cache folders to use when calculating similarity features, whitespace delimited. Required if similarity feature is selected."
+    ),
+)
 def calculate_table(
     cache,
     file,
@@ -144,6 +190,8 @@ def calculate_table(
     features_gc,
     features_kmers,
     kmer_k,
+    similarity_genomic,
+    similarity_cache,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -157,17 +205,39 @@ def calculate_table(
         )
     if not features_genomic and not features_gc and not features_kmers:
         raise ValueError("No features selected.")
-    sp.build_table(
+    if similarity_genomic and not features_genomic:
+        raise ValueError(
+            "To calculate genomic similarity features, you must calculate genomic features."
+        )
+    if similarity_genomic and not similarity_cache:
+        raise ValueError(
+            "To calculate similarity features, you must provide at least one cache."
+        )
+    df_feats = sp.build_table(
         df,
         rfc=rfc,
         cache=cache,
-        save=True,
+        save=(not similarity_genomic),
         filename=outfile,
         genomic=features_genomic,
         gc=features_gc,
         kmers=features_kmers,
         kmer_k=kmer_k,
     )
+    if similarity_genomic:
+        for sim_cache in similarity_cache.split():
+            this_table = sp.build_table(
+                cache=sim_cache,
+                save=False,
+                genomic=similarity_genomic,
+                gc=False,
+                kmers=False,
+                ordered=False,
+            )
+            df_feats = gf.get_similarity_features(
+                this_table, df_feats, suffix=os.path.basename(sim_cache)
+            )
+        df_feats.to_parquet(outfile, engine="pyarrow", compression="gzip")
 
 
 # --- cross-validation ---

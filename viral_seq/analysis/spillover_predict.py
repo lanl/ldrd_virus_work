@@ -20,6 +20,7 @@ from sklearn.metrics import (
 )
 from urllib.request import HTTPError
 import time
+from typing import Any
 
 matplotlib.use("Agg")
 
@@ -44,15 +45,21 @@ def run_search(
 ) -> set[str]:
     Entrez.email = email
     acc_set: set[str] = set()
-    for search_term in search_terms:
+    big_search = False
+    if len(search_terms) > 10:
+        big_search = True
+    for search_term in tqdm(search_terms, disable=not big_search):
         # try to prevent timeouts on large search queries
         # by batching
         search_batch_size = min(10_000, retmax)
         count = 0
         remaining = retmax
-        print(f"starting Entrez esearch (search batch size is: {search_batch_size})")
-        print("Search term:", search_term)
-        for retstart in tqdm(range(0, retmax, search_batch_size)):
+        if not big_search:
+            print(
+                f"starting Entrez esearch (search batch size is: {search_batch_size})"
+            )
+            print("Search term:", search_term)
+        for retstart in tqdm(range(0, retmax, search_batch_size), disable=big_search):
             if remaining < search_batch_size:
                 actual_retmax = remaining
             else:
@@ -80,11 +87,14 @@ def run_search(
                 else:
                     search_results = Entrez.read(handle)
                     acc_set = acc_set.union(search_results["IdList"])
+                    if int(search_results["Count"]) == 0:
+                        print("Nothing returned for search term:", search_term)
                     count += int(search_results["Count"])
                     remaining -= search_batch_size
                     handle.close()
                     break
-        print("after Entrez esearch")
+        if not big_search:
+            print("after Entrez esearch")
 
     return acc_set
 
@@ -140,7 +150,7 @@ def filter_records(
 ):
     # Checks the records satisfy the conditions defined
     # If just_assert, it will throw an exception if a record is bad
-    # If just_warn, it will print warnings for bad records but take no action
+    # If just_warn, it will print warnings for bad records but still return them
     # Otherwise, it will return the records that pass
 
     # TODO: current work flow uses hand-picked sequences so these filters are very lenient. Will need stronger filters if workflow changes
@@ -171,14 +181,19 @@ def filter_records(
                 raise AssertionError(record.id, msg)
             else:
                 continue
-        if not just_assert and not just_warn:
-            filtered_records.append(record)
+        filtered_records.append(record)
     if not just_assert and not just_warn:
         print(len(filtered_records), "retained of", len(records), "checked")
         return filtered_records
+    elif just_warn:
+        print(len(filtered_records), " of", len(records), "triggered no warnings")
+        return records
+    elif just_assert:
+        print("All records verified")
+        return records
 
 
-def add_to_cache(records, cache: str = ".cache"):
+def add_to_cache(records, cache: str = ".cache", just_warn: bool = False):
     cache_path, cache_subdirectories = init_cache(cache)
     # with the records list populated from the online
     # search, we next want to grow the local cache with
@@ -187,7 +202,7 @@ def add_to_cache(records, cache: str = ".cache"):
     print(
         "performing quality analysis of sequences and adding to local cache if they pass..."
     )
-    records = filter_records(records)
+    records = filter_records(records, just_warn=just_warn, verbose=just_warn)
     num_recs_added = 0
     num_recs_excluded = 0
     for record in tqdm(records):
@@ -209,7 +224,9 @@ def add_to_cache(records, cache: str = ".cache"):
     )
 
 
-def load_from_cache(accessions=None, cache: str = ".cache", verbose: bool = True):
+def load_from_cache(
+    accessions=None, cache: str = ".cache", verbose: bool = True, filter: bool = True
+):
     # TODO: Verbose flag added as this call prints too much in certain circumstances but should implement a proper verbose mode
     cache_path, cache_subdirectories = init_cache(cache)
     directories_to_load = []
@@ -236,9 +253,10 @@ def load_from_cache(accessions=None, cache: str = ".cache", verbose: bool = True
     for record_folder in tqdm(directories_to_load, disable=not verbose):
         records.append(_append_recs(record_folder))
     # TODO: if we change data retention filters when scraping, we will possibly need to update the cache
-    if verbose:
-        print("Asserting records loaded from cache conform to quality standards...")
-    filter_records(records, just_assert=True, verbose=verbose)
+    if filter:
+        if verbose:
+            print("Asserting records loaded from cache conform to quality standards...")
+        filter_records(records, just_assert=True, verbose=verbose)
     return records
 
 
@@ -279,7 +297,7 @@ def drop_unshared_kmers(df: pd.DataFrame):
 
 
 def build_table(
-    df,
+    df=None,
     rfc=None,
     save: bool = False,
     filename: str = "df.parquet.gzip",
@@ -290,28 +308,39 @@ def build_table(
     gc: bool = True,
     ordered: bool = True,
 ):
-    # make a list of all the accessions and a dict to keep track of which species an accession belongs to
-    records_dict: dict[str, list] = {}
-    accessions_dict: dict[str, str] = {}
-    row_dict: dict[str, pd.Series] = {}
-    accessions = []
-    for index, row in df.iterrows():
-        records_dict[row["Species"]] = []
-        row_dict[row["Species"]] = row
-        for accession in row["Accessions"].split():
-            accessions.append(accession)
-            accessions_dict[accession] = row["Species"]
+    features: dict[str, Any] = {}
     calculated_feature_rows = []
-    # we do one call to load all records from cache
-    records_unordered = load_from_cache(accessions, cache=cache, verbose=False)
-    for record in records_unordered:
-        records_dict[accessions_dict[record.id]].append(record)
-    meta_data = list(df.columns)
-    for species, records in tqdm(records_dict.items()):
-        features = row_dict[species].to_dict()
-        this_result = _grab_features(features, records, genomic, kmers, kmer_k, gc)
-        if this_result is not None:
-            calculated_feature_rows.append(this_result)
+    if df is not None:
+        # make a list of all the accessions and a dict to keep track of which species an accession belongs to
+        records_dict: dict[str, list] = {}
+        accessions_dict: dict[str, str] = {}
+        row_dict: dict[str, pd.Series] = {}
+        accessions = []
+        for index, row in df.iterrows():
+            records_dict[row["Species"]] = []
+            row_dict[row["Species"]] = row
+            for accession in row["Accessions"].split():
+                accessions.append(accession)
+                accessions_dict[accession] = row["Species"]
+        # we do one call to load all records from cache
+        records_unordered = load_from_cache(accessions, cache=cache, verbose=False)
+        for record in records_unordered:
+            records_dict[accessions_dict[record.id]].append(record)
+        meta_data = list(df.columns)
+        for species, records in tqdm(records_dict.items()):
+            features = row_dict[species].to_dict()
+            this_result = _grab_features(features, records, genomic, kmers, kmer_k, gc)
+            if this_result is not None:
+                calculated_feature_rows.append(this_result)
+    else:
+        # build feature table from the entire cache
+        # we don't know what accessions are associated with, treated as one entry (e.g. human features)
+        records = load_from_cache(cache=cache, filter=False, verbose=False)
+        for record in tqdm(records):
+            features = {}
+            this_result = _grab_features(features, [record], genomic, kmers, kmer_k, gc)
+            if this_result is not None:
+                calculated_feature_rows.append(this_result)
     table = pd.DataFrame.from_records(calculated_feature_rows)
     if rfc is not None:
         # add columns from training if missing

@@ -429,7 +429,8 @@ def load_files(files: Any):
     if len(file_list) > 1:
         for i in range(1, len(file_list)):
             df_temp = pl.read_parquet(file_list[i]).to_pandas()
-            df = df.join(df_temp)
+            non_duplicate_columns = df_temp.columns.difference(df.columns)
+            df = df.join(df_temp[non_duplicate_columns])
     return df
 
 

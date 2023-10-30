@@ -239,12 +239,8 @@ def calculate_table(
         )
     if features_kmers:
         kmer_k = [int(i) for i in kmer_k.split()]
-        if len(kmer_k) == 1:
-            kmer_k = kmer_k[0]
     if features_kmers_pc:
         kmer_k_pc = [int(i) for i in kmer_k_pc.split()]
-        if len(kmer_k_pc) == 1:
-            kmer_k_pc = kmer_k_pc[0]
     df_feats = sp.build_table(
         df,
         rfc=rfc,

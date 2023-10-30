@@ -270,8 +270,6 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
         else:
             features.update(feat_genomic)
     if kmers:
-        if not isinstance(kmer_k, list):
-            kmer_k = [kmer_k]
         feat_kmers: dict[str, Any] = {}
         for this_k in kmer_k:
             this_res = get_kmers(records, k=this_k)
@@ -281,8 +279,6 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
                 feat_kmers.update(this_res)
         features.update(feat_kmers)
     if kmers_pc:
-        if not isinstance(kmer_k_pc, list):
-            kmer_k_pc = [kmer_k_pc]
         feat_kmers_pc: dict[str, Any] = {}
         for this_k in kmer_k_pc:
             this_res = get_kmers(records, k=this_k, kmer_type="PC")

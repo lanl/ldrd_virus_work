@@ -389,11 +389,11 @@ def build_table(
                 calculated_feature_rows.append(this_result)
     if uni_select:
         print("Performing univariate selection.")
+        print("Initial load of data...")
+        t_start = time.perf_counter()
         keepers = []
         feat_groups = defaultdict(list)
         # LazyFrame to prevent loading everything into memory yet
-        print("Initial load of data...")
-        t_start = time.perf_counter()
         lf = pl.LazyFrame(calculated_feature_rows)
         for feat in lf.columns:
             if feat.startswith("kmer_AA"):

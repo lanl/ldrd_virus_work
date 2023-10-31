@@ -198,6 +198,30 @@ def pull_ensembl_transcripts(email, cache, file):
         "Cache folders to use when calculating similarity features, whitespace delimited. Required if similarity feature is selected."
     ),
 )
+@click.option(
+    "--uni-select",
+    "-u",
+    is_flag=True,
+    help=("Filter features after calculation based on univariate feature selection."),
+)
+@click.option(
+    "--uni-type",
+    "-ut",
+    default="mutual_info_classif",
+    show_default=True,
+    help=(
+        "Selection method for univariate feature selection. Options: chi2, mutual_info_classif, f_classif"
+    ),
+)
+@click.option(
+    "--num-select",
+    "-n",
+    default=1_000,
+    show_default=True,
+    help=(
+        "Number of features per category to retain when filtering with univariate selection."
+    ),
+)
 def calculate_table(
     cache,
     file,
@@ -211,6 +235,9 @@ def calculate_table(
     kmer_k_pc,
     similarity_genomic,
     similarity_cache,
+    uni_select,
+    uni_type,
+    num_select,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -253,6 +280,9 @@ def calculate_table(
         gc=features_gc,
         kmers=features_kmers,
         kmer_k=kmer_k,
+        uni_select=uni_select,
+        uni_type=uni_type,
+        num_select=num_select,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():

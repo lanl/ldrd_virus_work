@@ -18,9 +18,11 @@ from sklearn.metrics import (
     roc_auc_score,
     auc,
 )
+from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif, f_classif
 from urllib.request import HTTPError
 import time
 from typing import Any
+from collections import defaultdict
 
 matplotlib.use("Agg")
 
@@ -260,23 +262,30 @@ def load_from_cache(
     return records
 
 
-def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
+def _grab_features(
+    features,
+    records,
+    genomic,
+    kmers,
+    kmer_k,
+    gc,
+    kmers_pc,
+    kmer_k_pc,
+):
     feat_genomic = None
     feat_gc = None
     if genomic:
         feat_genomic = get_genomic_features(records)
         if feat_genomic is None:
             return None
-        else:
-            features.update(feat_genomic)
+        features.update(feat_genomic)
     if kmers:
         feat_kmers: dict[str, Any] = {}
         for this_k in kmer_k:
             this_res = get_kmers(records, k=this_k)
             if this_res is None:
                 return None
-            else:
-                feat_kmers.update(this_res)
+            feat_kmers.update(this_res)
         features.update(feat_kmers)
     if kmers_pc:
         feat_kmers_pc: dict[str, Any] = {}
@@ -284,16 +293,26 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
             this_res = get_kmers(records, k=this_k, kmer_type="PC")
             if this_res is None:
                 return None
-            else:
-                feat_kmers_pc.update(this_res)
+            feat_kmers_pc.update(this_res)
         features.update(feat_kmers_pc)
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:
             return None
-        else:
-            features.update(feat_gc)
+        features.update(feat_gc)
     return features
+
+
+def univariate_selection(X, y, uni_type, num_select):
+    if uni_type == "chi2":
+        sel_ = SelectKBest(chi2, k=num_select).fit(X, y)
+    elif uni_type == "mutual_info_classif":
+        sel_ = SelectKBest(mutual_info_classif, k=num_select).fit(X, y)
+    elif uni_type == "f_classif":
+        sel_ = SelectKBest(f_classif, k=num_select).fit(X, y)
+    else:
+        raise ValueError("Univariate selection type not understood")
+    return list(X.columns[(sel_.get_support())])
 
 
 def drop_unshared_kmers(df: pd.DataFrame):
@@ -320,6 +339,9 @@ def build_table(
     kmer_k_pc: int = 10,
     gc: bool = True,
     ordered: bool = True,
+    uni_select: bool = False,
+    uni_type: str = "mutual_info_classif",
+    num_select: int = 1_000,
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
@@ -343,7 +365,14 @@ def build_table(
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
             this_result = _grab_features(
-                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+                features,
+                records,
+                genomic,
+                kmers,
+                kmer_k,
+                gc,
+                kmers_pc,
+                kmer_k_pc,
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
@@ -358,7 +387,45 @@ def build_table(
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
-    table = pd.DataFrame.from_records(calculated_feature_rows)
+    if uni_select:
+        print("Performing univariate selection.")
+        keepers = []
+        feat_groups = defaultdict(list)
+        # LazyFrame to prevent loading everything into memory yet
+        print("Initial load of data...")
+        t_start = time.perf_counter()
+        lf = pl.LazyFrame(calculated_feature_rows)
+        for feat in lf.columns:
+            if feat.startswith("kmer_AA"):
+                feat_groups["kmer_AA_len" + str(len(feat))].append(feat)
+            elif feat.startswith("kmer_PC"):
+                feat_groups["kmer_PC_len" + str(len(feat))].append(feat)
+            else:
+                keepers.append(feat)
+        print("Data load completed in", time.perf_counter() - t_start, "s")
+        for val in feat_groups.values():
+            if len(val) > num_select:
+                if val[0].startswith("kmer_AA"):
+                    print("Selecting on AA kmers, k =", len(val[0]) - 8)
+                elif k.startswith("kmer_PC"):
+                    print("Selecting on PC kmers, k =", len(val[0]) - 8)
+                t_start = time.perf_counter()
+                # we need to pass a df of these columns to select best
+                temp_df = lf.select(val).collect().to_pandas()
+                res = univariate_selection(
+                    drop_unshared_kmers(temp_df.fillna(0)),
+                    df["Human Host"].to_numpy().flatten(),
+                    uni_type,
+                    num_select,
+                )
+                keepers += res
+                print("Finished category in", time.perf_counter() - t_start, "s")
+        print("Building final table...")
+        t_start = time.perf_counter()
+        table = lf.select(keepers).collect().to_pandas()
+        print("Finished in", time.perf_counter() - t_start, "s")
+    else:
+        table = pl.from_records(calculated_feature_rows).to_pandas()
     if rfc is not None:
         # add columns from training if missing
         table = pd.concat(

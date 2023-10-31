@@ -315,9 +315,9 @@ def build_table(
     cache: str = ".cache",
     genomic: bool = True,
     kmers: bool = True,
-    kmer_k: int = 10,
+    kmer_k: list[int] = [10],
     kmers_pc: bool = False,
-    kmer_k_pc: int = 10,
+    kmer_k_pc: list[int] = [10],
     gc: bool = True,
     ordered: bool = True,
 ):

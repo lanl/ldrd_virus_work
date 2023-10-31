@@ -204,7 +204,7 @@ def test_human_similarity_features(tmp_path):
         )
 
 
-def test_expanded_kmers(tmp_path):
+def test_expanded_kmers():
     # regression test calculation of kmers, including PC kmers and calculating multiple kmers at once
     this_cache = files("viral_seq.tests") / "cache"
     cache_str = str(this_cache.resolve())

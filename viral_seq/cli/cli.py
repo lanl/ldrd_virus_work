@@ -164,9 +164,26 @@ def pull_ensembl_transcripts(email, cache, file):
 @click.option(
     "--kmer-k",
     "-k",
-    default=10,
+    default="10",
     show_default=True,
-    help=("K value to use for amino acid Kmer calculation."),
+    help=(
+        "K value to use for amino acid Kmer calculation. For multiple, enter a whitespace delimited list."
+    ),
+)
+@click.option(
+    "--features-kmers-pc",
+    "-kmerspc",
+    is_flag=True,
+    help=("Calculate amino acid PC-Kmer features."),
+)
+@click.option(
+    "--kmer-k-pc",
+    "-kpc",
+    default="10",
+    show_default=True,
+    help=(
+        "K value to use for amino acid PC-Kmer calculation. For multiple, enter a whitespace delimited list."
+    ),
 )
 @click.option(
     "--similarity-genomic",
@@ -190,6 +207,8 @@ def calculate_table(
     features_gc,
     features_kmers,
     kmer_k,
+    features_kmers_pc,
+    kmer_k_pc,
     similarity_genomic,
     similarity_cache,
 ):
@@ -203,7 +222,12 @@ def calculate_table(
         raise ValueError(
             "Provided .csv file must contain 'Species', 'Accessions', and 'Human Host' columns."
         )
-    if not features_genomic and not features_gc and not features_kmers:
+    if (
+        not features_genomic
+        and not features_gc
+        and not features_kmers
+        and not features_kmers_pc
+    ):
         raise ValueError("No features selected.")
     if similarity_genomic and not features_genomic:
         raise ValueError(
@@ -213,10 +237,16 @@ def calculate_table(
         raise ValueError(
             "To calculate similarity features, you must provide at least one cache."
         )
+    if features_kmers:
+        kmer_k = [int(i) for i in kmer_k.split()]
+    if features_kmers_pc:
+        kmer_k_pc = [int(i) for i in kmer_k_pc.split()]
     df_feats = sp.build_table(
         df,
         rfc=rfc,
         cache=cache,
+        kmers_pc=features_kmers_pc,
+        kmer_k_pc=kmer_k_pc,
         save=(not similarity_genomic),
         filename=outfile,
         genomic=features_genomic,
@@ -232,6 +262,7 @@ def calculate_table(
                 genomic=similarity_genomic,
                 gc=False,
                 kmers=False,
+                kmers_pc=False,
                 ordered=False,
             )
             df_feats = gf.get_similarity_features(

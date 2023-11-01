@@ -260,9 +260,17 @@ def load_from_cache(
     return records
 
 
-def _grab_features(features, records, genomic, kmers, kmer_k, gc):
+def _populate_kmer_dict(kmer, records, features, kmer_type="AA"):
+    for this_k in kmer:
+        this_res = get_kmers(records, k=this_k, kmer_type=kmer_type)
+        if this_res is None:
+            return None
+        else:
+            features.update(this_res)
+
+
+def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
     feat_genomic = None
-    feat_kmers = None
     feat_gc = None
     if genomic:
         feat_genomic = get_genomic_features(records)
@@ -271,11 +279,9 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc):
         else:
             features.update(feat_genomic)
     if kmers:
-        feat_kmers = get_kmers(records, k=kmer_k)
-        if feat_kmers is None:
-            return None
-        else:
-            features.update(feat_kmers)
+        _populate_kmer_dict(kmer_k, records, features)
+    if kmers_pc:
+        _populate_kmer_dict(kmer_k_pc, records, features, kmer_type="PC")
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:
@@ -304,7 +310,9 @@ def build_table(
     cache: str = ".cache",
     genomic: bool = True,
     kmers: bool = True,
-    kmer_k: int = 10,
+    kmer_k: list[int] = [10],
+    kmers_pc: bool = False,
+    kmer_k_pc: list[int] = [10],
     gc: bool = True,
     ordered: bool = True,
 ):
@@ -329,7 +337,9 @@ def build_table(
         meta_data = list(df.columns)
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
-            this_result = _grab_features(features, records, genomic, kmers, kmer_k, gc)
+            this_result = _grab_features(
+                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+            )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
     else:
@@ -338,7 +348,9 @@ def build_table(
         records = load_from_cache(cache=cache, filter=False, verbose=False)
         for record in tqdm(records):
             features = {}
-            this_result = _grab_features(features, [record], genomic, kmers, kmer_k, gc)
+            this_result = _grab_features(
+                features, [record], genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+            )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
     table = pd.DataFrame.from_records(calculated_feature_rows)

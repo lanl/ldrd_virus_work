@@ -243,3 +243,46 @@ def test_expanded_kmers():
             rtol=1e-9,
             atol=1e-9,
         )
+
+
+def test_univariate_selection():
+    # regression selecting of features after calculation
+    this_cache = files("viral_seq.tests") / "cache"
+    cache_str = str(this_cache.resolve())
+    csv_train_str = str(csv_train.resolve())
+    expected_table = str(
+        files("viral_seq.tests").joinpath("test_uni_select.csv").resolve()
+    )
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_train_str,
+                "-kmers",
+                "-k",
+                "2",
+                "-u",
+                "-ut",
+                "chi2",
+                "-n",
+                "100",
+            ],
+        )
+        assert result.exit_code == 0
+        assert (
+            "Saving the pandas DataFrame of genomic data to a parquet file"
+            in result.output
+        )
+        df_test = pd.read_parquet("table.parquet.gzip")
+        df_expected = pd.read_csv(expected_table)
+        assert_frame_equal(
+            df_test,
+            df_expected,
+            rtol=1e-9,
+            atol=1e-9,
+        )

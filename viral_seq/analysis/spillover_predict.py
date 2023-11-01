@@ -385,8 +385,8 @@ def build_table(
         t_start = time.perf_counter()
         keepers = []
         feat_groups = defaultdict(list)
-        lf = pl.LazyFrame(calculated_feature_rows)
-        for feat in lf.columns:
+        df = pl.from_records(calculated_feature_rows)
+        for feat in df.columns:
             if feat.startswith(prefix_AA):
                 feat_groups[prefix_AA + "len" + str(len(feat))].append(feat)
             elif feat.startswith(prefix_PC):
@@ -402,7 +402,7 @@ def build_table(
                     print("Selecting on PC kmers, k =", len(val[0]) - len(prefix_PC))
                 t_start = time.perf_counter()
                 # we need to pass a df of these columns to select best
-                temp_df = lf.select(val).collect().to_pandas()
+                temp_df = df.select(val).to_pandas()
                 res = univariate_selection(
                     drop_unshared_kmers(temp_df.fillna(0)),
                     df["Human Host"].to_numpy().flatten(),
@@ -413,7 +413,7 @@ def build_table(
                 print("Finished category in", time.perf_counter() - t_start, "s")
         print("Building final table...")
         t_start = time.perf_counter()
-        table = lf.select(keepers).collect().to_pandas()
+        table = df.select(keepers).to_pandas()
         print("Finished in", time.perf_counter() - t_start, "s")
     else:
         table = pl.from_records(calculated_feature_rows).to_pandas()

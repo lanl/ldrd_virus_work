@@ -260,6 +260,15 @@ def load_from_cache(
     return records
 
 
+def _populate_kmer_dict(kmer, records, features, kmer_type="AA"):
+    for this_k in kmer:
+        this_res = get_kmers(records, k=this_k, kmer_type=kmer_type)
+        if this_res is None:
+            return None
+        else:
+            features.update(this_res)
+
+
 def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
     feat_genomic = None
     feat_gc = None
@@ -270,23 +279,9 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
         else:
             features.update(feat_genomic)
     if kmers:
-        feat_kmers: dict[str, Any] = {}
-        for this_k in kmer_k:
-            this_res = get_kmers(records, k=this_k)
-            if this_res is None:
-                return None
-            else:
-                feat_kmers.update(this_res)
-        features.update(feat_kmers)
+        _populate_kmer_dict(kmer_k, records, features)
     if kmers_pc:
-        feat_kmers_pc: dict[str, Any] = {}
-        for this_k in kmer_k_pc:
-            this_res = get_kmers(records, k=this_k, kmer_type="PC")
-            if this_res is None:
-                return None
-            else:
-                feat_kmers_pc.update(this_res)
-        features.update(feat_kmers_pc)
+        _populate_kmer_dict(kmer_k_pc, records, features, kmer_type="PC")
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:

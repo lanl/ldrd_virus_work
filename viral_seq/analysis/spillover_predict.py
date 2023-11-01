@@ -278,7 +278,8 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
         feat_genomic = get_genomic_features(records)
         if feat_genomic is None:
             return None
-        features.update(feat_genomic)
+        else:
+            features.update(feat_genomic)
     if kmers:
         _populate_kmer_dict(kmer_k, records, features)
     if kmers_pc:
@@ -287,7 +288,8 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
         feat_gc = get_gc(records)
         if feat_gc is None:
             return None
-        features.update(feat_gc)
+        else:
+            features.update(feat_gc)
     return features
 
 
@@ -376,6 +378,8 @@ def build_table(
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
     if uni_select:
+        prefix_AA = "kmer_AA_"
+        prefix_PC = "kmer_PC_"
         print("Performing univariate selection.")
         print("Initial load of data...")
         t_start = time.perf_counter()
@@ -383,19 +387,19 @@ def build_table(
         feat_groups = defaultdict(list)
         lf = pl.LazyFrame(calculated_feature_rows)
         for feat in lf.columns:
-            if feat.startswith("kmer_AA"):
-                feat_groups["kmer_AA_len" + str(len(feat))].append(feat)
-            elif feat.startswith("kmer_PC"):
-                feat_groups["kmer_PC_len" + str(len(feat))].append(feat)
+            if feat.startswith(prefix_AA):
+                feat_groups[prefix_AA + "len" + str(len(feat))].append(feat)
+            elif feat.startswith(prefix_PC):
+                feat_groups[prefix_PC + "len" + str(len(feat))].append(feat)
             else:
                 keepers.append(feat)
         print("Data load completed in", time.perf_counter() - t_start, "s")
         for val in feat_groups.values():
             if len(val) > num_select:
-                if val[0].startswith("kmer_AA"):
-                    print("Selecting on AA kmers, k =", len(val[0]) - 8)
-                elif val[0].startswith("kmer_PC"):
-                    print("Selecting on PC kmers, k =", len(val[0]) - 8)
+                if val[0].startswith(prefix_AA):
+                    print("Selecting on AA kmers, k =", len(val[0]) - len(prefix_AA))
+                elif val[0].startswith(prefix_PC):
+                    print("Selecting on PC kmers, k =", len(val[0]) - len(prefix_PC))
                 t_start = time.perf_counter()
                 # we need to pass a df of these columns to select best
                 temp_df = lf.select(val).collect().to_pandas()

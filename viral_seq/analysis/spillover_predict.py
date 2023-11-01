@@ -394,7 +394,7 @@ def build_table(
             if len(val) > num_select:
                 if val[0].startswith("kmer_AA"):
                     print("Selecting on AA kmers, k =", len(val[0]) - 8)
-                elif k.startswith("kmer_PC"):
+                elif val[0].startswith("kmer_PC"):
                     print("Selecting on PC kmers, k =", len(val[0]) - 8)
                 t_start = time.perf_counter()
                 # we need to pass a df of these columns to select best

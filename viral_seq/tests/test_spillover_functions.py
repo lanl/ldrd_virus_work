@@ -245,13 +245,17 @@ def test_expanded_kmers():
         )
 
 
-@pytest.mark.slow
 def test_save_load_split_parquet(tmp_path):
     """Regression test the file splitting of large parquet files"""
     this_cache = files("viral_seq.tests") / "cache"
     cache_str = str(this_cache.resolve())
     csv_train_str = str(csv_train.resolve())
-    str(files("viral_seq.tests").joinpath("test_expanded_kmers.csv").resolve())
+    expected_table1 = str(
+        files("viral_seq.tests").joinpath("test_split_file1.csv").resolve()
+    )
+    expected_table2 = str(
+        files("viral_seq.tests").joinpath("test_split_file2.csv").resolve()
+    )
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(
@@ -263,13 +267,8 @@ def test_save_load_split_parquet(tmp_path):
                 "--file",
                 csv_train_str,
                 "-g",
-                "-gc",
-                "-kmers",
-                "-k",
-                "2 3 4 5 6 7 8 9 10",
-                "-kmerspc",
-                "-kpc",
-                "2 3 4 5 6 7",
+                "-cs",
+                "75",
             ],
         )
         assert result.exit_code == 0
@@ -282,3 +281,19 @@ def test_save_load_split_parquet(tmp_path):
             ],
         )
         assert result.exit_code == 0
+        df_test1 = pd.read_parquet("table.parquet.00.gzip")
+        df_expected1 = pd.read_csv(expected_table1)
+        assert_frame_equal(
+            df_test1,
+            df_expected1,
+            rtol=1e-9,
+            atol=1e-9,
+        )
+        df_test2 = pd.read_parquet("table.parquet.01.gzip")
+        df_expected2 = pd.read_csv(expected_table2)
+        assert_frame_equal(
+            df_test2,
+            df_expected2,
+            rtol=1e-9,
+            atol=1e-9,
+        )

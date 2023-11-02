@@ -381,32 +381,34 @@ def build_table(
         table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
     if save:
-        if len(table.columns) > chunk_size:
-            f_list = filename.split(".")
-            f_print = f_list[:]
-            f_print.insert(-1, "**")
-            print(
-                "Saving the pandas DataFrame of genomic data to a parquet file with pattern:",
-                ".".join(f_print),
-            )
-            split_cols = [
-                table.columns[x : x + chunk_size]
-                for x in range(0, len(table.columns), chunk_size)
-            ]
-            for i, each in enumerate(split_cols):
-                df = table[each]
-                this_filename = f_list[:]
-                this_filename.insert(-1, "%.2d" % i)
-                df.to_parquet(
-                    ".".join(this_filename), engine="pyarrow", compression="gzip"
-                )
-        else:
-            print(
-                "Saving the pandas DataFrame of genomic data to a parquet file:",
-                filename,
-            )
-            table.to_parquet(filename, engine="pyarrow", compression="gzip")
+        save_files(table, filename, chunk_size)
     return table
+
+
+def save_files(table: pd.DataFrame, filename, chunk_size):
+    if len(table.columns) > chunk_size:
+        f_list = filename.split(".")
+        f_print = f_list[:]
+        f_print.insert(-1, "**")
+        print(
+            "Saving the pandas DataFrame of genomic data to a parquet file with pattern:",
+            ".".join(f_print),
+        )
+        split_cols = [
+            table.columns[x : x + chunk_size]
+            for x in range(0, len(table.columns), chunk_size)
+        ]
+        for i, each in enumerate(split_cols):
+            df = table[each]
+            this_filename = f_list[:]
+            this_filename.insert(-1, "%.2d" % i)
+            df.to_parquet(".".join(this_filename), engine="pyarrow", compression="gzip")
+    else:
+        print(
+            "Saving the pandas DataFrame of genomic data to a parquet file:",
+            filename,
+        )
+        table.to_parquet(filename, engine="pyarrow", compression="gzip")
 
 
 def load_files(files: Any):

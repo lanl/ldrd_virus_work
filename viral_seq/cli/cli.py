@@ -198,6 +198,15 @@ def pull_ensembl_transcripts(email, cache, file):
         "Cache folders to use when calculating similarity features, whitespace delimited. Required if similarity feature is selected."
     ),
 )
+@click.option(
+    "--chunk-size",
+    "-cs",
+    default=20_000,
+    show_default=True,
+    help=(
+        "Maximum amount of columns to keep when saving to parquet file. If table is larger, splits into multiple files."
+    ),
+)
 def calculate_table(
     cache,
     file,
@@ -211,6 +220,7 @@ def calculate_table(
     kmer_k_pc,
     similarity_genomic,
     similarity_cache,
+    chunk_size,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -253,6 +263,7 @@ def calculate_table(
         gc=features_gc,
         kmers=features_kmers,
         kmer_k=kmer_k,
+        chunk_size=chunk_size,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
@@ -268,7 +279,7 @@ def calculate_table(
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
-        df_feats.to_parquet(outfile, engine="pyarrow", compression="gzip")
+        sp.save_files(df_feats, outfile, chunk_size)
 
 
 # --- cross-validation ---

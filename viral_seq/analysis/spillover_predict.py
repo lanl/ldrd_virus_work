@@ -20,7 +20,7 @@ from sklearn.metrics import (
 )
 from urllib.request import HTTPError
 import time
-from typing import Any
+from typing import Any, Union
 
 matplotlib.use("Agg")
 
@@ -411,7 +411,7 @@ def save_files(table: pd.DataFrame, filename, chunk_size):
         table.to_parquet(filename, engine="pyarrow", compression="gzip")
 
 
-def load_files(files: Any):
+def load_files(files: Union[str, tuple[str]]):
     if isinstance(files, str):
         file_list = files.split()
     else:

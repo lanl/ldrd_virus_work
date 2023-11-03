@@ -222,6 +222,12 @@ def pull_ensembl_transcripts(email, cache, file):
         "Number of features per category to retain when filtering with univariate selection."
     ),
 )
+@click.option(
+    "--random-state",
+    "-r",
+    default=123456789,
+    help=("Random seed value used for mutual_info_classif. Does nothing otherwise."),
+)
 def calculate_table(
     cache,
     file,
@@ -238,6 +244,7 @@ def calculate_table(
     uni_select,
     uni_type,
     num_select,
+    random_state,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -283,6 +290,7 @@ def calculate_table(
         uni_select=uni_select,
         uni_type=uni_type,
         num_select=num_select,
+        random_state=random_state,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():

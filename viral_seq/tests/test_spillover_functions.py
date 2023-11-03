@@ -245,13 +245,14 @@ def test_expanded_kmers():
         )
 
 
-def test_univariate_selection():
-    # regression selecting of features after calculation
+@pytest.mark.parametrize("uni_type", ["chi2", "mutual_info_classif"])
+def test_univariate_selection(uni_type):
+    # regression test for feature selection
     this_cache = files("viral_seq.tests") / "cache"
     cache_str = str(this_cache.resolve())
     csv_train_str = str(csv_train.resolve())
     expected_table = str(
-        files("viral_seq.tests").joinpath("test_uni_select.csv").resolve()
+        files("viral_seq.tests").joinpath(f"test_uni_select_{uni_type}.csv").resolve()
     )
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -268,7 +269,7 @@ def test_univariate_selection():
                 "2",
                 "-u",
                 "-ut",
-                "chi2",
+                f"{uni_type}",
                 "-n",
                 "100",
             ],

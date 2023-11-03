@@ -9,6 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import polars as pl
+import sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
     StratifiedKFold,
@@ -18,7 +19,7 @@ from sklearn.metrics import (
     roc_auc_score,
     auc,
 )
-from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif, f_classif
+from sklearn.feature_selection import SelectKBest
 from urllib.request import HTTPError
 import time
 from typing import Any
@@ -293,15 +294,10 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
     return features
 
 
-def univariate_selection(X, y, uni_type, num_select):
-    if uni_type == "chi2":
-        sel_ = SelectKBest(chi2, k=num_select).fit(X, y)
-    elif uni_type == "mutual_info_classif":
-        sel_ = SelectKBest(mutual_info_classif, k=num_select).fit(X, y)
-    elif uni_type == "f_classif":
-        sel_ = SelectKBest(f_classif, k=num_select).fit(X, y)
-    else:
-        raise ValueError("Univariate selection type not understood")
+def univariate_selection(X, y, uni_type, num_select, random_state=13245679):
+    np.random.seed(random_state)  # for mutual_info_classif
+    uni_type = getattr(sklearn.feature_selection, uni_type)
+    sel_ = SelectKBest(uni_type, k=num_select).fit(X, y)
     return list(X.columns[(sel_.get_support())])
 
 
@@ -332,6 +328,7 @@ def build_table(
     uni_select: bool = False,
     uni_type: str = "mutual_info_classif",
     num_select: int = 1_000,
+    random_state: int = 123456798,
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
@@ -355,14 +352,7 @@ def build_table(
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
             this_result = _grab_features(
-                features,
-                records,
-                genomic,
-                kmers,
-                kmer_k,
-                gc,
-                kmers_pc,
-                kmer_k_pc,
+                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
@@ -408,6 +398,7 @@ def build_table(
                     df["Human Host"].to_numpy().flatten(),
                     uni_type,
                     num_select,
+                    random_state,
                 )
                 keepers += res
                 print("Finished category in", time.perf_counter() - t_start, "s")

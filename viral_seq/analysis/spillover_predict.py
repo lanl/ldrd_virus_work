@@ -385,7 +385,7 @@ def build_table(
     return table
 
 
-def save_files(table: pd.DataFrame, filename, chunk_size):
+def save_files(table: pd.DataFrame, filename, chunk_size=20_000):
     if len(table.columns) > chunk_size:
         f_list = filename.split(".")
         f_print = f_list[:]

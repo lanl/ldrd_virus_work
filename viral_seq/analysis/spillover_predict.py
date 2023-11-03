@@ -294,7 +294,7 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
     return features
 
 
-def univariate_selection(X, y, uni_type, num_select, random_state=13245679):
+def univariate_selection(X, y, uni_type, num_select, random_state=132456789):
     np.random.seed(random_state)  # for mutual_info_classif
     uni_type = getattr(sklearn.feature_selection, uni_type)
     sel_ = SelectKBest(uni_type, k=num_select).fit(X, y)
@@ -328,7 +328,7 @@ def build_table(
     uni_select: bool = False,
     uni_type: str = "mutual_info_classif",
     num_select: int = 1_000,
-    random_state: int = 123456798,
+    random_state: int = 123456789,
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []

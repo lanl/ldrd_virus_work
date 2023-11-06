@@ -198,15 +198,6 @@ def pull_ensembl_transcripts(email, cache, file):
         "Cache folders to use when calculating similarity features, whitespace delimited. Required if similarity feature is selected."
     ),
 )
-@click.option(
-    "--chunk-size",
-    "-cs",
-    default=20_000,
-    show_default=True,
-    help=(
-        "Maximum amount of columns to keep when saving to parquet file. If table is larger, splits into multiple files."
-    ),
-)
 def calculate_table(
     cache,
     file,
@@ -220,7 +211,6 @@ def calculate_table(
     kmer_k_pc,
     similarity_genomic,
     similarity_cache,
-    chunk_size,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -263,7 +253,6 @@ def calculate_table(
         gc=features_gc,
         kmers=features_kmers,
         kmer_k=kmer_k,
-        chunk_size=chunk_size,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
@@ -279,7 +268,7 @@ def calculate_table(
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
-        sp.save_files(df_feats, outfile, chunk_size)
+        sp.save_files(df_feats, outfile)
 
 
 # --- cross-validation ---
@@ -287,12 +276,6 @@ def calculate_table(
 @click.argument(
     "files",
     nargs=-1,
-)
-@click.option(
-    "--file",
-    "-f",
-    required=False,
-    help=("Parquet file(s) that contains data table to use for training."),
 )
 @click.option(
     "--prefix",
@@ -308,13 +291,9 @@ def calculate_table(
     show_default=True,
     help=("Number of folds to use for cross validation."),
 )
-def cross_validation(files, file, prefix, splits):
+def cross_validation(files, prefix, splits):
     """Run cross validation on the data table using default parameters"""
-    if file is None:
-        if files is None:
-            raise ValueError("Provide parquet file(s)")
-        file = files
-    X, y = sp.get_training_columns(table_filename=file)
+    X, y = sp.get_training_columns(table_filename=files)
     sp.cross_validation(X, y, plot=True, prefix=prefix, splits=splits)
 
 
@@ -325,25 +304,15 @@ def cross_validation(files, file, prefix, splits):
     nargs=-1,
 )
 @click.option(
-    "--file",
-    "-f",
-    required=False,
-    help=("Parquet file(s) that contains data table to use for training."),
-)
-@click.option(
     "--outfile",
     "-o",
     default="rfc.p",
     show_default=True,
     help=("Pickle file of trained RandomForestClassifier."),
 )
-def train(files, file, outfile):
+def train(files, outfile):
     """Train and save a RandomForestClassifier on the given data table using default parameters"""
-    if file is None:
-        if files is None:
-            raise ValueError("Provide parquet file(s)")
-        file = files
-    X, y = sp.get_training_columns(table_filename=file)
+    X, y = sp.get_training_columns(table_filename=files)
     sp.train_rfc(X, y, save=True, filename=outfile)
 
 
@@ -352,12 +321,6 @@ def train(files, file, outfile):
 @click.argument(
     "files",
     nargs=-1,
-)
-@click.option(
-    "--file",
-    "-f",
-    required=False,
-    help=("Parquet file(s) that contains data table to use for prediction."),
 )
 @click.option(
     "--rfc-file",
@@ -371,12 +334,8 @@ def train(files, file, outfile):
     show_default=True,
     help=("Prefix prepended to output files."),
 )
-def predict(files, file, rfc_file, out_prefix):
-    if file is None:
-        if files is None:
-            raise ValueError("Provide parquet file(s)")
-        file = files
-    X, y = sp.get_training_columns(table_filename=file)
+def predict(files, rfc_file, out_prefix):
+    X, y = sp.get_training_columns(table_filename=files)
     sp.predict_rfc(X, y, filename=rfc_file, plot=True, out_prefix=out_prefix)
 
 

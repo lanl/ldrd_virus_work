@@ -315,7 +315,6 @@ def build_table(
     kmer_k_pc: list[int] = [10],
     gc: bool = True,
     ordered: bool = True,
-    chunk_size: int = 20_000,
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
@@ -381,34 +380,16 @@ def build_table(
         table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
     if save:
-        save_files(table, filename, chunk_size)
+        save_files(table, filename)
     return table
 
 
-def save_files(table: pd.DataFrame, filename, chunk_size=20_000):
-    if len(table.columns) > chunk_size:
-        f_list = filename.split(".")
-        f_print = f_list[:]
-        f_print.insert(-1, "**")
-        print(
-            "Saving the pandas DataFrame of genomic data to a parquet file with pattern:",
-            ".".join(f_print),
-        )
-        split_cols = [
-            table.columns[x : x + chunk_size]
-            for x in range(0, len(table.columns), chunk_size)
-        ]
-        for i, each in enumerate(split_cols):
-            df = table[each]
-            this_filename = f_list[:]
-            this_filename.insert(-1, "%.2d" % i)
-            df.to_parquet(".".join(this_filename), engine="pyarrow", compression="gzip")
-    else:
-        print(
-            "Saving the pandas DataFrame of genomic data to a parquet file:",
-            filename,
-        )
-        table.to_parquet(filename, engine="pyarrow", compression="gzip")
+def save_files(table: pd.DataFrame, filename):
+    print(
+        "Saving the pandas DataFrame of genomic data to a parquet file:",
+        filename,
+    )
+    table.to_parquet(filename, engine="pyarrow", compression="gzip")
 
 
 def load_files(files: Union[str, tuple[str]]):
@@ -424,6 +405,7 @@ def load_files(files: Union[str, tuple[str]]):
             df_temp = pl.read_parquet(file_list[i]).to_pandas()
             non_duplicate_columns = df_temp.columns.difference(df.columns)
             df = df.join(df_temp[non_duplicate_columns])
+    df = df.reindex(sorted(df.columns), axis=1)
     return df
 
 

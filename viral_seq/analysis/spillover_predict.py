@@ -22,7 +22,7 @@ from sklearn.metrics import (
 from sklearn.feature_selection import SelectKBest
 from urllib.request import HTTPError
 import time
-from typing import Any
+from typing import Any, Union
 from collections import defaultdict
 from functools import partial
 
@@ -439,11 +439,33 @@ def build_table(
         table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
     if save:
-        print(
-            "Saving the pandas DataFrame of genomic data to a parquet file:", filename
-        )
-        table.to_parquet(filename, engine="pyarrow", compression="gzip")
+        save_files(table, filename)
     return table
+
+
+def save_files(table: pd.DataFrame, filename):
+    print(
+        "Saving the pandas DataFrame of genomic data to a parquet file:",
+        filename,
+    )
+    table.to_parquet(filename, engine="pyarrow", compression="gzip")
+
+
+def load_files(files: Union[str, tuple[str]]):
+    if isinstance(files, str):
+        file_list = files.split()
+    else:
+        file_list = list(files)
+    # polars is about 10 minutes faster here for large files
+    # per https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/18#note_258600
+    df = pl.read_parquet(file_list[0]).to_pandas()
+    if len(file_list) > 1:
+        for i in range(1, len(file_list)):
+            df_temp = pl.read_parquet(file_list[i]).to_pandas()
+            non_duplicate_columns = df_temp.columns.difference(df.columns)
+            df = df.join(df_temp[non_duplicate_columns])
+    df = df.reindex(sorted(df.columns), axis=1)
+    return df
 
 
 def get_training_columns(
@@ -454,9 +476,7 @@ def get_training_columns(
         raise ValueError("No data provided to train random forest model.")
     elif df is None:
         print("Loading the pandas DataFrame from a parquet file:", table_filename)
-        # polars is about 10 minutes faster here for large files
-        # per https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/18#note_258600
-        df = pl.read_parquet(table_filename).to_pandas()
+        df = load_files(table_filename)
     elif table_filename == "":
         print("Using provided DataFrame")
     else:

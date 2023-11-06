@@ -306,16 +306,14 @@ def calculate_table(
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
-        df_feats.to_parquet(outfile, engine="pyarrow", compression="gzip")
+        sp.save_files(df_feats, outfile)
 
 
 # --- cross-validation ---
 @cli.command()
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Parquet file that contains the data table to run cross validation on."),
+@click.argument(
+    "files",
+    nargs=-1,
 )
 @click.option(
     "--prefix",
@@ -331,19 +329,17 @@ def calculate_table(
     show_default=True,
     help=("Number of folds to use for cross validation."),
 )
-def cross_validation(file, prefix, splits):
+def cross_validation(files, prefix, splits):
     """Run cross validation on the data table using default parameters"""
-    X, y = sp.get_training_columns(table_filename=file)
+    X, y = sp.get_training_columns(table_filename=files)
     sp.cross_validation(X, y, plot=True, prefix=prefix, splits=splits)
 
 
 # --- train ---
 @cli.command()
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Parquet file that contains data table to use for training."),
+@click.argument(
+    "files",
+    nargs=-1,
 )
 @click.option(
     "--outfile",
@@ -352,19 +348,17 @@ def cross_validation(file, prefix, splits):
     show_default=True,
     help=("Pickle file of trained RandomForestClassifier."),
 )
-def train(file, outfile):
+def train(files, outfile):
     """Train and save a RandomForestClassifier on the given data table using default parameters"""
-    X, y = sp.get_training_columns(table_filename=file)
+    X, y = sp.get_training_columns(table_filename=files)
     sp.train_rfc(X, y, save=True, filename=outfile)
 
 
 # --- predict ---
 @cli.command()
-@click.option(
-    "--file",
-    "-f",
-    required=True,
-    help=("Parquet file that contains data table to use for prediction."),
+@click.argument(
+    "files",
+    nargs=-1,
 )
 @click.option(
     "--rfc-file",
@@ -378,8 +372,8 @@ def train(file, outfile):
     show_default=True,
     help=("Prefix prepended to output files."),
 )
-def predict(file, rfc_file, out_prefix):
-    X, y = sp.get_training_columns(table_filename=file)
+def predict(files, rfc_file, out_prefix):
+    X, y = sp.get_training_columns(table_filename=files)
     sp.predict_rfc(X, y, filename=rfc_file, plot=True, out_prefix=out_prefix)
 
 

@@ -5,6 +5,7 @@ from viral_seq.cli.cli import cli
 import json
 import pandas as pd
 from pandas.testing import assert_frame_equal
+from viral_seq.analysis import spillover_predict as sp
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -97,7 +98,7 @@ def test_modelling_cli():
             in result.output
         )
         result = runner.invoke(
-            cli, ["cross-validation", "--file", "table.parquet.gzip", "--splits", "2"]
+            cli, ["cross-validation", "table.parquet.gzip", "--splits", "2"]
         )
         assert result.exit_code == 0
         aucs = []
@@ -112,7 +113,7 @@ def test_modelling_cli():
             cli, ["plot-roc", "cv_0_roc_curve.csv", "cv_1_roc_curve.csv"]
         )
         assert result.exit_code == 0
-        result = runner.invoke(cli, ["train", "--file", "table.parquet.gzip"])
+        result = runner.invoke(cli, ["train", "table.parquet.gzip"])
         assert result.exit_code == 0
         assert "Saving random forest model to file" in result.output
         # table caclulation of a test set, which utilizes a trained random forest model
@@ -139,7 +140,7 @@ def test_modelling_cli():
             in result.output
         )
         result = runner.invoke(
-            cli, ["predict", "--file", "table.parquet.gzip", "--rfc-file", "rfc.p"]
+            cli, ["predict", "table.parquet.gzip", "--rfc-file", "rfc.p"]
         )
         assert result.exit_code == 0
         with open("cli_metrics.json", "r") as f:
@@ -287,3 +288,155 @@ def test_univariate_selection(uni_type):
             rtol=1e-9,
             atol=1e-9,
         )
+
+
+def test_load_multi_parquet(tmp_path):
+    """Regression test joining parquet files created with multiple calculate-table commands"""
+    this_cache = files("viral_seq.tests") / "cache"
+    cache_str = str(this_cache.resolve())
+    csv_train_str = str(csv_train.resolve())
+    csv_test_str = str(csv_test.resolve())
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        # test joining of the output of calculate-table commands is equal to output of calculating the same thing in one command
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_train_str,
+                "-kmers",
+                "-k",
+                "2",
+                "-o",
+                "table.k2.parquet.gzip",
+            ],
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_train_str,
+                "-kmerspc",
+                "-kpc",
+                "2",
+                "-o",
+                "table.kpc2.parquet.gzip",
+            ],
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_train_str,
+                "-kmers",
+                "-k",
+                "2",
+                "-kmerspc",
+                "-kpc",
+                "2",
+                "-o",
+                "table.expected.parquet.gzip",
+            ],
+        )
+        assert result.exit_code == 0
+        df_test = sp.load_files(("table.k2.parquet.gzip", "table.kpc2.parquet.gzip"))
+        df_expected = pd.read_parquet("table.expected.parquet.gzip")
+        assert_frame_equal(
+            df_test,
+            df_expected,
+            rtol=1e-9,
+            atol=1e-9,
+        )
+        # test cross-validation accepts multiple tables
+        result = runner.invoke(
+            cli,
+            [
+                "cross-validation",
+                "table.k2.parquet.gzip",
+                "table.kpc2.parquet.gzip",
+                "--splits",
+                "2",
+            ],
+        )
+        assert result.exit_code == 0
+        # regression test on cross-validation output
+        aucs = []
+        for i in range(2):
+            with open("cv_" + str(i) + "_metrics.json", "r") as f:
+                data = json.load(f)
+            aucs.append(data["AUC"])
+
+        assert aucs == pytest.approx([1.0, 0.6666666666666666])
+
+        # test data to use for predict command
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_test_str,
+                "-kmers",
+                "-k",
+                "2",
+                "-o",
+                "test_table.k2.parquet.gzip",
+            ],
+        )
+        assert result.exit_code == 0
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_test_str,
+                "-kmerspc",
+                "-kpc",
+                "2",
+                "-o",
+                "test_table.kpc2.parquet.gzip",
+            ],
+        )
+        assert result.exit_code == 0
+        # check training accepts two tables
+        result = runner.invoke(
+            cli,
+            [
+                "train",
+                "table.k2.parquet.gzip",
+                "table.kpc2.parquet.gzip",
+                "-o",
+                "rfc.p",
+            ],
+        )
+        assert result.exit_code == 0
+        # check predict accepts two tables
+        result = runner.invoke(
+            cli,
+            [
+                "predict",
+                "test_table.k2.parquet.gzip",
+                "test_table.kpc2.parquet.gzip",
+                "--rfc-file",
+                "rfc.p",
+            ],
+        )
+        assert result.exit_code == 0
+        with open("cli_metrics.json", "r") as f:
+            data = json.load(f)
+        # regression test of predict output
+        assert data["AUC"] == pytest.approx(0.38)

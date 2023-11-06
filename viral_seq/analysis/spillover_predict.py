@@ -9,6 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import polars as pl
+import sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
     StratifiedKFold,
@@ -18,9 +19,12 @@ from sklearn.metrics import (
     roc_auc_score,
     auc,
 )
+from sklearn.feature_selection import SelectKBest
 from urllib.request import HTTPError
 import time
 from typing import Any
+from collections import defaultdict
+from functools import partial
 
 matplotlib.use("Agg")
 
@@ -291,6 +295,17 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
     return features
 
 
+def univariate_selection(X, y, uni_type, num_select, random_state=123456789):
+    uni_type = getattr(sklearn.feature_selection, uni_type)
+    # only mutual_info_classif takes random_state
+    uni_type_seeded = partial(uni_type, random_state=random_state)
+    try:
+        sel_ = SelectKBest(uni_type_seeded, k=num_select).fit(X, y)
+    except TypeError:
+        sel_ = SelectKBest(uni_type, k=num_select).fit(X, y)
+    return list(X.columns[(sel_.get_support())])
+
+
 def drop_unshared_kmers(df: pd.DataFrame):
     drop_cols = []
     for col in df.columns:
@@ -315,6 +330,10 @@ def build_table(
     kmer_k_pc: list[int] = [10],
     gc: bool = True,
     ordered: bool = True,
+    uni_select: bool = False,
+    uni_type: str = "mutual_info_classif",
+    num_select: int = 1_000,
+    random_state: int = 123456789,
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
@@ -353,7 +372,47 @@ def build_table(
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
-    table = pd.DataFrame.from_records(calculated_feature_rows)
+    if uni_select:
+        prefix_AA = "kmer_AA_"
+        prefix_PC = "kmer_PC_"
+        print("Performing univariate selection.")
+        print("Initial load of data...")
+        t_start = time.perf_counter()
+        keepers = []
+        feat_groups = defaultdict(list)
+        df = pl.from_records(calculated_feature_rows)
+        for feat in df.columns:
+            if feat.startswith(prefix_AA):
+                feat_groups[prefix_AA + "len" + str(len(feat))].append(feat)
+            elif feat.startswith(prefix_PC):
+                feat_groups[prefix_PC + "len" + str(len(feat))].append(feat)
+            else:
+                keepers.append(feat)
+        print("Data load completed in", time.perf_counter() - t_start, "s")
+        for val in feat_groups.values():
+            if len(val) > num_select:
+                if val[0].startswith(prefix_AA):
+                    print("Selecting on AA kmers, k =", len(val[0]) - len(prefix_AA))
+                elif val[0].startswith(prefix_PC):
+                    print("Selecting on PC kmers, k =", len(val[0]) - len(prefix_PC))
+                t_start = time.perf_counter()
+                # we need to pass a df of these columns to select best
+                temp_df = df.select(val).to_pandas()
+                res = univariate_selection(
+                    drop_unshared_kmers(temp_df.fillna(0)),
+                    df["Human Host"].to_numpy().flatten(),
+                    uni_type,
+                    num_select,
+                    random_state,
+                )
+                keepers += res
+                print("Finished category in", time.perf_counter() - t_start, "s")
+        print("Building final table...")
+        t_start = time.perf_counter()
+        table = df.select(keepers).to_pandas()
+        print("Finished in", time.perf_counter() - t_start, "s")
+    else:
+        table = pl.from_records(calculated_feature_rows).to_pandas()
     if rfc is not None:
         # add columns from training if missing
         table = pd.concat(

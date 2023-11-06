@@ -24,6 +24,7 @@ from urllib.request import HTTPError
 import time
 from typing import Any
 from collections import defaultdict
+from functools import partial
 
 matplotlib.use("Agg")
 
@@ -295,9 +296,13 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
 
 
 def univariate_selection(X, y, uni_type, num_select, random_state=123456789):
-    np.random.seed(random_state)  # for mutual_info_classif
     uni_type = getattr(sklearn.feature_selection, uni_type)
-    sel_ = SelectKBest(uni_type, k=num_select).fit(X, y)
+    # only mutual_info_classif takes random_state
+    uni_type_seeded = partial(uni_type, random_state=random_state)
+    try:
+        sel_ = SelectKBest(uni_type_seeded, k=num_select).fit(X, y)
+    except TypeError:
+        sel_ = SelectKBest(uni_type, k=num_select).fit(X, y)
     return list(X.columns[(sel_.get_support())])
 
 

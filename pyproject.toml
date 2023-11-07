@@ -12,3 +12,5 @@ viral_seq = "viral_seq.cli.cli:cli"
 name = "viral_seq"
 dynamic = ['version']
 
+[tool.setuptools]
+packages=['viral_seq']

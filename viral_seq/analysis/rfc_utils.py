@@ -17,6 +17,9 @@ def calc_pred(est, X, n_samples, n_samples_bootstrap):
 
 
 def oob_score(rfc, X, y, scorer, n_jobs=-1, scoring_on_pred=True):
+    """Calculation of oob_score on a fit RandomForestClassifier utilizing parallelization
+    Related to upstream issue https://github.com/scikit-learn/scikit-learn/issues/28059
+    """
     n_samples = len(y)
     n_samples_bootstrap = forest_utils._get_n_samples_bootstrap(
         n_samples, rfc.max_samples

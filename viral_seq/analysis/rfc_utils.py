@@ -4,19 +4,16 @@ import sklearn.ensemble._forest as forest_utils
 from joblib import Parallel, delayed
 
 
-def calc_pred(est, X, n_samples, n_samples_bootstrap):
+def calc_pred(est, X: pd.DataFrame, n_samples, n_samples_bootstrap):
     # generate oob samples from stored random_state
     ind = forest_utils._generate_unsampled_indices(
         est.random_state, n_samples, n_samples_bootstrap
     )
-    if isinstance(X, pd.DataFrame):
-        y_pred = est.predict_proba(X.iloc[ind].to_numpy())
-    else:
-        y_pred = est.predict_proba(X[ind])
+    y_pred = est.predict_proba(X.iloc[ind].to_numpy())
     return ind, y_pred
 
 
-def oob_score(rfc, X, y, scorer, n_jobs=-1, scoring_on_pred=True):
+def oob_score(rfc, X: pd.DataFrame, y, scorer, n_jobs=-1, scoring_on_pred=True):
     """Calculation of oob_score on a fit RandomForestClassifier utilizing parallelization
     Related to upstream issue https://github.com/scikit-learn/scikit-learn/issues/28059
     """

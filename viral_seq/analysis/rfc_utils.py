@@ -25,7 +25,7 @@ def oob_score(rfc, X, y, scorer, n_jobs=-1, scoring_on_pred=True):
         n_samples, rfc.max_samples
     )
     oob_pred = np.zeros(shape=(n_samples, rfc.n_classes_), dtype=np.float64)
-    r = Parallel(n_jobs=-1, verbose=10)(
+    r = Parallel(n_jobs=n_jobs, verbose=10)(
         delayed(calc_pred)(est, X, n_samples, n_samples_bootstrap)
         for est in rfc.estimators_
     )

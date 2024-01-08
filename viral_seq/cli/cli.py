@@ -77,7 +77,15 @@ def search_data(email, query, retmax, cache):
     required=True,
     help=("Provide a .csv file that contains an 'Accessions' column. "),
 )
-def pull_data(email, cache, file):
+@click.option(
+    "--no-filter",
+    "-n",
+    is_flag=True,
+    help=(
+        "Will warn about triggered data filters, but will still add all results to cache. "
+    ),
+)
+def pull_data(email, cache, file, no_filter):
     """Retrieve accessions from Pubmed and store locally for further use."""
     df = pd.read_csv(file)
     if "Accessions" not in df:
@@ -85,7 +93,7 @@ def pull_data(email, cache, file):
     # Entries in 'Accessions' column may be space delimited accessions for species with multiple segments
     accessions = set((" ".join(df["Accessions"].values)).split())
     records = sp.load_results(accessions, email=email)
-    sp.add_to_cache(records, cache=cache)
+    sp.add_to_cache(records, cache=cache, just_warn=no_filter)
 
 
 # --- pull-ensembl-transcripts

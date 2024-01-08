@@ -9,6 +9,7 @@ from viral_seq.analysis import spillover_predict as sp
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
+csv_partial = files("viral_seq.tests").joinpath("partial_record.csv")
 email = "arhall@lanl.gov"
 
 
@@ -55,6 +56,51 @@ def test_network_cli_pull(tmp_path):
     assert result.exit_code == 0
     assert (
         "number of records added to the local cache from online search: 14"
+        in result.output
+    )
+
+
+@pytest.mark.slow
+def test_network_cli_pull_no_filter(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "pull-data",
+            "--email",
+            email,
+            "--cache",
+            tmp_path.absolute().as_posix(),
+            "--file",
+            csv_partial.absolute().as_posix(),
+            "--no-filter",
+        ],
+    )
+    assert result.exit_code == 0
+    assert (
+        "number of records added to the local cache from online search: 1"
+        in result.output
+    )
+
+
+@pytest.mark.slow
+def test_network_cli_pull_filter(tmp_path):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "pull-data",
+            "--email",
+            email,
+            "--cache",
+            tmp_path.absolute().as_posix(),
+            "--file",
+            csv_partial.absolute().as_posix(),
+        ],
+    )
+    assert result.exit_code == 0
+    assert (
+        "number of records added to the local cache from online search: 0"
         in result.output
     )
 

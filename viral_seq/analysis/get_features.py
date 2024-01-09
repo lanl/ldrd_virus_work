@@ -86,7 +86,6 @@ def get_genomic_features(records):
     coding_cnt_dict = defaultdict(float)
     bridge_cnt_dict = defaultdict(float)
     codons = []
-    set("ACTG")
     full_sequence = ""
     for record in records:
         full_sequence += str(record.seq)

@@ -39,68 +39,32 @@ def test_network_cli_search(tmp_path):
 
 
 @pytest.mark.slow
-def test_network_cli_pull(tmp_path):
+@pytest.mark.parametrize(
+    "file, no_filter, num_expected",
+    [
+        (csv_train, False, 14),
+        (csv_partial, False, 0),
+        (csv_partial, True, 1),
+    ],
+)
+def test_network_cli_pull(tmp_path, file, no_filter, num_expected):
     runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "pull-data",
-            "--email",
-            email,
-            "--cache",
-            tmp_path.absolute().as_posix(),
-            "--file",
-            csv_train.absolute().as_posix(),
-        ],
-    )
+    args = [
+        "pull-data",
+        "--email",
+        email,
+        "--cache",
+        tmp_path.absolute().as_posix(),
+        "--file",
+        file.absolute().as_posix(),
+    ]
+    if no_filter:
+        args += ["--no-filter"]
+    result = runner.invoke(cli, args)
     assert result.exit_code == 0
     assert (
-        "number of records added to the local cache from online search: 14"
-        in result.output
-    )
-
-
-@pytest.mark.slow
-def test_network_cli_pull_no_filter(tmp_path):
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "pull-data",
-            "--email",
-            email,
-            "--cache",
-            tmp_path.absolute().as_posix(),
-            "--file",
-            csv_partial.absolute().as_posix(),
-            "--no-filter",
-        ],
-    )
-    assert result.exit_code == 0
-    assert (
-        "number of records added to the local cache from online search: 1"
-        in result.output
-    )
-
-
-@pytest.mark.slow
-def test_network_cli_pull_filter(tmp_path):
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "pull-data",
-            "--email",
-            email,
-            "--cache",
-            tmp_path.absolute().as_posix(),
-            "--file",
-            csv_partial.absolute().as_posix(),
-        ],
-    )
-    assert result.exit_code == 0
-    assert (
-        "number of records added to the local cache from online search: 0"
+        "number of records added to the local cache from online search: "
+        + str(num_expected)
         in result.output
     )
 

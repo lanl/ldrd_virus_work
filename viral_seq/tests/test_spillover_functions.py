@@ -450,3 +450,29 @@ def test_load_multi_parquet(tmp_path):
             data = json.load(f)
         # regression test of predict output
         assert data["AUC"] == pytest.approx(0.38)
+
+
+def test_calculate_table_with_partial(tmp_path):
+    """check we can calculate a feature table with a accession labeled 'partial'"""
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    csv_partial_str = str(csv_partial.resolve())
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            cli,
+            [
+                "calculate-table",
+                "--cache",
+                cache_str,
+                "--file",
+                csv_partial_str,
+                "-kmers",
+                "-k",
+                "2",
+                "-o",
+                "table.k2.parquet.gzip",
+            ],
+        )
+        print(result.output)
+        assert result.exit_code == 0

@@ -453,7 +453,7 @@ def test_load_multi_parquet(tmp_path):
 
 
 def test_calculate_table_with_partial(tmp_path):
-    """check we can calculate a feature table with a accession labeled 'partial'"""
+    """check we can calculate a feature table with an accession labeled 'partial'"""
     this_cache = files("viral_seq.tests") / "cache_unfiltered"
     cache_str = str(this_cache.resolve())
     csv_partial_str = str(csv_partial.resolve())

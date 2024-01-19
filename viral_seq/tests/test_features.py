@@ -1,22 +1,43 @@
-from viral_seq.analysis.get_features import get_genomic_features
+from viral_seq.analysis.get_features import get_genomic_features, get_kmers
 from viral_seq.analysis.spillover_predict import _append_recs
 import pandas as pd
 from pandas.testing import assert_frame_equal
 from importlib.resources import files
+import pytest
 
 
-def test_features():
-    tests_dir = files("viral_seq") / "tests"
+@pytest.mark.parametrize(
+    "accession, sep, file_name, calc_feats",
+    [
+        (
+            "NC_019843.3",
+            "\t",
+            "MERS-CoV_features.csv",
+            get_genomic_features,
+        ),  # generic viral genomic feature test
+        (
+            "NC_007620.1",
+            ",",
+            "Menangle_features.csv",
+            get_genomic_features,
+        ),  # bad coding sequence test
+        (
+            "NC_007620.1",
+            ",",
+            "Menangle_features_kmers.csv",
+            lambda e: get_kmers(e, k=2),
+        ),  # bad coding sequence kmer calculation test
+    ],
+)
+@pytest.mark.filterwarnings("error:Partial codon")
+def test_features(accession, sep, file_name, calc_feats):
+    tests_dir = files("viral_seq") / "tests" / accession
     test_record = _append_recs(tests_dir)
-    # Calculate features for NC_019843.3 (MERS-CoV)
-    df = pd.DataFrame(
-        get_genomic_features([test_record]), index=["NC_019843.3"]
-    ).reset_index()
-    # Check our calculation matches published results in
+    df = pd.DataFrame(calc_feats([test_record]), index=[accession]).reset_index()
+    # For viral genomic features check our calculation matches published results in
     # https://doi.org/10.1371/journal.pbio.3001390
-    df_expected = pd.read_csv(
-        files("viral_seq.tests").joinpath("MERS-CoV_features.csv"), sep="\t"
-    )
+    # For k-mers regression test
+    df_expected = pd.read_csv(files("viral_seq.tests").joinpath(file_name), sep=sep)
     assert_frame_equal(
         df.sort_index(axis=1),
         df_expected.sort_index(axis=1),

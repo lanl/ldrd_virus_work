@@ -450,3 +450,12 @@ def test_load_multi_parquet(tmp_path):
             data = json.load(f)
         # regression test of predict output
         assert data["AUC"] == pytest.approx(0.38)
+
+
+def test_build_table_with_partial():
+    """check we can calculate a feature table with an accession labeled 'partial'"""
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    csv_partial_str = str(csv_partial.resolve())
+    df = pd.read_csv(csv_partial_str)
+    sp.build_table(df, cache=cache_str, kmers=True, kmer_k=[2])

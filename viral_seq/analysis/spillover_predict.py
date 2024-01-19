@@ -350,7 +350,9 @@ def build_table(
                 accessions.append(accession)
                 accessions_dict[accession] = row["Species"]
         # we do one call to load all records from cache
-        records_unordered = load_from_cache(accessions, cache=cache, verbose=False)
+        records_unordered = load_from_cache(
+            accessions, cache=cache, filter=False, verbose=False
+        )
         for record in records_unordered:
             records_dict[accessions_dict[record.id]].append(record)
         meta_data = list(df.columns)

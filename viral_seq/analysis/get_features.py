@@ -39,7 +39,11 @@ def get_kmers(records, k=10, kmer_type="AA"):
     for record in records:
         for feature in record.features:
             if feature.type == "CDS":
-                this_seq = feature.location.extract(record.seq).translate()
+                nuc_seq = feature.location.extract(record.seq)
+                if len(nuc_seq) % 3 != 0:
+                    # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
+                    continue
+                this_seq = nuc_seq.translate()
                 if kmer_type == "PC":
                     new_seq = ""
                     # Categories defined in https://doi.org/10.1073/pnas.0607879104
@@ -104,14 +108,8 @@ def get_genomic_features(records):
                         these_codons,
                     ) = split_seq(str(this_seq), coding=True)
                 except AssertionError:
-                    print(
-                        "Error asserting CDS for",
-                        record.id,
-                        "at location",
-                        feature.location,
-                    )
-                    print("Exiting..")
-                    return None
+                    # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
+                    continue
                 coding_pairs = coding_pairs + these_coding_pairs
                 bridge_pairs = bridge_pairs + these_bridge_pairs
                 nonbridge_pairs = nonbridge_pairs + these_nonbridge_pairs

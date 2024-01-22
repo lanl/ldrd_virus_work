@@ -27,6 +27,12 @@ import pytest
             "Menangle_features_kmers.csv",
             lambda e: get_kmers(e, k=2),
         ),  # bad coding sequence kmer calculation test
+        (
+            "HM045787.1",
+            ",",
+            "Chikungunya_features.csv",
+            get_genomic_features,
+        ),  # ambiguous nucleotide test
     ],
 )
 @pytest.mark.filterwarnings("error:Partial codon")
@@ -45,4 +51,3 @@ def test_features(accession, sep, file_name, calc_feats):
         rtol=1e-9,
         atol=1e-9,
     )
-

@@ -86,14 +86,9 @@ def get_genomic_features(records):
     coding_cnt_dict = defaultdict(float)
     bridge_cnt_dict = defaultdict(float)
     codons = []
-    allowed = set("ACTG")
     full_sequence = ""
     for record in records:
         full_sequence += str(record.seq)
-        if set(record.seq) > allowed:
-            print(record.id, "contains ambiguous nucleotides")
-            print("Exiting..")
-            return None
         # get cds for each protein so we can count bias
         for feature in record.features:
             if feature.type == "CDS":
@@ -179,6 +174,8 @@ def get_dinucleotide_bias(pair_lst, cnt_dict, key_prefix=""):
     # store bias value as calculated
     for pair in pair_lst:
         this_key = key_prefix + pair
+        if pair not in dinuc_factor:
+            continue
         this_factor = dinuc_factor[pair]
         dinuc_dict[this_key] = dinuc_dict[this_key] + this_factor
     return dinuc_dict
@@ -188,7 +185,7 @@ def get_dinucleotide_bias(pair_lst, cnt_dict, key_prefix=""):
 def get_codon_amino_bias(codons):
     codon_count = defaultdict(float)
     amino_count = defaultdict(float)
-    total_amino = 0.0
+    total_amino = len(codons)  # This includes stop codons according to reference
     bias_ret = {}
     for codon in codons:
         if codon not in codontab:
@@ -197,7 +194,6 @@ def get_codon_amino_bias(codons):
         if codon not in ["ATG", "TGG"]:
             codon_count[codon] = codon_count[codon] + 1.0
         amino = codontab[codon]
-        total_amino = total_amino + 1.0  # this includes STOP codon as defined in ref
         amino_count[amino] = amino_count[amino] + 1.0
     for codon, count in codon_count.items():
         amino = codontab[codon]

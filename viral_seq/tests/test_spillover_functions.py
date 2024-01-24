@@ -117,7 +117,7 @@ def test_modelling_cli():
                 data = json.load(f)
             aucs.append(data["AUC"])
 
-        assert aucs == pytest.approx([0.8333333333333333, 0.875])
+        assert aucs == pytest.approx([0.9166666666666667, 0.8333333333333333])
         # we can't check the image generated easily so we only verify the plot generation doesn't fail
         result = runner.invoke(
             cli, ["plot-roc", "cv_0_roc_curve.csv", "cv_1_roc_curve.csv"]
@@ -156,7 +156,7 @@ def test_modelling_cli():
         with open("cli_metrics.json", "r") as f:
             data = json.load(f)
 
-        assert data["AUC"] == pytest.approx(0.38)
+        assert data["AUC"] == pytest.approx(0.4)
 
 
 @pytest.mark.slow

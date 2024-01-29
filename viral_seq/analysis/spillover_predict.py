@@ -25,6 +25,7 @@ import time
 from typing import Any, Union
 from collections import defaultdict
 from functools import partial
+from operator import itemgetter
 
 matplotlib.use("Agg")
 
@@ -242,11 +243,39 @@ def load_from_cache(
     else:
         if verbose:
             print("Will attempt to load selected accessions from local cache")
+        # Accessions are of the form 'STEM.version' where 'version' is an ascending ordinal
+        # If version is missing or the specific version is not present, we should look for the stem
+        cache_accession_stems = [
+            s.parts[-1].split(".")[0] for s in cache_subdirectories
+        ]
         for accession in accessions:
-            this_record_cache_path = cache_path / f"{accession}"
-            # we can only load what exists
-            if this_record_cache_path in cache_subdirectories:
-                directories_to_load.append(this_record_cache_path)
+            accession_parts = accession.split(".")
+            this_record_cache_path = None
+            candidate_cache_path = cache_path / f"{accession}"
+            # find matches to accession stem
+            matches = [
+                ind
+                for ind, ele in enumerate(cache_accession_stems)
+                if ele == accession_parts[0]
+            ]
+            if len(matches) == 0:
+                raise ValueError(
+                    "Unable to locate suitable entry in the cache for", accession
+                )
+            res = itemgetter(*matches)(
+                cache_subdirectories
+            )  # will either be PosixPath or tuple
+            matched_directories = list(res) if isinstance(res, tuple) else [res]
+            # this will be true if the version specified is present
+            if candidate_cache_path in matched_directories:
+                this_record_cache_path = candidate_cache_path
+            else:
+                # likely there is only one directory with this accession stem, but if there are multiple take the most recent version
+                max_version_ind = np.argmax(
+                    list(int(s.parts[-1].split(".")[-1]) for s in matched_directories)
+                )
+                this_record_cache_path = matched_directories[max_version_ind]
+            directories_to_load.append(this_record_cache_path)
     if verbose:
         print(
             "total number of records (sequence folders) to load from local cache:",

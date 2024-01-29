@@ -459,3 +459,13 @@ def test_build_table_with_partial():
     csv_partial_str = str(csv_partial.resolve())
     df = pd.read_csv(csv_partial_str)
     sp.build_table(df, cache=cache_str, kmers=True, kmer_k=[2])
+
+
+@pytest.mark.parametrize("accession", ["HM147992", "HM147992.2"])
+def test_load_accession_bad_version(accession):
+    # check we can load accessions missing version information or with version information that doesn't match the cached accession
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    sp.load_from_cache(
+        accessions=[accession], cache=cache_str, verbose=True, filter=False
+    )

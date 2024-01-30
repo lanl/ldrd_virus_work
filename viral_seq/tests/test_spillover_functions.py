@@ -459,3 +459,24 @@ def test_build_table_with_partial():
     csv_partial_str = str(csv_partial.resolve())
     df = pd.read_csv(csv_partial_str)
     sp.build_table(df, cache=cache_str, kmers=True, kmer_k=[2])
+
+
+@pytest.mark.parametrize("accession", ["HM147992", "HM147992.2"])
+def test_load_accession_bad_version(accession):
+    # check we can load accessions missing version information or with version information that doesn't match the cached accession
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    records = sp.load_from_cache(
+        accessions=[accession], cache=cache_str, verbose=True, filter=False
+    )
+    assert len(records) == 1
+    assert records[0].id == "HM147992.1"
+
+
+def test_bounce_missing_accession():
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    with pytest.raises(ValueError, match="suitable entry"):
+        sp.load_from_cache(
+            accessions=["ABC1234.1"], cache=cache_str, verbose=True, filter=False
+        )

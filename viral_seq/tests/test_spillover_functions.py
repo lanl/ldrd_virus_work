@@ -469,7 +469,8 @@ def test_load_accession_bad_version(accession):
     records = sp.load_from_cache(
         accessions=[accession], cache=cache_str, verbose=True, filter=False
     )
-    assert len(records) > 0
+    assert len(records) == 1
+    assert records[0].id == "HM147992.1"
 
 
 def test_bounce_missing_accession():

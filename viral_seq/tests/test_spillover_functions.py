@@ -466,6 +466,16 @@ def test_load_accession_bad_version(accession):
     # check we can load accessions missing version information or with version information that doesn't match the cached accession
     this_cache = files("viral_seq.tests") / "cache_unfiltered"
     cache_str = str(this_cache.resolve())
-    sp.load_from_cache(
+    records = sp.load_from_cache(
         accessions=[accession], cache=cache_str, verbose=True, filter=False
     )
+    assert len(records) > 0
+
+
+def test_bounce_missing_accession():
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    with pytest.raises(ValueError, match="suitable entry"):
+        sp.load_from_cache(
+            accessions=["ABC1234.1"], cache=cache_str, verbose=True, filter=False
+        )

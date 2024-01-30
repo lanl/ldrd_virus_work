@@ -17,3 +17,12 @@ Linting pre-commit procedure prevents unnecessary CI/CD failures, but testing pr
 >cd /tmp
 >python3 -m pytest --pyargs viral_seq
 ```
+
+**Workflow Testing**
+The full workflow is not automatically tested and should be occassionally tested by running the following command (assuming from root directory):
+
+```
+>python3 viral_seq/run_workflow.py --debug
+```
+
+This will run the entire workflow with assertions on generated data which are not designed to be performative.

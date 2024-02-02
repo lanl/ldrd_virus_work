@@ -148,6 +148,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 missing_hk.remove(k)
                 extra_accessions.remove(v)
             assert len(extra_accessions) == 0
+        if len(missing_hk) > 0:  # len could have changed
             # currently we don't expect to find everything
             print(
                 "Couldn't find",
@@ -212,15 +213,16 @@ def build_cache(cache_checkpoint=3, debug=False):
         # assert we don't have anything extra
         assert len(cache_subdirectories) == 0
         assert len(missing) + total_cached == len(ensembl_ids)
-        print(
-            "Couldn't find",
-            len(missing),
-            "transcripts; ids saved to",
-            missing_file.absolute().as_posix(),
-        )
-        with open(missing_file, "w") as f:
-            print("Missing ISG transcripts", file=f)
-            print(missing, file=f)
+        if len(missing) > 0:
+            print(
+                "Couldn't find",
+                len(missing),
+                "transcripts; ids saved to",
+                missing_file.absolute().as_posix(),
+            )
+            with open(missing_file, "w") as f:
+                print("Missing ISG transcripts", file=f)
+                print(missing, file=f)
 
 
 if __name__ == "__main__":

@@ -12,11 +12,7 @@ from http.client import IncompleteRead
 def find_in_record(this_search, record_folder):
     genbank_file = list(record_folder.glob("*.genbank"))[0]
     with open(genbank_file, "r") as f:
-        line = next((s for s in f if bool(re.search(this_search, s))), None)
-    if line is None:
-        return False
-    else:
-        return True
+        return bool(re.search(this_search, f.read()))
 
 
 def build_cache(cache_checkpoint=3, debug=False):

@@ -6,6 +6,7 @@ import pandas as pd
 import re
 import argparse
 from tqdm import tqdm
+from http.client import IncompleteRead
 
 
 def find_in_record(this_search, record_folder):
@@ -18,13 +19,11 @@ def find_in_record(this_search, record_folder):
         return True
 
 
-def build_cache(generate=True, debug=False):
+def build_cache(cache_checkpoint=3, debug=False):
     """Download and store all data needed for the workflow"""
 
-    if generate:
-        print(
-            "Will pull down test and train data to local cache, as well as human gene data for similarity features."
-        )
+    if cache_checkpoint > 0:
+        print("Will pull down data to local cache")
 
     if debug:
         print("Debug mode: will run assertions on generated cache")
@@ -37,21 +36,26 @@ def build_cache(generate=True, debug=False):
     cache_viral = cache_Trav.absolute().as_posix()
     viral_files = [train_Trav.absolute().as_posix(), test_Trav.absolute().as_posix()]
 
-    if generate:
+    if cache_checkpoint > 2:
         print("Pulling viral sequence data to local cache...")
-        for file in viral_files:
-            cli.pull_data(
-                [
-                    "--email",
-                    email,
-                    "--cache",
-                    cache_viral,
-                    "--file",
-                    file,
-                    "--no-filter",
-                ],
-                standalone_mode=False,
-            )
+        try:
+            for file in viral_files:
+                cli.pull_data(
+                    [
+                        "--email",
+                        email,
+                        "--cache",
+                        cache_viral,
+                        "--file",
+                        file,
+                        "--no-filter",
+                    ],
+                    standalone_mode=False,
+                )
+        except IncompleteRead:
+            raise ConnectionError(
+                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 3"
+            ) from None
 
     if debug:
         print("Validating train and test cache...")
@@ -86,7 +90,7 @@ def build_cache(generate=True, debug=False):
     cache_hk = cache_Trav.absolute().as_posix()
     file = housekeeping_Trav.absolute().as_posix()
 
-    if generate:
+    if cache_checkpoint > 1:
         print(
             "Pulling sequence data of human housekeeping genes for similarity features..."
         )
@@ -104,7 +108,13 @@ def build_cache(generate=True, debug=False):
         results = sp.run_search(
             search_terms=[search_term], retmax=len(transcripts), email=email
         )
-        records = sp.load_results(results, email=email)
+        try:
+            records = sp.load_results(results, email=email)
+        except IncompleteRead:
+            raise ConnectionError(
+                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 2"
+            ) from None
+
         sp.add_to_cache(records, just_warn=True, cache=cache_hk)
     if debug:
         print("Validating human housekeeping gene cache...")
@@ -156,19 +166,24 @@ def build_cache(generate=True, debug=False):
     isg_Trav = data.joinpath("ISG_transcript_ids.txt")
     cache_isg = cache_Trav.absolute().as_posix()
     file = isg_Trav.absolute().as_posix()
-    if generate:
-        print("Pulling sequence data of human isg genes for similarity features...")
-        cli.pull_ensembl_transcripts(
-            [
-                "--email",
-                email,
-                "--cache",
-                cache_isg,
-                "--file",
-                file,
-            ],
-            standalone_mode=False,
-        )
+    if cache_checkpoint > 0:
+        try:
+            print("Pulling sequence data of human isg genes for similarity features...")
+            cli.pull_ensembl_transcripts(
+                [
+                    "--email",
+                    email,
+                    "--cache",
+                    cache_isg,
+                    "--file",
+                    file,
+                ],
+                standalone_mode=False,
+            )
+        except IncompleteRead:
+            raise ConnectionError(
+                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 1"
+            ) from None
 
     if debug:
         print("Validating human ISG gene cache...")
@@ -210,10 +225,17 @@ def build_cache(generate=True, debug=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cache", action="store_true")
+    parser.add_argument(
+        "-c",
+        "--cache",
+        type=int,
+        choices=range(4),
+        default=3,
+        help="Specify cache building checkpoint(0-3), typically 0 or 3: 0 skips building the cache, 3 builds the entire cache.",
+    )
     parser.add_argument("-d", "--debug", action="store_true")
     args = parser.parse_args()
-    cache = args.cache
+    cache_checkpoint = args.cache
     debug = args.debug
 
-    build_cache(generate=cache, debug=debug)
+    build_cache(cache_checkpoint=cache_checkpoint, debug=debug)

@@ -191,25 +191,21 @@ def build_cache(cache_checkpoint=3, debug=False):
         total_cached = len(cache_subdirectories)
         missing = []
         missing_file = data / "missing_isg.txt"
-        # see if we can find the ensembl transcript ids in the raw text of the genbank files (this is slow)
-        for this_id in tqdm(ensembl_ids):
-            # make our work easier as we go
-            new_list = list(
-                filterfalse(
-                    lambda e: find_in_record(r"MANE Ensembl match\s+:: " + this_id, e),
-                    cache_subdirectories,
-                )
-            )
-            if len(new_list) == len(cache_subdirectories):
-                missing.append(this_id)
-            else:
-                # if we had a match we should have one less directory to look at
-                assert len(new_list) == len(cache_subdirectories) - 1
-            cache_subdirectories = new_list[:]
-        # TODO: make this more strict if we expect to find all the transcripts
-        # assert we don't have anything extra
-        assert len(cache_subdirectories) == 0
-        assert len(missing) + total_cached == len(ensembl_ids)
+        # see if we can find the ensembl transcript ids in the raw text of the genbank files
+        cache_subdir_set = set()
+        prog = re.compile(r"MANE Ensembl match\s+:: (ENST\d+)")
+        # make a set of ensembl trascripts present
+        for subdir in cache_subdirectories:
+            genbank_file = list(subdir.glob("*.genbank"))[0]
+            with open(genbank_file, "r") as f:
+                match = prog.search(f.read())
+                if match is not None:
+                    cache_subdir_set.add(match.group(1))
+        # there should only be one per directory, and they should be unique
+        assert len(cache_subdir_set) == len(cache_subdirectories)
+        missing = ensembl_ids.difference(cache_subdir_set)
+        # assert there is nothing extra
+        assert len(missing) + len(cache_subdir_set) == len(ensembl_ids)
         if len(missing) > 0:
             print(
                 "Couldn't find",

@@ -480,3 +480,16 @@ def test_bounce_missing_accession():
         sp.load_from_cache(
             accessions=["ABC1234.1"], cache=cache_str, verbose=True, filter=False
         )
+
+
+@pytest.mark.parametrize("accession", ["HM147992", "HM147992.2"])
+def test_build_table_bad_version(accession):
+    this_cache = files("viral_seq.tests") / "cache_unfiltered"
+    cache_str = str(this_cache.resolve())
+    df = pd.DataFrame(
+        [["1", accession, "Una virus"]], columns=["Unnamed: 0", "Accessions", "Species"]
+    )
+    table = sp.build_table(
+        df=df, cache=cache_str, genomic=False, kmers=False, kmers_pc=False, gc=True
+    )
+    assert table["GC Content"].values[0] == pytest.approx(0.5050986292209964)

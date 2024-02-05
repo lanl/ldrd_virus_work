@@ -1,11 +1,9 @@
 from importlib.resources import files
-from itertools import filterfalse
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.cli import cli
 import pandas as pd
 import re
 import argparse
-from tqdm import tqdm
 from http.client import IncompleteRead
 from urllib.error import URLError
 
@@ -182,7 +180,6 @@ def build_cache(cache_checkpoint=3, debug=False):
         with open(file, "r") as f:
             ensembl_ids = set((f.readlines()[0]).split())
         cache_path, cache_subdirectories = sp.init_cache(cache_isg)
-        total_cached = len(cache_subdirectories)
         missing = []
         missing_file = data / "missing_isg.txt"
         # see if we can find the ensembl transcript ids in the raw text of the genbank files

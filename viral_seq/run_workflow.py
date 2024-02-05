@@ -10,12 +10,6 @@ from http.client import IncompleteRead
 from urllib.error import URLError
 
 
-def find_in_record(this_search, record_folder):
-    genbank_file = list(record_folder.glob("*.genbank"))[0]
-    with open(genbank_file, "r") as f:
-        return bool(re.search(this_search, f.read()))
-
-
 def build_cache(cache_checkpoint=3, debug=False):
     """Download and store all data needed for the workflow"""
 

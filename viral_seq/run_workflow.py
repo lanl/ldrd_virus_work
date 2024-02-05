@@ -7,6 +7,7 @@ import re
 import argparse
 from tqdm import tqdm
 from http.client import IncompleteRead
+from urllib.error import URLError
 
 
 def find_in_record(this_search, record_folder):
@@ -48,9 +49,9 @@ def build_cache(cache_checkpoint=3, debug=False):
                     ],
                     standalone_mode=False,
                 )
-        except IncompleteRead:
+        except (IncompleteRead, URLError):
             raise ConnectionError(
-                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 3"
+                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 3 and an active internet connection."
             ) from None
 
     if debug:
@@ -106,9 +107,9 @@ def build_cache(cache_checkpoint=3, debug=False):
         )
         try:
             records = sp.load_results(results, email=email)
-        except IncompleteRead:
+        except (IncompleteRead, URLError):
             raise ConnectionError(
-                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 2"
+                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 2 and an active internet connection."
             ) from None
 
         sp.add_to_cache(records, just_warn=True, cache=cache_hk)
@@ -177,9 +178,9 @@ def build_cache(cache_checkpoint=3, debug=False):
                 ],
                 standalone_mode=False,
             )
-        except IncompleteRead:
+        except (IncompleteRead, URLError):
             raise ConnectionError(
-                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 1"
+                "Connection closed as protocol synchronisation is probably lost. Re-run workflow with option --cache 1 and an active internet connection."
             ) from None
 
     if debug:

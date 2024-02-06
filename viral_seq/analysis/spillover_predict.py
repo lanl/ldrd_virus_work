@@ -377,13 +377,14 @@ def build_table(
             row_dict[row["Species"]] = row
             for accession in row["Accessions"].split():
                 accessions.append(accession)
-                accessions_dict[accession] = row["Species"]
+                accession_key = accession.split(".")[0]
+                accessions_dict[accession_key] = row["Species"]
         # we do one call to load all records from cache
         records_unordered = load_from_cache(
             accessions, cache=cache, filter=False, verbose=False
         )
         for record in records_unordered:
-            records_dict[accessions_dict[record.id]].append(record)
+            records_dict[accessions_dict[record.id.split(".")[0]]].append(record)
         meta_data = list(df.columns)
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()

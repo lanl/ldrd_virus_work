@@ -26,7 +26,7 @@ The full workflow is not automatically tested and should be occassionally tested
 3. Run the workflow with the following command:
 
 ```
->python3 viral_seq/run_workflow.py --cache 3 --debug
+>python3 viral_seq/run_workflow.py --debug
 ```
 
 This will run the entire workflow with assertions on generated data which are not designed to be performative.

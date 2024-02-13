@@ -336,12 +336,11 @@ def univariate_selection(X, y, uni_type, num_select, random_state=123456789):
 
 
 def drop_unshared_kmers(df: pd.DataFrame):
-    drop_cols = []
-    for col in df.columns:
-        # checks if column is a kmer column
-        # and, if there are less than two nonzero entries (the number of zeros is greater than total entries minus 2)
-        if col.startswith("kmer_") and (df[col] == 0).sum() > df.shape[0] - 2:
-            drop_cols.append(col)
+    # filter kmer columns
+    candidate_df = df.filter(like="kmer_", axis=1)
+    # find columns with less than 2 non-zero entries to drop
+    vals = (candidate_df == 0).sum(axis=0) > (df.shape[0] - 2)
+    drop_cols = candidate_df.columns[vals]
     ret = df.drop(columns=drop_cols)
     return ret
 

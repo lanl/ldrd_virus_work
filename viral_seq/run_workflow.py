@@ -6,6 +6,10 @@ import re
 import argparse
 from http.client import IncompleteRead
 from urllib.error import URLError
+import polars as pl
+import ast
+from pytest import approx
+import numpy as np
 
 
 def build_cache(cache_checkpoint=3, debug=False):
@@ -18,12 +22,6 @@ def build_cache(cache_checkpoint=3, debug=False):
         print("Debug mode: will run assertions on generated cache")
 
     email = "arhall@lanl.gov"
-    data = files("viral_seq.data")
-    cache_Trav = data / "cache_viral"
-    train_Trav = data.joinpath("Mollentze_Training.csv")
-    test_Trav = data.joinpath("Mollentze_Holdout.csv")
-    cache_viral = cache_Trav.absolute().as_posix()
-    viral_files = [train_Trav.absolute().as_posix(), test_Trav.absolute().as_posix()]
 
     if cache_checkpoint > 2:
         print("Pulling viral sequence data to local cache...")
@@ -74,9 +72,7 @@ def build_cache(cache_checkpoint=3, debug=False):
         # assert we don't have anything extra
         assert len(accessions_train.union(accessions_test)) == len(cache_subdirectories)
 
-    cache_Trav = data / "cache_housekeeping"
     housekeeping_Trav = data.joinpath("Housekeeping_accessions.txt")
-    cache_hk = cache_Trav.absolute().as_posix()
     file = housekeeping_Trav.absolute().as_posix()
 
     if cache_checkpoint > 1:
@@ -152,9 +148,7 @@ def build_cache(cache_checkpoint=3, debug=False):
         # assert we don't have anything extra
         assert len(cached_accessions) + len(missing_hk) == len(accessions_hk)
 
-    cache_Trav = data / "cache_isg"
     isg_Trav = data.joinpath("ISG_transcript_ids.txt")
-    cache_isg = cache_Trav.absolute().as_posix()
     file = isg_Trav.absolute().as_posix()
     if cache_checkpoint > 0:
         try:
@@ -209,6 +203,131 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing, file=f)
 
 
+def build_tables(feature_checkpoint=0, debug=False):
+    """Calculate all features and store in data tables for future use in the workflow"""
+
+    if feature_checkpoint > 0:
+        print("Will build feature tables for training models")
+
+    if debug:
+        print("Debug mode: will run assertions on generated tables")
+        table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+        table_info = pd.read_csv(
+            table_file,
+            sep="\t",
+            dtype={"Train_sum": np.float32, "Test_sum": np.float32},
+            converters={
+                "Train_shape": ast.literal_eval,
+                "Test_shape": ast.literal_eval,
+            },
+        )
+    # tables are built in multiple parts as this is faster for reading/writing
+    for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+        prefix = "Train" if i == 0 else "Test"
+        this_checkpoint_modifier = (1 - i) * 8
+        this_checkpoint = 8 + this_checkpoint_modifier
+        this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+        if feature_checkpoint >= this_checkpoint:
+            print(
+                "Building table for",
+                prefix,
+                "which includes genomic features, gc content, kmers with k=2,3,4, pc kmers with k=2,3,4,5,6, and similarity features for ISG and housekeeping genes.",
+            )
+            print("To restart at this point use --features", this_checkpoint)
+            cli.calculate_table(
+                [
+                    "--file",
+                    file,
+                    "--cache",
+                    cache_viral,
+                    "--outfile",
+                    this_outfile,
+                    "--features-genomic",
+                    "--features-gc",
+                    "--features-kmers",
+                    "--kmer-k",
+                    "2 3 4",
+                    "--features-kmers-pc",
+                    "--kmer-k-pc",
+                    "2 3 4 5 6",
+                    "--similarity-genomic",
+                    "--similarity-cache",
+                    cache_isg + " " + cache_hk,
+                ],
+                standalone_mode=False,
+            )
+        if debug:
+            print("Validating", this_outfile)
+            idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
+            df = pl.read_parquet(this_outfile).to_pandas()
+            assert df.shape == table_info.iloc[idx][prefix + "_shape"]
+            # check if numeric sum of the entire table matches what was precalculated
+            assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
+                table_info.iloc[idx][prefix + "_sum"]
+            )
+        this_checkpoint -= 1
+        this_outfile = folder + "/" + prefix + "_kpc7.parquet.gzip"
+        if feature_checkpoint >= this_checkpoint:
+            print("Building table for", prefix, "which includes pc kmers with k=7.")
+            print("To restart at this point use --features", this_checkpoint)
+            cli.calculate_table(
+                [
+                    "--file",
+                    file,
+                    "--cache",
+                    cache_viral,
+                    "--outfile",
+                    this_outfile,
+                    "--features-kmers-pc",
+                    "--kmer-k-pc",
+                    "7",
+                ],
+                standalone_mode=False,
+            )
+        if debug:
+            print("Validating", this_outfile)
+            idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
+            df = pl.read_parquet(this_outfile).to_pandas()
+            assert df.shape == table_info.iloc[idx][prefix + "_shape"]
+            # check if numeric sum of the entire table matches what was precalculated
+            assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
+                table_info.iloc[idx][prefix + "_sum"]
+            )
+        for k in range(5, 11):
+            this_checkpoint -= 1
+            this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
+            if feature_checkpoint >= this_checkpoint:
+                print(
+                    "Building table for",
+                    prefix,
+                    "which includes kmers with k={}.".format(k),
+                )
+                print("To restart at this point use --features", this_checkpoint)
+                cli.calculate_table(
+                    [
+                        "--file",
+                        file,
+                        "--cache",
+                        cache_viral,
+                        "--outfile",
+                        this_outfile,
+                        "--features-kmers",
+                        "--kmer-k",
+                        str(k),
+                    ],
+                    standalone_mode=False,
+                )
+            if debug:
+                print("Validating", this_outfile)
+                idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
+                df = pl.read_parquet(this_outfile).to_pandas()
+                assert df.shape == table_info.iloc[idx][prefix + "_shape"]
+                # check if numeric sum of the entire table matches what was precalculated
+                assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
+                    table_info.iloc[idx][prefix + "_sum"]
+                )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -220,8 +339,30 @@ if __name__ == "__main__":
         help="Specify cache building checkpoint(0-3), typically 0 or 3: 0 skips building the cache, 3 builds the entire cache.",
     )
     parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument(
+        "-f",
+        "--features",
+        type=int,
+        choices=range(17),
+        default=16,
+        help="Specify feature table building checkpoint(0-16), typically 0 or 16: 0 skips building feature tables, 16 builds all feature tables.",
+    )
+
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
+    feature_checkpoint = args.features
+
+    data = files("viral_seq.data")
+    cache_viral = str(data / "cache_viral")
+    train_file = str(data.joinpath("Mollentze_Training.csv"))
+    test_file = str(data.joinpath("Mollentze_Holdout.csv"))
+    viral_files = [train_file, test_file]
+    cache_isg = str(data / "cache_isg")
+    cache_hk = str(data / "cache_housekeeping")
+    table_loc_train = str(data / "tables" / "train")
+    table_loc_test = str(data / "tables" / "test")
+    table_locs = [table_loc_train, table_loc_test]
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
+    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)

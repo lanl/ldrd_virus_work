@@ -466,8 +466,10 @@ def build_table(
         table = drop_unshared_kmers(table)
     # required for repeatability, but may be slow
     if ordered:
+        # rows need to be ordered for viruses
         table.sort_values(by=["Unnamed: 0"], inplace=True)
-        table = table.reindex(sorted(table.columns), axis=1)
+    # columns should be ordered for everything (viruses, human gene sets)
+    table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
     if save:
         save_files(table, filename)

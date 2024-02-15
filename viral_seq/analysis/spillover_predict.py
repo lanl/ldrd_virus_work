@@ -365,6 +365,7 @@ def build_table(
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
+    # viral feature tables
     if df is not None:
         # make a list of all the accessions and a dict to keep track of which species an accession belongs to
         records_dict: dict[str, list] = {}
@@ -392,9 +393,9 @@ def build_table(
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
+    # human gene feature tables
     else:
         # build feature table from the entire cache
-        # we don't know what accessions are associated with, treated as one entry (e.g. human features)
         records = load_from_cache(cache=cache, filter=False, verbose=False)
         for record in tqdm(records):
             features = {}
@@ -464,12 +465,13 @@ def build_table(
         # if we aren't keeping specific columns from a previously trained model, we should drop shared kmers
         table.fillna(0, inplace=True)
         table = drop_unshared_kmers(table)
-    # required for repeatability, but may be slow
+    # required for repeatability
     if ordered:
-        # rows need to be ordered for viruses
-        table.sort_values(by=["Unnamed: 0"], inplace=True)
-    # columns should be ordered for everything (viruses, human gene sets)
-    table = table.reindex(sorted(table.columns), axis=1)
+        if df is not None:
+            # rows need to be ordered for viruses
+            table.sort_values(by=["Unnamed: 0"], inplace=True)
+        # columns should be ordered for everything (viruses, human gene sets)
+        table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)
     if save:
         save_files(table, filename)

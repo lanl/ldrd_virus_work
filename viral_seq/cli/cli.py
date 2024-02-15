@@ -309,7 +309,6 @@ def calculate_table(
                 gc=False,
                 kmers=False,
                 kmers_pc=False,
-                ordered=False,
             )
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)

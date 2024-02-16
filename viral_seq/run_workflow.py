@@ -12,6 +12,7 @@ from pytest import approx
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
+from pathlib import Path
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -315,28 +316,49 @@ def build_tables(feature_checkpoint=0, debug=False):
 
 def feature_selection_rfc(feature_selection, debug):
     """Sub-select features using best performing from a trained random forest classifier"""
-    this_outfile = table_loc_train_best + "/Train_best.parquet.gzip"
-    if feature_selection == "yes":
-        print(
-            "Will train a random forest classifier to select the best performing features."
-        )
-        print(
-            "This step requires enough resources to load all feature tables for training into memory."
-        )
+    this_outfile_X = table_loc_train_best + "/X_train.parquet.gzip"
+    this_outfile_y = table_loc_train_best + "/y_train.parquet.gzip"
+    if feature_selection == "yes" or feature_selection == "none":
+        print("Loading all feature tables for train...")
         train_files = tuple(glob(table_loc_train + "/*gzip"))
         X, y = sp.get_training_columns(table_filename=train_files)
-        rfc = RandomForestClassifier(n_estimators=10_000, random_state=123)
-        rfc.fit(X, y)
-        sorted_imps, sorted_feats = zip(
-            *sorted(zip(rfc.feature_importances_, rfc.feature_names_in_))
+        if feature_selection == "none":
+            print(
+                "All training features will be used as X_train in the following steps."
+            )
+        elif feature_selection == "yes":
+            print(
+                "Will train a random forest classifier to select the best performing features to use as X_train."
+            )
+            rfc = RandomForestClassifier(n_estimators=10_000, random_state=123)
+            rfc.fit(X, y)
+            sorted_imps, sorted_feats = zip(
+                *sorted(zip(rfc.feature_importances_, rfc.feature_names_in_))
+            )
+            keep_feats = list(sorted_feats[-10_000:])
+            X = X[keep_feats]
+            print("Saving X_train, y_train to", this_outfile_X, "and", this_outfile_y)
+            X.to_parquet(this_outfile_X)
+            y.to_frame().to_parquet(this_outfile_y)
+    elif feature_selection == "skip":
+        print(
+            "Will use previously calculated X_train, y_train stored at",
+            this_outfile_X,
+            "and",
+            this_outfile_y,
         )
-        keep_feats = list(sorted_feats[-10_000:])
-        X = X[keep_feats]
-        X.to_parquet(this_outfile)
-    elif feature_selection == "none":
-        print("Will use full feature tables for training")
-    if (feature_selection == "yes" or feature_selection == "skip") and debug:
-        validate_feature_table(this_outfile, 8, "Train")
+        X = pl.read_parquet(this_outfile_X).to_pandas()
+        y = pl.read_parquet(this_outfile_y).to_pandas()["Human Host"]
+    if debug:
+        # these might not exist if the workflow has only been run with --feature-selection none
+        if Path(this_outfile_X).is_file():
+            validate_feature_table(this_outfile_X, 8, "Train")
+        if Path(this_outfile_y).is_file():
+            print("Validating", this_outfile_y)
+            df_actual = pl.read_parquet(this_outfile_y).to_pandas()
+            df_expected = pd.read_csv(train_file)[["Human Host"]]
+            pd.testing.assert_frame_equal(df_actual, df_expected)
+    return X, y
 
 
 if __name__ == "__main__":
@@ -396,4 +418,6 @@ if __name__ == "__main__":
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
-    feature_selection_rfc(feature_selection=feature_selection, debug=debug)
+    X_train, y_train = feature_selection_rfc(
+        feature_selection=feature_selection, debug=debug
+    )

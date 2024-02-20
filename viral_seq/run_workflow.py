@@ -314,7 +314,7 @@ def build_tables(feature_checkpoint=0, debug=False):
                 validate_feature_table(this_outfile, idx, prefix)
 
 
-def feature_selection_rfc(feature_selection, debug):
+def feature_selection_rfc(feature_selection, debug, n_jobs):
     """Sub-select features using best performing from a trained random forest classifier"""
     this_outfile_X = table_loc_train_best + "/X_train.parquet.gzip"
     this_outfile_y = table_loc_train_best + "/y_train.parquet.gzip"
@@ -330,7 +330,9 @@ def feature_selection_rfc(feature_selection, debug):
             print(
                 "Will train a random forest classifier to select the best performing features to use as X_train."
             )
-            rfc = RandomForestClassifier(n_estimators=10_000, random_state=123)
+            rfc = RandomForestClassifier(
+                n_estimators=10_000, random_state=123, n_jobs=n_jobs
+            )
             rfc.fit(X, y)
             sorted_imps, sorted_feats = zip(
                 *sorted(zip(rfc.feature_importances_, rfc.feature_names_in_))
@@ -387,12 +389,20 @@ if __name__ == "__main__":
         default="yes",
         help="Option 'none' will use all features in subsequent steps, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
     )
+    parser.add_argument(
+        "-n",
+        "--n-jobs",
+        type=int,
+        default=1,
+        help="Parameter will be used for sklearn modules with parallelization as appropriate.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
     feature_checkpoint = args.features
     feature_selection = args.feature_selection
+    n_jobs = args.n_jobs
 
     data = files("viral_seq.data")
     cache_viral = str(data / "cache_viral")
@@ -419,5 +429,5 @@ if __name__ == "__main__":
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
     X_train, y_train = feature_selection_rfc(
-        feature_selection=feature_selection, debug=debug
+        feature_selection=feature_selection, debug=debug, n_jobs=n_jobs
     )

@@ -416,15 +416,16 @@ if __name__ == "__main__":
     table_locs = [table_loc_train, table_loc_test]
     table_loc_train_best = str(data / "tables" / "train_best")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
-    table_info = pd.read_csv(
-        table_file,
-        sep="\t",
-        dtype={"Train_sum": np.float32, "Test_sum": np.float32},
-        converters={
-            "Train_shape": ast.literal_eval,
-            "Test_shape": ast.literal_eval,
-        },
-    )
+    if debug:
+        table_info = pd.read_csv(
+            table_file,
+            sep="\t",
+            dtype={"Train_sum": np.float32, "Test_sum": np.float32},
+            converters={
+                "Train_shape": ast.literal_eval,
+                "Test_shape": ast.literal_eval,
+            },
+        )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(feature_checkpoint=feature_checkpoint, debug=debug)

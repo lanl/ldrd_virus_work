@@ -316,7 +316,6 @@ def build_tables(feature_checkpoint=0, debug=False):
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     """Sub-select features using best performing from a trained random forest classifier"""
-    this_outfile_X = table_loc_train_best + "/X_train.parquet.gzip"
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
         train_files = tuple(glob(table_loc_train + "/*gzip"))
@@ -338,16 +337,16 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
             )
             keep_feats = list(sorted_feats[-10_000:])
             X = X[keep_feats]
-            print("Saving X_train to", this_outfile_X)
-            X.to_parquet(this_outfile_X)
+            print("Saving X_train to", table_loc_train_best)
+            X.to_parquet(table_loc_train_best)
     elif feature_selection == "skip":
-        print("Will use previously calculated X_train stored at", this_outfile_X)
-        X = pl.read_parquet(this_outfile_X).to_pandas()
+        print("Will use previously calculated X_train stored at", table_loc_train_best)
+        X = pl.read_parquet(table_loc_train_best).to_pandas()
         y = pd.read_csv(train_file)["Human Host"]
     if debug:
         # these might not exist if the workflow has only been run with --feature-selection none
-        if Path(this_outfile_X).is_file():
-            validate_feature_table(this_outfile_X, 8, "Train")
+        if Path(table_loc_train_best).is_file():
+            validate_feature_table(table_loc_train_best, 8, "Train")
     return X, y
 
 
@@ -410,7 +409,7 @@ if __name__ == "__main__":
     table_loc_train = str(data / "tables" / "train")
     table_loc_test = str(data / "tables" / "test")
     table_locs = [table_loc_train, table_loc_test]
-    table_loc_train_best = str(data / "tables" / "train_best")
+    table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
     if debug:
         table_info = pd.read_csv(

@@ -13,6 +13,7 @@ import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
 from pathlib import Path
+from warnings import warn
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -347,6 +348,13 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
         # these might not exist if the workflow has only been run with --feature-selection none
         if Path(table_loc_train_best).is_file():
             validate_feature_table(table_loc_train_best, 8, "Train")
+        else:
+            warn(
+                "File at {} cannot be validated because it does not exist. If using option '--feature-selection none' this is expected behavior.".format(
+                    table_loc_train_best
+                ),
+                UserWarning,
+            )
     return X, y
 
 

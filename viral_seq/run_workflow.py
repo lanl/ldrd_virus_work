@@ -317,7 +317,6 @@ def build_tables(feature_checkpoint=0, debug=False):
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     """Sub-select features using best performing from a trained random forest classifier"""
     this_outfile_X = table_loc_train_best + "/X_train.parquet.gzip"
-    this_outfile_y = table_loc_train_best + "/y_train.parquet.gzip"
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
         train_files = tuple(glob(table_loc_train + "/*gzip"))
@@ -339,27 +338,16 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
             )
             keep_feats = list(sorted_feats[-10_000:])
             X = X[keep_feats]
-            print("Saving X_train, y_train to", this_outfile_X, "and", this_outfile_y)
+            print("Saving X_train to", this_outfile_X)
             X.to_parquet(this_outfile_X)
-            y.to_frame().to_parquet(this_outfile_y)
     elif feature_selection == "skip":
-        print(
-            "Will use previously calculated X_train, y_train stored at",
-            this_outfile_X,
-            "and",
-            this_outfile_y,
-        )
+        print("Will use previously calculated X_train stored at", this_outfile_X)
         X = pl.read_parquet(this_outfile_X).to_pandas()
-        y = pl.read_parquet(this_outfile_y).to_pandas()["Human Host"]
+        y = pd.read_csv(train_file)["Human Host"]
     if debug:
         # these might not exist if the workflow has only been run with --feature-selection none
         if Path(this_outfile_X).is_file():
             validate_feature_table(this_outfile_X, 8, "Train")
-        if Path(this_outfile_y).is_file():
-            print("Validating", this_outfile_y)
-            df_actual = pl.read_parquet(this_outfile_y).to_pandas()
-            df_expected = pd.read_csv(train_file)[["Human Host"]]
-            pd.testing.assert_frame_equal(df_actual, df_expected)
     return X, y
 
 

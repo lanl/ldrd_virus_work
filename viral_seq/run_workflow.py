@@ -314,7 +314,7 @@ def build_tables(feature_checkpoint=0, debug=False):
                 validate_feature_table(this_outfile, idx, prefix)
 
 
-def feature_selection_rfc(feature_selection, debug, n_jobs):
+def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     """Sub-select features using best performing from a trained random forest classifier"""
     this_outfile_X = table_loc_train_best + "/X_train.parquet.gzip"
     this_outfile_y = table_loc_train_best + "/y_train.parquet.gzip"
@@ -331,7 +331,7 @@ def feature_selection_rfc(feature_selection, debug, n_jobs):
                 "Will train a random forest classifier to select the best performing features to use as X_train."
             )
             rfc = RandomForestClassifier(
-                n_estimators=10_000, random_state=123, n_jobs=n_jobs
+                n_estimators=10_000, random_state=random_state, n_jobs=n_jobs
             )
             rfc.fit(X, y)
             sorted_imps, sorted_feats = zip(
@@ -396,6 +396,13 @@ if __name__ == "__main__":
         default=1,
         help="Parameter will be used for sklearn modules with parallelization as appropriate.",
     )
+    parser.add_argument(
+        "-r",
+        "--random-state",
+        type=int,
+        default=123,
+        help="Random seed to use when needed in workflow.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -403,6 +410,7 @@ if __name__ == "__main__":
     feature_checkpoint = args.features
     feature_selection = args.feature_selection
     n_jobs = args.n_jobs
+    random_state = args.random_state
 
     data = files("viral_seq.data")
     cache_viral = str(data / "cache_viral")
@@ -430,5 +438,8 @@ if __name__ == "__main__":
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
     X_train, y_train = feature_selection_rfc(
-        feature_selection=feature_selection, debug=debug, n_jobs=n_jobs
+        feature_selection=feature_selection,
+        debug=debug,
+        n_jobs=n_jobs,
+        random_state=random_state,
     )

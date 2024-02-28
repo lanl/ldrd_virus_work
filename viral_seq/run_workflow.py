@@ -335,13 +335,14 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
                 n_estimators=10_000, random_state=random_state, n_jobs=n_jobs
             )
             rfc.fit(X, y)
-            print("Checking OOB score of Random Forest.")
-            oob_score = rfc_utils.oob_score(
-                rfc, X, y, roc_auc_score, n_jobs=n_jobs, scoring_on_pred=False
-            )
-            print("Achieved an OOB score (AUC) of", oob_score)
-            # RandomForestClassifier should perform well enough that we can trust its feature ranking
-            assert oob_score > 0.75
+            if debug:
+                print("Debug mode: Checking OOB score of Random Forest.")
+                oob_score = rfc_utils.oob_score(
+                    rfc, X, y, roc_auc_score, n_jobs=n_jobs, scoring_on_pred=False
+                )
+                print("Achieved an OOB score (AUC) of", oob_score)
+                # RandomForestClassifier should perform well enough that we can trust its feature ranking
+                assert oob_score > 0.75
             keep_feats = sp.get_best_features(
                 rfc.feature_importances_, rfc.feature_names_in_
             )

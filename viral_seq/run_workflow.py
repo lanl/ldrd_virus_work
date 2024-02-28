@@ -332,7 +332,10 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
                 "Will train a random forest classifier to select the best performing features to use as X_train."
             )
             rfc = RandomForestClassifier(
-                n_estimators=10_000, random_state=random_state, n_jobs=n_jobs
+                n_estimators=2_000,
+                random_state=random_state,
+                n_jobs=n_jobs,
+                max_depth=30,
             )
             rfc.fit(X, y)
             if debug:

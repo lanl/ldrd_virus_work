@@ -721,3 +721,21 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
     ax.legend(loc="lower right")
 
     fig.savefig(filename)
+
+
+def get_best_features(feature_importances, feature_names, cutoff=None):
+    """Return names of the best features
+
+    feature_importances -- a list of importances of each feature, the list sums to 1
+    feature_names -- names of features in the order of feature_importances
+    cutoff -- intended cutoff is set below, if not None uses whatever value is passed instead
+    """
+    # default cutoff will be importance > 2*mean_importance, where the mean_importance will be 1/n_nonzero as total importance sums to 1
+    if cutoff is None:
+        n_nonzero = (feature_importances > 0).sum()
+        cutoff = 2.0 / n_nonzero
+    # use the list of importances to sort the list of feature names in ascending order of importance
+    sorted_imps, sorted_feats = zip(*sorted(zip(feature_importances, feature_names)))
+    cutoff_loc = np.searchsorted(sorted_imps, cutoff, side="right")
+    keep_feats = list(sorted_feats[cutoff_loc:])
+    return keep_feats

@@ -342,11 +342,11 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
             print("Achieved an OOB score (AUC) of", oob_score)
             # RandomForestClassifier should perform well enough that we can trust its feature ranking
             assert oob_score > 0.75
-
-            sorted_imps, sorted_feats = zip(
-                *sorted(zip(rfc.feature_importances_, rfc.feature_names_in_))
+            keep_feats = sp.get_best_features(
+                rfc.feature_importances_, rfc.feature_names_in_
             )
-            keep_feats = list(sorted_feats[-10_000:])
+            print("Selected", len(keep_feats), "features")
+            assert len(keep_feats) < 50_000
             X = X[keep_feats]
             print("Saving X_train to", table_loc_train_best)
             X.to_parquet(table_loc_train_best)

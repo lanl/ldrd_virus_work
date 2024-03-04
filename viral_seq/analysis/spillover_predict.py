@@ -5,6 +5,8 @@ from viral_seq.analysis.get_features import get_genomic_features, get_kmers, get
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
 import numpy as np
+import numpy.typing as npt
+from numpy.testing import assert_allclose
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -723,19 +725,33 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
     fig.savefig(filename)
 
 
-def get_best_features(feature_importances, feature_names, cutoff=None):
-    """Return names of the best features
-
-    feature_importances -- a list of importances of each feature, the list sums to 1
-    feature_names -- names of features in the order of feature_importances
-    cutoff -- intended cutoff is set below, if not None uses whatever value is passed instead
+def get_best_features(
+    feature_importances: npt.NDArray,
+    feature_names: npt.NDArray,
+    percentile: float = 90.0,
+) -> npt.NDArray:
     """
-    # default cutoff will be importance > 2*mean_importance, where the mean_importance will be 1/n_nonzero as total importance sums to 1
-    if cutoff is None:
-        n_nonzero = (feature_importances > 0).sum()
-        cutoff = 2.0 / n_nonzero
-    # use the list of importances to sort the list of feature names in ascending order of importance
-    sorted_imps, sorted_feats = zip(*sorted(zip(feature_importances, feature_names)))
-    cutoff_loc = np.searchsorted(sorted_imps, cutoff, side="right")
-    keep_feats = list(sorted_feats[cutoff_loc:])
-    return keep_feats
+    Return names of the features with importances greater than or equal to the percentile of the non-zero importances
+
+        Parameters:
+            feature_importances (npt.NDArray): Importances of each feature, sums to 1
+            feature_names (npt.NDArray): Names of features in the order of feature_importances
+            percentile (float): In range [0, 100]
+
+        Returns:
+            (ntd.NDArray): Names of features greater than or equal to percentile
+    """
+    assert_allclose(feature_importances.sum(), 1)
+
+    # drop 0s
+    non_zero = np.nonzero(feature_importances)[0]
+    feature_importances = feature_importances[non_zero]
+    feature_names = feature_names[non_zero]
+
+    cutoff = np.percentile(feature_importances, percentile)
+    # >= ensures something is returned in edge cases where all non-zero values are identical
+    mask = feature_importances >= cutoff
+    feature_importances = feature_importances[mask]
+    feature_names = feature_names[mask]
+    idx = np.argsort(feature_importances)[::-1]
+    return feature_names[idx]

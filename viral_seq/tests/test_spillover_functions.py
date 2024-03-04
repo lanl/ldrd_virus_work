@@ -7,6 +7,8 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 from viral_seq.analysis import spillover_predict as sp
 import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -497,57 +499,22 @@ def test_build_table_bad_version(accession):
 
 
 def test_get_best_features():
-    """
-    Feature importances cached from following:
     X, y = make_classification(
-            n_samples=300,
-            n_features=30,
-            n_informative=3,
-            n_redundant=0,
-            n_repeated=0,
-            n_classes=2,
-            random_state=0,
-            shuffle=False,
-            class_sep=2,
+        n_samples=300,
+        n_features=30,
+        n_informative=3,
+        n_redundant=0,
+        n_repeated=0,
+        n_classes=2,
+        random_state=0,
+        shuffle=False,
+        class_sep=2,
     )
     rfc = RandomForestClassifier(n_estimators=10, random_state=0)
-    rfc.fit(X,y)
-    """
-    feature_importances = np.array(
-        [
-            0.10588681,
-            0.20879084,
-            0.08130232,
-            0.01392846,
-            0.03254672,
-            0.03617162,
-            0.02795051,
-            0.01091748,
-            0.01131068,
-            0.04024188,
-            0.02655592,
-            0.01749936,
-            0.01660615,
-            0.02744385,
-            0.00387307,
-            0.01468557,
-            0.0237248,
-            0.04829045,
-            0.02516414,
-            0.00861525,
-            0.01648333,
-            0.02547048,
-            0.0229809,
-            0.0146191,
-            0.02749679,
-            0.0203104,
-            0.03194598,
-            0.01956063,
-            0.02695125,
-            0.01267525,
-        ]
-    )
+    rfc.fit(X, y)
     feature_names = np.array([f"feature {i}" for i in range(30)])
-    selected_features = set(sp.get_best_features(feature_importances, feature_names))
+    selected_features = set(
+        sp.get_best_features(rfc.feature_importances_, feature_names)
+    )
     informative_features = set(feature_names[:3])
     assert selected_features == informative_features

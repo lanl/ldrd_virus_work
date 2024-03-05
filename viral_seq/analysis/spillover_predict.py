@@ -742,7 +742,7 @@ def get_best_features(
     """
     if not np.allclose(feature_importances.sum(), 1):
         raise ValueError("feature_importances must sum to 1")
-    if 100.0 < percentile < 0.0:
+    if 100.0 < percentile or percentile < 0.0:
         raise ValueError("percentile out of range [0, 100]")
     if feature_importances.shape != feature_names.shape:
         raise ValueError(

@@ -7,6 +7,7 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 from viral_seq.analysis import spillover_predict as sp
 import numpy as np
+import numpy.testing as npt
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
 
@@ -513,8 +514,61 @@ def test_get_best_features():
     rfc = RandomForestClassifier(n_estimators=10, random_state=0)
     rfc.fit(X, y)
     feature_names = np.array([f"feature {i}" for i in range(30)])
-    selected_features = set(
+    selected_features = np.sort(
         sp.get_best_features(rfc.feature_importances_, feature_names)
     )
-    informative_features = set(feature_names[:3])
-    assert selected_features == informative_features
+    informative_features = feature_names[:3]
+    npt.assert_array_equal(selected_features, informative_features)
+
+
+@pytest.mark.parametrize(
+    "size, percentile",
+    [
+        (10, 50),
+        (10, 90),
+        (100, 50),
+        (100, 90),
+        (1_000, 90),
+    ],
+)
+def test_get_best_features_dirichlet(size, percentile):
+    rng = np.random.default_rng(123)
+    feature_importances = np.sort(rng.dirichlet(np.ones(size) * 200))
+    feature_names = np.array([f"feature {i}" for i in range(size)])
+    idx = int(percentile / 100.0 * size)
+    selected_features = np.sort(
+        sp.get_best_features(feature_importances, feature_names, percentile)
+    )
+    informative_features = feature_names[idx:]
+    npt.assert_array_equal(selected_features, informative_features)
+
+
+@pytest.mark.parametrize(
+    "feature_importances, feature_names, percentile, match",
+    [
+        (
+            np.array([1.0]),
+            np.array(["feature"]),
+            101,
+            "percentile out of range",
+        ),
+        (np.array([1.0]), np.array(["feature"]), -1, "percentile out of range"),
+        (
+            np.array([0.5, 0.51]),
+            np.array(["feature 1", "feature 2"]),
+            90,
+            "feature_importances must sum to 1",
+        ),
+        (
+            np.array([1.0]),
+            np.array(["feature 1", "feature 2"]),
+            90,
+            "feature_importances and feature_names must have the same shape",
+        ),
+    ],
+)
+def test_get_best_features_argument_guards(
+    feature_importances, feature_names, percentile, match
+):
+    with pytest.raises(ValueError, match=match):
+        sp.get_best_features(feature_importances, feature_names, percentile)

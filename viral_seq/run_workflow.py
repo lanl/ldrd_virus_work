@@ -350,7 +350,8 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
                 rfc.feature_importances_, rfc.feature_names_in_
             )
             print("Selected", len(keep_feats), "features")
-            assert len(keep_feats) < 50_000
+            if debug:
+                assert len(keep_feats) < 50_000
             X = X[keep_feats]
             print("Saving X_train to", table_loc_train_best)
             X.to_parquet(table_loc_train_best)

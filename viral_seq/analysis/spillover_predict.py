@@ -6,7 +6,6 @@ from tqdm import tqdm
 from Bio import Entrez, SeqIO
 import numpy as np
 import numpy.typing as npt
-from numpy.testing import assert_allclose
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -741,7 +740,14 @@ def get_best_features(
         Returns:
             (ntd.NDArray): Names of features greater than or equal to percentile
     """
-    assert_allclose(feature_importances.sum(), 1)
+    if not np.allclose(feature_importances.sum(), 1):
+        raise ValueError("feature_importances must sum to 1")
+    if 100.0 < percentile < 0.0:
+        raise ValueError("percentile out of range [0, 100]")
+    if feature_importances.shape != feature_names.shape:
+        raise ValueError(
+            "feature_importances and feature_names must have the same shape"
+        )
 
     # drop 0s
     non_zero = np.nonzero(feature_importances)[0]

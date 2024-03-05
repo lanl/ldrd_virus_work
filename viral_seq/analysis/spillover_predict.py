@@ -725,7 +725,7 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
 
 
 def get_best_features(
-    feature_importances: npt.NDArray,
+    feature_importances: npt.NDArray[np.float64],
     feature_names: npt.NDArray,
     percentile: float = 90.0,
 ) -> npt.NDArray:
@@ -733,12 +733,12 @@ def get_best_features(
     Return names of the features with importances greater than or equal to the percentile of the non-zero importances
 
         Parameters:
-            feature_importances (npt.NDArray): Importances of each feature, sums to 1
+            feature_importances (npt.NDArray[np.float64]): Importances of each feature, sums to 1
             feature_names (npt.NDArray): Names of features in the order of feature_importances
             percentile (float): In range [0, 100]
 
         Returns:
-            (ntd.NDArray): Names of features greater than or equal to percentile
+            (npt.NDArray): Names of features greater than or equal to percentile
     """
     if not np.allclose(feature_importances.sum(), 1):
         raise ValueError("feature_importances must sum to 1")

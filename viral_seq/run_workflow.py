@@ -1,5 +1,6 @@
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
+from viral_seq.analysis import rfc_utils
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -10,6 +11,21 @@ import polars as pl
 import ast
 from pytest import approx
 import numpy as np
+from glob import glob
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+from pathlib import Path
+from warnings import warn
+
+
+def validate_feature_table(file_name, idx, prefix):
+    print("Validating", file_name)
+    df = pl.read_parquet(file_name).to_pandas()
+    assert df.shape == table_info.iloc[idx][prefix + "_shape"]
+    # check if numeric sum of the entire table matches what was precalculated
+    assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
+        table_info.iloc[idx][prefix + "_sum"]
+    )
 
 
 def build_cache(cache_checkpoint=3, debug=False):
@@ -211,16 +227,7 @@ def build_tables(feature_checkpoint=0, debug=False):
 
     if debug:
         print("Debug mode: will run assertions on generated tables")
-        table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
-        table_info = pd.read_csv(
-            table_file,
-            sep="\t",
-            dtype={"Train_sum": np.float32, "Test_sum": np.float32},
-            converters={
-                "Train_shape": ast.literal_eval,
-                "Test_shape": ast.literal_eval,
-            },
-        )
+
     # tables are built in multiple parts as this is faster for reading/writing
     for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
         prefix = "Train" if i == 0 else "Test"
@@ -257,14 +264,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                 standalone_mode=False,
             )
         if debug:
-            print("Validating", this_outfile)
             idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-            df = pl.read_parquet(this_outfile).to_pandas()
-            assert df.shape == table_info.iloc[idx][prefix + "_shape"]
-            # check if numeric sum of the entire table matches what was precalculated
-            assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
-                table_info.iloc[idx][prefix + "_sum"]
-            )
+            validate_feature_table(this_outfile, idx, prefix)
         this_checkpoint -= 1
         this_outfile = folder + "/" + prefix + "_kpc7.parquet.gzip"
         if feature_checkpoint >= this_checkpoint:
@@ -285,14 +286,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                 standalone_mode=False,
             )
         if debug:
-            print("Validating", this_outfile)
             idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-            df = pl.read_parquet(this_outfile).to_pandas()
-            assert df.shape == table_info.iloc[idx][prefix + "_shape"]
-            # check if numeric sum of the entire table matches what was precalculated
-            assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
-                table_info.iloc[idx][prefix + "_sum"]
-            )
+            validate_feature_table(this_outfile, idx, prefix)
         for k in range(5, 11):
             this_checkpoint -= 1
             this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
@@ -318,14 +313,64 @@ def build_tables(feature_checkpoint=0, debug=False):
                     standalone_mode=False,
                 )
             if debug:
-                print("Validating", this_outfile)
                 idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-                df = pl.read_parquet(this_outfile).to_pandas()
-                assert df.shape == table_info.iloc[idx][prefix + "_shape"]
-                # check if numeric sum of the entire table matches what was precalculated
-                assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
-                    table_info.iloc[idx][prefix + "_sum"]
+                validate_feature_table(this_outfile, idx, prefix)
+
+
+def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
+    """Sub-select features using best performing from a trained random forest classifier"""
+    if feature_selection == "yes" or feature_selection == "none":
+        print("Loading all feature tables for train...")
+        train_files = tuple(glob(table_loc_train + "/*gzip"))
+        X, y = sp.get_training_columns(table_filename=train_files)
+        if feature_selection == "none":
+            print(
+                "All training features will be used as X_train in the following steps."
+            )
+        elif feature_selection == "yes":
+            print(
+                "Will train a random forest classifier to select the best performing features to use as X_train."
+            )
+            rfc = RandomForestClassifier(
+                n_estimators=2_000,
+                random_state=random_state,
+                n_jobs=n_jobs,
+                max_depth=30,
+            )
+            rfc.fit(X, y)
+            if debug:
+                print("Debug mode: Checking OOB score of Random Forest.")
+                oob_score = rfc_utils.oob_score(
+                    rfc, X, y, roc_auc_score, n_jobs=n_jobs, scoring_on_pred=False
                 )
+                print("Achieved an OOB score (AUC) of", oob_score)
+                # RandomForestClassifier should perform well enough that we can trust its feature ranking
+                assert oob_score > 0.75
+            keep_feats = sp.get_best_features(
+                rfc.feature_importances_, rfc.feature_names_in_
+            )
+            print("Selected", len(keep_feats), "features")
+            if debug:
+                assert len(keep_feats) < 50_000
+            X = X[keep_feats]
+            print("Saving X_train to", table_loc_train_best)
+            X.to_parquet(table_loc_train_best)
+    elif feature_selection == "skip":
+        print("Will use previously calculated X_train stored at", table_loc_train_best)
+        X = pl.read_parquet(table_loc_train_best).to_pandas()
+        y = pd.read_csv(train_file)["Human Host"]
+    if debug:
+        # these might not exist if the workflow has only been run with --feature-selection none
+        if Path(table_loc_train_best).is_file():
+            validate_feature_table(table_loc_train_best, 8, "Train")
+        else:
+            warn(
+                "File at {} cannot be validated because it does not exist. If using option '--feature-selection none' this is expected behavior.".format(
+                    table_loc_train_best
+                ),
+                UserWarning,
+            )
+    return X, y
 
 
 if __name__ == "__main__":
@@ -347,11 +392,35 @@ if __name__ == "__main__":
         default=16,
         help="Specify feature table building checkpoint(0-16), typically 0 or 16: 0 skips building feature tables, 16 builds all feature tables.",
     )
+    parser.add_argument(
+        "-fs",
+        "--feature-selection",
+        choices=["none", "skip", "yes"],
+        default="yes",
+        help="Option 'none' will use all features in subsequent steps, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
+    )
+    parser.add_argument(
+        "-n",
+        "--n-jobs",
+        type=int,
+        default=1,
+        help="Parameter will be used for sklearn modules with parallelization as appropriate.",
+    )
+    parser.add_argument(
+        "-r",
+        "--random-state",
+        type=int,
+        default=123,
+        help="Random seed to use when needed in workflow.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
     feature_checkpoint = args.features
+    feature_selection = args.feature_selection
+    n_jobs = args.n_jobs
+    random_state = args.random_state
 
     data = files("viral_seq.data")
     cache_viral = str(data / "cache_viral")
@@ -363,6 +432,24 @@ if __name__ == "__main__":
     table_loc_train = str(data / "tables" / "train")
     table_loc_test = str(data / "tables" / "test")
     table_locs = [table_loc_train, table_loc_test]
+    table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
+    table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+    if debug:
+        table_info = pd.read_csv(
+            table_file,
+            sep="\t",
+            dtype={"Train_sum": np.float32, "Test_sum": np.float32},
+            converters={
+                "Train_shape": ast.literal_eval,
+                "Test_shape": ast.literal_eval,
+            },
+        )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    X_train, y_train = feature_selection_rfc(
+        feature_selection=feature_selection,
+        debug=debug,
+        n_jobs=n_jobs,
+        random_state=random_state,
+    )

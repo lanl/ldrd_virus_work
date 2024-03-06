@@ -5,6 +5,7 @@ from viral_seq.analysis.get_features import get_genomic_features, get_kmers, get
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
 import numpy as np
+import numpy.typing as npt
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -721,3 +722,42 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
     ax.legend(loc="lower right")
 
     fig.savefig(filename)
+
+
+def get_best_features(
+    feature_importances: npt.NDArray[np.float64],
+    feature_names: npt.NDArray,
+    percentile: float = 90.0,
+) -> npt.NDArray:
+    """
+    Return names of the features with importances greater than or equal to the percentile of the non-zero importances
+
+        Parameters:
+            feature_importances (npt.NDArray[np.float64]): Importances of each feature, sums to 1
+            feature_names (npt.NDArray): Names of features in the order of feature_importances
+            percentile (float): In range [0, 100]
+
+        Returns:
+            (npt.NDArray): Names of features greater than or equal to percentile
+    """
+    if not np.allclose(feature_importances.sum(), 1):
+        raise ValueError("feature_importances must sum to 1")
+    if 100.0 < percentile or percentile < 0.0:
+        raise ValueError("percentile out of range [0, 100]")
+    if feature_importances.shape != feature_names.shape:
+        raise ValueError(
+            "feature_importances and feature_names must have the same shape"
+        )
+
+    # drop 0s
+    non_zero = np.nonzero(feature_importances)[0]
+    feature_importances = feature_importances[non_zero]
+    feature_names = feature_names[non_zero]
+
+    cutoff = np.percentile(feature_importances, percentile)
+    # >= ensures something is returned in edge cases where all non-zero values are identical
+    mask = feature_importances >= cutoff
+    feature_importances = feature_importances[mask]
+    feature_names = feature_names[mask]
+    idx = np.argsort(feature_importances)[::-1]
+    return feature_names[idx]

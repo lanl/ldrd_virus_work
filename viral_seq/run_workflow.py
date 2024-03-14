@@ -15,6 +15,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from pathlib import Path
 from warnings import warn
+import json
+from typing import Dict, Any
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -401,6 +403,40 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     return X, y
 
 
+def optimize_model(
+    get_hyperparameters,
+    X_train,
+    y_train,
+    outfile,
+    optimize,
+    debug,
+    n_jobs,
+    random_state,
+    **kwargs,
+):
+    if optimize == "yes":
+        print(
+            "Performing hyperparameter optimization with target AUC minimum across 5 fold Cross Validation"
+        )
+        best_params = get_hyperparameters(
+            X_train, y_train, n_jobs=n_jobs, random_state=random_state, **kwargs
+        )
+        print("Saving selected parameters to", outfile)
+        with open(outfile, "w") as f:
+            json.dump(best_params, f)
+    elif optimize == "skip":
+        print("Loading previously saved parameters from", outfile)
+        with open(outfile, "r") as f:
+            best_params = json.load(f)
+    if debug:
+        print(
+            "Debug mode: asserting best score during hyperparameter search is sufficient"
+        )
+        assert best_params["target"] > 0.75
+    print("Hyperparameters that will be used:", best_params["params"])
+    return best_params["params"]
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -441,6 +477,13 @@ if __name__ == "__main__":
         default=123,
         help="Random seed to use when needed in workflow.",
     )
+    parser.add_argument(
+        "-o",
+        "--optimize",
+        choices=["none", "skip", "yes"],
+        default="yes",
+        help="Option 'none' will not optimize hyperparameters and use mostly defaults, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -449,6 +492,7 @@ if __name__ == "__main__":
     feature_selection = args.feature_selection
     n_jobs = args.n_jobs
     random_state = args.random_state
+    optimize = args.optimize
 
     data = files("viral_seq.data")
     cache_viral = str(data / "cache_viral")
@@ -462,6 +506,7 @@ if __name__ == "__main__":
     table_locs = [table_loc_train, table_loc_test]
     table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+    hyperparams_rfc_file = str(data / "hyperparameters" / "params_rfc.json")
     if debug:
         table_info = pd.read_csv(
             table_file,
@@ -481,3 +526,28 @@ if __name__ == "__main__":
         n_jobs=n_jobs,
         random_state=random_state,
     )
+    best_params: Dict[str, Any] = {}
+    optimize_model_arguments: Dict[str, Any] = {}
+    optimize_model_arguments["RandomForestClassifier"] = {
+        "func": rfc_utils.get_hyperparameters,
+        "outfile": hyperparams_rfc_file,
+        "params": {
+            "n_estimators": 2_000,
+        },
+    }
+    for name, model in optimize_model_arguments.items():
+        if optimize == "none":
+            best_params[name] = {}
+        else:
+            print("===", name, "===")
+            best_params[name] = optimize_model(
+                model["func"],
+                X_train,
+                y_train,
+                model["outfile"],
+                optimize=optimize,
+                debug=debug,
+                n_jobs=n_jobs,
+                random_state=random_state,
+                **model["params"],
+            )

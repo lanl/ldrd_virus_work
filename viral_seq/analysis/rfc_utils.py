@@ -166,4 +166,6 @@ def get_hyperparameters(
     for name in ["max_depth", "criterion", "class_weight"]:
         if name in res["params"]:
             res["params"][name] = _floatparam(name, res["params"][name])
+    targets = list(pd.DataFrame(optimizer.res)["target"].values)
+    res["targets"] = targets
     return res

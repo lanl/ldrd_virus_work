@@ -17,6 +17,11 @@ from pathlib import Path
 from warnings import warn
 import json
 from typing import Dict, Any
+import matplotlib
+import matplotlib.pyplot as plt
+
+
+matplotlib.use("Agg")
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -412,29 +417,37 @@ def optimize_model(
     debug,
     n_jobs,
     random_state,
+    name,
     **kwargs,
 ):
     if optimize == "yes":
         print(
             "Performing hyperparameter optimization with target AUC minimum across 5 fold Cross Validation"
         )
-        best_params = get_hyperparameters(
+        res = get_hyperparameters(
             X_train, y_train, n_jobs=n_jobs, random_state=random_state, **kwargs
         )
-        print("Saving selected parameters to", outfile)
+        print("Saving results to", outfile)
         with open(outfile, "w") as f:
-            json.dump(best_params, f)
+            json.dump(res, f)
+        target_max = np.maximum.accumulate(np.array(res["targets"]))
+        df = pd.DataFrame(target_max, columns=[name])
+        if Path(optimization_plot_source).is_file():
+            old_df = pd.read_csv(optimization_plot_source)
+            df = pd.concat([old_df.loc[:, old_df.columns != name], df], axis=1)
+        print("Writing optimization plot data to", optimization_plot_source)
+        df.to_csv(optimization_plot_source, index=False)
     elif optimize == "skip":
         print("Loading previously saved parameters from", outfile)
         with open(outfile, "r") as f:
-            best_params = json.load(f)
+            res = json.load(f)
     if debug:
         print(
             "Debug mode: asserting best score during hyperparameter search is sufficient"
         )
-        assert best_params["target"] > 0.75
-    print("Hyperparameters that will be used:", best_params["params"])
-    return best_params["params"]
+        assert res["target"] > 0.75
+    print("Hyperparameters that will be used:", res["params"])
+    return res["params"]
 
 
 if __name__ == "__main__":
@@ -507,6 +520,8 @@ if __name__ == "__main__":
     table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
     hyperparams_rfc_file = str(data / "hyperparameters" / "params_rfc.json")
+    optimization_plot_source = str(data / "plots" / "optimization_plot.csv")
+    optimization_plot_figure = str(data / "plots" / "optimization_plot.png")
     if debug:
         table_info = pd.read_csv(
             table_file,
@@ -549,5 +564,19 @@ if __name__ == "__main__":
                 debug=debug,
                 n_jobs=n_jobs,
                 random_state=random_state,
+                name=name,
                 **model["params"],
             )
+    if optimize == "yes" or optimize == "skip":
+        print(
+            "Generating plot of optimization progress for classifiers and saving to",
+            optimization_plot_figure,
+        )
+        df = pd.read_csv(optimization_plot_source)
+        fig, ax = plt.subplots(1, 1)
+        df.plot(ax=ax, alpha=0.6, marker="o")
+        ax.set_title("Maximum Optimization Target\nminimum AUC over 5 folds")
+        ax.set_xlabel("Step")
+        ax.set_ylabel("AUC")
+        ax.legend(loc=4, fontsize=6)
+        fig.savefig(optimization_plot_figure, dpi=300)

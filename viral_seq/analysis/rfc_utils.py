@@ -81,21 +81,12 @@ def _floatparam(name: str, val: float):
 
 
 def min_cv_score(
-    X: npt.ArrayLike,
-    y: npt.ArrayLike,
-    cv: int = 5,
-    scoring: str = "roc_auc",
-    max_depth: Optional[Union[float, int]] = None,
-    criterion: Union[float, str] = "gini",
-    class_weight: Optional[Union[float, str]] = None,
-    **kwargs
+    X: npt.ArrayLike, y: npt.ArrayLike, cv: int = 5, scoring: str = "roc_auc", **kwargs
 ) -> float:
     """Perform cv-fold cross validation and return the minimum of the scores across folds"""
-    for name, var in zip(
-        ["max_depth", "criterion", "class_weight"], [max_depth, criterion, class_weight]
-    ):
-        if isinstance(var, float):
-            var = _floatparam(name, var)
+    for name in ["max_depth", "criterion", "class_weight"]:
+        if name in kwargs and isinstance(kwargs[name], float):
+            kwargs[name] = _floatparam(name, kwargs[name])
     return cross_val_score(
         RandomForestClassifier(**kwargs), X, y, scoring=scoring, cv=cv
     ).min()

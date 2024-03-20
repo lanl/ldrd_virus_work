@@ -91,7 +91,9 @@ def test_min_cv_score(random_state, score):
 
 
 @given(
-    max_depth=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
+    max_depth=st.floats(
+        min_value=0.0, max_value=100.99999, allow_nan=False, allow_infinity=False
+    ),
     criterion=st.floats(
         min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False
     ),
@@ -115,6 +117,28 @@ def test_min_cv_score_args(max_depth, criterion, class_weight, floats):
         class_weight=class_weight,
         n_estimators=10,
     )
+
+
+@pytest.mark.parametrize(
+    "max_depth, criterion, class_weight",
+    [
+        ("bad value", "gini", None),
+        (1, "bad value", None),
+        (1, "gini", "bad value"),
+    ],
+)
+def test_min_cv_score_args_passed(max_depth, criterion, class_weight):
+    X, y = make_classification(n_samples=10, n_features=10)
+    with pytest.raises(ValueError, match="InvalidParameterError"):
+        rfc_utils.min_cv_score(
+            X,
+            y,
+            cv=3,
+            max_depth=max_depth,
+            criterion=criterion,
+            class_weight=class_weight,
+            n_estimators=10,
+        )
 
 
 @pytest.mark.parametrize(

@@ -8,6 +8,7 @@ from joblib import Parallel, delayed
 from functools import partial
 from bayes_opt import BayesianOptimization
 from typing import Optional, Union, Any
+import math
 
 
 def calc_pred(est, X: pd.DataFrame, n_samples, n_samples_bootstrap):
@@ -65,7 +66,7 @@ def _floatparam(name: str, val: float):
                 "If parameter has a finite number of output values, float value should be in range [0,1]"
             )
         val = float(
-            np.floor(np.interp(val, [0, 1], [0, this_len]))
+            math.floor(np.interp(val, [0, 1], [0, this_len]))
         )  # float() to satisfy mypy
         val = (
             this_len - 1 if val == this_len else val
@@ -73,7 +74,7 @@ def _floatparam(name: str, val: float):
         return options[int(val)]
 
     if name == "max_depth":
-        return int(np.floor(val)) if val >= 1.0 else None
+        return int(math.floor(val)) if val >= 1.0 else None
 
     raise ValueError(
         "RandomForestClassifier parameter not recognized. This functionality may not be implemented for this parameter. If this parameter accepts a float by default this function shouldn't be used."
@@ -145,9 +146,9 @@ def get_hyperparameters(
         "min_samples_leaf": one_sample,
         "min_samples_split": 2.0 * one_sample,
         "max_features": sqrt_feature,
-        "criterion": 0.0,
-        "class_weight": 0.0,
-        "max_depth": 0.0,
+        "criterion": 0.0,  # gini
+        "class_weight": 0.0,  # None
+        "max_depth": 0.0,  # None
     }
     # only include what's in the parameter space
     defaults = {key: defaults[key] for key in distributions.keys()}

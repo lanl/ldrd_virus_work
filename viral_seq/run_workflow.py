@@ -430,7 +430,7 @@ def optimize_model(
         print("Saving results to", outfile)
         with open(outfile, "w") as f:
             json.dump(res, f)
-        target_max = np.maximum.accumulate(np.array(res["targets"]))
+        target_max = np.maximum.accumulate(res["targets"])
         df = pd.DataFrame(target_max, columns=[name])
         if Path(optimization_plot_source).is_file():
             old_df = pd.read_csv(optimization_plot_source)

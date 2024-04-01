@@ -402,13 +402,6 @@ def optimize_model(
         print("Saving results to", outfile)
         with open(outfile, "w") as f:
             json.dump(res, f)
-        target_max = np.maximum.accumulate(res["targets"])
-        df = pd.DataFrame(target_max, columns=[name])
-        if Path(optimization_plot_source).is_file():
-            old_df = pd.read_csv(optimization_plot_source)
-            df = pd.concat([old_df.loc[:, old_df.columns != name], df], axis=1)
-        print("Writing optimization plot data to", optimization_plot_source)
-        df.to_csv(optimization_plot_source, index=False)
     elif optimize == "skip":
         print("Loading previously saved parameters from", outfile)
         with open(outfile, "r") as f:
@@ -419,7 +412,29 @@ def optimize_model(
         )
         assert res["target"] > 0.75
     print("Hyperparameters that will be used:", res["params"])
-    return res["params"]
+    return res
+
+
+def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str):
+    for name, targets in input_data.items():
+        target_max = np.maximum.accumulate(targets)
+        df = pd.DataFrame(target_max, columns=[name])
+        if Path(out_source).is_file():
+            old_df = pd.read_csv(out_source)
+            df = pd.concat([old_df.loc[:, list(old_df.columns != name)], df], axis=1)
+        print("Writing optimization plot data to", out_source)
+        df.to_csv(out_source, index=False)
+    print(
+        "Generating plot of optimization progress for classifiers and saving to",
+        out_fig,
+    )
+    fig, ax = plt.subplots(1, 1)
+    df.plot(ax=ax, alpha=0.6, marker="o")
+    ax.set_title("Maximum Optimization Target\nminimum AUC over 5 folds")
+    ax.set_xlabel("Step")
+    ax.set_ylabel("AUC")
+    ax.legend(loc=4, fontsize=6)
+    fig.savefig(out_fig, dpi=300)
 
 
 if __name__ == "__main__":
@@ -492,8 +507,9 @@ if __name__ == "__main__":
     table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
     hyperparams_rfc_file = str(data / "hyperparameters" / "params_rfc.json")
-    optimization_plot_source = str(data / "plots" / "optimization_plot.csv")
-    optimization_plot_figure = str(data / "plots" / "optimization_plot.png")
+    plots_loc = sp.init_cache("plots")[0]
+    optimization_plot_source = str(plots_loc / "optimization_plot.csv")
+    optimization_plot_figure = str(plots_loc / "optimization_plot.png")
     if debug:
         table_info = pd.read_csv(
             table_file,
@@ -514,6 +530,7 @@ if __name__ == "__main__":
         random_state=random_state,
     )
     best_params: Dict[str, Any] = {}
+    plotting_data: Dict[str, Any] = {}
     optimize_model_arguments: Dict[str, Any] = {}
     optimize_model_arguments["RandomForestClassifier"] = {
         "func": rfc_utils.get_hyperparameters,
@@ -527,7 +544,7 @@ if __name__ == "__main__":
             best_params[name] = {}
         else:
             print("===", name, "===")
-            best_params[name] = optimize_model(
+            res = optimize_model(
                 model["func"],
                 X_train,
                 y_train,
@@ -539,16 +556,9 @@ if __name__ == "__main__":
                 name=name,
                 **model["params"],
             )
+            best_params[name] = res["params"]
+            plotting_data[name] = res["targets"]
     if optimize == "yes" or optimize == "skip":
-        print(
-            "Generating plot of optimization progress for classifiers and saving to",
-            optimization_plot_figure,
+        optimization_plots(
+            plotting_data, optimization_plot_source, optimization_plot_figure
         )
-        df = pd.read_csv(optimization_plot_source)
-        fig, ax = plt.subplots(1, 1)
-        df.plot(ax=ax, alpha=0.6, marker="o")
-        ax.set_title("Maximum Optimization Target\nminimum AUC over 5 folds")
-        ax.set_xlabel("Step")
-        ax.set_ylabel("AUC")
-        ax.legend(loc=4, fontsize=6)
-        fig.savefig(optimization_plot_figure, dpi=300)

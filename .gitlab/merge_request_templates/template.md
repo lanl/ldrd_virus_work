@@ -1,0 +1,6 @@
+- [ ] Added a clear description of what the merge request does, and how it moves us in the right direction. Add details about how you are confident that the changes are robust (i.e., to different random seeds), generalizable (API designed to work for future extension, etc.).
+- [ ] Added appropriate regression tests (i.e., `pytest`, `hypothesis` style tests, etc.) and tried to cover all lines of the diff with tests, where reasonable (can check with i.e., `pytest-cov` locally)
+- [ ] Added appropriate benchmarks if adjusting the performance of our own library code (bare minimum is informal benchmarks, better is using something like `asv`, etc.)
+- [ ] Format your commits/MR titles cleanly in a manner similar to: https://numpy.org/devdocs/dev/development\_workflow.html#writing-the-commit-message
+- [ ] Added appropriate literature/reference book citations in code comments for ideas or approaches based on previous work.
+- [ ] Reference an issue that you are fixing/closing with i.e., `Fixes #20` to automatically close the matching issue when the MR is merged, and so that the reviewer can easily read the background material in the issue being dealt with.

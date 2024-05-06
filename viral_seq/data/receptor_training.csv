@@ -1,3 +1,5 @@
 Citation,Virus_Name,Receptor_Type,Whole_Genome,Accessions
 https://doi.org/10.1073/pnas.0801433106,hMPV,integrin,True,NC_039199.1
 https://doi.org/10.1073/pnas.1712592114,MERS-CoV,sialic_acid,True,NC_019843.3
+https://doi.org/10.1038%2Fncomms15408,FMDV,integrin,True,NC_039210.1
+https://doi.org/10.1016/j.jmb.2018.06.024,influenza_A_H1N1,sialic_acid,True,NC_026438.1 NC_026435.1 NC_026437.1 NC_026433.1 NC_026436.1 NC_026434.1 NC_026432.1 NC_026431.1

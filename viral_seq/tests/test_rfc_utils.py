@@ -81,8 +81,8 @@ def test_floatparams(val, name):
 
 
 @given(
-    x=st.integers(), y=st.integers(max_value=9.223372036854776e18)
-)  # max_value set to C long max, max accepted by numpy
+    x=st.integers(), y=st.integers(max_value=18446744073709551615)
+)  # max_value set to 2^64-1, max accepted by numpy.sqrt
 def test_defaults_default_param_argument_guards(x, y):
     if x <= 0 or y <= 0:
         with pytest.raises(ValueError, match="must be positive"):

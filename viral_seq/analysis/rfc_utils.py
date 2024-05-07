@@ -1,14 +1,32 @@
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import sklearn.ensemble._forest as forest_utils
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
 from joblib import Parallel, delayed
-from functools import partial
-from bayes_opt import BayesianOptimization
-from typing import Optional, Union, Any
 import math
+
+
+_model = RandomForestClassifier
+_floatparam_names = ["class_weight", "criterion", "max_depth"]
+
+
+def _default_parameters(shape: tuple[int, int]):
+    """Returns a dictionary of default values in float form to use for hyperparameter optimization.
+    Not all-inclusive; only parameters we intend to do hyperparameter optimization on are listed.
+    """
+    if shape[0] <= 0 or shape[1] <= 0:
+        raise ValueError("shape dimensions must be positive, instead got", shape)
+    one_sample = 1.0 / shape[0]
+    sqrt_feature = np.sqrt(shape[1]) / shape[1]
+    return {
+        "criterion": 0.0,  # gini
+        "max_depth": 0.0,  # None
+        "min_samples_split": 2.0 * one_sample,
+        "min_samples_leaf": one_sample,
+        "max_features": sqrt_feature,
+        "max_samples": 1.0,
+        "class_weight": 0.0,  # None
+    }
 
 
 def calc_pred(est, X: pd.DataFrame, n_samples, n_samples_bootstrap):
@@ -79,85 +97,3 @@ def _floatparam(name: str, val: float):
     raise ValueError(
         "RandomForestClassifier parameter not recognized. This functionality may not be implemented for this parameter. If this parameter accepts a float by default this function shouldn't be used."
     )
-
-
-def min_cv_score(
-    X: npt.ArrayLike, y: npt.ArrayLike, cv: int = 5, scoring: str = "roc_auc", **kwargs
-) -> float:
-    """Perform cv-fold cross validation and return the minimum of the scores across folds"""
-    for name in ["max_depth", "criterion", "class_weight"]:
-        if name in kwargs and isinstance(kwargs[name], float):
-            kwargs[name] = _floatparam(name, kwargs[name])
-    return cross_val_score(
-        RandomForestClassifier(**kwargs), X, y, scoring=scoring, cv=cv
-    ).min()
-
-
-def get_hyperparameters(
-    X: npt.NDArray,
-    y: npt.NDArray,
-    init_points: int = 10,
-    n_iter: int = 20,
-    n_jobs: int = 1,
-    random_state: int = 0,
-    distributions: Optional[dict[str, tuple[float, float]]] = None,
-    **kwargs
-) -> dict[str, Union[float, dict[str, Any]]]:
-    """Search for the best hyperparameters using bayesian optimization
-
-    Parameters:
-        X (npt.NDArray), y (npt.NDArray): passed as is to `sklearn.model_selection.cross_val_score`
-        init_points (int), n_iter (int): passed as is to `bayes_opt.BayesianOptimization.maximize`
-        random_state (int): seed used when needed for repeatability
-        distributions (Optional[dict[str, tuple[float, float]]]): dictionary of parameters to optimize
-        n_jobs (int), **kwargs: passed to the `sklearn.ensemble.RandomForestClassifer` used for scoring
-
-    Returns:
-        (dict[str, Union[float, dict[str, Any]]]): dictionary with best performing score (key 'target') and parameters (key 'params')
-    """
-    one_sample = 1.0 / X.shape[0]
-    sqrt_feature = np.sqrt(X.shape[1]) / X.shape[1]
-    one_feature = 1.0 / X.shape[1]
-    if distributions is None:
-        distributions = {
-            "max_samples": (one_sample, 1.0),
-            "min_samples_leaf": (one_sample, np.min([1.0, 10 * one_sample])),
-            "min_samples_split": (one_sample, np.min([1.0, 100 * one_sample])),
-            "max_features": (one_feature, np.min([1.0, 2 * sqrt_feature])),
-            "criterion": (0.0, 1.0),
-            "class_weight": (0.0, 1.0),
-            "max_depth": (0.0, 30.99999),  # <1.0 is None
-        }
-    optimizer = BayesianOptimization(
-        partial(
-            min_cv_score,
-            X=X,
-            y=y,
-            n_jobs=n_jobs,
-            random_state=random_state,
-            **kwargs,
-        ),
-        distributions,
-        random_state=random_state,
-    )
-    # check default settings first
-    defaults = {
-        "max_samples": 1.0,
-        "min_samples_leaf": one_sample,
-        "min_samples_split": 2.0 * one_sample,
-        "max_features": sqrt_feature,
-        "criterion": 0.0,  # gini
-        "class_weight": 0.0,  # None
-        "max_depth": 0.0,  # None
-    }
-    # only include what's in the parameter space
-    defaults = {key: defaults[key] for key in distributions.keys()}
-    optimizer.probe(params=defaults, lazy=True)
-    optimizer.maximize(init_points=init_points, n_iter=n_iter)
-    res = optimizer.max
-    for name in ["max_depth", "criterion", "class_weight"]:
-        if name in res["params"]:
-            res["params"][name] = _floatparam(name, res["params"][name])
-    targets = list(pd.DataFrame(optimizer.res)["target"].values)
-    res["targets"] = targets
-    return res

@@ -1,6 +1,6 @@
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils
+from viral_seq.analysis import rfc_utils, classifier
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -381,23 +381,32 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
 
 
 def optimize_model(
-    get_hyperparameters,
+    model_utils,
     X_train,
     y_train,
     outfile,
-    optimize,
-    debug,
-    n_jobs,
-    random_state,
-    name,
-    **kwargs,
+    distributions,
+    optimize="skip",
+    name="Classifier",
+    debug=False,
+    random_state=123,
+    model_parameters={},
+    bayes_parameters={},
+    n_jobs_cv=1,
 ):
     if optimize == "yes":
         print(
             "Performing hyperparameter optimization with target AUC minimum across 5 fold Cross Validation"
         )
-        res = get_hyperparameters(
-            X_train, y_train, n_jobs=n_jobs, random_state=random_state, **kwargs
+        res = classifier.get_hyperparameters(
+            model_utils=model_utils,
+            model_parameters=model_parameters,
+            bayes_parameters=bayes_parameters,
+            distributions=distributions,
+            X=X_train,
+            y=y_train,
+            n_jobs_cv=n_jobs_cv,
+            random_state=random_state,
         )
         print("Saving results to", outfile)
         with open(outfile, "w") as f:
@@ -532,29 +541,44 @@ if __name__ == "__main__":
     best_params: Dict[str, Any] = {}
     plotting_data: Dict[str, Any] = {}
     optimize_model_arguments: Dict[str, Any] = {}
+    one_sample = 1.0 / X_train.shape[0]
+    sqrt_feature = np.sqrt(X_train.shape[1]) / X_train.shape[1]
+    one_feature = 1.0 / X_train.shape[1]
     optimize_model_arguments["RandomForestClassifier"] = {
-        "func": rfc_utils.get_hyperparameters,
+        "model_utils": rfc_utils,
         "outfile": hyperparams_rfc_file,
-        "params": {
+        "model_parameters": {
             "n_estimators": 2_000,
+            "n_jobs": n_jobs,
+        },
+        "bayes_parameters": {
+            "n_iter": 10,
+            "init_points": 0,
+        },
+        "n_jobs_cv": 1,
+        "distributions": {
+            "max_samples": (one_sample, 1.0),
+            "min_samples_leaf": (one_sample, np.min([1.0, 10 * one_sample])),
+            "min_samples_split": (one_sample, np.min([1.0, 100 * one_sample])),
+            "max_features": (one_feature, np.min([1.0, 2 * sqrt_feature])),
+            "criterion": (0.0, 1.0),
+            "class_weight": (0.0, 1.0),
+            "max_depth": (0.0, 30.99999),  # <1.0 is None
         },
     }
-    for name, model in optimize_model_arguments.items():
+    for name, params in optimize_model_arguments.items():
         if optimize == "none":
             best_params[name] = {}
         else:
             print("===", name, "===")
             res = optimize_model(
-                model["func"],
-                X_train,
-                y_train,
-                model["outfile"],
+                X_train=X_train,
+                y_train=y_train,
                 optimize=optimize,
                 debug=debug,
-                n_jobs=n_jobs,
                 random_state=random_state,
                 name=name,
-                **model["params"],
+                **params,
             )
             best_params[name] = res["params"]
             plotting_data[name] = res["targets"]

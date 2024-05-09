@@ -572,7 +572,7 @@ if __name__ == "__main__":
     one_sample = 1.0 / X_train.shape[0]
     sqrt_feature = np.sqrt(X_train.shape[1]) / X_train.shape[1]
     one_feature = 1.0 / X_train.shape[1]
-    optimize_model_arguments["RandomForestClassifier"] = {
+    optimize_model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
         "model_utils": rfc_utils,
         "outfile": hyperparams_rfc_file,
         "model_parameters": {
@@ -580,14 +580,14 @@ if __name__ == "__main__":
             "n_jobs": n_jobs,
         },
         "bayes_parameters": {
-            "n_iter": 10,
+            "n_iter": 500,
             "init_points": 0,
         },
         "n_jobs_cv": 1,
         "distributions": {
             "max_samples": (one_sample, 1.0),
             "min_samples_leaf": (one_sample, np.min([1.0, 10 * one_sample])),
-            "min_samples_split": (one_sample, np.min([1.0, 100 * one_sample])),
+            "min_samples_split": (one_sample, np.min([1.0, 300 * one_sample])),
             "max_features": (one_feature, np.min([1.0, 2 * sqrt_feature])),
             "criterion": (0.0, 1.0),
             "class_weight": (0.0, 1.0),

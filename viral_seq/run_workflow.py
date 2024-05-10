@@ -396,7 +396,7 @@ def optimize_model(
 ):
     if optimize == "yes":
         print(
-            "Performing hyperparameter optimization with target AUC minimum across 5 fold Cross Validation"
+            "Performing hyperparameter optimization with target AUC across 5 fold Cross Validation"
         )
         res = classifier.get_hyperparameters(
             model_utils=model_utils,
@@ -439,7 +439,7 @@ def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str
     )
     fig, ax = plt.subplots(1, 1)
     df.plot(ax=ax, alpha=0.6, marker="o")
-    ax.set_title("Maximum Optimization Target\nminimum AUC over 5 folds")
+    ax.set_title("Maximum Optimization Target\nAUC over 5 folds")
     ax.set_xlabel("Step")
     ax.set_ylabel("AUC")
     ax.legend(loc=4, fontsize=6)

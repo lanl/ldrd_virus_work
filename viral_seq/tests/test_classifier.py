@@ -8,17 +8,14 @@ from hypothesis import given, strategies as st
 
 
 @pytest.mark.parametrize(
-    "random_state, score, kind",
+    "random_state, score",
     [
-        (0, 1.0, "min"),
-        (1, 1.0, "min"),
-        (2, 0.25, "min"),
-        (3, 0.625, "mean"),
-        (4, 1.0, "mean"),
-        (5, 0.875, "mean"),
+        (3, 0.625),
+        (4, 1.0),
+        (5, 0.875),
     ],
 )
-def test_cv_score(random_state, score, kind):
+def test_cv_score(random_state, score):
     X, y = make_classification(n_samples=10, n_features=10, random_state=random_state)
     X = pd.DataFrame(X)
     test_score = classifier.cv_score(
@@ -28,7 +25,6 @@ def test_cv_score(random_state, score, kind):
         n_splits=3,
         n_estimators=10,
         random_state=random_state,
-        kind=kind,
     )
     assert_allclose(test_score, score)
 

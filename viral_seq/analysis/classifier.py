@@ -3,7 +3,7 @@ import numpy.typing as npt
 import pandas as pd
 from functools import partial
 from bayes_opt import BayesianOptimization
-from typing import Union, Any, Literal
+from typing import Union, Any
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
 from sklearn.metrics import get_scorer
@@ -28,7 +28,6 @@ def cv_score(
     y,
     n_splits=5,
     scoring: str = "roc_auc",
-    kind: Literal["mean", "min"] = "min",
     n_jobs_cv: int = 1,
     **kwargs,  # classifier arguments
 ) -> float:
@@ -45,10 +44,7 @@ def cv_score(
     )
     for res in r:
         scores.append(res)
-    if kind == "mean":
-        return np.mean(scores)
-    elif kind == "min":
-        return np.min(scores)
+    return np.mean(scores)
 
 
 def get_hyperparameters(
@@ -88,7 +84,6 @@ def get_hyperparameters(
             model_utils,
             X=X,
             y=y,
-            kind="min",
             n_jobs_cv=n_jobs_cv,
             random_state=random_state,
             **model_parameters,

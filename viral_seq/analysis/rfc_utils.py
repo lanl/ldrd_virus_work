@@ -1,32 +1,7 @@
 import numpy as np
 import pandas as pd
 import sklearn.ensemble._forest as forest_utils
-from sklearn.ensemble import RandomForestClassifier
 from joblib import Parallel, delayed
-import math
-
-
-_model = RandomForestClassifier
-_floatparam_names = ["class_weight", "criterion", "max_depth"]
-
-
-def _default_parameters(shape: tuple[int, int]):
-    """Returns a dictionary of default values in float form to use for hyperparameter optimization.
-    Not all-inclusive; only parameters we intend to do hyperparameter optimization on are listed.
-    """
-    if shape[0] <= 0 or shape[1] <= 0:
-        raise ValueError("shape dimensions must be positive, instead got", shape)
-    one_sample = 1.0 / shape[0]
-    sqrt_feature = np.sqrt(shape[1]) / shape[1]
-    return {
-        "criterion": 0.0,  # gini
-        "max_depth": 0.0,  # None
-        "min_samples_split": 2.0 * one_sample,
-        "min_samples_leaf": one_sample,
-        "max_features": sqrt_feature,
-        "max_samples": 1.0,
-        "class_weight": 0.0,  # None
-    }
 
 
 def calc_pred(est, X: pd.DataFrame, n_samples, n_samples_bootstrap):
@@ -65,35 +40,3 @@ def oob_score(rfc, X: pd.DataFrame, y, scorer, n_jobs=-1, scoring_on_pred=True):
         y_scores = oob_pred[:, 1].reshape(-1, 1)
         score = scorer(y, y_scores)
     return score
-
-
-def _floatparam(name: str, val: float):
-    """Utility function to allow bayesian optimization of RandomForestClassifer parameters that don't accept float values"""
-    if val < 0.0:
-        raise ValueError("No RandomForestClassifier parameter accept a value < 0")
-    # finite parameters
-    options = []
-    if name == "class_weight":
-        options = [None, "balanced", "balanced_subsample"]
-    elif name == "criterion":
-        options = ["gini", "entropy", "log_loss"]
-    this_len = len(options)
-    if this_len > 0:
-        if val > 1.0:
-            raise ValueError(
-                "If parameter has a finite number of output values, float value should be in range [0,1]"
-            )
-        val = float(
-            math.floor(np.interp(val, [0, 1], [0, this_len]))
-        )  # float() to satisfy mypy
-        val = (
-            this_len - 1 if val == this_len else val
-        )  # bayes_opt uses closed bounds only
-        return options[int(val)]
-
-    if name == "max_depth":
-        return int(math.floor(val)) if val >= 1.0 else None
-
-    raise ValueError(
-        "RandomForestClassifier parameter not recognized. This functionality may not be implemented for this parameter. If this parameter accepts a float by default this function shouldn't be used."
-    )

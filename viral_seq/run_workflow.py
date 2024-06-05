@@ -20,7 +20,8 @@ import json
 from typing import Dict, Any
 import matplotlib
 import matplotlib.pyplot as plt
-
+from ray import tune
+from time import perf_counter
 
 matplotlib.use("Agg")
 
@@ -381,17 +382,16 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
 
 
 def optimize_model(
-    model_utils,
+    model,
     X_train,
     y_train,
     outfile,
-    distributions,
+    config,
+    num_samples,
     optimize="skip",
     name="Classifier",
     debug=False,
     random_state=123,
-    model_parameters={},
-    bayes_parameters={},
     n_jobs_cv=1,
 ):
     if optimize == "yes":
@@ -399,10 +399,9 @@ def optimize_model(
             "Performing hyperparameter optimization with target AUC across 5 fold Cross Validation"
         )
         res = classifier.get_hyperparameters(
-            model_utils=model_utils,
-            model_parameters=model_parameters,
-            bayes_parameters=bayes_parameters,
-            distributions=distributions,
+            model=model,
+            config=config,
+            num_samples=num_samples,
             X=X_train,
             y=y_train,
             n_jobs_cv=n_jobs_cv,
@@ -545,25 +544,26 @@ if __name__ == "__main__":
     sqrt_feature = np.sqrt(X_train.shape[1]) / X_train.shape[1]
     one_feature = 1.0 / X_train.shape[1]
     optimize_model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
-        "model_utils": rfc_utils,
+        "model": RandomForestClassifier,
         "outfile": hyperparams_rfc_file,
-        "model_parameters": {
+        "num_samples": 3_000,
+        "n_jobs_cv": 1,
+        "config": {
             "n_estimators": 2_000,
             "n_jobs": n_jobs,
-        },
-        "bayes_parameters": {
-            "n_iter": 500,
-            "init_points": 0,
-        },
-        "n_jobs_cv": 1,
-        "distributions": {
-            "max_samples": (one_sample, 1.0),
-            "min_samples_leaf": (one_sample, np.min([1.0, 10 * one_sample])),
-            "min_samples_split": (one_sample, np.min([1.0, 300 * one_sample])),
-            "max_features": (one_feature, np.min([1.0, 2 * sqrt_feature])),
-            "criterion": (0.0, 1.0),
-            "class_weight": (0.0, 1.0),
-            "max_depth": (0.0, 30.99999),  # <1.0 is None
+            "max_samples": tune.uniform(one_sample, 1.0),
+            "min_samples_leaf": tune.uniform(
+                one_sample, np.min([1.0, 10 * one_sample])
+            ),
+            "min_samples_split": tune.uniform(
+                one_sample, np.min([1.0, 300 * one_sample])
+            ),
+            "max_features": tune.uniform(one_feature, np.min([1.0, 2 * sqrt_feature])),
+            "criterion": tune.choice(
+                ["gini", "log_loss"]
+            ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
+            "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
+            "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
         },
     }
     for name, params in optimize_model_arguments.items():
@@ -571,6 +571,7 @@ if __name__ == "__main__":
             best_params[name] = {}
         else:
             print("===", name, "===")
+            t_start = perf_counter()
             res = optimize_model(
                 X_train=X_train,
                 y_train=y_train,
@@ -580,8 +581,18 @@ if __name__ == "__main__":
                 name=name,
                 **params,
             )
+            default_score = classifier.cv_score(
+                params["model_utils"],
+                X=X_train,
+                y=y_train,
+                random_state=random_state,
+                n_estimators=2_000,
+                n_jobs=n_jobs,
+            )
+            print("Score with default settings:", default_score)
+            print("Time elapsed:", perf_counter() - t_start)
             best_params[name] = res["params"]
-            plotting_data[name] = res["targets"]
+            plotting_data[name] = [default_score] + res["targets"]
     if optimize == "yes" or optimize == "skip":
         optimization_plots(
             plotting_data, optimization_plot_source, optimization_plot_figure

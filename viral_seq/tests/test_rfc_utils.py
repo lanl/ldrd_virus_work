@@ -5,7 +5,6 @@ from sklearn.metrics import accuracy_score, roc_auc_score, balanced_accuracy_sco
 from numpy.testing import assert_allclose
 import pandas as pd
 import pytest
-from hypothesis import example, given, strategies as st
 
 
 @pytest.mark.parametrize(
@@ -58,34 +57,3 @@ def test_oob_score_require_bootstrap():
     clf.fit(X, y)
     with pytest.raises(ValueError, match="if bootstrap"):
         rfc_utils.oob_score(clf, X, y, roc_auc_score, n_jobs=2, scoring_on_pred=False)
-
-
-@pytest.mark.parametrize(
-    "name", ["max_depth", "criterion", "class_weight", "fake_parameter"]
-)
-@given(val=st.floats(allow_nan=False, allow_infinity=False))
-@example(val=-1.0)
-@example(val=12.0)
-def test_floatparams(val, name):
-    if val < 0.0:
-        with pytest.raises(ValueError, match="value < 0"):
-            rfc_utils._floatparam(name, val)
-    elif name in ["criterion", "class_weight"] and val > 1.0:
-        with pytest.raises(ValueError, match="in range"):
-            rfc_utils._floatparam(name, val)
-    elif name == "fake_parameter":
-        with pytest.raises(ValueError, match="parameter not recognized"):
-            rfc_utils._floatparam(name, val)
-    else:
-        RandomForestClassifier(**{name: rfc_utils._floatparam(name, val)})
-
-
-@given(
-    x=st.integers(), y=st.integers(max_value=18446744073709551615)
-)  # max_value set to 2^64-1, max accepted by numpy.sqrt
-def test_defaults_default_param_argument_guards(x, y):
-    if x <= 0 or y <= 0:
-        with pytest.raises(ValueError, match="must be positive"):
-            rfc_utils._default_parameters((x, y))
-    else:
-        rfc_utils._default_parameters((x, y))

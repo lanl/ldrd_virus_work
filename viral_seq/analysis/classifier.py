@@ -1,13 +1,15 @@
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from functools import partial
-from bayes_opt import BayesianOptimization
 from typing import Union, Any
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
 from sklearn.metrics import get_scorer
 from sklearn.model_selection import StratifiedKFold
+import ray
+from ray import tune
+from ray.tune.search.optuna import OptunaSearch
+from optuna.samplers import TPESampler
 
 
 def _cv_score_child(model, X, y, scoring, train, test, **kwargs) -> float:
@@ -23,7 +25,7 @@ def _cv_score_child(model, X, y, scoring, train, test, **kwargs) -> float:
 
 
 def cv_score(
-    model_utils,
+    model,
     X,
     y,
     n_splits=5,
@@ -31,15 +33,10 @@ def cv_score(
     n_jobs_cv: int = 1,
     **kwargs,  # classifier arguments
 ) -> float:
-    for param in model_utils._floatparam_names:
-        if param in kwargs and isinstance(kwargs[param], float):
-            kwargs[param] = model_utils._floatparam(param, kwargs[param])
     cv = StratifiedKFold(n_splits=n_splits)
     scores = []
     r = Parallel(n_jobs=n_jobs_cv)(
-        delayed(_cv_score_child)(
-            model_utils._model, X, y, scoring, train, test, **kwargs
-        )
+        delayed(_cv_score_child)(model, X, y, scoring, train, test, **kwargs)
         for train, test in cv.split(X, y)
     )
     for res in r:
@@ -47,60 +44,62 @@ def cv_score(
     return np.mean(scores)
 
 
+def _tune_objective(config, **kwargs):
+    score = cv_score(**config, **kwargs)
+    ray.train.report({"mean_roc_auc": score})
+
+
 def get_hyperparameters(
-    model_utils,
+    model,
     X: pd.DataFrame,
     y: npt.ArrayLike,
-    distributions: dict[str, tuple[float, float]],
-    model_parameters: dict[str, Any] = {},
-    bayes_parameters: dict[str, Any] = {},
+    config: dict[str, tuple[float, float]],
+    num_samples: int = 1,
     random_state: int = 0,
     n_jobs_cv: int = 1,
+    max_concurrent_trials: int = 0,
 ) -> dict[str, Union[float, dict[str, Any]]]:
-    """Search for the best hyperparameters using bayesian optimization
+    """Search for the best hyperparameters using `ray.tune`
 
     Parameters:
-        model_utils: helper module for each model, see use below and `viral_seq.analysis.rfc_utils`
+        model: model to use for training, expects sklearn-like interface
         X (pd.DataFrame), y (npt.ArrayLike): data used for model evaluation
-        distributions (dict[str, tuple[float, float]]): dictionary of parameters to optimize
-        model_parameters: passed as is to the model used for scoring. These are not optimized and should not overlap with parameters in `distributions`
-        bayes_parameters: passed as is to `bayes_opt.BayesianOptimization.maximize`
+        config (dict[str, tuple[float, float]]): dictionary of parameters to optimize
+        num_samples (int): number of hyperparameters to sample from parameter space
         random_state (int): seed used when needed for repeatability
         n_jobs_cv (int): used for `sklearn.model_selection.cross_val_score`, pass n_jobs to model training with `model_parameters`
+        max_concurrent_trials (int): limits concurrency, this is mostly used for testing as `optuna` is only repeatable when serial
 
     Returns:
         (dict[str, Union[float, dict[str, Any]]]): dictionary with best performing score (key 'target'), parameters (key 'params'), and target history during optimization (key 'targets')
     """
-    duplicate_params = set(distributions.keys()).intersection(set(model_parameters))
-    if len(duplicate_params) > 0:
-        raise ValueError(
-            "Received inputs for the following parameters in both `distributions` and `model_parameters`: "
-            + str(duplicate_params)
-            + ". Model parameters to be optimized should be passed in `distributions` and those to be set but not optimized in `model_parameters`."
-        )
-    optimizer = BayesianOptimization(
-        partial(
-            cv_score,
-            model_utils,
-            X=X,
-            y=y,
+    algo = OptunaSearch(
+        metric="mean_roc_auc", mode="max", sampler=TPESampler(seed=random_state)
+    )
+    put_X = ray.put(X)
+    put_y = ray.put(y)
+    results = tune.run(
+        tune.with_parameters(
+            _tune_objective,
+            model=model,
+            X=put_X,
+            y=put_y,
             n_jobs_cv=n_jobs_cv,
             random_state=random_state,
-            **model_parameters,
         ),
-        distributions,
-        random_state=random_state,
+        search_alg=algo,
+        metric="mean_roc_auc",
+        mode="max",
+        num_samples=num_samples,
+        config=config,
+        verbose=1,
+        max_concurrent_trials=max_concurrent_trials,
     )
-    # check default settings first
-    defaults = model_utils._default_parameters(X.shape)
-    # only include what's in the parameter space
-    defaults = {key: defaults[key] for key in distributions.keys()}
-    optimizer.probe(params=defaults, lazy=True)
-    optimizer.maximize(**bayes_parameters)
-    res = optimizer.max
-    for name in model_utils._floatparam_names:
-        if name in res["params"]:
-            res["params"][name] = model_utils._floatparam(name, res["params"][name])
-    targets = list(pd.DataFrame(optimizer.res)["target"].values)
+    res = {}
+    best_result = results.best_result
+    res_df = results.dataframe()
+    res["params"] = results.best_config
+    res["target"] = best_result["mean_roc_auc"]
+    targets = list(res_df["mean_roc_auc"].values)
     res["targets"] = targets
     return res

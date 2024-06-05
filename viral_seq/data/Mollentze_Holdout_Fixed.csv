@@ -1,0 +1,737 @@
+,Species,Human Host,Accessions,Family,Genome Composition
+0,Abatino macacapox virus,False,MH816996.1,Poxviridae,dsDNA
+1,Acerodon celebensis polyomavirus 1,False,NC_038554.1,Polyomaviridae,dsDNA
+2,Acerodon celebensis polyomavirus 2,False,NC_026762.1,Polyomaviridae,dsDNA
+4,Aguacate phlebovirus,False,NC_015451.1 NC_015450.1 NC_015452.1,Phenuiviridae,ssRNA(+/-)
+5,Ailurivirus A,False,MF327529.1,Picornaviridae,ssRNA(+)
+6,Ailuropoda melanoleuca polyomavirus 1,False,NC_035181.1,Polyomaviridae,dsDNA
+8,Akhmeta virus,True,MH607141.1,Poxviridae,dsDNA
+9,Alcube phlebovirus,False,KR363190.1 KR363191.1 KR363192.1,Phenuiviridae,ssRNA(+/-)
+10,Alenquer phlebovirus,True,HM119401.1 HM119402.1 HM119403.1,Phenuiviridae,ssRNA(+/-)
+11,American dog uukuvirus,False,KM048311.1 KM048312.1,Phenuiviridae,ssRNA(+/-)
+12,Anadyr orthobunyavirus,False,KU159766.1 KU159765.1 KU159764.1,Peribunyaviridae,ssRNA(-)
+13,Anatid alphaherpesvirus 1,False,JF999965.1,Orthoherpesviridae,dsDNA
+14,Anativirus B,False,KT880670.1,Picornaviridae,ssRNA(+)
+15,Anhembi orthobunyavirus,False,NC_043564.1 NC_043565.1 NC_043566.1,Peribunyaviridae,ssRNA(-)
+16,Anser anser polyomavirus 1,False,NC_004800.1,Polyomaviridae,dsDNA
+17,Anseriform dependoparvovirus 1,False,NC_006147.2,Parvoviridae,ssDNA(+/-)
+18,Aotine betaherpesvirus 1,False,NC_016447.1,Orthoherpesviridae,dsDNA
+19,Artibeus planirostris polyomavirus 1,False,NC_038558.1,Polyomaviridae,dsDNA
+20,Artibeus planirostris polyomavirus 2,False,NC_038555.1,Polyomaviridae,dsDNA
+21,Artibeus planirostris polyomavirus 3,False,NC_038556.1,Polyomaviridae,dsDNA
+22,Arumowot phlebovirus,False,MF593931.1 MF593932.1 MF593933.1,Phenuiviridae,ssRNA(+/-)
+23,Asikkala orthohantavirus,False,NC_043068.1 NC_043069.1 NC_043070.1,Hantaviridae,ssRNA(-)
+24,Ateles paniscus polyomavirus 1,False,NC_019853.1,Polyomaviridae,dsDNA
+25,Aves polyomavirus 1,False,NC_004764.2,Polyomaviridae,dsDNA
+26,Avian coronavirus 9203,False,KR902510.1,Coronaviridae,ssRNA(+)
+27,Avian dependoparvovirus 1,False,NC_004828.1,Parvoviridae,ssDNA(+/-)
+28,Avian metaavulavirus 14,False,NC_039015.1,Paramyxoviridae,ssRNA(-)
+29,Avian metaavulavirus 20,False,NC_040796.1,Paramyxoviridae,ssRNA(-)
+30,Avian myelocytomatosis virus 29,False,NC_001866.1,Retroviridae,ssRNA-RT
+31,Avian orthoavulavirus 16,False,NC_039016.1,Paramyxoviridae,ssRNA(-)
+32,Avian orthoavulavirus 21,False,MF594598.1,Paramyxoviridae,ssRNA(-)
+33,Avian sarcoma virus CT10,False,NC_038922.1,Retroviridae,ssRNA-RT
+34,Badger associated gemykibivirus 1,False,NC_026806.1,Genomoviridae,ssDNA(+/-)
+35,Bahia barhavirus,False,KM205018.1,Rhabdoviridae,ssRNA(-)
+36,Balsa almendravirus,False,NC_039200.1,Rhabdoviridae,ssRNA(-)
+37,Bat Hp-betacoronavirus Zhejiang2013,False,NC_025217.1,Coronaviridae,ssRNA(+)
+38,Bat associated circovirus 1,False,NC_038385.1,Circoviridae,ssDNA(+)
+39,Bat associated circovirus 10,False,NC_035799.1,Circoviridae,ssDNA(+)
+40,Bat associated circovirus 11,False,KX756996.1,Circoviridae,ssDNA(+)
+41,Bat associated circovirus 12,False,KJ641716.1,Circoviridae,ssDNA(+)
+42,Bat associated circovirus 2,False,NC_021206.1,Circoviridae,ssDNA(+)
+43,Bat associated circovirus 3,False,NC_038386.1,Circoviridae,ssDNA(+)
+44,Bat associated circovirus 4,False,NC_028045.1,Circoviridae,ssDNA(+)
+45,Bat associated circovirus 5,False,NC_038387.1,Circoviridae,ssDNA(+)
+46,Bat associated circovirus 6,False,NC_038388.1,Circoviridae,ssDNA(+)
+47,Bat associated circovirus 7,False,NC_038389.1,Circoviridae,ssDNA(+)
+48,Bat associated circovirus 8,False,NC_038390.1,Circoviridae,ssDNA(+)
+49,Bat associated circovirus 9,False,NC_039033.1,Circoviridae,ssDNA(+)
+50,Bat associated cyclovirus 1,False,NC_034547.1,Circoviridae,ssDNA(+)
+51,Bat associated cyclovirus 10,False,NC_025792.1,Circoviridae,ssDNA(+)
+52,Bat associated cyclovirus 11,False,NC_038400.1,Circoviridae,ssDNA(+)
+53,Bat associated cyclovirus 12,False,NC_025791.1,Circoviridae,ssDNA(+)
+54,Bat associated cyclovirus 13,False,NC_038401.1,Circoviridae,ssDNA(+)
+55,Bat associated cyclovirus 14,False,NC_038402.1,Circoviridae,ssDNA(+)
+56,Bat associated cyclovirus 15,False,NC_038403.1,Circoviridae,ssDNA(+)
+57,Bat associated cyclovirus 16,False,NC_038404.1,Circoviridae,ssDNA(+)
+58,Bat associated cyclovirus 2,False,NC_038393.1,Circoviridae,ssDNA(+)
+59,Bat associated cyclovirus 3,False,NC_038394.1,Circoviridae,ssDNA(+)
+60,Bat associated cyclovirus 4,False,NC_038395.1,Circoviridae,ssDNA(+)
+61,Bat associated cyclovirus 5,False,NC_014929.1,Circoviridae,ssDNA(+)
+62,Bat associated cyclovirus 6,False,NC_038396.1,Circoviridae,ssDNA(+)
+63,Bat associated cyclovirus 7,False,NC_038397.1,Circoviridae,ssDNA(+)
+64,Bat associated cyclovirus 8,False,NC_038398.1,Circoviridae,ssDNA(+)
+65,Bat associated cyclovirus 9,False,NC_038399.1,Circoviridae,ssDNA(+)
+66,Bat mastadenovirus A,False,NC_016895.2,Adenoviridae,dsDNA
+67,Bat mastadenovirus B,False,NC_015932.1,Adenoviridae,dsDNA
+68,Bat mastadenovirus C,False,NC_029898.1,Adenoviridae,dsDNA
+69,Bat mastadenovirus D,False,NC_030860.1,Adenoviridae,dsDNA
+70,Bat mastadenovirus E,False,NC_030874.1,Adenoviridae,dsDNA
+71,Bat mastadenovirus F,False,NC_034626.1,Adenoviridae,dsDNA
+72,Bat mastadenovirus G,False,NC_031948.1,Adenoviridae,dsDNA
+73,Bat mastadenovirus H,False,AP018374.1,Adenoviridae,dsDNA
+74,Bat mastadenovirus I,False,MG551742.1,Adenoviridae,dsDNA
+75,Bat mastadenovirus J,False,LC385827.1,Adenoviridae,dsDNA
+76,Batai orthobunyavirus,False,NC_043580.1 NC_043579.1 NC_043581.1,Peribunyaviridae,ssRNA(-)
+77,Bavaria virus,False,HQ010042.1,Caliciviridae,ssRNA(+)
+78,Beak and feather disease virus,False,NC_001944.1,Circoviridae,ssDNA(+)
+79,Beatrice Hill tibrovirus,False,NC_039021.1,Rhabdoviridae,ssRNA(-)
+80,Beihai picobirnavirus,False,NC_032498.1 NC_032502.1,Picobirnaviridae,dsRNA
+81,Beilong jeilongvirus,False,NC_007803.1,Paramyxoviridae,ssRNA(-)
+82,Bellavista orthobunyavirus,False,NC_043621.1 NC_043623.1 NC_043622.1,Peribunyaviridae,ssRNA(-)
+83,Betaarterivirus sheoin,False,KY369968.1,Arteriviridae,ssRNA(+)
+84,Betaarterivirus timiclar,False,NC_040535.1,Arteriviridae,ssRNA(+)
+85,Betapapillomavirus 6,False,NC_015691.1,Papillomaviridae,ssDNA
+86,Bhanja bandavirus,False,NC_027140.1 NC_027141.1 NC_027142.1,Phenuiviridae,ssRNA(+/-)
+87,Birao orthobunyavirus,False,NC_043651.1 NC_043652.1 NC_043650.1,Peribunyaviridae,ssRNA(-)
+88,Black robin associated gemykibivirus 1,False,NC_025732.1,Genomoviridae,ssDNA(+/-)
+89,Blackbird associated gemycircularvirus 1,False,NC_025741.1,Genomoviridae,ssDNA(+/-)
+90,Blackbird associated gemykibivirus 1,False,NC_025731.1,Genomoviridae,ssDNA(+/-)
+91,Blackleg ixovirus,False,KM048313.1 KM048314.1,Phenuiviridae,ssRNA(+/-)
+92,Bombali ebolavirus,False,NC_039345.1,Filoviridae,ssRNA(-)
+93,Boosepivirus A,False,LC006971.1,Picornaviridae,ssRNA(+)
+94,Boosepivirus B,False,LC036579.1,Picornaviridae,ssRNA(+)
+95,Boosepivirus C,False,LR216006.1,Picornaviridae,ssRNA(+)
+96,Bovine associated cyclovirus 1,False,NC_038405.1,Circoviridae,ssDNA(+)
+97,Bovine associated gemycircularvirus 1,False,NC_030146.1,Genomoviridae,ssDNA(+/-)
+98,Bovine associated gemykibivirus 1,False,NC_024689.1,Genomoviridae,ssDNA(+/-)
+99,Bovine associated gemykrogvirus 1,False,NC_024690.1,Genomoviridae,ssDNA(+/-)
+100,Bovine gammaherpesvirus 6,False,NC_024303.1,Orthoherpesviridae,dsDNA
+101,Bozo orthobunyavirus,False,NC_043655.1 NC_043653.1 NC_043654.1,Peribunyaviridae,ssRNA(-)
+102,Broome orthoreovirus,False,NC_014236.1 NC_014237.1 NC_014238.1 NC_014239.1 NC_014240.1 NC_014241.1 NC_014242.1 NC_014243.1 NC_014244.1 NC_014245.1,Spinareoviridae,dsRNA
+103,Buenaventura phlebovirus,False,KP272001.1 KP272002.1 KP272003.1,Phenuiviridae,ssRNA(+/-)
+104,Buttonwillow orthobunyavirus,False,NC_043597.1 NC_043599.1 NC_043598.1,Peribunyaviridae,ssRNA(-)
+106,Cache Valley orthobunyavirus,False,NC_043618.1 NC_043619.1 NC_043620.1,Peribunyaviridae,ssRNA(-)
+107,Cachoeira Porteira orthobunyavirus,False,NC_043575.1 NC_043573.1 NC_043574.1,Peribunyaviridae,ssRNA(-)
+108,Cadicivirus B,False,NC_040611.1,Picornaviridae,ssRNA(+)
+109,Caimito pacuvirus,False,MK330759.1 MK330760.1 MK330761.1,Peribunyaviridae,ssRNA(-)
+110,Canary circovirus,False,NC_003410.1,Circoviridae,ssDNA(+)
+111,Canarypox virus,False,NC_005309.1,Poxviridae,dsDNA
+112,Canine associated gemygorvirus 1,False,NC_030147.1,Genomoviridae,ssDNA(+/-)
+113,Canine circovirus,False,NC_020904.1,Circoviridae,ssDNA(+)
+114,Canis familiaris polyomavirus 1,False,NC_034456.1,Polyomaviridae,dsDNA
+115,Caprine respirovirus 3,False,NC_028362.1,Paramyxoviridae,ssRNA(-)
+116,Capuchin monkey hepatitis B virus,False,NC_043528.1,Hepadnaviridae,dsDNA-RT
+117,Cardioderma cor polyomavirus 1,False,NC_020067.1,Polyomaviridae,dsDNA
+118,Cardiovirus D,True,NC_009448.2,Picornaviridae,ssRNA(+)
+119,Cardiovirus E,False,KY432930.1,Picornaviridae,ssRNA(+)
+120,Cardiovirus F,False,KY432929.1,Picornaviridae,ssRNA(+)
+121,Caribou associated gemykrogvirus 1,False,NC_024909.1,Genomoviridae,ssDNA(+/-)
+122,Carnivore amdoparvovirus 3,False,NC_025825.1,Parvoviridae,ssDNA(+/-)
+123,Carnivore amdoparvovirus 5,False,NC_031751.1,Parvoviridae,ssDNA(+/-)
+124,Carnivore bocaparvovirus 2,False,NC_020499.1,Parvoviridae,ssDNA(+/-)
+125,Carnivore bocaparvovirus 3,False,NC_017823.1,Parvoviridae,ssDNA(+/-)
+126,Carnivore protoparvovirus,False,NC_030837.1,Parvoviridae,ssDNA(+/-)
+127,Carollia perspicillata polyomavirus 1,False,NC_028120.1,Polyomaviridae,dsDNA
+129,Cebus albifrons polyomavirus 1,False,NC_019854.2,Polyomaviridae,dsDNA
+130,Cercopithecus erythrotis polyomavirus 1,False,NC_025892.1,Polyomaviridae,dsDNA
+131,Chagres phlebovirus,True,HM566147.1 HM566146.1 HM566148.1,Phenuiviridae,ssRNA(+/-)
+132,Chickadee associated gemycircularvirus 1,False,NC_027776.1,Genomoviridae,ssDNA(+/-)
+133,Chicken anemia virus,False,NC_001427.1,Anelloviridae,ssDNA(-)
+134,Chicken associated cyclovirus 1,False,NC_038406.1,Circoviridae,ssDNA(+)
+135,Chicken associated cyclovirus 2,False,NC_040639.1,Circoviridae,ssDNA(+)
+136,Chicken associated gemycircularvirus 1,False,NC_030141.1,Genomoviridae,ssDNA(+/-)
+137,Chicken associated gemycircularvirus 2,False,NC_030140.1,Genomoviridae,ssDNA(+/-)
+138,Chimpanzee associated circovirus 1,False,NC_038391.1,Circoviridae,ssDNA(+)
+139,Chimpanzee associated cyclovirus 1,False,NC_038407.1,Circoviridae,ssDNA(+)
+140,China Rattus coronavirus HKU24,False,NC_026011.1,Coronaviridae,ssRNA(+)
+141,Chinese shrew hepatitis B virus,False,MH484438.1,Hepadnaviridae,dsDNA-RT
+142,Chipapillomavirus 1,False,NC_008297.1,Papillomaviridae,ssDNA
+143,Chipapillomavirus 2,False,NC_010226.1,Papillomaviridae,ssDNA
+144,Chipapillomavirus 3,False,NC_016014.1,Papillomaviridae,ssDNA
+145,Chiropteran artiparvovirus 1,False,NC_016752.1,Parvoviridae,ssDNA(+/-)
+146,Chlorocebus pygerythrus polyomavirus 1,False,NC_019844.1,Polyomaviridae,dsDNA
+147,Chlorocebus pygerythrus polyomavirus 2,False,NC_025896.1,Polyomaviridae,dsDNA
+148,Chlorocebus pygerythrus polyomavirus 3,False,NC_025898.1,Polyomaviridae,dsDNA
+149,Civet circovirus,False,NC_040679.1,Circoviridae,ssDNA(+)
+150,Columbid alphaherpesvirus 1,False,NC_034266.1,Orthoherpesviridae,dsDNA
+151,Coot Bay almendravirus,False,NC_031957.1,Rhabdoviridae,ssRNA(-)
+152,Corvus monedula polyomavirus 1,False,NC_007922.1,Polyomaviridae,dsDNA
+153,Cotia virus,False,NC_016924.1,Poxviridae,dsDNA
+154,Cracticus torquatus polyomavirus 1,False,NC_023008.1,Polyomaviridae,dsDNA
+155,Crahelivirus A,False,KY312540.1,Picornaviridae,ssRNA(+)
+156,Dashli phlebovirus,False,KP771821.1 KP771822.1 KP771823.1,Phenuiviridae,ssRNA(+/-)
+157,Deer atadenovirus A,False,NC_035619.1,Adenoviridae,dsDNA
+158,Deer mastadenovirus B,False,NC_034834.1,Adenoviridae,dsDNA
+160,Deltapapillomavirus 5,False,NC_011051.1,Papillomaviridae,ssDNA
+161,Deltapapillomavirus 6,False,NC_015267.1,Papillomaviridae,ssDNA
+162,Deltapapillomavirus 7,False,NC_039036.1,Papillomaviridae,ssDNA
+163,Desmodus rotundus polyomavirus 1,False,NC_028122.1,Polyomaviridae,dsDNA
+164,Dipteran brevihamaparvovirus 1,False,NC_011317.1,Parvoviridae,ssDNA(+/-)
+165,Dipteran brevihamaparvovirus 2,False,NC_004285.1,Parvoviridae,ssDNA(+/-)
+166,Dipteran protoambidensovirus 1,False,NC_012685.1,Parvoviridae,ssDNA(+/-)
+167,Diresapivirus A,False,KJ641685.1,Picornaviridae,ssRNA(+)
+168,Diresapivirus B,False,KJ641697.1,Picornaviridae,ssRNA(+)
+169,Dobsonia moluccensis polyomavirus 1,False,NC_026768.1,Polyomaviridae,dsDNA
+170,Dobsonia moluccensis polyomavirus 2,False,NC_026770.1,Polyomaviridae,dsDNA
+171,Dobsonia moluccensis polyomavirus 3,False,NC_026769.1,Polyomaviridae,dsDNA
+172,Dolphin mastadenovirus B,False,NC_044960.1,Adenoviridae,dsDNA
+173,Domestic cat hepatitis B virus,False,NC_040719.1,Hepadnaviridae,dsDNA-RT
+174,Drosophina B birnavirus,False,GQ342962.1 GQ342963.1,Birnaviridae,dsRNA
+175,Duck associated cyclovirus 1,False,NC_034977.1,Circoviridae,ssDNA(+)
+176,Duck atadenovirus A,False,NC_001813.1,Adenoviridae,dsDNA
+177,Duck aviadenovirus B,False,NC_024486.1,Adenoviridae,dsDNA
+178,Duck circovirus,False,NC_005053.1,Circoviridae,ssDNA(+)
+179,Duck coronavirus 2714,False,KM454473.1,Coronaviridae,ssRNA(+)
+180,Duck hepatitis B virus,False,NC_001344.1,Hepadnaviridae,dsDNA-RT
+181,Durania phlebovirus,False,HM566155.1 HM566157.1 HM566156.1,Phenuiviridae,ssRNA(+/-)
+182,Dyochipapillomavirus 1,False,NC_023882.1,Papillomaviridae,ssDNA
+183,Dyodeltapapillomavirus 1,False,NC_011280.1,Papillomaviridae,ssDNA
+184,Dyoepsilonpapillomavirus 1,False,NC_013117.1,Papillomaviridae,ssDNA
+185,Dyoetapapillomavirus 1,False,NC_011765.1,Papillomaviridae,ssDNA
+186,Dyoiotapapillomavirus 1,False,NC_017862.1,Papillomaviridae,ssDNA
+187,Dyoiotapapillomavirus 2,False,NC_020085.1,Papillomaviridae,ssDNA
+188,Dyokappapapillomavirus 1,False,NC_038516.1,Papillomaviridae,ssDNA
+189,Dyokappapapillomavirus 2,False,NC_023895.1,Papillomaviridae,ssDNA
+190,Dyokappapapillomavirus 3,False,NC_030796.1,Papillomaviridae,ssDNA
+191,Dyokappapapillomavirus 4,False,NC_030798.1,Papillomaviridae,ssDNA
+192,Dyokappapapillomavirus 5,False,NC_039037.1,Papillomaviridae,ssDNA
+193,Dyolambdapapillomavirus 1,False,NC_014143.1,Papillomaviridae,ssDNA
+194,Dyonupapillomavirus 1,False,NC_015325.1,Papillomaviridae,ssDNA
+195,Dyoomegapapillomavirus 1,False,NC_038517.1,Papillomaviridae,ssDNA
+196,Dyoomikronpapillomavirus 1,False,NC_023496.1,Papillomaviridae,ssDNA
+197,Dyophipapillomavirus 1,False,NC_039038.1,Papillomaviridae,ssDNA
+198,Dyopipapillomavirus 1,False,NC_018076.1,Papillomaviridae,ssDNA
+199,Dyopsipapillomavirus 1,False,NC_038518.1,Papillomaviridae,ssDNA
+200,Dyorhopapillomavirus 1,False,NC_020500.1,Papillomaviridae,ssDNA
+201,Dyosigmapapillomavirus 1,False,NC_023178.1,Papillomaviridae,ssDNA
+202,Dyotaupapillomavirus 1,False,NC_038519.1,Papillomaviridae,ssDNA
+203,Dyothetapapillomavirus 1,False,NC_038520.1,Papillomaviridae,ssDNA
+204,Dyoupsilonpapillomavirus 1,False,NC_038521.1,Papillomaviridae,ssDNA
+205,Dyoxipapillomavirus 1,False,NC_007612.1,Papillomaviridae,ssDNA
+206,Dyoxipapillomavirus 2,False,NC_030799.1,Papillomaviridae,ssDNA
+207,Eastern kangaroopox virus,False,MF467281.1,Poxviridae,dsDNA
+208,Echarate phlebovirus,True,HM119410.1 HM119411.1 HM119412.1,Phenuiviridae,ssRNA(+/-)
+210,Eidolon helvum polyomavirus 1,False,NC_020068.1,Polyomaviridae,dsDNA
+211,Elephantid betaherpesvirus 1,False,NC_020474.2,Orthoherpesviridae,dsDNA
+212,Elephantid betaherpesvirus 4,False,NC_028379.1,Orthoherpesviridae,dsDNA
+213,Elephantid betaherpesvirus 5,False,NC_024696.1,Orthoherpesviridae,dsDNA
+214,Enhydra lutris polyomavirus 1,False,NC_025259.1,Polyomaviridae,dsDNA
+215,Enseada orthobunyavirus,False,NC_043614.1 NC_043612.1 NC_043613.1,Peribunyaviridae,ssRNA(-)
+216,Enterovirus L,False,NC_029905.1,Picornaviridae,ssRNA(+)
+217,Epsilonpapillomavirus 2,False,NC_030151.1,Papillomaviridae,ssDNA
+218,Eptesipox virus,False,NC_035460.1,Poxviridae,dsDNA
+219,Equine associated gemycircularvirus 1,False,NC_030143.1,Genomoviridae,ssDNA(+/-)
+220,Equine picobirnavirus,False,KR902508.1 KR902507.1,Picobirnaviridae,dsRNA
+221,Equus caballus polyomavirus 1,False,NC_017982.1,Polyomaviridae,dsDNA
+222,Erythrura gouldiae polyomavirus 1,False,NC_039052.1,Polyomaviridae,dsDNA
+223,Etapapillomavirus 1,False,NC_004068.1,Papillomaviridae,ssDNA
+224,Faceys paddock orthobunyavirus,False,KF697138.1 KF697137.1 KF697136.1,Peribunyaviridae,ssRNA(-)
+225,Felid gammaherpesvirus 1,False,NC_028099.1,Orthoherpesviridae,dsDNA
+226,Feline associated cyclovirus 1,False,NC_024700.1,Circoviridae,ssDNA(+)
+227,Felipivirus A,False,NC_016156.1,Picornaviridae,ssRNA(+)
+228,Finch circovirus,False,NC_008522.1,Circoviridae,ssDNA(+)
+229,Flamingopox virus,False,NC_036582.1,Poxviridae,dsDNA
+230,Fort Sherman orthobunyavirus,True,NC_043617.1 NC_043615.1 NC_043616.1,Peribunyaviridae,ssRNA(-)
+231,Fowl aviadenovirus A,False,NC_001720.1,Adenoviridae,dsDNA
+232,Fowl aviadenovirus B,False,NC_021221.1,Adenoviridae,dsDNA
+233,Fowl aviadenovirus C,False,NC_015323.1,Adenoviridae,dsDNA
+234,Fowl aviadenovirus D,False,NC_000899.1,Adenoviridae,dsDNA
+235,Fowl aviadenovirus E,False,NC_038332.1,Adenoviridae,dsDNA
+236,Fowlpox virus,False,NC_002188.1,Poxviridae,dsDNA
+237,Fujinami sarcoma virus,False,NC_001403.1,Retroviridae,ssRNA-RT
+238,Fur seal associated gemycircularvirus 1,False,NC_025736.1,Genomoviridae,ssDNA(+/-)
+239,Gabek phlebovirus,False,KF297903.1 KF297904.1 KF297905.1,Phenuiviridae,ssRNA(+/-)
+240,Gallid alphaherpesvirus 1,False,JN596962.1,Orthoherpesviridae,dsDNA
+241,Gallid alphaherpesvirus 2,False,NC_002229.3,Orthoherpesviridae,dsDNA
+242,Gallid alphaherpesvirus 3,False,HQ840738.1,Orthoherpesviridae,dsDNA
+243,Galliform aveparvovirus 1,False,NC_038534.1,Parvoviridae,ssDNA(+/-)
+244,Gammapapillomavirus 10,True,NC_014185.1,Papillomaviridae,ssDNA
+245,Gammapapillomavirus 11,True,NC_016157.1,Papillomaviridae,ssDNA
+246,Gammapapillomavirus 12,True,NC_014469.1,Papillomaviridae,ssDNA
+247,Gammapapillomavirus 13,True,NC_014952.1,Papillomaviridae,ssDNA
+248,Gammapapillomavirus 14,True,NC_014954.1,Papillomaviridae,ssDNA
+249,Gammapapillomavirus 15,True,NC_017993.1,Papillomaviridae,ssDNA
+250,Gammapapillomavirus 16,True,NC_017995.1,Papillomaviridae,ssDNA
+251,Gammapapillomavirus 17,True,NC_017997.1,Papillomaviridae,ssDNA
+252,Gammapapillomavirus 18,True,NC_033781.1,Papillomaviridae,ssDNA
+253,Gammapapillomavirus 19,True,NC_038522.1,Papillomaviridae,ssDNA
+254,Gammapapillomavirus 20,True,NC_028125.1,Papillomaviridae,ssDNA
+255,Gammapapillomavirus 21,True,NC_022892.1,Papillomaviridae,ssDNA
+256,Gammapapillomavirus 22,True,NC_038523.1,Papillomaviridae,ssDNA
+257,Gammapapillomavirus 23,True,NC_038524.1,Papillomaviridae,ssDNA
+258,Gammapapillomavirus 24,True,NC_023891.1,Papillomaviridae,ssDNA
+259,Gammapapillomavirus 25,True,NC_038914.1,Papillomaviridae,ssDNA
+260,Gammapapillomavirus 26,True,NC_039086.1,Papillomaviridae,ssDNA
+261,Gammapapillomavirus 27,True,NC_027528.1,Papillomaviridae,ssDNA
+262,Gammapapillomavirus 6,True,NC_008189.1,Papillomaviridae,ssDNA
+263,Gammapapillomavirus 7,True,NC_012485.1,Papillomaviridae,ssDNA
+264,Gammapapillomavirus 8,True,NC_012486.1,Papillomaviridae,ssDNA
+265,Gammapapillomavirus 9,True,NC_013035.1,Papillomaviridae,ssDNA
+266,Gannoruwa bat lyssavirus,False,NC_031988.1,Rhabdoviridae,ssRNA(-)
+267,Gerygone associated gemycircularvirus 1,False,NC_025734.1,Genomoviridae,ssDNA(+/-)
+268,Gerygone associated gemycircularvirus 2,False,NC_025735.1,Genomoviridae,ssDNA(+/-)
+269,Gerygone associated gemycircularvirus 3,False,NC_025737.1,Genomoviridae,ssDNA(+/-)
+270,Goat associated cyclovirus 1,False,NC_014928.1,Circoviridae,ssDNA(+)
+271,Goose aviadenovirus A,False,NC_017979.1,Adenoviridae,dsDNA
+272,Goose circovirus,False,NC_003054.1,Circoviridae,ssDNA(+)
+273,Goose coronavirus CB17,False,NC_046965.1,Coronaviridae,ssRNA(+)
+274,Gorilla gorilla polyomavirus 1,False,NC_025380.1,Polyomaviridae,dsDNA
+275,Grand Arbaud uukuvirus,False,JF838327.1 JF838328.1 JF838329.1,Phenuiviridae,ssRNA(+/-)
+276,Grey sealpox virus,False,NC_035188.1,Poxviridae,dsDNA
+278,Gruiform aveparvovirus 1,False,NC_040603.1,Parvoviridae,ssDNA(+/-)
+279,Grusopivirus A,False,KY312544.1,Picornaviridae,ssRNA(+)
+280,Grusopivirus B,False,KY312545.1,Picornaviridae,ssRNA(+)
+281,Gull circovirus,False,NC_008521.1,Circoviridae,ssDNA(+)
+282,Heartland bandavirus,True,KJ740148.1 KJ740147.1 KJ740146.1,Phenuiviridae,ssRNA(+/-)
+283,Heron hepatitis B virus,False,NC_001486.1,Hepadnaviridae,dsDNA-RT
+285,Holmes hapavirus,False,KY421919.1,Rhabdoviridae,ssRNA(-)
+286,Horse associated cyclovirus 1,False,NC_038411.1,Circoviridae,ssDNA(+)
+287,Huangpi uukuvirus,False,NC_031138.1 NC_031139.1 NC_031140.1,Phenuiviridae,ssRNA(+/-)
+288,Human associated circovirus 1,True,NC_038392.1,Circoviridae,ssDNA(+)
+289,Human associated cyclovirus 1,True,NC_038412.1,Circoviridae,ssDNA(+)
+290,Human associated cyclovirus 10,True,NC_023874.2,Circoviridae,ssDNA(+)
+291,Human associated cyclovirus 11,True,NC_038418.1,Circoviridae,ssDNA(+)
+292,Human associated cyclovirus 12,True,NC_032682.2,Circoviridae,ssDNA(+)
+293,Human associated cyclovirus 2,True,NC_036877.1,Circoviridae,ssDNA(+)
+294,Human associated cyclovirus 3,True,NC_038413.1,Circoviridae,ssDNA(+)
+295,Human associated cyclovirus 4,True,NC_038414.1,Circoviridae,ssDNA(+)
+296,Human associated cyclovirus 5,True,NC_038415.1,Circoviridae,ssDNA(+)
+297,Human associated cyclovirus 6,True,NC_038416.1,Circoviridae,ssDNA(+)
+298,Human associated cyclovirus 7,True,NC_038417.1,Circoviridae,ssDNA(+)
+299,Human associated cyclovirus 8,True,NC_039215.1,Circoviridae,ssDNA(+)
+300,Human associated cyclovirus 9,True,NC_021568.1,Circoviridae,ssDNA(+)
+301,Human associated gemykibivirus 1,True,NC_024691.1,Genomoviridae,ssDNA(+/-)
+302,Human associated gemykibivirus 2,True,NC_026818.1,Genomoviridae,ssDNA(+/-)
+303,Human associated gemykibivirus 3,True,NC_038496.1,Genomoviridae,ssDNA(+/-)
+304,Human associated gemykibivirus 4,True,NC_038497.1,Genomoviridae,ssDNA(+/-)
+305,Human associated gemykibivirus 5,True,NC_030448.1,Genomoviridae,ssDNA(+/-)
+306,Human associated gemyvongvirus 1,True,NC_028459.1,Genomoviridae,ssDNA(+/-)
+307,Human betaherpesvirus 6A,True,NC_001664.4,Orthoherpesviridae,dsDNA
+308,Human betaherpesvirus 6B,True,NC_000898.1,Orthoherpesviridae,dsDNA
+309,Human mastadenovirus G,False,NC_006879.1,Adenoviridae,dsDNA
+310,Human polyomavirus 10,True,NC_018102.1,Polyomaviridae,dsDNA
+311,Human polyomavirus 11,True,NC_020106.1,Polyomaviridae,dsDNA
+312,Human polyomavirus 13,True,NC_024118.1,Polyomaviridae,dsDNA
+313,Human polyomavirus 14,True,NC_034253.1,Polyomaviridae,dsDNA
+314,Human polyomavirus 3,True,NC_009238.1,Polyomaviridae,dsDNA
+315,Human polyomavirus 4,True,NC_009539.1,Polyomaviridae,dsDNA
+316,Human polyomavirus 5,True,NC_010277.2,Polyomaviridae,dsDNA
+317,Human polyomavirus 6,True,NC_014406.1,Polyomaviridae,dsDNA
+318,Human polyomavirus 7,True,NC_014407.1,Polyomaviridae,dsDNA
+319,Human polyomavirus 8,True,NC_014361.1,Polyomaviridae,dsDNA
+320,Human polyomavirus 9,True,NC_015150.1,Polyomaviridae,dsDNA
+321,Iaco orthobunyavirus,False,NC_043568.1 NC_043567.1 NC_043569.1,Peribunyaviridae,ssRNA(-)
+322,Ilesha orthobunyavirus,True,NC_043587.1 NC_043586.1 NC_043585.1,Peribunyaviridae,ssRNA(-)
+323,Ingwavuma orthobunyavirus,False,NC_043588.1 NC_043589.1 NC_043590.1,Peribunyaviridae,ssRNA(-)
+324,Inhangapi arurhavirus,False,KM204991.1,Rhabdoviridae,ssRNA(-)
+325,Iotapapillomavirus 2,False,NC_039039.1,Papillomaviridae,ssDNA
+326,Island sawgrhavirus,False,NC_025340.1,Rhabdoviridae,ssRNA(-)
+327,Itaituba phlebovirus,False,HM119416.2 HM119417.1 HM119418.2,Phenuiviridae,ssRNA(+/-)
+328,Itaporanga phlebovirus,False,MK330771.2 MK330772.1 MK330773.1,Phenuiviridae,ssRNA(+/-)
+329,Ixcanal phlebovirus,False,HM566162.2 HM566163.1 HM566161.1,Phenuiviridae,ssRNA(+/-)
+330,Jamestown Canyon orthobunyavirus,False,NC_043559.1 NC_043560.1 NC_043558.1,Peribunyaviridae,ssRNA(-)
+331,Jatobal orthobunyavirus,False,NC_043578.1 NC_043577.1 NC_043576.1,Peribunyaviridae,ssRNA(-)
+332,Jun jeilongvirus,False,NC_007454.1,Paramyxoviridae,ssRNA(-)
+333,Kabuto mountain uukuvirus,False,NC_036604.1 NC_036605.1 NC_036606.1,Phenuiviridae,ssRNA(+/-)
+334,Keystone orthobunyavirus,False,NC_043629.1 NC_043627.1 NC_043628.1,Peribunyaviridae,ssRNA(-)
+335,Kigluaik phantom orthophasmavirus,False,NC_034462.1 NC_034469.1 NC_034463.1,Phasmaviridae,ssRNA(-)
+336,Kismaayo bandavirus,False,KM114252.1 KM114253.1 KM114254.1,Phenuiviridae,ssRNA(+/-)
+337,Kunsagivirus C,False,NC_034206.1,Picornaviridae,ssRNA(+)
+338,La Crosse orthobunyavirus,True,EF485032.1 EF485031.1 EF485030.1,Peribunyaviridae,ssRNA(-)
+339,Lama associated gemycircularvirus 1,False,NC_030142.1,Genomoviridae,ssDNA(+/-)
+340,Lambdapapillomavirus 3,False,NC_013237.1,Papillomaviridae,ssDNA
+341,Lambdapapillomavirus 4,False,NC_007150.1,Papillomaviridae,ssDNA
+342,Lambdapapillomavirus 5,False,NC_018575.1,Papillomaviridae,ssDNA
+343,Laurel Lake laulavirus,False,NC_043679.1 NC_043680.1 NC_043681.1,Phenuiviridae,ssRNA(+/-)
+344,Leanyer orthobunyavirus,False,NC_043563.1 NC_043562.1 NC_043561.1,Peribunyaviridae,ssRNA(-)
+345,Leporid alphaherpesvirus 4,False,NC_029311.1,Orthoherpesviridae,dsDNA
+346,Leptonychotes weddellii polyomavirus 1,False,NC_032120.1,Polyomaviridae,dsDNA
+347,Leticia phlebovirus,False,HM566152.1 HM566154.1 HM566153.1,Phenuiviridae,ssRNA(+/-)
+348,Lleida bat lyssavirus,False,NC_031955.1,Rhabdoviridae,ssRNA(-)
+349,Lonchura maja polyomavirus 1,False,NC_039053.1,Polyomaviridae,dsDNA
+350,Lone Star bandavirus,False,NC_021242.1 NC_021243.1 NC_021244.1,Phenuiviridae,ssRNA(+/-)
+351,Long-fingered bat hepatitis B virus,False,NC_020881.1,Hepadnaviridae,dsDNA-RT
+352,Lophuromys jeilongvirus 1,False,NC_043539.1,Paramyxoviridae,ssRNA(-)
+353,Lophuromys jeilongvirus 2,False,NC_043540.1,Paramyxoviridae,ssRNA(-)
+354,Loxodonta africana polyomavirus 1,False,NC_022519.1,Polyomaviridae,dsDNA
+355,Lucheng Rn rat coronavirus,False,NC_032730.1,Coronaviridae,ssRNA(+)
+356,Ludopivirus A,False,NC_040684.1,Picornaviridae,ssRNA(+)
+357,Lumbo orthbunyavirus,False,NC_043632.1 NC_043630.1 NC_043631.1,Peribunyaviridae,ssRNA(-)
+358,Macaca fascicularis polyomavirus 1,False,NC_019851.1,Polyomaviridae,dsDNA
+359,Macacine betaherpesvirus 8,False,JN227533.1,Orthoherpesviridae,dsDNA
+360,Macacine betaherpesvirus 9,False,NC_030200.1,Orthoherpesviridae,dsDNA
+361,Macacine gammaherpesvirus 10,False,KP676001.1,Orthoherpesviridae,dsDNA
+362,Macacine gammaherpesvirus 11,False,AY528864.1,Orthoherpesviridae,dsDNA
+363,Macaua orthobunyavirus,False,JN572068.1 JN572069.1 JN572070.1,Peribunyaviridae,ssRNA(-)
+364,Maguari orthobunyavirus,False,KY910429.1 KY910430.1 KY910431.1,Peribunyaviridae,ssRNA(-)
+365,Mahlapitsi orthoreovirus,False,NC_029917.1 NC_029911.1 NC_029912.1 NC_029913.1 NC_029918.1 NC_029914.1 NC_029915.1 NC_029919.1 NC_029916.1 NC_029920.1,Spinareoviridae,dsRNA
+366,Malagasivirus A,False,NC_026315.1,Picornaviridae,ssRNA(+)
+367,Malagasivirus B,False,NC_026316.1,Picornaviridae,ssRNA(+)
+368,Mallard associated gemycircularvirus 1,False,NC_025733.1,Genomoviridae,ssDNA(+/-)
+369,Mallard associated gemygorvirus 1,False,NC_030138.1,Genomoviridae,ssDNA(+/-)
+370,Mammalian orthoreovirus,True,HM159613.1 HM159614.1 HM159615.1 HM159616.1 HM159617.1 HM159618.1 HM159619.1 HM159620.1 HM159621.1 HM159622.1,Spinareoviridae,dsRNA
+371,Mammalian orthorubulavirus 6,False,MH972568.1,Paramyxoviridae,ssRNA(-)
+372,Mandrilline betaherpesvirus 1,False,KR297253.1,Orthoherpesviridae,dsDNA
+373,Mariental mammarenavirus,False,NC_027136.1 NC_027134.1,Arenaviridae,ssRNA(+/-)
+374,Massilia phlebovirus,False,EU725771.1 EU725772.1 EU725773.1,Phenuiviridae,ssRNA(+/-)
+375,Mastomys natalensis polyomavirus 1,False,NC_025895.1,Polyomaviridae,dsDNA
+376,Medjerda phlebovirus,False,KU255114.1 KU255115.1 KU297253.1,Phenuiviridae,ssRNA(+/-)
+377,Megrivirus C,False,NC_039235.1,Picornaviridae,ssRNA(+)
+378,Megrivirus D,False,NC_034617.1,Picornaviridae,ssRNA(+)
+379,Megrivirus E,False,NC_039004.1,Picornaviridae,ssRNA(+)
+380,Melao orthobunyavirus,False,NC_043634.1 NC_043633.1 NC_043635.1,Peribunyaviridae,ssRNA(-)
+381,Meleagrid alphaherpesvirus 1,False,NC_002641.1,Orthoherpesviridae,dsDNA
+382,Meles meles polyomavirus 1,False,NC_026473.1,Polyomaviridae,dsDNA
+383,Menghai almendravirus,False,KX785335.1,Rhabdoviridae,ssRNA(-)
+384,Mermet orthobunyavirus,False,NC_043591.1 NC_043592.1 NC_043593.1,Peribunyaviridae,ssRNA(-)
+385,Microtus arvalis polyomavirus 1,False,NC_028119.1,Polyomaviridae,dsDNA
+386,Miniopterus africanus polyomavirus 1,False,NC_020069.1,Polyomaviridae,dsDNA
+387,Miniopterus associated gemycircularvirus 1,False,NC_038480.1,Genomoviridae,ssDNA(+/-)
+388,Miniopterus schreibersii polyomavirus 1,False,NC_034220.1,Polyomaviridae,dsDNA
+389,Miniopterus schreibersii polyomavirus 2,False,NC_034221.1,Polyomaviridae,dsDNA
+390,Mink circovirus,False,NC_023885.1,Circoviridae,ssDNA(+)
+392,Mischivirus D,False,KY512802.1,Picornaviridae,ssRNA(+)
+393,Molossus molossus polyomavirus 1,False,NC_028123.1,Polyomaviridae,dsDNA
+394,Mongoose associated gemycircularvirus 1,False,NC_026810.1,Genomoviridae,ssDNA(+/-)
+395,Mongoose associated gemykibivirus 1,False,NC_026808.1,Genomoviridae,ssDNA(+/-)
+396,Monodontid alphaherpesvirus 1,False,MF678601.1,Orthoherpesviridae,dsDNA
+397,Mosavirus B,False,KY855435.1,Picornaviridae,ssRNA(+)
+398,Mosquito X virus,False,JX403941.1 JX403942.1,Birnaviridae,dsRNA
+399,Mosquito associated circovirus 1,False,NC_040833.1,Circoviridae,ssDNA(+)
+400,Mosquito associated gemycircularvirus 1,False,NC_038481.1,Genomoviridae,ssDNA(+/-)
+401,Mossman narmovirus,False,NC_005339.1,Paramyxoviridae,ssRNA(-)
+402,Mouse associated cyclovirus 1,False,NC_031755.1,Circoviridae,ssDNA(+)
+403,Muarterivirus afrigant,False,NC_035127.1,Arteriviridae,ssRNA(+)
+404,Muir barhavirus,False,KM204990.1,Rhabdoviridae,ssRNA(-)
+405,Mukawa phlebovirus,False,NC_043510.1 NC_043509.1 NC_043511.1,Phenuiviridae,ssRNA(+/-)
+406,Mule deerpox virus,False,NC_006966.1,Poxviridae,dsDNA
+407,Mupapillomavirus 3,True,NC_038525.1,Papillomaviridae,ssDNA
+408,Mupivirus A,False,KY432924.1,Picornaviridae,ssRNA(+)
+409,Murid betaherpesvirus 3,False,NC_033620.1,Orthoherpesviridae,dsDNA
+410,Murid betaherpesvirus 8,False,NC_019559.2,Orthoherpesviridae,dsDNA
+411,Murid gammaherpesvirus 7,False,GQ169129.1,Orthoherpesviridae,dsDNA
+412,Murine mastadenovirus C,False,NC_012584.1,Adenoviridae,dsDNA
+413,Murmansk microtuspox virus,False,NC_035468.1,Poxviridae,dsDNA
+414,Murre uukuvirus,False,JF838330.1 JF838331.1 JF838332.1,Phenuiviridae,ssRNA(+/-)
+415,Mus musculus polyomavirus 3,False,MF175082.1,Polyomaviridae,dsDNA
+416,Myodes coronavirus 2JL14,False,NC_046954.1,Coronaviridae,ssRNA(+)
+417,Myodes glareolus polyomavirus 1,False,NC_028117.1,Polyomaviridae,dsDNA
+418,Myodes jeilongvirus,False,MG516455.1,Paramyxoviridae,ssRNA(-)
+419,Myodes narmovirus,False,MF943130.1,Paramyxoviridae,ssRNA(-)
+420,Myotis lucifugus polyomavirus 1,False,NC_011310.1,Polyomaviridae,dsDNA
+421,Myotis ricketti alphacoronavirus Sax-2011,False,NC_028811.1,Coronaviridae,ssRNA(+)
+422,NL63-related bat coronavirus strain BtKYNL63-9b,False,KY073745.1,Coronaviridae,ssRNA(+)
+423,Nacovirus A,False,NC_043516.1,Caliciviridae,ssRNA(+)
+424,Nariva narmovirus,False,NC_017937.1,Paramyxoviridae,ssRNA(-)
+425,Neoavian orthoreovirus,False,KF741756.1 KF741757.1 KF741758.1 KF741759.1 KF741760.1 KF741761.1 KF741762.1 KF741763.1 KF741764.1 KF741765.1,Spinareoviridae,dsRNA
+426,Nique phlebovirus,False,HM119425.1 HM119426.1 HM119427.1,Phenuiviridae,ssRNA(+/-)
+427,Ntepes phlebovirus,False,MF695812.1 MF695810.1 MF695811.1,Phenuiviridae,ssRNA(+/-)
+428,Nyctalus velutinus alphacoronavirus SC-2013,False,NC_028833.1,Coronaviridae,ssRNA(+)
+429,Oakvale sunrhavirus,False,NC_025399.1,Rhabdoviridae,ssRNA(-)
+430,Odrenisrou phlebovirus,False,HM566174.1 HM566173.1 HM566175.1,Phenuiviridae,ssRNA(+/-)
+431,Omegapapillomavirus 1,False,NC_010739.1,Papillomaviridae,ssDNA
+432,Orivirus A,False,NC_025432.1,Picornaviridae,ssRNA(+)
+433,Oriximina phlebovirus,False,HM119434.1 HM119435.1 HM119436.2,Phenuiviridae,ssRNA(+/-)
+434,Ostrich associated gemytondvirus 1,False,NC_025728.1,Genomoviridae,ssDNA(+/-)
+435,Otomops martiensseni polyomavirus 1,False,NC_020071.1,Polyomaviridae,dsDNA
+436,Otomops martiensseni polyomavirus 2,False,NC_020066.1,Polyomaviridae,dsDNA
+437,Ovine mastadenovirus C,False,MK518392.1,Adenoviridae,dsDNA
+438,Pacui pacuvirus,False,NC_043600.1 NC_043602.1 NC_043601.1,Peribunyaviridae,ssRNA(-)
+439,Pan troglodytes polyomavirus 1,False,NC_014743.1,Polyomaviridae,dsDNA
+440,Pan troglodytes polyomavirus 2,False,NC_025368.1,Polyomaviridae,dsDNA
+441,Pan troglodytes polyomavirus 3,False,NC_025370.1,Polyomaviridae,dsDNA
+442,Pan troglodytes polyomavirus 4,False,NC_019855.1,Polyomaviridae,dsDNA
+443,Pan troglodytes polyomavirus 5,False,NC_019856.1,Polyomaviridae,dsDNA
+444,Pan troglodytes polyomavirus 6,False,NC_019857.1,Polyomaviridae,dsDNA
+445,Pan troglodytes polyomavirus 7,False,NC_019858.1,Polyomaviridae,dsDNA
+446,Pan troglodytes polyomavirus 8,False,NC_028635.1,Polyomaviridae,dsDNA
+447,Panine alphaherpesvirus 3,False,NC_023677.1,Orthoherpesviridae,dsDNA
+448,Papiine betaherpesvirus 4,False,NC_027016.1,Orthoherpesviridae,dsDNA
+449,Papio cynocephalus polyomavirus 1,False,NC_025894.1,Polyomaviridae,dsDNA
+450,Papio cynocephalus polyomavirus 2,False,NC_025897.1,Polyomaviridae,dsDNA
+451,Parabovirus A,False,MF352412.1,Picornaviridae,ssRNA(+)
+452,Parabovirus B,False,KY432927.1,Picornaviridae,ssRNA(+)
+453,Parabovirus C,False,KY432933.1,Picornaviridae,ssRNA(+)
+454,Parechovirus E,False,NC_035779.1,Picornaviridae,ssRNA(+)
+455,Parrot hepatitis B virus,False,NC_016561.1,Hepadnaviridae,dsDNA-RT
+456,Passerivirus B,False,NC_036588.1,Picornaviridae,ssRNA(+)
+457,Peaton orthobunyavirus,False,NC_043550.1 NC_043551.1 NC_043549.1,Peribunyaviridae,ssRNA(-)
+458,Penguin siadenovirus A,False,NC_030116.1,Adenoviridae,dsDNA
+459,Penguinpox virus,False,NC_024446.1,Poxviridae,dsDNA
+460,Pestivirus F,False,NC_023176.1,Flaviviridae,ssRNA(+)
+461,Pestivirus G,False,NC_003678.1,Flaviviridae,ssRNA(+)
+462,Pestivirus J,False,NC_025677.1,Flaviviridae,ssRNA(+)
+463,Pestivirus K,False,NC_038964.1,Flaviviridae,ssRNA(+)
+464,Phipapillomavirus 1,False,NC_008032.1,Papillomaviridae,ssDNA
+465,Pigeon aviadenovirus A,False,NC_024474.1,Adenoviridae,dsDNA
+466,Pigeon aviadenovirus B,False,NC_031503.1,Adenoviridae,dsDNA
+467,Pigeon circovirus,False,NC_002361.1,Circoviridae,ssDNA(+)
+468,Pigeonpox virus,False,NC_024447.1,Poxviridae,dsDNA
+469,Piliocolobus badius polyomavirus 1,False,NC_039051.1,Polyomaviridae,dsDNA
+470,Piliocolobus rufomitratus polyomavirus 1,False,NC_019850.1,Polyomaviridae,dsDNA
+471,Pinniped copiparvovirus 1,False,NC_026251.1,Parvoviridae,ssDNA(+/-)
+473,Pipapillomavirus 2,False,NC_008519.1,Papillomaviridae,ssDNA
+474,Planalto mammarenavirus,False,NC_040763.1 NC_040762.1,Arenaviridae,ssRNA(+/-)
+475,Platyrrhini mastadenovirus A,False,NC_020487.1,Adenoviridae,dsDNA
+476,Poecivirus A,False,KU977108.1,Picornaviridae,ssRNA(+)
+477,Polar bear mastadenovirus A,False,NC_040811.1,Adenoviridae,dsDNA
+478,Pomona bat hepatitis B virus,False,NC_038503.1,Hepadnaviridae,dsDNA-RT
+479,Pongo abelii polyomavirus 1,False,NC_028127.1,Polyomaviridae,dsDNA
+480,Pongo pygmaeus polyomavirus 1,False,NC_013439.1,Polyomaviridae,dsDNA
+481,Porcine associated gemycircularvirus 1,False,NC_030145.1,Genomoviridae,ssDNA(+/-)
+482,Porcine associated gemycircularvirus 2,False,NC_025738.1,Genomoviridae,ssDNA(+/-)
+483,Porcine circovirus 3,False,NC_031753.1,Circoviridae,ssDNA(+)
+484,Potosi orthobunyavirus,False,NC_043646.1 NC_043645.1 NC_043647.1,Peribunyaviridae,ssRNA(-)
+485,Precarious Point uukuvirus,False,HM566181.1 HM566179.1 HM566180.1,Phenuiviridae,ssRNA(+/-)
+486,Primate bocaparvovirus 1,True,JQ923422.1,Parvoviridae,ssDNA(+/-)
+487,Primate loriparvovirus 1,False,NC_025891.1,Parvoviridae,ssDNA(+/-)
+488,Primate protoparvovirus 4,True,KJ495710.1,Parvoviridae,ssDNA(+/-)
+489,Procyon lotor polyomavirus 1,False,NC_023845.1,Polyomaviridae,dsDNA
+490,Procyon lotor polyomavirus 2,False,NC_034378.1,Polyomaviridae,dsDNA
+491,Prospect Hill orthohantavirus,False,NC_038939.1 NC_038940.1 NC_038938.1,Hantaviridae,ssRNA(-)
+492,Psipapillomavirus 1,False,NC_008298.1,Papillomaviridae,ssDNA
+493,Psipapillomavirus 2,False,NC_033740.1,Papillomaviridae,ssDNA
+494,Psipapillomavirus 3,False,NC_033745.1,Papillomaviridae,ssDNA
+495,Psittacid alphaherpesvirus 1,False,NC_005264.1,Orthoherpesviridae,dsDNA
+496,Psittacine atadenovirus A,False,NC_025962.1,Adenoviridae,dsDNA
+497,Psittacine aviadenovirus B,False,NC_039032.1,Adenoviridae,dsDNA
+498,Pteronotus davyi polyomavirus 1,False,NC_020070.1,Polyomaviridae,dsDNA
+499,Pteronotus parnellii polyomavirus 1,False,NC_028121.1,Polyomaviridae,dsDNA
+500,Pteropodid alphaherpesvirus 1,False,NC_024306.1,Orthoherpesviridae,dsDNA
+501,Pteropox virus,False,NC_030656.1,Poxviridae,dsDNA
+502,Pteropus associated gemycircularvirus 1,False,NC_038484.1,Genomoviridae,ssDNA(+/-)
+503,Pteropus associated gemycircularvirus 10,False,NC_038493.1,Genomoviridae,ssDNA(+/-)
+504,Pteropus associated gemycircularvirus 2,False,NC_038485.1,Genomoviridae,ssDNA(+/-)
+505,Pteropus associated gemycircularvirus 3,False,NC_038486.1,Genomoviridae,ssDNA(+/-)
+506,Pteropus associated gemycircularvirus 4,False,NC_038487.1,Genomoviridae,ssDNA(+/-)
+507,Pteropus associated gemycircularvirus 5,False,NC_038488.1,Genomoviridae,ssDNA(+/-)
+508,Pteropus associated gemycircularvirus 6,False,NC_038489.1,Genomoviridae,ssDNA(+/-)
+509,Pteropus associated gemycircularvirus 7,False,NC_038490.1,Genomoviridae,ssDNA(+/-)
+510,Pteropus associated gemycircularvirus 8,False,NC_038491.1,Genomoviridae,ssDNA(+/-)
+511,Pteropus associated gemycircularvirus 9,False,NC_038492.1,Genomoviridae,ssDNA(+/-)
+512,Pteropus associated gemygorvirus 1,False,NC_038495.1,Genomoviridae,ssDNA(+/-)
+513,Pteropus associated gemykibivirus 1,False,NC_038498.1,Genomoviridae,ssDNA(+/-)
+514,Pteropus associated gemykolovirus 1,False,NC_038501.1,Genomoviridae,ssDNA(+/-)
+515,Pteropus associated gemykolovirus 2,False,NC_038502.1,Genomoviridae,ssDNA(+/-)
+516,Pteropus vampyrus polyomavirus 1,False,NC_026767.1,Polyomaviridae,dsDNA
+517,Pygoscelis adeliae polyomavirus 1,False,NC_026141.2,Polyomaviridae,dsDNA
+518,Pyrrhula pyrrhula polyomavirus 1,False,NC_007923.1,Polyomaviridae,dsDNA
+519,Qalyub orthonairovirus,False,NC_034511.1 NC_034522.1 NC_034512.1,Nairoviridae,ssRNA(-)
+520,Rabbit associated gemykroznavirus 1,False,NC_025729.1,Genomoviridae,ssDNA(+/-)
+522,Rabovirus C,False,NC_040605.1,Picornaviridae,ssRNA(+)
+524,Raptor siadenovirus A,False,NC_015455.1,Adenoviridae,dsDNA
+525,Rat associated gemycircularvirus 1,False,NC_027821.1,Genomoviridae,ssDNA(+/-)
+526,Rattus norvegicus polyomavirus 1,False,NC_027531.1,Polyomaviridae,dsDNA
+527,Rattus norvegicus polyomavirus 2,False,KX574453.1,Polyomaviridae,dsDNA
+528,Raven circovirus,False,NC_008375.1,Circoviridae,ssDNA(+)
+529,Recovirus A,False,NC_043512.1,Caliciviridae,ssRNA(+)
+530,Rhinolophus associated gemykibivirus 1,False,NC_038499.1,Genomoviridae,ssDNA(+/-)
+531,Rhinolophus associated gemykibivirus 2,False,NC_038500.1,Genomoviridae,ssDNA(+/-)
+532,Rhinolophus ferrumequinum alphacoronavirus HuB-2013,False,NC_028814.1,Coronaviridae,ssRNA(+)
+533,Rhopapillomavirus 1,False,NC_006563.1,Papillomaviridae,ssDNA
+534,Rhopapillomavirus 2,False,NC_038526.1,Papillomaviridae,ssDNA
+535,Rio Chico almendravirus,False,NC_031958.1,Rhabdoviridae,ssRNA(-)
+536,Rio Preto da Eva pacuvirus,False,NC_043605.1 NC_043603.1 NC_043604.1,Peribunyaviridae,ssRNA(-)
+537,Rodent associated circovirus 1,False,KY370034.1,Circoviridae,ssDNA(+)
+538,Rodent associated circovirus 2,False,KY370042.1,Circoviridae,ssDNA(+)
+539,Rodent associated circovirus 3,False,KY370039.1,Circoviridae,ssDNA(+)
+540,Rodent associated circovirus 4,False,KY370029.1,Circoviridae,ssDNA(+)
+543,Rodent associated circovirus 7,False,MF497827.1,Circoviridae,ssDNA(+)
+546,Rodent bocaparvovirus 1,False,NC_029133.1,Parvoviridae,ssDNA(+/-)
+548,Rodent chaphamaparvovirus 1,False,NC_040843.1,Parvoviridae,ssDNA(+/-)
+551,Rohelivirus A,False,KX156153.1,Picornaviridae,ssRNA(+)
+552,Rosavirus B,False,NC_031105.1,Picornaviridae,ssRNA(+)
+553,Rosavirus C,False,KX783424.1,Picornaviridae,ssRNA(+)
+554,Rotavirus J,False,KX756624.1 KX756625.1 KX756627.1 KX756626.1 KX756619.1 KX756628.1 KX756621.1 KX756620.1 KX756629.1 KX756622.1 KX756623.1,Sedoreoviridae,dsRNA
+555,Roundleaf bat hepatitis B virus,False,NC_024443.1,Hepadnaviridae,dsDNA-RT
+556,Rous sarcoma virus,False,NC_001407.1,Retroviridae,ssRNA-RT
+557,Rousettus aegyptiacus polyomavirus 1,False,NC_034219.1,Polyomaviridae,dsDNA
+558,Rousettus bat coronavirus GCCDC1,False,NC_030886.1,Coronaviridae,ssRNA(+)
+559,Ryukyu mammarenavirus,False,NC_039010.1 NC_039009.1,Arenaviridae,ssRNA(+/-)
+560,Sabo orthobunyavirus,False,NC_043553.1 NC_043552.1 NC_043554.1,Peribunyaviridae,ssRNA(-)
+561,Saimiri boliviensis polyomavirus 1,False,NC_009951.1,Polyomaviridae,dsDNA
+562,Saimiri sciureus polyomavirus 1,False,NC_038559.1,Polyomaviridae,dsDNA
+563,Saimiriine betaherpesvirus 4,False,NC_016448.1,Orthoherpesviridae,dsDNA
+564,Saint Floris phlebovirus,False,JF920136.1 JF920137.1 JF920138.1,Phenuiviridae,ssRNA(+/-)
+565,Saint Valerien virus,False,NC_012699.1,Caliciviridae,ssRNA(+)
+566,Salem salemvirus,False,NC_025386.1,Paramyxoviridae,ssRNA(-)
+567,Salobo phlabovirus,False,HM627184.1 HM627183.1 HM627185.1,Phenuiviridae,ssRNA(+/-)
+568,San Angelo orthobunyavirus,False,NC_043637.1 NC_043638.1 NC_043636.1,Peribunyaviridae,ssRNA(-)
+569,Sango orthobunyavirus,False,NC_043556.1 NC_043555.1 NC_043557.1,Peribunyaviridae,ssRNA(-)
+570,Sawgrass sawgrhavirus,False,KM205013.1,Rhabdoviridae,ssRNA(-)
+571,Schmidt uukuvirus,False,HM566159.1 HM566160.1 HM566158.1,Phenuiviridae,ssRNA(+/-)
+572,Sea lion mastadenovirus A,False,NC_024150.1,Adenoviridae,dsDNA
+573,Sea otterpox virus,False,NC_037656.1,Poxviridae,dsDNA
+574,Serinus canaria polyomavirus 1,False,NC_017085.1,Polyomaviridae,dsDNA
+575,Serra do Navio orthobunyavirus,False,NC_043641.1 NC_043639.1 NC_043640.1,Peribunyaviridae,ssRNA(-)
+576,Sewage derived gemycircularvirus 1,False,NC_026164.1,Genomoviridae,ssDNA(+/-)
+577,Sewage derived gemycircularvirus 2,False,NC_026166.1,Genomoviridae,ssDNA(+/-)
+578,Sewage derived gemycircularvirus 3,False,NC_026162.1,Genomoviridae,ssDNA(+/-)
+579,Sewage derived gemycircularvirus 4,False,NC_038494.1,Genomoviridae,ssDNA(+/-)
+580,Sewage derived gemycircularvirus 5,False,NC_026165.1,Genomoviridae,ssDNA(+/-)
+581,Sewage derived gemygorvirus 1,False,NC_026161.1,Genomoviridae,ssDNA(+/-)
+582,Sewage derived gemykibivirus 1,False,NC_026168.1,Genomoviridae,ssDNA(+/-)
+583,Sewage derived gemykibivirus 2,False,NC_026167.1,Genomoviridae,ssDNA(+/-)
+584,Sewage derived gemykrogvirus 1,False,NC_026144.1,Genomoviridae,ssDNA(+/-)
+585,Sheep associated gemycircularvirus 1,False,NC_030144.1,Genomoviridae,ssDNA(+/-)
+586,Sicilian phlebovirus,True,NC_015412.1 NC_015411.1 NC_015413.1,Phenuiviridae,ssRNA(+/-)
+587,Sigmapapillomavirus 1,False,NC_006951.1,Papillomaviridae,ssDNA
+588,Silverwater uukuvirus,False,KM114257.1 KM114255.1 KM114256.1,Phenuiviridae,ssRNA(+/-)
+589,Simian mastadenovirus A,False,NC_006144.1,Adenoviridae,dsDNA
+590,Simian mastadenovirus B,False,NC_015225.1,Adenoviridae,dsDNA
+591,Simian mastadenovirus C,False,NC_021168.1,Adenoviridae,dsDNA
+592,Simian mastadenovirus D,False,NC_028103.1,Adenoviridae,dsDNA
+593,Simian mastadenovirus E,False,NC_028105.1,Adenoviridae,dsDNA
+594,Simian mastadenovirus F,False,NC_022266.1,Adenoviridae,dsDNA
+595,Simian mastadenovirus G,False,NC_020485.1,Adenoviridae,dsDNA
+596,Simian mastadenovirus H,False,NC_025678.1,Adenoviridae,dsDNA
+597,Simian mastadenovirus I,False,NC_032105.1,Adenoviridae,dsDNA
+598,Skua siadenovirus A,False,NC_016437.1,Adenoviridae,dsDNA
+599,Skunk mastadenovirus A,False,NC_027708.1,Adenoviridae,dsDNA
+600,Skunkpox virus,False,NC_031038.1,Poxviridae,dsDNA
+601,Snowshoe hare orthobunyavirus,False,EU203678.2 EU262553.1 EU294510.1,Peribunyaviridae,ssRNA(-)
+602,Sorex araneus coronavirus T14,False,NC_046955.1,Coronaviridae,ssRNA(+)
+603,Sorex araneus polyomavirus 1,False,MF374997.1,Polyomaviridae,dsDNA
+604,Sorex coronatus polyomavirus 1,False,MF374999.1,Polyomaviridae,dsDNA
+605,Sorex minutus polyomavirus 1,False,MF401583.1,Polyomaviridae,dsDNA
+606,Sororoca orthobunyavirus,False,NC_043570.1 NC_043571.1 NC_043572.1,Peribunyaviridae,ssRNA(-)
+607,Souris mammarenavirus,False,NC_039011.1 NC_039012.1,Arenaviridae,ssRNA(+/-)
+608,Spheniscid alphaherpesvirus 1,False,NC_033464.1,Orthoherpesviridae,dsDNA
+609,Spider monkey simian foamy virus,False,NC_039027.1,Retroviridae,ssRNA-RT
+610,Squirrel associated cyclovirus 1,False,NC_027530.1,Circoviridae,ssDNA(+)
+611,Squirrel mastadenovirus A,False,NC_035207.1,Adenoviridae,dsDNA
+612,Squirrel respirovirus,False,LS992584.1,Paramyxoviridae,ssRNA(-)
+613,Starling associated gemygorvirus 1,False,NC_025730.1,Genomoviridae,ssDNA(+/-)
+614,Starling circovirus,False,NC_008033.1,Circoviridae,ssDNA(+)
+615,Sturnira lilium polyomavirus 1,False,NC_038557.1,Polyomaviridae,dsDNA
+616,Sunguru sunrhavirus,False,NC_025401.1,Rhabdoviridae,ssRNA(-)
+617,Swan circovirus,False,NC_025247.1,Circoviridae,ssDNA(+)
+618,Tahyna orthobunyavirus,False,EU665255.1 EU622819.2 EU622820.2,Peribunyaviridae,ssRNA(-)
+619,Tai Forest hepatitis B virus,False,MK620908.1,Hepadnaviridae,dsDNA-RT
+620,Tailam jeilongvirus,False,NC_025355.1,Paramyxoviridae,ssRNA(-)
+621,Taiwan bat lyssavirus,False,MF472710.1,Rhabdoviridae,ssRNA(-)
+622,Tapirape pacuvirus,False,KM225260.1 KM225261.1 KM225262.1,Peribunyaviridae,ssRNA(-)
+623,Tataguine orthobunyavirus,False,NC_043607.1 NC_043608.1 NC_043606.1,Peribunyaviridae,ssRNA(-)
+624,Taupapillomavirus 1,False,NC_006564.1,Papillomaviridae,ssDNA
+625,Taupapillomavirus 2,False,NC_023852.1,Papillomaviridae,ssDNA
+626,Taupapillomavirus 3,False,NC_021472.1,Papillomaviridae,ssDNA
+627,Taupapillomavirus 4,False,NC_022253.1,Papillomaviridae,ssDNA
+628,Tensaw orthobunyavirus,False,NC_043546.1 NC_043548.1 NC_043547.1,Peribunyaviridae,ssRNA(-)
+629,Tent-making bat hepatitis B virus,False,NC_024445.1,Hepadnaviridae,dsDNA-RT
+630,Teschovirus B,False,MG875515.1,Picornaviridae,ssRNA(+)
+631,Thetapapillomavirus 1,False,NC_003973.1,Papillomaviridae,ssDNA
+632,Tick associated circovirus 1,False,NC_030199.1,Circoviridae,ssDNA(+)
+633,Tick associated circovirus 2,False,KX987146.1,Circoviridae,ssDNA(+)
+634,Tigray orthohantavirus,False,KU934008.1,Hantaviridae,ssRNA(-)
+635,Toros phlebovirus,False,NC_029903.1 NC_037614.1 NC_037615.1,Phenuiviridae,ssRNA(+/-)
+636,Torque teno canis virus,False,NC_014071.1,Anelloviridae,ssDNA(-)
+637,Torque teno douroucouli virus,False,NC_014087.1,Anelloviridae,ssDNA(-)
+638,Torque teno equus virus 1,False,NC_040668.1,Anelloviridae,ssDNA(-)
+639,Torque teno felis virus,False,NC_014072.1,Anelloviridae,ssDNA(-)
+640,Torque teno felis virus 2,False,NC_038349.1,Anelloviridae,ssDNA(-)
+641,Torque teno midi virus 1,True,NC_009225.1,Anelloviridae,ssDNA(-)
+642,Torque teno midi virus 10,True,NC_038357.1,Anelloviridae,ssDNA(-)
+643,Torque teno midi virus 11,True,NC_038358.1,Anelloviridae,ssDNA(-)
+644,Torque teno midi virus 12,True,NC_038359.1,Anelloviridae,ssDNA(-)
+645,Torque teno midi virus 13,True,NC_038360.1,Anelloviridae,ssDNA(-)
+646,Torque teno midi virus 14,True,NC_038361.1,Anelloviridae,ssDNA(-)
+647,Torque teno midi virus 15,False,NC_038362.1,Anelloviridae,ssDNA(-)
+648,Torque teno midi virus 2,True,NC_014093.1,Anelloviridae,ssDNA(-)
+649,Torque teno midi virus 3,True,NC_038350.1,Anelloviridae,ssDNA(-)
+650,Torque teno midi virus 4,True,NC_038351.1,Anelloviridae,ssDNA(-)
+651,Torque teno midi virus 5,True,NC_038352.1,Anelloviridae,ssDNA(-)
+652,Torque teno midi virus 6,True,NC_038353.1,Anelloviridae,ssDNA(-)
+653,Torque teno midi virus 7,True,NC_038354.1,Anelloviridae,ssDNA(-)
+654,Torque teno midi virus 8,True,NC_038355.1,Anelloviridae,ssDNA(-)
+655,Torque teno midi virus 9,True,NC_038356.1,Anelloviridae,ssDNA(-)
+656,Torque teno mini virus 1,True,NC_014097.1,Anelloviridae,ssDNA(-)
+657,Torque teno mini virus 10,True,NC_038345.1,Anelloviridae,ssDNA(-)
+658,Torque teno mini virus 11,True,NC_038346.1,Anelloviridae,ssDNA(-)
+659,Torque teno mini virus 12,True,NC_038347.1,Anelloviridae,ssDNA(-)
+660,Torque teno mini virus 2,True,NC_014086.1,Anelloviridae,ssDNA(-)
+661,Torque teno mini virus 3,True,NC_014088.1,Anelloviridae,ssDNA(-)
+662,Torque teno mini virus 4,False,NC_014090.1,Anelloviridae,ssDNA(-)
+663,Torque teno mini virus 5,True,NC_014089.1,Anelloviridae,ssDNA(-)
+664,Torque teno mini virus 6,True,NC_014095.1,Anelloviridae,ssDNA(-)
+665,Torque teno mini virus 7,True,NC_014082.1,Anelloviridae,ssDNA(-)
+666,Torque teno mini virus 8,True,NC_014068.1,Anelloviridae,ssDNA(-)
+667,Torque teno mini virus 9,True,NC_002195.1,Anelloviridae,ssDNA(-)
+668,Torque teno seal virus 1,False,NC_015212.1,Anelloviridae,ssDNA(-)
+669,Torque teno seal virus 2,False,NC_024891.1,Anelloviridae,ssDNA(-)
+670,Torque teno seal virus 3,False,NC_024890.1,Anelloviridae,ssDNA(-)
+671,Torque teno seal virus 4,False,NC_026138.1,Anelloviridae,ssDNA(-)
+672,Torque teno seal virus 8,False,KY246582.1,Anelloviridae,ssDNA(-)
+673,Torque teno seal virus 9,False,NC_035135.1,Anelloviridae,ssDNA(-)
+674,Torque teno sus virus 1a,False,NC_014070.1,Anelloviridae,ssDNA(-)
+675,Torque teno sus virus 1b,False,NC_027059.1,Anelloviridae,ssDNA(-)
+676,Torque teno sus virus k2a,False,NC_014092.2,Anelloviridae,ssDNA(-)
+677,Torque teno sus virus k2b,False,NC_038363.1,Anelloviridae,ssDNA(-)
+678,Torque teno tamarin virus,False,NC_014085.1,Anelloviridae,ssDNA(-)
+679,Torque teno tupaia virus,False,NC_038348.1,Anelloviridae,ssDNA(-)
+680,Torque teno virus 1,True,NC_002076.2,Anelloviridae,ssDNA(-)
+681,Torque teno virus 10,True,NC_014076.1,Anelloviridae,ssDNA(-)
+682,Torque teno virus 11,True,NC_038338.1,Anelloviridae,ssDNA(-)
+683,Torque teno virus 12,True,NC_014075.1,Anelloviridae,ssDNA(-)
+684,Torque teno virus 13,True,NC_038339.1,Anelloviridae,ssDNA(-)
+685,Torque teno virus 14,False,NC_014077.1,Anelloviridae,ssDNA(-)
+686,Torque teno virus 15,True,NC_014096.1,Anelloviridae,ssDNA(-)
+687,Torque teno virus 16,True,NC_014091.1,Anelloviridae,ssDNA(-)
+690,Torque teno virus 19,True,NC_014078.1,Anelloviridae,ssDNA(-)
+691,Torque teno virus 2,False,NC_014480.2,Anelloviridae,ssDNA(-)
+692,Torque teno virus 20,True,NC_038340.1,Anelloviridae,ssDNA(-)
+693,Torque teno virus 21,True,NC_038341.1,Anelloviridae,ssDNA(-)
+695,Torque teno virus 23,False,NC_038342.1,Anelloviridae,ssDNA(-)
+696,Torque teno virus 24,True,NC_038343.1,Anelloviridae,ssDNA(-)
+697,Torque teno virus 25,False,NC_014083.1,Anelloviridae,ssDNA(-)
+698,Torque teno virus 26,False,NC_014079.1,Anelloviridae,ssDNA(-)
+699,Torque teno virus 27,True,NC_014074.1,Anelloviridae,ssDNA(-)
+700,Torque teno virus 28,True,NC_014073.1,Anelloviridae,ssDNA(-)
+701,Torque teno virus 29,True,NC_038344.1,Anelloviridae,ssDNA(-)
+702,Torque teno virus 3,True,NC_014081.1,Anelloviridae,ssDNA(-)
+703,Torque teno virus 4,False,NC_014069.1,Anelloviridae,ssDNA(-)
+704,Torque teno virus 5,True,NC_038336.1,Anelloviridae,ssDNA(-)
+705,Torque teno virus 6,True,NC_014094.1,Anelloviridae,ssDNA(-)
+706,Torque teno virus 7,True,NC_014080.1,Anelloviridae,ssDNA(-)
+707,Torque teno virus 8,True,NC_014084.1,Anelloviridae,ssDNA(-)
+708,Torque teno virus 9,True,NC_038337.1,Anelloviridae,ssDNA(-)
+709,Torque teno zalophus virus 1,False,NC_012126.1,Anelloviridae,ssDNA(-)
+710,Tottorivirus A,False,LC113907.1,Picornaviridae,ssRNA(+)
+711,Treisdeltapapillomavirus 1,False,NC_038527.1,Papillomaviridae,ssDNA
+712,Treisepsilonpapillomavirus 1,False,NC_023894.1,Papillomaviridae,ssDNA
+713,Treisetapapillomavirus 1,False,NC_038531.1,Papillomaviridae,ssDNA
+714,Treisiotapapillomavirus 1,False,NC_039040.1,Papillomaviridae,ssDNA
+715,Treiskappapapillomavirus 1,False,NC_031756.1,Papillomaviridae,ssDNA
+716,Treisthetapapillomavirus 1,False,NC_039041.1,Papillomaviridae,ssDNA
+717,Treiszetapapillomavirus 1,False,NC_024300.1,Papillomaviridae,ssDNA
+718,Trivittatus orthobunyavirus,False,KR149249.1 KR149248.1 KR149247.1,Peribunyaviridae,ssRNA(-)
+719,Tupaia belangeri polyomavirus 1,False,MK443498.1,Polyomaviridae,dsDNA
+720,Tupaia narmovirus,False,NC_002199.1,Paramyxoviridae,ssRNA(-)
+721,Turkey aviadenovirus B,False,NC_014564.2,Adenoviridae,dsDNA
+722,Turkey aviadenovirus C,False,NC_022612.1,Adenoviridae,dsDNA
+723,Turkey aviadenovirus D,False,NC_022613.1,Adenoviridae,dsDNA
+724,Turkey siadenovirus A,False,NC_001958.1,Adenoviridae,dsDNA
+725,Turkeypox virus,False,NC_028238.1,Poxviridae,dsDNA
+726,Turuna phlebovirus,False,HM119431.1 HM119432.1 HM119433.1,Phenuiviridae,ssRNA(+/-)
+727,UR2 sarcoma virus,False,NC_001618.1,Retroviridae,ssRNA-RT
+728,Ungulate bocaparvovirus 7,False,KY640430.1,Parvoviridae,ssDNA(+/-)
+729,Ungulate bocaparvovirus 8,False,NC_035185.1,Parvoviridae,ssDNA(+/-)
+730,Ungulate copiparvovirus 3,False,MK091524.1,Parvoviridae,ssDNA(+/-)
+731,Ungulate copiparvovirus 4,False,KX384823.1,Parvoviridae,ssDNA(+/-)
+732,Ungulate copiparvovirus 5,False,NC_031959.2,Parvoviridae,ssDNA(+/-)
+733,Ungulate copiparvovirus 6,False,MG136722.1,Parvoviridae,ssDNA(+/-)
+734,Upsilonpapillomavirus 1,False,NC_011109.1,Papillomaviridae,ssDNA
+735,Upsilonpapillomavirus 2,False,NC_008184.1,Papillomaviridae,ssDNA
+736,Upsilonpapillomavirus 3,False,NC_018075.1,Papillomaviridae,ssDNA
+737,Uriurana phlebovirus,False,HM566189.1 HM566188.1 HM566190.1,Phenuiviridae,ssRNA(+/-)
+738,Usutu virus,False,NC_006551.1,Flaviviridae,ssRNA(+)
+739,Utinga orthobunyavirus,False,NC_043594.1 NC_043595.1 NC_043596.1,Peribunyaviridae,ssRNA(-)
+740,Vaprio ledantevirus,False,NC_043538.1,Rhabdoviridae,ssRNA(-)
+741,Vicugna pacos polyomavirus 1,False,NC_034251.1,Polyomaviridae,dsDNA
+742,Walkabout sunrhavirus,False,NC_028232.1,Rhabdoviridae,ssRNA(-)
+743,Western kangaroopox virus,False,MF467280.1,Poxviridae,dsDNA
+744,Witwatersrand orthobunyavirus,False,NC_043674.1 NC_043675.1 NC_043673.1,Peribunyaviridae,ssRNA(-)
+745,Wolkberg orthobunyavirus,False,NC_034633.1 NC_034631.1 NC_034632.1,Peribunyaviridae,ssRNA(-)
+746,Woolly monkey hepatitis B virus,False,NC_028129.1,Hepadnaviridae,dsDNA-RT
+747,Wuhan mosquito orthophasmavirus 1,False,NC_031307.1 NC_031308.1 NC_031310.1,Phasmaviridae,ssRNA(-)
+748,Wuhan mosquito orthophasmavirus 2,False,NC_031312.1 NC_031309.1 NC_031311.1,Phasmaviridae,ssRNA(-)
+749,Xapuri mammarenavirus,False,MG976578.1 MG976577.1,Arenaviridae,ssRNA(+/-)
+750,Xipapillomavirus 2,False,NC_028126.1,Papillomaviridae,ssDNA
+751,Xipapillomavirus 3,False,NC_021930.1,Papillomaviridae,ssDNA
+752,Xipapillomavirus 4,False,NC_030797.1,Papillomaviridae,ssDNA
+753,Xipapillomavirus 5,False,NC_039042.1,Papillomaviridae,ssDNA
+754,Yokapox virus,False,NC_015960.1,Poxviridae,dsDNA
+755,Zahedan zarhavirus,False,NC_040664.1,Rhabdoviridae,ssRNA(-)
+756,Zalophus californianus polyomavirus 1,False,NC_013796.1,Polyomaviridae,dsDNA
+757,Zebra finch circovirus,False,NC_026945.1,Circoviridae,ssDNA(+)

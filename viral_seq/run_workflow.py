@@ -578,7 +578,7 @@ if __name__ == "__main__":
         "n_jobs_cv": 1,
         "config": {
             "n_estimators": 2_000,
-            "n_jobs": n_jobs,
+            "n_jobs": 1,  # it's better to let ray handle parallelization
             "max_samples": tune.uniform(one_sample, 1.0),
             "min_samples_leaf": tune.uniform(
                 one_sample, np.min([1.0, 10 * one_sample])
@@ -610,7 +610,7 @@ if __name__ == "__main__":
                 **params,
             )
             default_score = classifier.cv_score(
-                params["model_utils"],
+                RandomForestClassifier,
                 X=X_train,
                 y=y_train,
                 random_state=random_state,

@@ -421,6 +421,7 @@ def optimize_model(
     debug=False,
     random_state=123,
     n_jobs_cv=1,
+    n_jobs=1,  # only used for default score
 ):
     if optimize == "yes":
         print(
@@ -435,6 +436,23 @@ def optimize_model(
             n_jobs_cv=n_jobs_cv,
             random_state=random_state,
         )
+        print("Checking default score...")
+        default_score = classifier.cv_score(
+            RandomForestClassifier,
+            X=X_train,
+            y=y_train,
+            random_state=random_state,
+            n_estimators=2_000,
+            n_jobs=n_jobs,
+        )
+        print("Score with default settings:", default_score)
+        res["targets"] = [default_score] + res["targets"]
+        if default_score > res["target"]:
+            print(
+                "Will use default settings since we weren't able to improve with optimization."
+            )
+            res["target"] = default_score
+            res["params"] = {}
         print("Saving results to", outfile)
         with open(outfile, "w") as f:
             json.dump(res, f)
@@ -607,20 +625,12 @@ if __name__ == "__main__":
                 debug=debug,
                 random_state=random_state,
                 name=name,
+                n_jobs=n_jobs,
                 **params,
             )
-            default_score = classifier.cv_score(
-                RandomForestClassifier,
-                X=X_train,
-                y=y_train,
-                random_state=random_state,
-                n_estimators=2_000,
-                n_jobs=n_jobs,
-            )
-            print("Score with default settings:", default_score)
             print("Time elapsed:", perf_counter() - t_start)
             best_params[name] = res["params"]
-            plotting_data[name] = [default_score] + res["targets"]
+            plotting_data[name] = res["targets"]
     if optimize == "yes" or optimize == "skip":
         optimization_plots(
             plotting_data, optimization_plot_source, optimization_plot_figure

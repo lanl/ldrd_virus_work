@@ -600,7 +600,13 @@ if __name__ == "__main__":
                 n_jobs=n_jobs,
                 **params,
             )
-            print("Time elapsed:", perf_counter() - t_start)
+            print(
+                "Hyperparameter optimization of",
+                name,
+                "took",
+                perf_counter() - t_start,
+                "s",
+            )
             best_params[name] = res["params"]
             plotting_data[name] = res["targets"]
     if optimize == "yes" or optimize == "skip":

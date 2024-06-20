@@ -9,22 +9,23 @@ from http.client import IncompleteRead
 from urllib.error import URLError
 import polars as pl
 import ast
-from pytest import approx
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from pathlib import Path
 from warnings import warn
+from numpy.testing import assert_equal, assert_allclose
 
 
 def validate_feature_table(file_name, idx, prefix):
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()
-    assert df.shape == table_info.iloc[idx][prefix + "_shape"]
+    assert_equal(df.shape, table_info.iloc[idx][prefix + "_shape"])
     # check if numeric sum of the entire table matches what was precalculated
-    assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
-        table_info.iloc[idx][prefix + "_sum"]
+    assert_allclose(
+        df.select_dtypes(["number"]).to_numpy().sum(),
+        table_info.iloc[idx][prefix + "_sum"],
     )
 
 
@@ -86,7 +87,9 @@ def build_cache(cache_checkpoint=3, debug=False):
                         [s for s in cached_accessions if s.startswith(this_stem)][0],
                     )
         # assert we don't have anything extra
-        assert len(accessions_train.union(accessions_test)) == len(cache_subdirectories)
+        assert_equal(
+            len(accessions_train.union(accessions_test)), len(cache_subdirectories)
+        )
 
     housekeeping_Trav = data.joinpath("Housekeeping_accessions.txt")
     file = housekeeping_Trav.absolute().as_posix()
@@ -141,14 +144,14 @@ def build_cache(cache_checkpoint=3, debug=False):
                     search_terms=[search_term], retmax=1, email=email
                 )
                 if len(results) > 0:
-                    assert len(results) == 1
+                    assert_equal(len(results), 1)
                     new_name = list(results)[0].split(".")[0]
                     print(accession, "was renamed as", new_name)
                     renamed_accessions[accession] = new_name
             for k, v in renamed_accessions.items():
                 missing_hk.remove(k)
                 extra_accessions.remove(v)
-            assert len(extra_accessions) == 0
+            assert_equal(len(extra_accessions), 0)
         if len(missing_hk) > 0:  # len could have changed
             # currently we don't expect to find everything
             print(
@@ -162,7 +165,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing_hk, file=f)
         # TODO: stricter assertion when we expect to find all accessions
         # assert we don't have anything extra
-        assert len(cached_accessions) + len(missing_hk) == len(accessions_hk)
+        assert_equal(len(cached_accessions) + len(missing_hk), len(accessions_hk))
 
     isg_Trav = data.joinpath("ISG_transcript_ids.txt")
     file = isg_Trav.absolute().as_posix()
@@ -203,10 +206,10 @@ def build_cache(cache_checkpoint=3, debug=False):
                 if match is not None:
                     cache_subdir_set.add(match.group(1))
         # there should only be one per directory, and they should be unique
-        assert len(cache_subdir_set) == len(cache_subdirectories)
+        assert_equal(len(cache_subdir_set), len(cache_subdirectories))
         missing = ensembl_ids.difference(cache_subdir_set)
         # assert there is nothing extra
-        assert len(missing) + len(cache_subdir_set) == len(ensembl_ids)
+        assert_equal(len(missing) + len(cache_subdir_set), len(ensembl_ids))
         if len(missing) > 0:
             print(
                 "Couldn't find",
@@ -345,13 +348,15 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
                 )
                 print("Achieved an OOB score (AUC) of", oob_score)
                 # RandomForestClassifier should perform well enough that we can trust its feature ranking
-                assert oob_score > 0.75
+                assert oob_score > 0.75, "oob_score: " + str(oob_score)
             keep_feats = sp.get_best_features(
                 rfc.feature_importances_, rfc.feature_names_in_
             )
             print("Selected", len(keep_feats), "features")
             if debug:
-                assert len(keep_feats) < 50_000
+                assert len(keep_feats) < 50_000, "len(keep_feats): " + str(
+                    len(keep_feats)
+                )
             X = X[keep_feats]
             print("Saving X_train to", table_loc_train_best)
             X.to_parquet(table_loc_train_best)

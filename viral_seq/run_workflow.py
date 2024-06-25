@@ -9,7 +9,6 @@ from http.client import IncompleteRead
 from urllib.error import URLError
 import polars as pl
 import ast
-from pytest import approx
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
@@ -21,11 +20,19 @@ from warnings import warn
 def validate_feature_table(file_name, idx, prefix):
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()
-    assert df.shape == table_info.iloc[idx][prefix + "_shape"]
-    # check if numeric sum of the entire table matches what was precalculated
-    assert df.select_dtypes(["number"]).to_numpy().sum() == approx(
-        table_info.iloc[idx][prefix + "_sum"]
-    )
+    expected_shape = table_info.iloc[idx][prefix + "_shape"]
+    if not np.array_equal(df.shape, expected_shape):
+        raise ValueError(
+            "Feature table shape does not match what was precalculated.\nActual: %s\nExpected: %s"
+            % (df.shape, expected_shape)
+        )
+    actual_sum = df.select_dtypes(["number"]).to_numpy().sum()
+    expected_sum = table_info.iloc[idx][prefix + "_sum"]
+    if not np.allclose(actual_sum, expected_sum):
+        raise ValueError(
+            "The feature table's numerical sum, which sums all feature values for all viruses, does not match what was precalculated. Verify integrity of input data and feature calculation.\nActual: %s\nExpected: %s"
+            % (actual_sum, expected_sum)
+        )
 
 
 def build_cache(cache_checkpoint=3, debug=False):
@@ -85,8 +92,12 @@ def build_cache(cache_checkpoint=3, debug=False):
                         "not in cache, but suitable accession present:",
                         [s for s in cached_accessions if s.startswith(this_stem)][0],
                     )
-        # assert we don't have anything extra
-        assert len(accessions_train.union(accessions_test)) == len(cache_subdirectories)
+        num_dir_expected = len(accessions_train.union(accessions_test))
+        num_dir_actual = len(cache_subdirectories)
+        assert num_dir_expected == num_dir_actual, (
+            "The number of directories in the cache differs from the number of accessions searched. There should only be one directory per accession.\nNumber of directories in cache: %s\nNumber of accessions searched: %s"
+            % (num_dir_actual, num_dir_expected)
+        )
 
     housekeeping_Trav = data.joinpath("Housekeeping_accessions.txt")
     file = housekeeping_Trav.absolute().as_posix()
@@ -141,14 +152,20 @@ def build_cache(cache_checkpoint=3, debug=False):
                     search_terms=[search_term], retmax=1, email=email
                 )
                 if len(results) > 0:
-                    assert len(results) == 1
+                    assert len(results) == 1, (
+                        "Expected search on accession %s to return only one replacement but received multiple results: %s"
+                        % (accession, results)
+                    )
                     new_name = list(results)[0].split(".")[0]
                     print(accession, "was renamed as", new_name)
                     renamed_accessions[accession] = new_name
             for k, v in renamed_accessions.items():
                 missing_hk.remove(k)
                 extra_accessions.remove(v)
-            assert len(extra_accessions) == 0
+            assert len(extra_accessions) == 0, (
+                "There are accessions in the cache beyond what was searched. These accessions should be removed: %s"
+                % extra_accessions
+            )
         if len(missing_hk) > 0:  # len could have changed
             # currently we don't expect to find everything
             print(
@@ -161,8 +178,10 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print("Missing accessions for human housekeeping genes", file=f)
                 print(missing_hk, file=f)
         # TODO: stricter assertion when we expect to find all accessions
-        # assert we don't have anything extra
-        assert len(cached_accessions) + len(missing_hk) == len(accessions_hk)
+        assert len(cached_accessions) + len(missing_hk) == len(accessions_hk), (
+            "The number of missing accessions (%s) plus the number of cached accessions (%s) doesn't match the number of accessions searched (%s). This is likely due to an error in how these values were counted."
+            % (len(missing_hk), len(cached_accessions), len(accessions_hk))
+        )
 
     isg_Trav = data.joinpath("ISG_transcript_ids.txt")
     file = isg_Trav.absolute().as_posix()
@@ -202,11 +221,15 @@ def build_cache(cache_checkpoint=3, debug=False):
                 match = prog.search(f.read())
                 if match is not None:
                     cache_subdir_set.add(match.group(1))
-        # there should only be one per directory, and they should be unique
-        assert len(cache_subdir_set) == len(cache_subdirectories)
+        assert len(cache_subdir_set) == len(cache_subdirectories), (
+            "Number of sequences linked to an Ensembl transcript does not match number of sequences in the cache. This is likely due to preexisting data in the cache. Clear the cache and try again.\nActual matches: %s\nExpected matches: %s"
+            % (len(cache_subdir_set), len(cache_subdirectories))
+        )
         missing = ensembl_ids.difference(cache_subdir_set)
-        # assert there is nothing extra
-        assert len(missing) + len(cache_subdir_set) == len(ensembl_ids)
+        assert len(missing) + len(cache_subdir_set) == len(ensembl_ids), (
+            "The number of missing Ensembl transcripts (%s) plus the number of cached transcripts (%s) doesn't match the number of transcripts searched (%s). This is likely due to an error in how these values were counted."
+            % (len(missing), len(cache_subdir_set), len(ensembl_ids))
+        )
         if len(missing) > 0:
             print(
                 "Couldn't find",
@@ -344,14 +367,19 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
                     rfc, X, y, roc_auc_score, n_jobs=n_jobs, scoring_on_pred=False
                 )
                 print("Achieved an OOB score (AUC) of", oob_score)
-                # RandomForestClassifier should perform well enough that we can trust its feature ranking
-                assert oob_score > 0.75
+                assert oob_score > 0.75, (
+                    "OOB score of RandomForestClassifier is too poor for feature ranking to be reliable.\nActual score: %s\nExpected score: > 0.75"
+                    % oob_score
+                )
             keep_feats = sp.get_best_features(
                 rfc.feature_importances_, rfc.feature_names_in_
             )
             print("Selected", len(keep_feats), "features")
             if debug:
-                assert len(keep_feats) < 50_000
+                assert len(keep_feats) < 50_000, (
+                    "Too many features selected by feature selection.\nAcutal: %s\nExpected: < 50_000"
+                    % len(keep_feats)
+                )
             X = X[keep_feats]
             print("Saving X_train to", table_loc_train_best)
             X.to_parquet(table_loc_train_best)

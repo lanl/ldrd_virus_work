@@ -28,7 +28,7 @@ def cv_score(
     model,
     X,
     y,
-    n_splits=5,
+    n_splits: int = 5,
     scoring: str = "roc_auc",
     n_jobs_cv: int = 1,
     **kwargs,  # classifier arguments

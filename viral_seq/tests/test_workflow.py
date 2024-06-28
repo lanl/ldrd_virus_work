@@ -12,9 +12,9 @@ import numpy as np
 def test_optimization_plotting(tmp_path):
     rng = np.random.default_rng(seed=2024)
     data = {
-        "Classifier1": [rng.uniform() for i in range(30)],
-        "Classifier2": [rng.uniform() for i in range(10)],
-        "Classifier3": [rng.uniform() for i in range(51)],
+        "Classifier1": rng.uniform(size=30),
+        "Classifier2": rng.uniform(size=10),
+        "Classifier3": rng.uniform(size=51),
     }
     workflow.optimization_plots(
         data,

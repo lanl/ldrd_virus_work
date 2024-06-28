@@ -21,6 +21,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from ray import tune
 from time import perf_counter
+import math
 
 matplotlib.use("Agg")
 
@@ -445,7 +446,7 @@ def optimize_model(
             n_estimators=2_000,
             n_jobs=n_jobs,
         )
-        print("Score with default settings:", default_score)
+        print("ROC AUC with default settings:", default_score)
         res["targets"] = [default_score] + res["targets"]
         if default_score > res["target"]:
             print(
@@ -587,7 +588,7 @@ if __name__ == "__main__":
     plotting_data: Dict[str, Any] = {}
     optimize_model_arguments: Dict[str, Any] = {}
     one_sample = 1.0 / X_train.shape[0]
-    sqrt_feature = np.sqrt(X_train.shape[1]) / X_train.shape[1]
+    sqrt_feature = math.sqrt(X_train.shape[1]) / X_train.shape[1]
     one_feature = 1.0 / X_train.shape[1]
     optimize_model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
         "model": RandomForestClassifier,

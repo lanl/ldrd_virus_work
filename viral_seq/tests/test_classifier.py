@@ -90,7 +90,6 @@ def test_get_hyperparameters(config, score, best_params):
         max_concurrent_trials=0,
     )
     assert res["target"] == pytest.approx(score)
-    print(res["params"])
     assert_array_equal(
         np.sort(list(res["params"].keys())), np.sort(list(best_params.keys()))
     )

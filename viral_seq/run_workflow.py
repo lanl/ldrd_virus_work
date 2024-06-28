@@ -1,6 +1,6 @@
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils
+from viral_seq.analysis import rfc_utils, classifier
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -15,6 +15,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from pathlib import Path
 from warnings import warn
+import json
+from typing import Dict, Any
+import matplotlib
+import matplotlib.pyplot as plt
+from ray import tune
+from time import perf_counter
+import math
+
+matplotlib.use("Agg")
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -401,6 +410,92 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     return X, y
 
 
+def optimize_model(
+    model,
+    X_train,
+    y_train,
+    outfile,
+    config,
+    num_samples,
+    optimize="skip",
+    name="Classifier",
+    debug=False,
+    random_state=123,
+    n_jobs_cv=1,
+    n_jobs=1,  # only used for default score
+):
+    if optimize == "yes":
+        print(
+            "Performing hyperparameter optimization with target AUC across 5 fold Cross Validation"
+        )
+        res = classifier.get_hyperparameters(
+            model=model,
+            config=config,
+            num_samples=num_samples,
+            X=X_train,
+            y=y_train,
+            n_jobs_cv=n_jobs_cv,
+            random_state=random_state,
+        )
+        print("Checking default score...")
+        default_score = classifier.cv_score(
+            RandomForestClassifier,
+            X=X_train,
+            y=y_train,
+            random_state=random_state,
+            n_estimators=2_000,
+            n_jobs=n_jobs,
+        )
+        print("ROC AUC with default settings:", default_score)
+        res["targets"] = [default_score] + res["targets"]
+        if default_score > res["target"]:
+            print(
+                "Will use default settings since we weren't able to improve with optimization."
+            )
+            res["target"] = default_score
+            res["params"] = {}
+        print("Saving results to", outfile)
+        with open(outfile, "w") as f:
+            json.dump(res, f)
+    elif optimize == "skip":
+        print("Loading previously saved parameters from", outfile)
+        with open(outfile, "r") as f:
+            res = json.load(f)
+    if debug:
+        print(
+            "Debug mode: asserting best score during hyperparameter search is sufficient"
+        )
+        assert res["target"] > 0.75, (
+            "ROC AUC achieved is too poor to accept hyperparameter optimization.\nActual score: %s\nExpected score: > 0.75"
+            % res["target"]
+        )
+
+    print("Hyperparameters that will be used:", res["params"])
+    return res
+
+
+def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str):
+    for name, targets in input_data.items():
+        target_max = np.maximum.accumulate(targets)
+        df = pd.DataFrame(target_max, columns=[name])
+        if Path(out_source).is_file():
+            old_df = pd.read_csv(out_source)
+            df = pd.concat([old_df.loc[:, list(old_df.columns != name)], df], axis=1)
+        print("Writing optimization plot data to", out_source)
+        df.to_csv(out_source, index=False)
+    print(
+        "Generating plot of optimization progress for classifiers and saving to",
+        out_fig,
+    )
+    fig, ax = plt.subplots(1, 1)
+    df.plot(ax=ax, alpha=0.6, marker="o")
+    ax.set_title("Maximum Optimization Target\nAUC over 5 folds")
+    ax.set_xlabel("Step")
+    ax.set_ylabel("AUC")
+    ax.legend(loc=4, fontsize=6)
+    fig.savefig(out_fig, dpi=300)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -441,6 +536,13 @@ if __name__ == "__main__":
         default=123,
         help="Random seed to use when needed in workflow.",
     )
+    parser.add_argument(
+        "-o",
+        "--optimize",
+        choices=["none", "skip", "yes"],
+        default="yes",
+        help="Option 'none' will not optimize hyperparameters and use mostly defaults, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -449,6 +551,7 @@ if __name__ == "__main__":
     feature_selection = args.feature_selection
     n_jobs = args.n_jobs
     random_state = args.random_state
+    optimize = args.optimize
 
     data = files("viral_seq.data")
     cache_viral = str(data / "cache_viral")
@@ -462,6 +565,10 @@ if __name__ == "__main__":
     table_locs = [table_loc_train, table_loc_test]
     table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+    hyperparams_rfc_file = str(data / "hyperparameters" / "params_rfc.json")
+    plots_loc = sp.init_cache("plots")[0]
+    optimization_plot_source = str(plots_loc / "optimization_plot.csv")
+    optimization_plot_figure = str(plots_loc / "optimization_plot.png")
     if debug:
         table_info = pd.read_csv(
             table_file,
@@ -481,3 +588,61 @@ if __name__ == "__main__":
         n_jobs=n_jobs,
         random_state=random_state,
     )
+    best_params: Dict[str, Any] = {}
+    plotting_data: Dict[str, Any] = {}
+    optimize_model_arguments: Dict[str, Any] = {}
+    one_sample = 1.0 / X_train.shape[0]
+    sqrt_feature = math.sqrt(X_train.shape[1]) / X_train.shape[1]
+    one_feature = 1.0 / X_train.shape[1]
+    optimize_model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
+        "model": RandomForestClassifier,
+        "outfile": hyperparams_rfc_file,
+        "num_samples": 3_000,
+        "n_jobs_cv": 1,
+        "config": {
+            "n_estimators": 2_000,
+            "n_jobs": 1,  # it's better to let ray handle parallelization
+            "max_samples": tune.uniform(one_sample, 1.0),
+            "min_samples_leaf": tune.uniform(
+                one_sample, np.min([1.0, 10 * one_sample])
+            ),
+            "min_samples_split": tune.uniform(
+                one_sample, np.min([1.0, 300 * one_sample])
+            ),
+            "max_features": tune.uniform(one_feature, np.min([1.0, 2 * sqrt_feature])),
+            "criterion": tune.choice(
+                ["gini", "log_loss"]
+            ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
+            "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
+            "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
+        },
+    }
+    for name, params in optimize_model_arguments.items():
+        if optimize == "none":
+            best_params[name] = {}
+        else:
+            print("===", name, "===")
+            t_start = perf_counter()
+            res = optimize_model(
+                X_train=X_train,
+                y_train=y_train,
+                optimize=optimize,
+                debug=debug,
+                random_state=random_state,
+                name=name,
+                n_jobs=n_jobs,
+                **params,
+            )
+            print(
+                "Hyperparameter optimization of",
+                name,
+                "took",
+                perf_counter() - t_start,
+                "s",
+            )
+            best_params[name] = res["params"]
+            plotting_data[name] = res["targets"]
+    if optimize == "yes" or optimize == "skip":
+        optimization_plots(
+            plotting_data, optimization_plot_source, optimization_plot_figure
+        )

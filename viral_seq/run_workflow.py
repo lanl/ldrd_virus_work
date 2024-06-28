@@ -465,7 +465,11 @@ def optimize_model(
         print(
             "Debug mode: asserting best score during hyperparameter search is sufficient"
         )
-        assert res["target"] > 0.75
+        assert res["target"] > 0.75, (
+            "ROC AUC achieved is too poor to accept hyperparameter optimization.\nActual score: %s\nExpected score: > 0.75"
+            % res["target"]
+        )
+
     print("Hyperparameters that will be used:", res["params"])
     return res
 

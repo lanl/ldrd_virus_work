@@ -14,3 +14,4 @@ https://doi.org/10.1016/j.chom.2010.09.004,JCPyV human polyomavirus,sialic_acid,
 https://doi.org/10.1016/j.celrep.2019.11.020,Zika virus,integrin,True,NC_012532.1,False,True,True
 https://doi.org/10.1007/s00705-005-0496-y,bovine parvovirus,sialic_acid,True,NC_001540.1,False,True,False
 https://doi.org/10.1007/s00705-015-2579-8,Human adenovirus type 5,integrin,True,AC_000008.1,True,True,True
+https://doi.org/10.1073%2Fpnas.77.10.5693,Sendai virus,sialic_acid,True,NC_001552.1,False,True,False

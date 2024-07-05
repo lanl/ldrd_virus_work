@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from ray import tune
 from time import perf_counter
 import math
+import tarfile
 
 matplotlib.use("Agg")
 
@@ -46,7 +47,11 @@ def validate_feature_table(file_name, idx, prefix):
 
 def build_cache(cache_checkpoint=3, debug=False):
     """Download and store all data needed for the workflow"""
-
+    if cache_checkpoint == "extract":
+        with tarfile.open(cache_file, "r") as tar:
+            tar.extractall(cache_extract_loc)
+        cache_checkpoint = 0
+    cache_checkpoint = int(cache_checkpoint)
     if cache_checkpoint > 0:
         print("Will pull down data to local cache")
 
@@ -166,11 +171,19 @@ def build_cache(cache_checkpoint=3, debug=False):
                         % (accession, results)
                     )
                     new_name = list(results)[0].split(".")[0]
-                    print(accession, "was renamed as", new_name)
                     renamed_accessions[accession] = new_name
             for k, v in renamed_accessions.items():
-                missing_hk.remove(k)
-                extra_accessions.remove(v)
+                if k != v:
+                    print(k, "was renamed as", v)
+                    extra_accessions.remove(v)
+                    missing_hk.remove(k)
+                else:
+                    warn(
+                        "The accession "
+                        + k
+                        + " can currently be found on NCBI but is not in the cache.",
+                        stacklevel=2,
+                    )
             assert len(extra_accessions) == 0, (
                 "There are accessions in the cache beyond what was searched. These accessions should be removed: %s"
                 % extra_accessions
@@ -501,10 +514,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c",
         "--cache",
-        type=int,
-        choices=range(4),
-        default=3,
-        help="Specify cache building checkpoint(0-3), typically 0 or 3: 0 skips building the cache, 3 builds the entire cache.",
+        choices=["extract"] + [str(i) for i in range(4)],
+        default="extract",
+        help="Use option 'extract' to extract pre-built cache from tarball. You can also build the cache at runtime by specifying a cache building checkpoint(0-3), typically 0 or 3: 0 skips building the cache, 3 builds the entire cache.",
     )
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument(
@@ -556,10 +568,13 @@ if __name__ == "__main__":
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
     test_file = str(data.joinpath("Mollentze_Holdout.csv"))
+    cache_file = str(data.joinpath("cache.tar.gz"))
     viral_files = [train_file, test_file]
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
 
     paths = []
+    paths.append(Path("data_external"))
+    cache_extract_loc = str(paths[-1])
     paths.append(Path("data_external/cache_viral"))
     cache_viral = str(paths[-1])
     paths.append(Path("data_external/cache_isg"))

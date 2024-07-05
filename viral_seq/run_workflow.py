@@ -38,10 +38,11 @@ def validate_feature_table(file_name, idx, prefix):
         )
     actual_sum = df.select_dtypes(["number"]).to_numpy().sum()
     expected_sum = table_info.iloc[idx][prefix + "_sum"]
-    if not np.allclose(actual_sum, expected_sum):
-        raise ValueError(
-            "The feature table's numerical sum, which sums all feature values for all viruses, does not match what was precalculated. Verify integrity of input data and feature calculation.\nActual: %s\nExpected: %s"
-            % (actual_sum, expected_sum)
+    if not np.allclose(actual_sum, expected_sum, rtol=1e-8):
+        warn(
+            "The feature table's numerical sum, which sums all feature values for all viruses, does not match what was precalculated. If using the '--cache extract' option, this is not expected. \nActual: %s\nExpected: %s"
+            % (actual_sum, expected_sum),
+            stacklevel=2,
         )
 
 

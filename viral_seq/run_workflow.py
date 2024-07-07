@@ -554,21 +554,36 @@ if __name__ == "__main__":
     optimize = args.optimize
 
     data = files("viral_seq.data")
-    cache_viral = str(data / "cache_viral")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
     test_file = str(data.joinpath("Mollentze_Holdout.csv"))
     viral_files = [train_file, test_file]
-    cache_isg = str(data / "cache_isg")
-    cache_hk = str(data / "cache_housekeeping")
-    table_loc_train = str(data / "tables" / "train")
-    table_loc_test = str(data / "tables" / "test")
-    table_locs = [table_loc_train, table_loc_test]
-    table_loc_train_best = str(data / "tables" / "train_best" / "X_train.parquet.gzip")
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
-    hyperparams_rfc_file = str(data / "hyperparameters" / "params_rfc.json")
-    plots_loc = sp.init_cache("plots")[0]
-    optimization_plot_source = str(plots_loc / "optimization_plot.csv")
-    optimization_plot_figure = str(plots_loc / "optimization_plot.png")
+
+    paths = []
+    paths.append(Path("data_external/cache_viral"))
+    cache_viral = str(paths[-1])
+    paths.append(Path("data_external/cache_isg"))
+    cache_isg = str(paths[-1])
+    paths.append(Path("data_external/cache_housekeeping"))
+    cache_hk = str(paths[-1])
+
+    paths.append(Path("data_calculated/tables/train"))
+    table_loc_train = str(paths[-1])
+    paths.append(Path("data_calculated/tables/test"))
+    table_loc_test = str(paths[-1])
+    table_locs = [table_loc_train, table_loc_test]
+    paths.append(Path("data_calculated/tables/train_best"))
+    table_loc_train_best = str(paths[-1] / "X_train.parquet.gzip")
+    paths.append(Path("data_calculated/hyperparameters"))
+    hyperparams_rfc_file = str(paths[-1] / "params_rfc.json")
+
+    paths.append(Path("plots"))
+    optimization_plot_source = str(paths[-1] / "optimization_plot.csv")
+    optimization_plot_figure = str(paths[-1] / "optimization_plot.png")
+
+    for path in paths:
+        path.mkdir(parents=True, exist_ok=True)
+
     if debug:
         table_info = pd.read_csv(
             table_file,

@@ -569,7 +569,7 @@ if __name__ == "__main__":
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
     test_file = str(data.joinpath("Mollentze_Holdout.csv"))
-    cache_file = str(data.joinpath("cache.tar.gz"))
+    cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
     viral_files = [train_file, test_file]
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
 

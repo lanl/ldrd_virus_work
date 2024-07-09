@@ -604,7 +604,7 @@ if __name__ == "__main__":
         table_info = pd.read_csv(
             table_file,
             sep="\t",
-            dtype={"Train_sum": np.float32, "Test_sum": np.float32},
+            dtype={"Train_sum": np.float64, "Test_sum": np.float64},
             converters={
                 "Train_shape": ast.literal_eval,
                 "Test_shape": ast.literal_eval,

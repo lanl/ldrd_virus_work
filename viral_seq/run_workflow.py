@@ -26,6 +26,38 @@ import tarfile
 
 matplotlib.use("Agg")
 
+data = files("viral_seq.data")
+train_file = str(data.joinpath("Mollentze_Training.csv"))
+test_file = str(data.joinpath("Mollentze_Holdout.csv"))
+cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
+viral_files = [train_file, test_file]
+table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+
+paths = []
+cache_extract_path = Path("data_external")
+extract_cookie = cache_extract_path / "CACHE_EXTRACTED_FROM_TARBALL"
+paths.append(cache_extract_path)
+paths.append(Path("data_external/cache_viral"))
+cache_viral = str(paths[-1])
+paths.append(Path("data_external/cache_isg"))
+cache_isg = str(paths[-1])
+paths.append(Path("data_external/cache_housekeeping"))
+cache_hk = str(paths[-1])
+
+paths.append(Path("data_calculated/tables/train"))
+table_loc_train = str(paths[-1])
+paths.append(Path("data_calculated/tables/test"))
+table_loc_test = str(paths[-1])
+table_locs = [table_loc_train, table_loc_test]
+paths.append(Path("data_calculated/tables/train_best"))
+table_loc_train_best = str(paths[-1] / "X_train.parquet.gzip")
+paths.append(Path("data_calculated/hyperparameters"))
+hyperparams_rfc_file = str(paths[-1] / "params_rfc.json")
+
+paths.append(Path("plots"))
+optimization_plot_source = str(paths[-1] / "optimization_plot.csv")
+optimization_plot_figure = str(paths[-1] / "optimization_plot.png")
+
 
 def validate_feature_table(file_name, idx, prefix):
     print("Validating", file_name)
@@ -579,38 +611,6 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs
     random_state = args.random_state
     optimize = args.optimize
-
-    data = files("viral_seq.data")
-    train_file = str(data.joinpath("Mollentze_Training.csv"))
-    test_file = str(data.joinpath("Mollentze_Holdout.csv"))
-    cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
-    viral_files = [train_file, test_file]
-    table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
-
-    paths = []
-    cache_extract_path = Path("data_external")
-    extract_cookie = cache_extract_path / "CACHE_EXTRACTED_FROM_TARBALL"
-    paths.append(cache_extract_path)
-    paths.append(Path("data_external/cache_viral"))
-    cache_viral = str(paths[-1])
-    paths.append(Path("data_external/cache_isg"))
-    cache_isg = str(paths[-1])
-    paths.append(Path("data_external/cache_housekeeping"))
-    cache_hk = str(paths[-1])
-
-    paths.append(Path("data_calculated/tables/train"))
-    table_loc_train = str(paths[-1])
-    paths.append(Path("data_calculated/tables/test"))
-    table_loc_test = str(paths[-1])
-    table_locs = [table_loc_train, table_loc_test]
-    paths.append(Path("data_calculated/tables/train_best"))
-    table_loc_train_best = str(paths[-1] / "X_train.parquet.gzip")
-    paths.append(Path("data_calculated/hyperparameters"))
-    hyperparams_rfc_file = str(paths[-1] / "params_rfc.json")
-
-    paths.append(Path("plots"))
-    optimization_plot_source = str(paths[-1] / "optimization_plot.csv")
-    optimization_plot_figure = str(paths[-1] / "optimization_plot.png")
 
     for path in paths:
         path.mkdir(parents=True, exist_ok=True)

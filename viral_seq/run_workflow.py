@@ -85,10 +85,9 @@ def build_cache(cache_checkpoint=3, debug=False):
         with open(extract_cookie, "w") as f:
             pass
         cache_checkpoint = 0
-    else:
-        extract_cookie.unlink(missing_ok=True)
     cache_checkpoint = int(cache_checkpoint)
     if cache_checkpoint > 0:
+        extract_cookie.unlink(missing_ok=True)
         print("Will pull down data to local cache")
 
     if debug:

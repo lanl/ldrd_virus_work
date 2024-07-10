@@ -524,21 +524,31 @@ def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str
     fig.savefig(out_fig, dpi=300)
 
 
-def get_test_features(table_loc_test, table_loc_test_saved, X_train):
+def get_test_features(X_train, debug=False):
+    print("Ensuring X_test has only the features in X_train...")
     if Path(table_loc_test_saved).exists():
         X_test = pl.read_parquet(table_loc_test_saved).to_pandas()
         y_test = pd.read_csv(test_file)["Human Host"]
         if set(X_test.columns) == set(X_train.columns):
+            print(
+                "Will use previously calculated X_test stored at", table_loc_test_saved
+            )
+            if debug:
+                validate_feature_table(table_loc_test_saved, 8, "Test")
             return X_test, y_test
         else:
             print(
                 table_loc_test_saved,
                 "already exists, but no longer matches train data. Will re-make.",
             )
+    print("Loading all feature tables for test...")
     test_files = tuple(glob(table_loc_test + "/*gzip"))
     X_test, y_test = sp.get_training_columns(table_filename=test_files)
-    X_test = sp.match_features(X_train)
+    X_test = sp.match_features(X_test, X_train)
+    print("Saving X_test to", table_loc_test_saved)
     X_test.to_parquet(table_loc_test_saved)
+    if debug:
+        validate_feature_table(table_loc_test_saved, 8, "Test")
     return X_test, y_test
 
 
@@ -626,7 +636,7 @@ if __name__ == "__main__":
     table_loc_test_saved = str(paths[-1] / "X_test.parquet.gzip")
     hyperparams_path = Path("data_calculated/hyperparameters")
     paths.append(hyperparams_path)
-    paths.append(Path("data_calcualted/predictions"))
+    paths.append(Path("data_calculated/predictions"))
     predictions_loc = str(paths[-1] / "model_predictions.csv")
     model_path = Path("data_calculated/trained_models")
     paths.append(model_path)
@@ -657,7 +667,7 @@ if __name__ == "__main__":
         n_jobs=n_jobs,
         random_state=random_state,
     )
-    X_test, y_test = get_test_features(table_loc_test, table_loc_test_saved, X_train)
+    X_test, y_test = get_test_features(X_train, debug=debug)
     best_params: Dict[str, Any] = {}
     plotting_data: Dict[str, Any] = {}
     model_arguments: Dict[str, Any] = {}

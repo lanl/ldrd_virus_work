@@ -594,3 +594,19 @@ def test_issue_15():
     )
     # prior to fix this will only return a row for HM119401.1; post fix a row for each is returned
     assert_frame_equal(df_feats, df_expected)
+
+
+def test_match_features():
+    rng = np.random.default_rng(123)
+    columns = list("ABCDEF")
+    X_match = pd.DataFrame(rng.integers(0, 10, (10, len(columns))), columns=columns)
+    for col in columns:
+        X_drop = X_match.drop(columns=[col])
+        X = sp.match_features(X_drop, X_match)
+        assert X.shape[1] > X_drop.shape[1]
+        assert X.shape == X_match.shape
+        npt.assert_array_equal(X.columns, X_match.columns)
+        X = sp.match_features(X_match, X_drop)
+        assert X.shape[1] < X_match.shape[1]
+        assert X.shape == X_drop.shape
+        npt.assert_array_equal(X.columns, X_drop.columns)

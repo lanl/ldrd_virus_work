@@ -3,7 +3,12 @@ See: https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/54
 
 The purpose of this module is to retarget the original Mollentze data
 from True/False on human infection to True/False on mammal and primate
-targets.
+targets. This module should also improve the human vs. no-human infection
+labels, since many records are manually inspected during the task of
+applying new host labels.
+
+This module should be executed in the repo root, but you'll need to
+manually provide the path to your local cache of the records.
 """
 
 import os
@@ -203,12 +208,27 @@ organism_dict = {
                  }
 
 
-def retarget(df):
-    y_human = np.empty(shape=(df.shape[0],), dtype=bool)
-    y_mammal = np.empty(shape=(df.shape[0],), dtype=bool)
-    y_primate = np.empty(shape=(df.shape[0],), dtype=bool)
-    for row in tqdm(df.itertuples(), desc="Retargeting Data"):
-        idx = row.Index
+def retarget(df, cache_path, n_records=None):
+    """
+    Parameters
+    ----------
+    df: pd.DataFrame of training or test data to be relabeled
+    cache_path: path to your local cache of the genbank files/records
+    n_records: integer number of records to be relabeled (allows
+               for partial relabeling, resulting in smaller return
+               y/target arrays)
+    Returns
+    -------
+    tuple of arrays with human, mammal, primate labels up to n_records:
+    y_human, y_mammal, y_primate
+    """
+    if n_records is None:
+        n_records = df.shape[0]
+    y_human = np.empty(shape=(n_records,), dtype=bool)
+    y_mammal = np.empty(shape=(n_records,), dtype=bool)
+    y_primate = np.empty(shape=(n_records,), dtype=bool)
+    idx = 0
+    for row in tqdm(df.iloc[:n_records, ...].itertuples(), desc="Retargeting Data"):
         if row._3: 
             # Human host is always mammal and primate
             y_human[idx] = True
@@ -255,11 +275,14 @@ def retarget(df):
                         host_found = True
             if not host_found:
                 raise ValueError(f"No host data found for {accession=} {organism=}")
+        idx += 1
     return y_human, y_mammal, y_primate
 
 def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
-    y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train)
+    y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
+                                                              cache_path=cache_path,
+                                                              n_records=215)
 
 
 
@@ -267,5 +290,7 @@ def main(cache_path):
 
 
 if __name__ == "__main__":
-    cache_path = "/Users/treddy/python_venvs/py_312_host_virus_bioinformatics/lib/python3.12/site-packages/viral_seq/data/cache_viral"
-    main(cache_path=cache_path)
+    # change this path to the location of your local
+    # cache:
+    local_cache_path = "/Users/treddy/python_venvs/py_312_host_virus_bioinformatics/lib/python3.12/site-packages/viral_seq/data/cache_viral"
+    main(cache_path=local_cache_path)

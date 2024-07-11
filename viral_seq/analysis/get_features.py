@@ -115,9 +115,7 @@ def get_genomic_features(records):
                     "".join(these_bridge_pairs), bridge_cnt_dict
                 )
     if len(codons) == 0:
-        print("No CDSs in features")
-        print("Exiting..")
-        return None
+        print("No CDSs in features for accession", record.id)
     all_pairs = split_seq(full_sequence, coding=False)[0]
     all_cnt_dict = get_cnt_dict(full_sequence)
     # get bias for each category

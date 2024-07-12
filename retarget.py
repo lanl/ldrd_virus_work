@@ -244,6 +244,39 @@ organism_dict = {
                 # https://ictv.global/report/chapter/picornaviridae/picornaviridae/anativirus
                 # https://www.genome.jp/virushostdb/2870379
                 "anativirus B1": "avian",
+                # https://en.wikipedia.org/wiki/Anhembi_orthobunyavirus
+                # https://www.genome.jp/virushostdb/273355
+                # The mouse host I buy, the primate seems to just be
+                # a citation for Vero cell line, which lacks interferon
+                "Anhembi virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/208491
+                # https://ictv.global/report_9th/dsDNA/Polyomaviridae
+                "Goose hemorrhagic polyomavirus": "avian",
+                # https://doi.org/10.3390/v14071471
+                # https://www.genome.jp/virushostdb/37325
+                "Muscovy duck parvovirus": "avian",
+                # https://www.genome.jp/virushostdb/50290
+                # https://en.wikipedia.org/wiki/Aotine_betaherpesvirus_1
+                "Aotine betaherpesvirus 1": "primate",
+                # https://www.genome.jp/virushostdb/1606497
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/betapolyomavirus
+                "Betapolyomavirus arplanirostris": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1606498
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/alphapolyomavirus
+                "Alphapolyomavirus secarplanirostris": "non_primate_mammals",
+                # https://ictv.global/report/chapter/polyomaviridae/taxonomy/polyomaviridae
+                # https://www.genome.jp/virushostdb/1606499
+                "Alphapolyomavirus tertarplanisrostris": "non_primate_mammals",
+                # https://doi.org/10.1099%2Fvir.0.048850-0
+                # propagated in Newborn mouse brain
+                "Arumowot virus": "non_primate_mammals",
+                # https://en.wikipedia.org/wiki/Asikkala_orthohantavirus
+                "Orthohantavirus asikkalaense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1236391
+                "Alphapolyomavirus apaniscus": "primate",
+                # https://www.genome.jp/virushostdb/133789
+                # https://doi.org/10.3389/fvets.2021.813397
+                "Budgerigar fledgling disease virus - 1": "avian",
                  }
 
 

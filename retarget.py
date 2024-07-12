@@ -209,6 +209,41 @@ organism_dict = {
                 "Orthopoxvirus Abatino": "human",
                 # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/alphapolyomavirus
                 "Bat polyomavirus 5b": "non_primate_mammals",
+                "Bat polyomavirus 6a": "non_primate_mammals",
+                # https://doi.org/10.1099%2Fvir.0.029389-0
+                # sandfly vector
+                # can't find evidence of animal infection data
+                "Aguacate virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2016447
+                # giant pandas?
+                "ailurivirus A1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2016463
+                "Giant panda polyomavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/11582
+                "Aino virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1725367
+                # claims that there is a primate host, but the citation
+                # doesn't seem to support it
+                "Alcube virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2847048
+                # I actually can't find evidence that this virus
+                # infects dogs, only the dog tick..
+                # information is confounded by a glut of sites/resources
+                # related to the tick itself
+                "American dog tick virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1642852
+                # can't find evidence of animal host
+                "Anadyr virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/104388
+                # https://en.wikipedia.org/wiki/Duck_plague
+                # this virus can propagate in Vero cells from a primate
+                # but I don't think I've counted cell culture for
+                # host range so far (should we?)
+                # https://doi.org/10.1016/j.biologicals.2021.02.003
+                "anatid alphaherpesvirus 1": "avian",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/anativirus
+                # https://www.genome.jp/virushostdb/2870379
+                "anativirus B1": "avian",
                  }
 
 

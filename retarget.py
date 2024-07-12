@@ -205,6 +205,10 @@ organism_dict = {
                 "Panine betaherpesvirus 2": "primate",
                 # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/alphapapillomavirus
                 "Alphapapillomavirus 12": "primate",
+                # https://doi.org/10.1111%2Fzph.12459
+                "Orthopoxvirus Abatino": "human",
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/alphapolyomavirus
+                "Bat polyomavirus 5b": "non_primate_mammals",
                  }
 
 
@@ -283,6 +287,10 @@ def main(cache_path):
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
                                                               n_records=215)
+    df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
+    y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
+                                                           cache_path=cache_path,
+                                                           n_records=200)
 
 
 

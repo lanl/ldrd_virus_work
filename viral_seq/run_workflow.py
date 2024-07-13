@@ -12,7 +12,7 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve
 from pathlib import Path
 from warnings import warn
 import json
@@ -751,6 +751,21 @@ if __name__ == "__main__":
         predictions[name] = clf.predict_proba(X_test)[..., 1]
         this_auc = roc_auc_score(y_test, predictions[name])
         print(name, "achieved ROC AUC", this_auc, "on test data.")
+        # Aaron's original preds
+        fpr_orig, tpr_orig, thresh_orig = roc_curve(y_test, predictions[name])
+
+        fig_roc, ax_roc = plt.subplots(1, 1)
+        ax_roc.plot(fpr_orig,
+                    tpr_orig,
+                    alpha=0.7,
+                    marker=".",
+                    label=f"RF original (AUC={this_auc:.2f})")
+        ax_roc.set_xlabel("False Positive Rate")
+        ax_roc.set_ylabel("True Positive Rate")
+        ax_roc.set_aspect("equal")
+        ax_roc.legend(loc=4)
+        fig_roc.savefig("plots/roc_plot.png", dpi=300)
+
     if optimize == "yes" or optimize == "skip":
         optimization_plots(
             plotting_data, optimization_plot_source, optimization_plot_figure

@@ -765,10 +765,22 @@ if __name__ == "__main__":
         relabeled_data = np.load("/Users/treddy/rough_work/LDRD_DR_host_virus/relabeled_data.npz")
         y_human_train_relabel = relabeled_data["y_human_train"]
         y_human_test_relabel = relabeled_data["y_human_test"]
+        y_mammal_train_relabel = relabeled_data["y_mammal_train"]
+        y_mammal_test_relabel = relabeled_data["y_mammal_test"]
+        y_primate_train_relabel = relabeled_data["y_primate_train"]
+        y_primate_test_relabel = relabeled_data["y_primate_test"]
         percent_disagree_human_labels_train = calc_percent_disagree(y_train[:y_human_train_relabel.size], y_human_train_relabel)
         percent_disagree_human_labels_test = calc_percent_disagree(y_test[:y_human_test_relabel.size], y_human_test_relabel)
         print(f"Train human label disagreement = {percent_disagree_human_labels_train:.1f} %")
         print(f"Test human label disagreement = {percent_disagree_human_labels_test:.1f} %")
+        percent_disagree_mammal_labels_train = calc_percent_disagree(y_train[:y_mammal_train_relabel.size], y_mammal_train_relabel)
+        percent_disagree_mammal_labels_test = calc_percent_disagree(y_test[:y_mammal_test_relabel.size], y_mammal_test_relabel)
+        print(f"Train mammal label disagreement = {percent_disagree_mammal_labels_train:.1f} %")
+        print(f"Test mammal label disagreement = {percent_disagree_mammal_labels_test:.1f} %")
+        percent_disagree_primate_labels_train = calc_percent_disagree(y_train[:y_primate_train_relabel.size], y_primate_train_relabel)
+        percent_disagree_primate_labels_test = calc_percent_disagree(y_test[:y_primate_test_relabel.size], y_primate_test_relabel)
+        print(f"Train primate label disagreement = {percent_disagree_primate_labels_train:.1f} %")
+        print(f"Test primate label disagreement = {percent_disagree_primate_labels_test:.1f} %")
         y_train[:y_human_train_relabel.size] = y_human_train_relabel
         y_test[:y_human_test_relabel.size] = y_human_test_relabel
         clf_human_relabel = val["model"](**val["predict"], **best_params[name])
@@ -779,8 +791,6 @@ if __name__ == "__main__":
         # once again predicting with the same hyperparameters, but
         # this time using mammal infection as the target from treddy_issue_54
         # initial data
-        y_mammal_train_relabel = relabeled_data["y_mammal_train"]
-        y_mammal_test_relabel = relabeled_data["y_mammal_test"]
         y_train[:y_mammal_train_relabel.size] = y_mammal_train_relabel
         y_test[:y_mammal_test_relabel.size] = y_mammal_test_relabel
         clf_mammal_relabel = val["model"](**val["predict"], **best_params[name])
@@ -789,8 +799,6 @@ if __name__ == "__main__":
         mammal_auc_relabel = roc_auc_score(y_test, predictions_mammal_relabel)
         fpr_mammal_relabel, tpr_mammal_relabel, thresh_mammal_relabel = roc_curve(y_test, predictions_mammal_relabel)
         # and similarly for primate target
-        y_primate_train_relabel = relabeled_data["y_primate_train"]
-        y_primate_test_relabel = relabeled_data["y_primate_test"]
         y_train[:y_primate_train_relabel.size] = y_primate_train_relabel
         y_test[:y_primate_test_relabel.size] = y_primate_test_relabel
         clf_primate_relabel = val["model"](**val["predict"], **best_params[name])

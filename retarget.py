@@ -277,6 +277,9 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/133789
                 # https://doi.org/10.3389/fvets.2021.813397
                 "Budgerigar fledgling disease virus - 1": "avian",
+                # https://en.wikipedia.org/wiki/Avian_coronavirus
+                # https://www.genome.jp/virushostdb/11120
+                "Infectious bronchitis virus Ind-TN92-03": "avian",
                  }
 
 
@@ -300,6 +303,7 @@ def retarget(df, cache_path, n_records=None):
     y_mammal = np.empty(shape=(n_records,), dtype=bool)
     y_primate = np.empty(shape=(n_records,), dtype=bool)
     idx = 0
+    metadata_missing_host = {}
     for row in tqdm(df.iloc[:n_records, ...].itertuples(), desc="Retargeting Data"):
         if row._3: 
             # Human host is always mammal and primate
@@ -316,6 +320,10 @@ def retarget(df, cache_path, n_records=None):
                 for record in SeqIO.parse(genbank_file, "genbank"):
                     if "organism" in record.annotations:
                         organism = record.annotations["organism"]
+                    # store some relevant metadata for host searching:
+                    for feature in record.features:
+                        if feature.type == "source":
+                            metadata_missing_host = feature.qualifiers
             if not host_found:
                 if organism in organism_dict:
                     if organism_dict[organism] == "human":
@@ -346,7 +354,8 @@ def retarget(df, cache_path, n_records=None):
                         y_primate[idx] = False
                         host_found = True
             if not host_found:
-                raise ValueError(f"No host data found for {accession=} {organism=}")
+                raise ValueError(f"No human host confirmed for {accession=} {organism=}\n"
+                                 f"{metadata_missing_host=}")
         idx += 1
     return y_human, y_mammal, y_primate
 

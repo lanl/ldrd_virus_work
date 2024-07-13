@@ -753,6 +753,20 @@ if __name__ == "__main__":
         print(name, "achieved ROC AUC", this_auc, "on test data.")
         # Aaron's original preds
         fpr_orig, tpr_orig, thresh_orig = roc_curve(y_test, predictions[name])
+        # now predict with same hyperparameters, but a model
+        # trained/tested on the partially relabeled target data
+        # from branch treddy_issue_54
+        relabeled_data = np.load("/Users/treddy/rough_work/LDRD_DR_host_virus/relabeled_data.npz")
+        y_human_train_relabel = relabeled_data["y_human_train"]
+        y_human_test_relabel = relabeled_data["y_human_test"]
+        y_train[:y_human_train_relabel.size] = y_human_train_relabel
+        y_test[:y_human_test_relabel.size] = y_human_test_relabel
+        clf_human_relabel = val["model"](**val["predict"], **best_params[name])
+        clf_human_relabel.fit(X_train, y_train)
+        predictions_human_relabel = clf_human_relabel.predict_proba(X_test)[..., 1]
+        human_auc_relabel = roc_auc_score(y_test, predictions_human_relabel)
+        fpr_human_relabel, tpr_human_relabel, thresh_human_relabel = roc_curve(y_test, predictions_human_relabel)
+
 
         fig_roc, ax_roc = plt.subplots(1, 1)
         ax_roc.plot(fpr_orig,
@@ -760,6 +774,11 @@ if __name__ == "__main__":
                     alpha=0.7,
                     marker=".",
                     label=f"RF original (AUC={this_auc:.2f})")
+        ax_roc.plot(fpr_human_relabel,
+                    tpr_human_relabel,
+                    alpha=0.7,
+                    marker=".",
+                    label=f"RF human relabel (AUC={human_auc_relabel:.2f})")
         ax_roc.set_xlabel("False Positive Rate")
         ax_roc.set_ylabel("True Positive Rate")
         ax_roc.set_aspect("equal")

@@ -28,6 +28,12 @@ import pickle
 matplotlib.use("Agg")
 
 
+def calc_percent_disagree(orig, new):
+    num_diff_positions = (orig != new).sum()
+    percent_diff = (num_diff_positions / orig.size) * 100.
+    return percent_diff
+
+
 def validate_feature_table(file_name, idx, prefix):
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()
@@ -759,6 +765,10 @@ if __name__ == "__main__":
         relabeled_data = np.load("/Users/treddy/rough_work/LDRD_DR_host_virus/relabeled_data.npz")
         y_human_train_relabel = relabeled_data["y_human_train"]
         y_human_test_relabel = relabeled_data["y_human_test"]
+        percent_disagree_human_labels_train = calc_percent_disagree(y_train[:y_human_train_relabel.size], y_human_train_relabel)
+        percent_disagree_human_labels_test = calc_percent_disagree(y_test[:y_human_test_relabel.size], y_human_test_relabel)
+        print(f"Train human label disagreement = {percent_disagree_human_labels_train:.1f} %")
+        print(f"Test human label disagreement = {percent_disagree_human_labels_test:.1f} %")
         y_train[:y_human_train_relabel.size] = y_human_train_relabel
         y_test[:y_human_test_relabel.size] = y_human_test_relabel
         clf_human_relabel = val["model"](**val["predict"], **best_params[name])

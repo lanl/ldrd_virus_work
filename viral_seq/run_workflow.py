@@ -776,6 +776,18 @@ if __name__ == "__main__":
         predictions_human_relabel = clf_human_relabel.predict_proba(X_test)[..., 1]
         human_auc_relabel = roc_auc_score(y_test, predictions_human_relabel)
         fpr_human_relabel, tpr_human_relabel, thresh_human_relabel = roc_curve(y_test, predictions_human_relabel)
+        # once again predicting with the same hyperparameters, but
+        # this time using mammal infection as the target from treddy_issue_54
+        # initial data
+        y_mammal_train_relabel = relabeled_data["y_mammal_train"]
+        y_mammal_test_relabel = relabeled_data["y_mammal_test"]
+        y_train[:y_mammal_train_relabel.size] = y_mammal_train_relabel
+        y_test[:y_mammal_test_relabel.size] = y_mammal_test_relabel
+        clf_mammal_relabel = val["model"](**val["predict"], **best_params[name])
+        clf_mammal_relabel.fit(X_train, y_train)
+        predictions_mammal_relabel = clf_mammal_relabel.predict_proba(X_test)[..., 1]
+        mammal_auc_relabel = roc_auc_score(y_test, predictions_mammal_relabel)
+        fpr_mammal_relabel, tpr_mammal_relabel, thresh_mammal_relabel = roc_curve(y_test, predictions_mammal_relabel)
 
 
         fig_roc, ax_roc = plt.subplots(1, 1)
@@ -789,6 +801,11 @@ if __name__ == "__main__":
                     alpha=0.7,
                     marker=".",
                     label=f"RF human relabel (AUC={human_auc_relabel:.2f})")
+        ax_roc.plot(fpr_mammal_relabel,
+                    tpr_mammal_relabel,
+                    alpha=0.7,
+                    marker=".",
+                    label=f"RF mammal relabel (AUC={mammal_auc_relabel:.2f})")
         ax_roc.set_xlabel("False Positive Rate")
         ax_roc.set_ylabel("True Positive Rate")
         ax_roc.set_aspect("equal")

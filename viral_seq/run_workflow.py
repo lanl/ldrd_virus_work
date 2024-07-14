@@ -1,3 +1,4 @@
+from collections import namedtuple
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import rfc_utils, classifier
@@ -12,7 +13,7 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.metrics import roc_auc_score, roc_curve, ConfusionMatrixDisplay
 from pathlib import Path
 from warnings import warn
 import json
@@ -26,6 +27,38 @@ import tarfile
 import pickle
 
 matplotlib.use("Agg")
+EER_Data = namedtuple("EER_Data", ["eer_threshold_index", "eer_threshold", "eer_value"])
+
+
+def plot_confusion_eer(fpr,
+                       tpr,
+                       thresh,
+                       pred_proba,
+                       y_test,
+                       estimator,
+                       figname):
+    fig, ax = plt.subplots(1, 1)
+    eer_data = cal_eer_thresh_and_val(fpr, tpr, thresh)
+    eer_thresh = eer_data.eer_threshold
+    preds = pred_proba > eer_thresh
+    ConfusionMatrixDisplay.from_predictions(y_test,
+                                            preds,
+                                            labels=estimator.classes_,
+                                            ax=ax)
+    fig.savefig(f"plots/{figname}", dpi=300)
+
+
+
+def cal_eer_thresh_and_val(fpr, tpr, threshold):
+    # see EER details: https://stackoverflow.com/a/46026962/2942522
+    fnr = 1 - tpr
+    threshold_index = np.nanargmin(np.absolute((fnr - fpr)))
+    eer_threshold = threshold[threshold_index]
+    eer_value = fpr[threshold_index]
+    eer_data = EER_Data(eer_threshold_index=threshold_index,
+                        eer_threshold=eer_threshold,
+                        eer_value=eer_value)
+    return eer_data
 
 
 def calc_percent_disagree(orig, new):
@@ -759,6 +792,14 @@ if __name__ == "__main__":
         print(name, "achieved ROC AUC", this_auc, "on test data.")
         # Aaron's original preds
         fpr_orig, tpr_orig, thresh_orig = roc_curve(y_test, predictions[name])
+        plot_confusion_eer(fpr_orig,
+                           tpr_orig,
+                           thresh_orig,
+                           predictions[name],
+                           y_test,
+                           clf,
+                           "original_confusion.png")
+
         # now predict with same hyperparameters, but a model
         # trained/tested on the partially relabeled target data
         # from branch treddy_issue_54
@@ -788,6 +829,13 @@ if __name__ == "__main__":
         predictions_human_relabel = clf_human_relabel.predict_proba(X_test)[..., 1]
         human_auc_relabel = roc_auc_score(y_test, predictions_human_relabel)
         fpr_human_relabel, tpr_human_relabel, thresh_human_relabel = roc_curve(y_test, predictions_human_relabel)
+        plot_confusion_eer(fpr_human_relabel,
+                           tpr_human_relabel,
+                           thresh_human_relabel,
+                           predictions_human_relabel,
+                           y_test,
+                           clf_human_relabel,
+                           "human_relabel_confusion.png")
         # once again predicting with the same hyperparameters, but
         # this time using mammal infection as the target from treddy_issue_54
         # initial data
@@ -798,6 +846,13 @@ if __name__ == "__main__":
         predictions_mammal_relabel = clf_mammal_relabel.predict_proba(X_test)[..., 1]
         mammal_auc_relabel = roc_auc_score(y_test, predictions_mammal_relabel)
         fpr_mammal_relabel, tpr_mammal_relabel, thresh_mammal_relabel = roc_curve(y_test, predictions_mammal_relabel)
+        plot_confusion_eer(fpr_mammal_relabel,
+                           tpr_mammal_relabel,
+                           thresh_mammal_relabel,
+                           predictions_mammal_relabel,
+                           y_test,
+                           clf_mammal_relabel,
+                           "mammal_relabel_confusion.png")
         # and similarly for primate target
         y_train[:y_primate_train_relabel.size] = y_primate_train_relabel
         y_test[:y_primate_test_relabel.size] = y_primate_test_relabel
@@ -806,6 +861,13 @@ if __name__ == "__main__":
         predictions_primate_relabel = clf_primate_relabel.predict_proba(X_test)[..., 1]
         primate_auc_relabel = roc_auc_score(y_test, predictions_primate_relabel)
         fpr_primate_relabel, tpr_primate_relabel, thresh_primate_relabel = roc_curve(y_test, predictions_primate_relabel)
+        plot_confusion_eer(fpr_primate_relabel,
+                           tpr_primate_relabel,
+                           thresh_primate_relabel,
+                           predictions_primate_relabel,
+                           y_test,
+                           clf_primate_relabel,
+                           "primate_relabel_confusion.png")
 
 
         fig_roc, ax_roc = plt.subplots(1, 1)
@@ -834,6 +896,7 @@ if __name__ == "__main__":
         ax_roc.set_aspect("equal")
         ax_roc.legend(loc=4)
         fig_roc.savefig("plots/roc_plot.png", dpi=300)
+
 
     if optimize == "yes" or optimize == "skip":
         optimization_plots(

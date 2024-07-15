@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from ray import tune
 from time import perf_counter
 import math
+import tarfile
 
 matplotlib.use("Agg")
 
@@ -37,21 +38,34 @@ def validate_feature_table(file_name, idx, prefix):
         )
     actual_sum = df.select_dtypes(["number"]).to_numpy().sum()
     expected_sum = table_info.iloc[idx][prefix + "_sum"]
-    if not np.allclose(actual_sum, expected_sum):
+    if not np.allclose(actual_sum, expected_sum, rtol=1e-8):
         raise ValueError(
             "The feature table's numerical sum, which sums all feature values for all viruses, does not match what was precalculated. Verify integrity of input data and feature calculation.\nActual: %s\nExpected: %s"
-            % (actual_sum, expected_sum)
+            % (actual_sum, expected_sum),
         )
 
 
 def build_cache(cache_checkpoint=3, debug=False):
     """Download and store all data needed for the workflow"""
-
+    if cache_checkpoint == "extract":
+        with tarfile.open(cache_file, "r") as tar:
+            tar.extractall(cache_extract_path)
+        with open(extract_cookie, "w") as f:
+            pass
+        cache_checkpoint = 0
+    cache_checkpoint = int(cache_checkpoint)
     if cache_checkpoint > 0:
+        extract_cookie.unlink(missing_ok=True)
         print("Will pull down data to local cache")
 
     if debug:
-        print("Debug mode: will run assertions on generated cache")
+        if extract_cookie.is_file():
+            print(
+                "Debug mode: cache extracted from file. Assertions on cache are unnecessary as it is expected files in cache may have diverged from those on NCBI. To generate cache using live data use option '--cache 3'"
+            )
+            debug = False
+        else:
+            print("Debug mode: will run assertions on generated cache")
 
     email = "arhall@lanl.gov"
 
@@ -166,11 +180,18 @@ def build_cache(cache_checkpoint=3, debug=False):
                         % (accession, results)
                     )
                     new_name = list(results)[0].split(".")[0]
-                    print(accession, "was renamed as", new_name)
                     renamed_accessions[accession] = new_name
             for k, v in renamed_accessions.items():
-                missing_hk.remove(k)
-                extra_accessions.remove(v)
+                if k != v:
+                    print(k, "was renamed as", v)
+                    extra_accessions.remove(v)
+                    missing_hk.remove(k)
+                else:
+                    raise ValueError(
+                        "The accession "
+                        + k
+                        + " can currently be found on NCBI but is not in the cache. Rebuild the cache with option --cache 2",
+                    )
             assert len(extra_accessions) == 0, (
                 "There are accessions in the cache beyond what was searched. These accessions should be removed: %s"
                 % extra_accessions
@@ -258,7 +279,13 @@ def build_tables(feature_checkpoint=0, debug=False):
         print("Will build feature tables for training models")
 
     if debug:
-        print("Debug mode: will run assertions on generated tables")
+        if extract_cookie.is_file():
+            print("Debug mode: will run assertions on generated tables")
+        else:
+            print(
+                "Debug mode: cache not extracted from file, table assertions cannot be enforced"
+            )
+            debug = False
 
     # tables are built in multiple parts as this is faster for reading/writing
     for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
@@ -396,7 +423,7 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
         print("Will use previously calculated X_train stored at", table_loc_train_best)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         y = pd.read_csv(train_file)["Human Host"]
-    if debug:
+    if debug and extract_cookie.is_file():
         # these might not exist if the workflow has only been run with --feature-selection none
         if Path(table_loc_train_best).is_file():
             validate_feature_table(table_loc_train_best, 8, "Train")
@@ -501,10 +528,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c",
         "--cache",
-        type=int,
-        choices=range(4),
-        default=3,
-        help="Specify cache building checkpoint(0-3), typically 0 or 3: 0 skips building the cache, 3 builds the entire cache.",
+        choices=["extract"] + [str(i) for i in range(4)],
+        default="extract",
+        help="Use option 'extract' to extract pre-built cache from tarball. You can also build the cache at runtime by specifying a cache building checkpoint(0-3), typically 0 or 3: 0 skips building the cache, 3 builds the entire cache.",
     )
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument(
@@ -556,10 +582,14 @@ if __name__ == "__main__":
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
     test_file = str(data.joinpath("Mollentze_Holdout.csv"))
+    cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
     viral_files = [train_file, test_file]
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
 
     paths = []
+    cache_extract_path = Path("data_external")
+    extract_cookie = cache_extract_path / "CACHE_EXTRACTED_FROM_TARBALL"
+    paths.append(cache_extract_path)
     paths.append(Path("data_external/cache_viral"))
     cache_viral = str(paths[-1])
     paths.append(Path("data_external/cache_isg"))
@@ -588,7 +618,7 @@ if __name__ == "__main__":
         table_info = pd.read_csv(
             table_file,
             sep="\t",
-            dtype={"Train_sum": np.float32, "Test_sum": np.float32},
+            dtype={"Train_sum": np.float64, "Test_sum": np.float64},
             converters={
                 "Train_shape": ast.literal_eval,
                 "Test_shape": ast.literal_eval,

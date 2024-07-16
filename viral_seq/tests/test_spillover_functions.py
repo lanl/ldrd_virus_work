@@ -572,3 +572,25 @@ def test_get_best_features_argument_guards(
 ):
     with pytest.raises(ValueError, match=match):
         sp.get_best_features(feature_importances, feature_names, percentile)
+
+
+def test_issue_15():
+    df = pd.DataFrame()
+    df["Unnamed: 0"] = [0, 1]
+    df["Species"] = ["No CDS Record", "Normal Record"]
+    df["Accessions"] = ["KU672593.1", "HM119401.1"]
+    cache_str = files("viral_seq.tests") / "cache_issue_15"
+    df_expected = pd.read_csv(
+        files("viral_seq.tests.expected") / "issue_15.csv", index_col=0
+    )
+    df_feats = sp.build_table(
+        df,
+        cache=cache_str,
+        save=False,
+        genomic=True,
+        gc=False,
+        kmers=False,
+        kmers_pc=False,
+    )
+    # prior to fix this will only return a row for HM119401.1; post fix a row for each is returned
+    assert_frame_equal(df_feats, df_expected)

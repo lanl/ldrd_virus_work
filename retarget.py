@@ -346,6 +346,26 @@ organism_dict = {
                 "Bat associated circovirus 9": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/795381
                 "Bat cyclovirus GF-4c": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1572239
+                "Bat circovirus POA/2012/VI": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987736
+                "Bat associated cyclovirus 11": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987737
+                "Bat associated cyclovirus 12": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987738
+                "Bat associated cyclovirus 13": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1795983
+                "Pacific flying fox associated cyclovirus-1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1795984
+                "Pacific flying fox associated cyclovirus-2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1795985
+                "Pacific flying fox associated cyclovirus-3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2050585
+                "Bat associated cyclovirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2050586
+                "Bat associated cyclovirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2050587
+                "Bat faeces associated cyclovirus 4": "non_primate_mammals",
                 }
 
 

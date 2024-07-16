@@ -280,7 +280,73 @@ organism_dict = {
                 # https://en.wikipedia.org/wiki/Avian_coronavirus
                 # https://www.genome.jp/virushostdb/11120
                 "Infectious bronchitis virus Ind-TN92-03": "avian",
-                 }
+                # the evidence for primate here is cell culture
+                # line: https://www.genome.jp/virushostdb/219704
+                # not strong enough I don't think
+                # https://doi.org/10.1128/jvi.77.12.6799-6810.2003
+                "Avian adeno-associated virus ATCC VR-865": "avian",
+                # this one also has primate label, but Vero cells
+                # is the evidence (and they lack some interferon activity..)
+                # https://www.genome.jp/virushostdb/1928005
+                "avian paramyxovirus 14": "avian",
+                # https://www.genome.jp/virushostdb/2560314
+                "avian paramyxovirus 20": "avian",
+                # https://www.genome.jp/virushostdb/11867
+                # https://ictv.global/report/chapter/retroviridae/retroviridae/alpharetrovirus
+                "Avian myelocytomatosis virus": "avian",
+                # https://doi.org/10.1016%2Fj.heliyon.2019.e03099
+                # https://www.genome.jp/virushostdb/2560322
+                "avian paramyxovirus 16": "avian",
+                # https://www.genome.jp/virushostdb/2094282
+                # not much available about 17 it seems
+                "Avian paramyxovirus 17": "avian",
+                # https://www.genome.jp/virushostdb/11878
+                # https://ictv.global/report/chapter/retroviridae/retroviridae/alpharetrovirus
+                "Avian sarcoma virus CT10": "avian",
+                # https://www.genome.jp/virushostdb/1634484
+                # https://doi.org/10.1093/ve/vew037
+                "Badger associated gemykibivirus 1": "non_primate_mammals",
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/barhavirus
+                # https://doi.org/10.1099/0022-1317-67-6-1081
+                "Bahia Grande virus": "human",
+                # https://www.genome.jp/virushostdb/1972684
+                # doesn't even grow in mammalian cell culture
+                # https://doi.org/10.4269%2Fajtmh.16-0403
+                "Almendravirus balsa": "no_mammals",
+                # https://en.wikipedia.org/wiki/Hibecovirus
+                # https://ictv.global/report/chapter/coronaviridae/coronaviridae/betacoronavirus
+                # https://www.genome.jp/virushostdb/1541205
+                "Bat Hp-betacoronavirus/Zhejiang2013": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1868218
+                "Bat associated circovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1329650
+                "Bat circovirus": "non_primate_mammals",
+                # https://ictv.global/report/chapter/circoviridae/circoviridae/circovirus
+                # https://www.genome.jp/virushostdb/3052133
+                "Circovirus siksparnis": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1868219
+                "Bat associated circovirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1868220
+                # https://ictv.global/report/chapter/circoviridae/circoviridae/circovirus
+                "Bat associated circovirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2003309
+                # https://ictv.global/report/chapter/circoviridae/circoviridae/circovirus
+                "Bat associated circovirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2003310
+                # https://ictv.global/report/chapter/circoviridae/circoviridae/circovirus
+                "Bat associated circovirus 5": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2003311
+                "Bat associated circovirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2003312
+                # https://ictv.global/report/chapter/circoviridae/circoviridae/circovirus
+                "Bat associated circovirus 7": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2003313
+                "Bat associated circovirus 8": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2169823
+                "Bat associated circovirus 9": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/795381
+                "Bat cyclovirus GF-4c": "non_primate_mammals",
+                }
 
 
 def retarget(df, cache_path, n_records=None):
@@ -367,7 +433,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=27)
+                                                           n_records=200)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

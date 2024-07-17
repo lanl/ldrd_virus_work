@@ -393,6 +393,17 @@ organism_dict = {
                 "Bat mastadenovirus WIV12": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1788435
                 "Bat mastadenovirus WIV13": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1986505
+                "Bat mastadenovirus WIV17": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2015376
+                "Bat mastadenovirus G": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2039267
+                "Eidolon helvum adenovirus": "non_primate_mammals",
+                # don't see much info on this one
+                "Egyptian fruit bat adenovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/740971
+                # https://ictv.global/report/chapter/adenoviridae/adenoviridae/mastadenovirus
+                "Bat mastadenovirus": "non_primate_mammals",
                 }
 
 

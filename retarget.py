@@ -366,6 +366,33 @@ organism_dict = {
                 "Bat associated cyclovirus 3": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2050587
                 "Bat faeces associated cyclovirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/942035
+                "Cyclovirus bat/USA/2009": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987731
+                "Bat associated cyclovirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987732
+                "Bat associated cyclovirus 7": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987733
+                "Bat associated cyclovirus 8": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987734
+                "Bat associated cyclovirus 9": "non_primate_mammals",
+                # the human/primate evidence cited at
+                # https://www.genome.jp/virushostdb/2758098
+                # appears to be just cell culture lines...
+                # https://en.wikipedia.org/wiki/Bat_mastadenovirus_A
+                "bat adenovirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/696069
+                # https://doi.org/10.1128%2FJVI.05974-11
+                # bats, maybe canines
+                "Bat adenovirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1788436
+                # again, the human/primate evidence is cell
+                # culture line only...
+                "Bat mastadenovirus WIV9": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1788434
+                "Bat mastadenovirus WIV12": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1788435
+                "Bat mastadenovirus WIV13": "non_primate_mammals",
                 }
 
 

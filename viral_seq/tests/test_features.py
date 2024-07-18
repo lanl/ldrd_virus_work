@@ -2,7 +2,9 @@ from viral_seq.analysis.get_features import get_genomic_features, get_kmers
 from viral_seq.analysis.spillover_predict import _append_recs
 import pandas as pd
 from pandas.testing import assert_frame_equal
+import os
 from importlib.resources import files
+from Bio import SeqIO
 import pytest
 
 
@@ -51,3 +53,12 @@ def test_features(accession, sep, file_name, calc_feats):
         rtol=1e-9,
         atol=1e-9,
     )
+
+
+def test_genomic_features_bad_cds():
+    # see: https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/15
+    data = files("viral_seq.tests") / "cache_issue_15"
+    data_path = os.path.join(data, "KU672593.1", "KU672593.1.genbank")
+    records = [SeqIO.read(data_path, "genbank")]
+    actual = get_genomic_features(records)
+    assert len(actual) == 16

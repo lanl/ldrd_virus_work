@@ -498,7 +498,7 @@ def optimize_model(
             % res["target"]
         )
 
-    print("Hyperparameters that will be used:", res["params"])
+    print("Hyperparameters that performed best:", res["params"])
     return res
 
 
@@ -741,7 +741,12 @@ if __name__ == "__main__":
         best_params[name] = {
             k: v for k, v in best_params[name].items() if k not in val["predict"]
         }
-        print("Will train model and run prediction on test for", name)
+        print(
+            "Will train model and run prediction on test for",
+            name,
+            "using the following parameters:",
+        )
+        print({**val["predict"], **best_params[name]})
         clf = val["model"](**val["predict"], **best_params[name])
         clf.fit(X_train, y_train)
         model_out = str(model_path / ("model_" + val["suffix"] + ".p"))

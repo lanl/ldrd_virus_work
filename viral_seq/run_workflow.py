@@ -525,6 +525,8 @@ def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str
 
 
 def get_test_features(X_train, debug=False):
+    if not extract_cookie.is_file():
+        debug = False
     print("Ensuring X_test has only the features in X_train...")
     if Path(table_loc_test_saved).exists():
         X_test = pl.read_parquet(table_loc_test_saved).to_pandas()

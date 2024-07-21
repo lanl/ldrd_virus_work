@@ -432,6 +432,39 @@ organism_dict = {
                 "Rodent arterivirus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/915424
                 "Macaca fascicularis papillomavirus 2": "primate",
+                # https://en.wikipedia.org/wiki/Bhanja_virus
+                "Bhanja virus": "human",
+                # https://www.genome.jp/virushostdb/273358
+                # tricky though because broader species can
+                # infect humans:
+                # https://ictv.global/faqs
+                # https://en.wikipedia.org/wiki/Bunyamwera_orthobunyavirus
+                # but I don't see enough evidence for Biraro animal
+                # infection yet...
+                "Birao virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1391037
+                "Black robin associated gemykibivirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1985371
+                "Blackbird associated gemycircularvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1391038
+                "Blackbird associated gemykibivirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1526521
+                # can't find evidence for animal infection
+                # ICTV says vertebate hosts not identified:
+                # https://ictv.global/report/chapter/phenuiviridae/phenuiviridae/ixovirus
+                "blacklegged tick virus 1": "no_mammals",
+                # https://en.wikipedia.org/wiki/Bombali_ebolavirus
+                # can infect human cells, but no compelling evidence
+                # of actual human infections yet; natural host
+                # seems to be bats
+                "Bombali virus": "non_primate_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/boosepivirus
+                # cattle and sheep; limited information
+                # https://doi.org/10.3390%2Fv16020307
+                "boosepivirus A1": "non_primate_mammals",
+                "boosepivirus B1": "non_primate_mammals",
+                # https://doi.org/10.3201%2Feid2505.181573
+                "Ovine picornavirus": "non_primate_mammals",
                 }
 
 

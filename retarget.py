@@ -404,6 +404,34 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/740971
                 # https://ictv.global/report/chapter/adenoviridae/adenoviridae/mastadenovirus
                 "Bat mastadenovirus": "non_primate_mammals",
+                # https://en.wikipedia.org/wiki/Batai_orthobunyavirus
+                # https://doi.org/10.3390%2Fv14091868
+                "Batai virus": "human",
+                # https://www.genome.jp/virushostdb/889389
+                "Calicivirus chicken/V0021/Bayern/2004": "avian",
+                # https://en.wikipedia.org/wiki/Psittacine_beak_and_feather_disease
+                "Beak and feather disease virus": "avian",
+                # https://doi.org/10.1128%2FgenomeA.01485-16
+                # not a natural infection of mouse though?
+                "Beatrice Hill virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1922524
+                "Beihai picobirna-like virus 7": "no_mammals",
+                # evidence for human infection appears to be
+                # from contaminated cell line:
+                # https://doi.org/10.1016/j.virol.2007.01.045
+                # rodent host seems more convincing
+                "Beilong virus": "non_primate_mammals",
+                # I don't usually count Vero cells as mammal/primate
+                # evidence; the mosquito source is clear though
+                "Bellavista virus": "no_mammals",
+                # https://ictv.global/report/chapter/arteriviridae/arteriviridae/betaarterivirus
+                # rodent evidence
+                "RtEi arterivirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1806636
+                # rodents
+                "Rodent arterivirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/915424
+                "Macaca fascicularis papillomavirus 2": "primate",
                 }
 
 

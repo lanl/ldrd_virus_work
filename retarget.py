@@ -465,6 +465,45 @@ organism_dict = {
                 "boosepivirus B1": "non_primate_mammals",
                 # https://doi.org/10.3201%2Feid2505.181573
                 "Ovine picornavirus": "non_primate_mammals",
+                # https://ictv.global/report/chapter/circoviridae/circoviridae/cyclovirus
+                # https://www.genome.jp/virushostdb/942032
+                "Cyclovirus PKbeef23/PAK/2009": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1843742
+                "Faeces associated gemycircularvirus 22": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2004486
+                "Bovine associated gemykibivirus 1": "non_primate_mammals",
+                # https://doi.org/10.1093/ve/vew037
+                # https://www.genome.jp/virushostdb/1516080
+                "HCBI9.212 virus": "non_primate_mammals",
+                # https://en.wikipedia.org/wiki/Bovine_gammaherpesvirus_6
+                # https://www.genome.jp/virushostdb/1504288
+                "Bovine gammaherpesvirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/273349
+                # https://ictv.global/report/chapter/peribunyaviridae/taxonomy/peribunyaviridae
+                "Bozo virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/667093
+                # https://doi.org/10.1016/j.virol.2009.11.048
+                "Broome reovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/206377
+                "Buenaventura virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/159140 suggests
+                # insect only, but the primary literature:
+                # https://doi.org/10.4269/ajtmh.1970.19.544
+                # clearly suggests rabbits as hosts
+                "Buttonwillow virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/629730
+                # I don't see much useful info; search is polluted
+                # by an unrelated plant virus
+                "Cacao virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/80935
+                # https://en.wikipedia.org/wiki/Cache_Valley_orthobunyavirus
+                # https://doi.org/10.1128%2FJCM.00252-13
+                "Cache Valley virus": "human",
+                # https://www.genome.jp/virushostdb/1138490
+                # https://ictv.global/report/chapter/peribunyaviridae/peribunyaviridae/orthobunyavirus
+                "Cachoeira Porteira virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3121209
+                "cadicivirus B1": "non_primate_mammals",
                 }
 
 

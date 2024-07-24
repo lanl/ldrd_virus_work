@@ -6,6 +6,7 @@ fonttools==4.40.0
 fsspec==2024.6.0
 joblib==1.2.0
 kiwisolver==1.4.4
+lightgbm==4.4.0
 markdown-it-py==3.0.0
 matplotlib==3.7.1
 mdurl==0.1.2

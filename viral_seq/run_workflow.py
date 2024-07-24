@@ -546,7 +546,7 @@ def get_test_features(X_train, debug=False):
     print("Loading all feature tables for test...")
     test_files = tuple(glob(table_loc_test + "/*gzip"))
     X_test, y_test = sp.get_training_columns(table_filename=test_files)
-    X_test = sp.match_features(X_test, X_train)
+    X_test = X_test.reindex(columns=X_train.columns, fill_value=0)
     print("Saving X_test to", table_loc_test_saved)
     X_test.to_parquet(table_loc_test_saved)
     if debug:
@@ -757,7 +757,7 @@ if __name__ == "__main__":
             pickle.dump(clf, f)
         predictions[name] = clf.predict_proba(X_test)[..., 1]
         this_auc = roc_auc_score(y_test, predictions[name])
-        print(name, "achieved ROC AUC", this_auc, "on test data.")
+        print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
     if optimize == "yes" or optimize == "skip":
         optimization_plots(
             plotting_data, optimization_plot_source, optimization_plot_figure

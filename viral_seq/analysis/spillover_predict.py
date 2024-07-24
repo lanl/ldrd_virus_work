@@ -761,13 +761,3 @@ def get_best_features(
     feature_names = feature_names[mask]
     idx = np.argsort(feature_importances)[::-1]
     return feature_names[idx]
-
-
-def match_features(X: pd.DataFrame, X_match: pd.DataFrame):
-    new_cols_needed = np.setdiff1d(X_match.columns, X.columns)
-    filler = np.full((X.shape[0], new_cols_needed.size), np.nan)
-    df = pd.DataFrame(data=filler, columns=new_cols_needed)
-    X = pd.concat((X, df), axis=1)
-    X = X[X_match.columns]
-    X.fillna(0, inplace=True)
-    return X

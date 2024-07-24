@@ -799,6 +799,13 @@ if __name__ == "__main__":
                            y_test,
                            clf,
                            "original_confusion.png")
+        eer_data_orig = cal_eer_thresh_and_val(fpr_orig,
+                                               tpr_orig,
+                                               thresh_orig)
+        test_hard_votes_orig = predictions[name] > eer_data_orig.eer_threshold
+        index_disagree = np.nonzero(test_hard_votes_orig != y_test)[0]
+        orig_test_raw = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
+        orig_test_raw.iloc[index_disagree, 1:].to_html("mislabeled_test.html")
 
         # now predict with same hyperparameters, but a model
         # trained/tested on the partially relabeled target data

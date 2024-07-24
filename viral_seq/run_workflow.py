@@ -23,6 +23,7 @@ from ray import tune
 from time import perf_counter
 import math
 import tarfile
+from lightgbm import LGBMClassifier
 
 matplotlib.use("Agg")
 
@@ -466,7 +467,7 @@ def optimize_model(
         )
         print("Checking default score...")
         default_score = classifier.cv_score(
-            RandomForestClassifier,
+            model,
             X=X_train,
             y=y_train,
             random_state=random_state,
@@ -717,6 +718,32 @@ if __name__ == "__main__":
         },
         "predict": {
             "n_estimators": 10_000,
+            "n_jobs": n_jobs,
+            "random_state": random_state,
+        },
+    }
+    model_arguments["LGBMClassifier Boost Seed:" + str(random_state)] = {
+        "model": LGBMClassifier,
+        "suffix": "lgbm",
+        "optimize": {
+            "num_samples": 2_000,
+            "n_jobs_cv": 1,
+            "config": {
+                "verbose": -1,
+                "force_col_wise": True,
+                "n_estimators": 500,
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "num_leaves": tune.randint(10, 100),
+                "learning_rate": tune.loguniform(1e-3, 0.01),
+                "subsample": tune.uniform(0.1, 1.0),
+                "subsample_freq": tune.randint(0, 10),
+                "max_depth": tune.randint(15, 100),
+                "min_child_samples": tune.randint(10, 200),
+                "colsample_bytree": tune.uniform(0.1, 1.0),
+            },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/lightgbm-tuning.html#lightgbm-tunable-hyperparameters
+        },
+        "predict": {
+            "verbose": 1,
             "n_jobs": n_jobs,
             "random_state": random_state,
         },

@@ -504,6 +504,33 @@ organism_dict = {
                 "Cachoeira Porteira virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/3121209
                 "cadicivirus B1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2572766
+                "Caimito virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/142661
+                "Canary circovirus": "avian",
+                # https://en.wikipedia.org/wiki/Canarypox
+                # https://www.genome.jp/virushostdb/44088
+                # can enter but not replicate in human cells?
+                "Canarypox virus": "avian",
+                # https://www.genome.jp/virushostdb/1843735
+                "Faeces associated gemycircularvirus 15": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1194757
+                # https://en.wikipedia.org/wiki/Canine_circovirus
+                # https://doi.org/10.1038/s41598-022-19815-z
+                "Canine circovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1980633
+                "Betapolyomavirus canis": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1529392
+                # https://doi.org/10.3389/fimmu.2020.01575
+                "Caprine parainfluenza virus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2163996
+                # https://doi.org/10.1371/journal.pone.0199200
+                "Capuchin monkey hepatitis B virus": "primate",
+                # https://www.genome.jp/virushostdb/1891718
+                "Alphapolyomavirus cardiodermae": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2870373
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/cardiovirus
+                "cardiovirus F1": "non_primate_mammals",
                 }
 
 

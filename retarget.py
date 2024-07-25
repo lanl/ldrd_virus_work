@@ -531,6 +531,40 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2870373
                 # https://ictv.global/report/chapter/picornaviridae/picornaviridae/cardiovirus
                 "cardiovirus F1": "non_primate_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/parechovirus
+                # Ljungan viruses appear to infect predominantly rodents (voles) and
+                # have been proposed to infect humans, however, conclusive data is awaited. 
+                # https://en.wikipedia.org/wiki/Parechovirus_B
+                # primary literature discussion suggests possible connection to human disease, but
+                # connection not strong enough yet and certainly not for this specific strain:
+                # https://doi.org/10.1099%2Fvir.0.007948-0
+                "Ljunganvirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985417
+                "Caribou associated gemykrogvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1513315
+                # https://ictv.global/report/chapter/parvoviridae/parvoviridae/amdoparvovirus
+                # https://doi.org/10.3201%2Feid2012.140289
+                "Raccoon dog amdovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1908805
+                "Amdoparvovirus sp.": "non_primate_mammals",
+                # https://en.wikipedia.org/wiki/Carnivore_bocaparvovirus_1
+                # https://www.genome.jp/virushostdb/1511885
+                "Canine bocavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1174530
+                "Feline bocavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1882382
+                "Sea otter parvovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2758138
+                "bat polyomavirus 4b": "non_primate_mammals",
+                # https://doi.org/10.4103%2Fijmr.IJMR_1195_18
+                # humans seem likely based on incidental reports
+                # but not enough for me to be sure...
+                # swine hosts in China seem confirmed
+                "Cat Que virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1236392
+                "Betapolyomavirus calbifrons": "primate",
+                # https://www.genome.jp/virushostdb/1236395
+                "Betapolyomavirus cercopitheci": "primate",
                 }
 
 

@@ -1,3 +1,5 @@
 Citation_for_receptor,Virus_Name,Receptor_Type,Whole_Genome,Accessions,Human_Host,Mammal_Host,Primate_Host
 https://doi.org/10.1016/S0092-8674(01)00231-8,type_1_reovirus,IgSF,True,MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1,False,True,False
 https://doi.org/10.1128/jvi.80.9.4482-4490.2006,feline calicivirus,IgSF,True,NC_075569.1,False,True,False
+https://doi.org/10.1016/0092-8674(89)90688-0,human rhinovirus,IgSF,True,MT157224.1,True,True,True
+https://doi.org/10.1128/jvi.72.9.7181-7190.1998,rabies virus,IgSF,True,NC_001542.1,True,True,True

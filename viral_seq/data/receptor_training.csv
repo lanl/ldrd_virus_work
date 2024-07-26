@@ -32,7 +32,7 @@ https://doi.org/10.1038/s44298-023-00001-5,Human adenovirus species D,sialic_aci
 https://doi.org/10.1128%2FJVI.03275-13,Coxsackievirus A9 (CVA9),integrin,False,OQ842435.1,True,True,True
 https://doi.org/10.3390/v13020262,Human rubulavirus 2,sialic_acid,True,NC_003443.1,True,True,True
 https://doi.org/10.1128%2FJVI.03275-13,Echovirus 1 (EV1),integrin,True,NC_001472.1,True,True,True
-https://doi.org/10.1073/pnas.85.12.452,Bovine coronavirus,sialic_acid,True,NC_003045.1,False,True,False
+https://doi.org/10.1073/pnas.85.12.4526,Bovine coronavirus,sialic_acid,True,NC_003045.1,False,True,False
 https://doi.org/10.1006/bbrc.2001.4838,Human Papillomavirus type 16 (HPV),integrin,True,NC_001526.4,True,True,True
 https://doi.org/10.1093/emboj/cdg439,Murine polyomavirus strain BG,sialic_acid,True,NC_001515.2,False,True,False
 https://doi.org/10.3390/v10040156,Simian varicella virus,integrin,True,NC_002686.2,False,True,True
@@ -47,12 +47,12 @@ https://doi.org/10.1128/jvi.06860-11,Vaccinia virus,integrin,True,NC_006998.1,Tr
 https://doi.org/10.1128/jvi.75.2.844-849.2001,Transmissible gastroenteritis virus (TGEV),sialic_acid,True,NC_038861.1,False,True,True
 https://journals.asm.org/doi/full/10.1128/jvi.01819-19,Rabies virus (RABV),integrin,True,NC_001542.1,True,True,True
 https://doi.org/10.1007/s10719-006-5438-8,Porcine torovirus,sialic_acid,True,NC_022787.1,False,True,False
-https://doi.org/10.3390/v14010018,Usutu virus,integrin,True,NC_006551.1,True,True,True
+https://doi.org/10.1182/blood-2003-05-1522,Human parvovirus B19,integrin,True,NC_000883.2,True,True,True
 https://doi.org/10.1016/B978-0-12-803109-4.00017-9,Goat torovirus,sialic_acid,True,NC_034976.1,False,True,False
-https://doi.org/10.3390/v14010018,Langat virus,integrin,True,NC_003690.1,True,True,True
+https://doi.org/10.1128/jvi.00843-06,Adeno-Associated Virus (AAV),integrin,True,NC_040671.1,True,True,True
 https://doi.org/10.1007/BF01313892,Mengovirus,sialic_acid,False,KX231802.1,True,True,True
 https://doi.org/10.1371/journal.pone.0110911,Classical swine fever virus (CSF),integrin,True,NC_002657.1,False,True,False
-https://doi.org/10.1007/3-540-30773-7_1,Nelson Bay orthoreovirus,sialic_acid,True,JF342668.1  JF342666.1  JF342667.1  JF342669.1  JF342670.1  JF342671.1  AY357730.1  AY357731.1  AY357732.1  AY357733.1,True,True,True
+https://doi.org/10.1074/jbc.270.3.1308,Encephalomyocarditis virus (Cardiovirus A),sialic_acid,True,NC_001479.1,True,True,True
 https://doi.org/10.4049/jimmunol.171.6.2804,Murine lymphocytic choriomeningitis virus,integrin,False,KY514256.1,False,True,False
 https://doi.org/10.1016/j.virusres.2016.05.031,Porcine epidemic diarrhea virus,sialic_acid,True,NC_003436.1,False,True,False
 https://doi.org/10.1002/jcb.24037,Dengue virus type 2,integrin,True,NC_001474.2,True,True,True

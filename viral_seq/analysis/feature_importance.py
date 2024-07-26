@@ -76,8 +76,8 @@ def plot_feat_import(
     sorted_feature_importances: npt.NDArray[np.float64],
     sorted_feature_names: npt.NDArray,
     top_feat_count: int,
-    model_name: Optional[str] = "",
-    fig_name_stem: Optional[str] = "feat_imp",
+    model_name: str = "",
+    fig_name_stem: str = "feat_imp",
 ):
     fig_name = fig_name_stem + ".png"
     fig_source = fig_name_stem + ".csv"

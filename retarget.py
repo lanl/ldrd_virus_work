@@ -565,6 +565,29 @@ organism_dict = {
                 "Betapolyomavirus calbifrons": "primate",
                 # https://www.genome.jp/virushostdb/1236395
                 "Betapolyomavirus cercopitheci": "primate",
+                # https://doi.org/10.1128/genomea.01081-15
+                # https://www.genome.jp/virushostdb/1699094
+                "Poecile atricapillus GI tract-associated gemycircularvirus": "avian",
+                # https://www.genome.jp/virushostdb/12618
+                # https://en.wikipedia.org/wiki/Chicken_anemia_virus
+                "Chicken anemia virus": "avian",
+                # https://www.genome.jp/virushostdb/942036
+                "Cyclovirus NGchicken8/NGA/2009": "avian",
+                # https://www.genome.jp/virushostdb/2109365
+                "Chicken associated cyclovirus 2": "avian",
+                # https://www.genome.jp/virushostdb/1843740
+                "Faeces associated gemycircularvirus 20": "avian",
+                # https://www.genome.jp/virushostdb/1843737
+                "Faeces associated gemycircularvirus 17": "avian",
+                # https://www.genome.jp/virushostdb/743290
+                "Chimpanzee stool avian-like circovirus Chimp17": "primate",
+                # https://www.genome.jp/virushostdb/742920
+                "Cyclovirus Chimp11": "primate",
+                # https://www.genome.jp/virushostdb/1590370
+                "Betacoronavirus HKU24": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2849741
+                # https://doi.org/10.1073/pnas.1908072116
+                "Asian grey shrew hepatitis B virus": "non_primate_mammals",
                 }
 
 

@@ -588,6 +588,32 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2849741
                 # https://doi.org/10.1073/pnas.1908072116
                 "Asian grey shrew hepatitis B virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/360397
+                "Canis familiaris papillomavirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/464980
+                "Canis familiaris papillomavirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1081055
+                "Canis familiaris papillomavirus 8": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1131485
+                # https://doi.org/10.1186/s12985-021-01677-y
+                "Artibeus jamaicensis parvovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1891719
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/alphapolyomavirus
+                "Alphapolyomavirus chlopygerythrus": "primate",
+                # https://www.genome.jp/virushostdb/1891758
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/betapolyomavirus
+                "Betapolyomavirus secuchlopygerythrus": "primate",
+                # https://www.genome.jp/virushostdb/1891720
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/alphapolyomavirus
+                "Alphapolyomavirus tertichlopygerythrus": "primate",
+                # https://www.genome.jp/virushostdb/2294094
+                "Paguma larvata circovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/93386
+                # https://en.wikipedia.org/wiki/Columbid_alphaherpesvirus_1
+                "Columbid alphaherpesvirus 1": "avian",
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/almendravirus
+                # https://www.genome.jp/virushostdb/1972685
+                "Almendravirus cootbay": "no_mammals",
                 }
 
 

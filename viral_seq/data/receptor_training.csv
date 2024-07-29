@@ -59,4 +59,12 @@ https://doi.org/10.1371/journal.ppat.1010083,Murine adenovirus 1,integrin,False,
 https://doi.org/10.3201%2Feid3007.240689,Highly Pathogenic Avian Influenza A (H5N1),sialic_acid,True,NC_007364.1 NC_007363.1 NC_007362.1 NC_007361.1 NC_007360.1 NC_007359.1 NC_007358.1 NC_007357.1,True,True,True
 https://doi.org/10.1128/jvi.01013-09,Andes hantavirus (ANDV),integrin,True,NC_003468.2 NC_003467.2 NC_003466.1,True,True,True
 https://doi.org/10.1128/jvi.68.11.6933-6939.1994,Monkey lymphotropic papovavirus (LPV),sialic_acid,False,D00055.1,True,True,True
-https://doi.org/10.1371/journal.pone.0055799,Simian virus 40,integrin,True,NC_001669.1,False,True,True
+https://doi.org/10.1371/journal.pone.0055799 https://doi.org/10.1093/emboj/cdg439,Simian virus 40,both,True,NC_001669.1,False,True,True
+https://doi.org/10.1007/978-3-642-56753-7_6,Hantaan virus,integrin,True,NC_005222.1 NC_005219.1 NC_005218.1,True,True,True
+https://doi.org/10.1074/jbc.M604421200,Minute virus of mice (MVM),sialic_acid,True,NC_001510.1,False,True,False
+https://doi.org/10.1007/978-3-642-56753-7_6,Prospect hill hantavirus (PHV),integrin,True,NC_038939.1 NC_038940.1 NC_038938.1,True,True,True
+https://doi.org/10.1128/jvi.75.10.4604-4613.2001,Human respirovirus 3,sialic_acid,True,NC_075446.1,True,True,True
+https://doi.org/10.1099/0022-1317-80-9-2311,Echovirus 9 strain Barty,integrin,False,X92886.1,True,True,True
+https://doi.org/10.1073/pnas.0913403107,Bluetongue virus,sialic_acid,True,NC_006023.1 NC_006013.2 NC_006014.1 NC_006024.2 NC_006025.1 NC_006010.1 NC_006022.1 NC_006007.1 NC_006008.2 NC_006015.1,False,True,False
+https://doi.org/10.1371/journal.pone.0035587,Dobrava virus,integrin,True,NC_005235.1 NC_005234.1 NC_005233.1,True,True,True
+https://doi.org/10.1016/j.ebiom.2022.104354,Porcine reproductive and respiratory syndrome virus (PRRSV),sialic_acid,True,NC_001961.1,False,True,False

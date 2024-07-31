@@ -614,6 +614,35 @@ organism_dict = {
                 # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/almendravirus
                 # https://www.genome.jp/virushostdb/1972685
                 "Almendravirus cootbay": "no_mammals",
+                # https://www.genome.jp/virushostdb/349563
+                "Crow polyomavirus": "avian",
+                # https://ictv.global/report/chapter/poxviridae/poxviridae/oryzopoxvirus
+                # https://www.genome.jp/virushostdb/930275
+                "Cotia virus SPAn232": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1394033
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae
+                "Butcherbird polyomavirus": "avian",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/crahelivirus
+                "crahelivirus A1": "avian",
+                # https://www.genome.jp/virushostdb/1764087
+                # I don't count Vero cells though, interferon
+                # compromised, etc.
+                # potential human pathogen but I don't see concrete
+                # evidence yet:
+                # https://doi.org/10.1371/journal.pntd.0005978
+                "Dashli virus": "unknown",
+                # https://doi.org/10.1177%2F1040638718766036
+                # https://www.genome.jp/virushostdb/78522
+                "Odocoileus adenovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2170000
+                "Deer mastadenovirus B": "non_primate_mammals",
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/zetapolyomavirus
+                # https://www.genome.jp/virushostdb/1891756
+                "Zetapolyomavirus delphini": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/470214
+                "Capreolus capreolus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/996650
+                "Camelus dromedarius papillomavirus 1": "non_primate_mammals",
                 }
 
 

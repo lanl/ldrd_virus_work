@@ -10,6 +10,7 @@ import ray
 from ray import tune
 from ray.tune.search.optuna import OptunaSearch
 from optuna.samplers import TPESampler
+import pickle
 
 
 def _cv_score_child(model, X, y, scoring, train, test, **kwargs) -> float:
@@ -103,3 +104,33 @@ def get_hyperparameters(
     targets = list(res_df["mean_roc_auc"].values)
     res["targets"] = targets
     return res
+
+
+def train_and_predict(
+    model,
+    X_train,
+    y_train,
+    X_test,
+    y_test,
+    name="Classifier",
+    model_out="",
+    params_predict={},
+    params_optimized={},
+):
+    params_optimized = {
+        k: v for k, v in params_optimized.items() if k not in params_predict
+    }
+    print(
+        "Will train model and run prediction on test for",
+        name,
+        "using the following parameters:",
+    )
+    print({**params_predict, **params_optimized})
+    clf = model(**params_predict, **params_optimized)
+    clf.fit(X_train, y_train)
+    if model_out:
+        with open(model_out, "wb") as f:
+            print("Saving trained model to", model_out)
+            pickle.dump(clf, f)
+    y_pred = clf.predict_proba(X_test)[..., 1]
+    return y_pred

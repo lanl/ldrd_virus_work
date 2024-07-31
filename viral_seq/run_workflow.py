@@ -23,7 +23,6 @@ from ray import tune
 from time import perf_counter
 import math
 import tarfile
-import pickle
 
 matplotlib.use("Agg")
 
@@ -524,7 +523,14 @@ def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str
     fig.savefig(out_fig, dpi=300)
 
 
-def get_test_features(X_train, debug=False):
+def get_test_features(
+    table_loc_test,
+    table_loc_test_saved,
+    test_file,
+    X_train,
+    extract_cookie,
+    debug=False,
+):
     if not extract_cookie.is_file():
         debug = False
     print("Ensuring X_test has only the features in X_train...")
@@ -669,7 +675,14 @@ if __name__ == "__main__":
         n_jobs=n_jobs,
         random_state=random_state,
     )
-    X_test, y_test = get_test_features(X_train, debug=debug)
+    X_test, y_test = get_test_features(
+        table_loc_test,
+        table_loc_test_saved,
+        test_file,
+        X_train,
+        extract_cookie,
+        debug=debug,
+    )
     best_params: Dict[str, Any] = {}
     plotting_data: Dict[str, Any] = {}
     model_arguments: Dict[str, Any] = {}
@@ -708,9 +721,7 @@ if __name__ == "__main__":
             "random_state": random_state,
         },
     }
-    predictions = {}
-    predictions["Species"] = pd.read_csv(test_file)["Species"]
-    # we optimize first if requested and then train and predict for all models
+    # optimize first if requested
     for name, val in model_arguments.items():
         params = val["optimize"]
         if optimize == "none":
@@ -739,27 +750,25 @@ if __name__ == "__main__":
             )
             best_params[name] = res["params"]
             plotting_data[name] = res["targets"]
-        # remove items in best_params that we want set differently during prediction
-        best_params[name] = {
-            k: v for k, v in best_params[name].items() if k not in val["predict"]
-        }
-        print(
-            "Will train model and run prediction on test for",
-            name,
-            "using the following parameters:",
-        )
-        print({**val["predict"], **best_params[name]})
-        clf = val["model"](**val["predict"], **best_params[name])
-        clf.fit(X_train, y_train)
-        model_out = str(model_path / ("model_" + val["suffix"] + ".p"))
-        with open(model_out, "wb") as f:
-            print("Saving trained model to", model_out)
-            pickle.dump(clf, f)
-        predictions[name] = clf.predict_proba(X_test)[..., 1]
-        this_auc = roc_auc_score(y_test, predictions[name])
-        print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
     if optimize == "yes" or optimize == "skip":
         optimization_plots(
             plotting_data, optimization_plot_source, optimization_plot_figure
         )
+    # train and predict on all models
+    predictions = {}
+    predictions["Species"] = pd.read_csv(test_file)["Species"]
+    for name, val in model_arguments.items():
+        predictions[name] = classifier.train_and_predict(
+            val["model"],
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            name=name,
+            model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
+            params_predict=val["predict"],
+            params_optimized=best_params[name],
+        )
+        this_auc = roc_auc_score(y_test, predictions[name])
+        print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
     pd.DataFrame(predictions).to_csv(predictions_loc)

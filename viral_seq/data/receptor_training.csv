@@ -16,6 +16,7 @@ https://doi.org/10.1007/s00705-005-0496-y,bovine parvovirus,sialic_acid,True,NC_
 https://doi.org/10.1007/s00705-015-2579-8,Human adenovirus type 5,integrin,True,AC_000008.1,True,True,True
 https://doi.org/10.1073%2Fpnas.77.10.5693,Sendai virus,sialic_acid,True,NC_001552.1,False,True,False
 https://doi.org/10.1073/pnas.0406821101,human cytomegalovirus,integrin,True,NC_006273.2,True,True,True
+https://doi.org/10.1016/s1369-5274(00)00232-0 https://doi.org/10.1073/pnas.250299897,Human rotavirus B,both,True,NC_021541.1 NC_021545.1 NC_021551.1 NC_021543.1 NC_021546.1 NC_021544.1 NC_021547.1 NC_021548.1 NC_021542.1 NC_021550.1 NC_021549.1,True,True,True
 https://doi.org/10.1128/jvi.79.11.7087-7094.2005,Enterovirus 70,sialic_acid,True,NC_001430.1,True,True,True
 https://doi.org/10.1016/s0092-8674(02)00628-1,Kaposi’s sarcoma-associated herpesvirus,integrin,True,NC_009333.1,True,True,True
 https://doi.org/10.1128%2FJVI.00718-07,Human parainfluenza virus 1,sialic_acid,True,NC_003461.1,True,True,True
@@ -39,11 +40,11 @@ https://doi.org/10.1371/journal.ppat.1010083,Murine adenovirus 3,integrin,True,N
 https://doi.org/10.1371/journal.ppat.1002738,Merkel cell polyomavirus,sialic_acid,True,NC_010277.2,True,True,True
 https://doi.org/10.1128/jvi.74.1.228-236.2000,Simian adenovirus 11,integrin,False,KP329562.1,False,True,True
 https://doi.org/10.1371/journal.ppat.1004172,Porcine sapovirus,sialic_acid,False,PQ001586.1,False,True,False
-https://doi.org/10.1002/eji.202350452,Theiler's murine encephalomyelitis virus (TMEV),integrin,False,KF680264.1,False,True,False
+https://doi.org/10.1002/eji.202350452 https://doi.org/10.1002/eji.202350452,Theiler's murine encephalomyelitis virus (TMEV),both,False,KF680264.1,False,True,False
 https://doi.org/10.1016/j.vetmic.2021.109315,Porcine hemagglutinating encephalomyelitis virus (PHEV),sialic_acid,False,OQ798806.1,False,True,False
 https://doi.org/10.1128/jvi.06860-11,Vaccinia virus,integrin,True,NC_006998.1,True,True,True
 https://doi.org/10.1128/jvi.75.2.844-849.2001,Transmissible gastroenteritis virus (TGEV),sialic_acid,True,NC_038861.1,False,True,True
-https://journals.asm.org/doi/full/10.1128/jvi.01819-19,Rabies virus (RABV),integrin,True,NC_001542.1,True,True,True
+https://doi.org/10.1128/jvi.01819-19,Rabies virus (RABV),integrin,True,NC_001542.1,True,True,True
 https://doi.org/10.3390/v13122442,Porcine deltacoronavirus,sialic_acid,False,MT505456.1,True,True,True
 https://doi.org/10.1182/blood-2003-05-1522,Human parvovirus B19,integrin,True,NC_000883.2,True,True,True
 https://doi.org/10.1016/B978-0-12-803109-4.00017-9,Goat torovirus,sialic_acid,True,NC_034976.1,False,True,False
@@ -51,7 +52,6 @@ https://doi.org/10.1128/jvi.00843-06,Adeno-Associated Virus Type 2 (AAV2),integr
 https://doi.org/10.1007/BF01313892,Mengovirus,sialic_acid,False,KX231802.1,True,True,True
 https://doi.org/10.1371/journal.pone.0110911,Classical swine fever virus (CSF),integrin,True,NC_002657.1,False,True,False
 https://doi.org/10.1074/jbc.270.3.1308,Encephalomyocarditis virus (Cardiovirus A),sialic_acid,True,NC_001479.1,True,True,True
-https://doi.org/10.4049/jimmunol.171.6.2804,Murine lymphocytic choriomeningitis virus,integrin,False,KY514256.1,False,True,False
 https://doi.org/10.1016/j.virusres.2016.05.031,Porcine epidemic diarrhea virus,sialic_acid,True,NC_003436.1,False,True,False
 https://doi.org/10.1002/jcb.24037,Dengue virus type 2,integrin,True,NC_001474.2,True,True,True
 https://doi.org/10.1128/jvi.05597-11,Coxsackievirus A24 (CVA24),sialic_acid,False,MT741537.1,True,True,True
@@ -67,9 +67,7 @@ https://doi.org/10.1128/jvi.75.10.4604-4613.2001,Human respirovirus 3,sialic_aci
 https://doi.org/10.1099/0022-1317-80-9-2311,Echovirus 9 strain Barty,integrin,False,X92886.1,True,True,True
 https://doi.org/10.1073/pnas.0913403107,Bluetongue virus,sialic_acid,True,NC_006023.1 NC_006013.2 NC_006014.1 NC_006024.2 NC_006025.1 NC_006010.1 NC_006022.1 NC_006007.1 NC_006008.2 NC_006015.1,False,True,False
 https://doi.org/10.1371/journal.pone.0035587,Dobrava virus,integrin,True,NC_005235.1 NC_005234.1 NC_005233.1,True,True,True
-https://doi.org/10.1016/j.ebiom.2022.104354,Porcine reproductive and respiratory syndrome virus (PRRSV),sialic_acid,True,NC_001961.1,False,True,False
 https://doi.org/10.1128/jvi.74.19.8867-8875.2000,Murray Valley encephalitis virus,integrin,True,NC_000943.1,True,True,True
 https://doi.org/10.1128/jvi.02393-05,Bovine adeno-associated virus (BAAV),sialic_acid,True,NC_005889.1,False,True,False
 https://doi.org/10.1128/JVI.01130-21,Tick-borne encephalitis virus (TBEV),integrin,True,NC_001672.1,True,True,True
 https://doi.org/10.1099/vir.0.82158-0,Feline calicivirus,sialic_acid,True,NC_075569.1,False,True,False
-https://doi.org/10.1016/s1369-5274(00)00232-0 https://doi.org/10.1073/pnas.250299897,Human rotavirus B,both,True,NC_021541.1 NC_021545.1 NC_021551.1 NC_021543.1 NC_021546.1 NC_021544.1 NC_021547.1 NC_021548.1 NC_021542.1 NC_021550.1 NC_021549.1,True,True,True

@@ -643,6 +643,76 @@ organism_dict = {
                 "Capreolus capreolus papillomavirus 1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/996650
                 "Camelus dromedarius papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1922325
+                # https://doi.org/10.1016/j.vetmic.2016.12.035
+                "Giraffa camelopardalis papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2758131
+                "bat polyomavirus 2a": "non_primate_mammals",
+                # https://doi.org/10.1038/srep12701
+                # https://www.genome.jp/virushostdb/487311
+                # https://doi.org/10.1186%2Fs13071-022-05341-4
+                "Anopheles gambiae densovirus": "no_mammals",
+                # https://ictv.global/report_9th/ssDNA/Parvoviridae
+                # https://www.genome.jp/virushostdb/1513199
+                # https://doi.org/10.1186/s40249-023-01099-8
+                "Aedes albopictus densovirus 2": "no_mammals",
+                # https://www.genome.jp/virushostdb/185638
+                "Culex pipiens densovirus": "no_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/diresapivirus
+                "diresapivirus A1": "non_primate_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/diresapivirus
+                "diresapivirus B1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1623687
+                "Bat polyomavirus 5a": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1623689
+                "Bat polyomavirus 6b": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1623688
+                "Bat polyomavirus 6c": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1714377
+                "Bottlenose dolphin adenovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2107574
+                "Domestic cat hepadnavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/663281
+                "Drosophila melanogaster birnavirus SW-2009a": "no_mammals",
+                # https://www.genome.jp/virushostdb/2006585
+                "Duck associated cyclovirus 1": "avian",
+                # https://en.wikipedia.org/wiki/Duck_atadenovirus_A
+                # https://www.genome.jp/virushostdb/130328
+                "Duck atadenovirus A": "avian",
+                # https://www.genome.jp/virushostdb/1520006
+                # https://en.wikipedia.org/wiki/Avian_adenovirus
+                "Duck adenovirus 2": "avian",
+                # https://en.wikipedia.org/wiki/Duck_circovirus
+                # https://www.genome.jp/virushostdb/232802
+                "Mulard duck circovirus": "avian",
+                # https://www.genome.jp/virushostdb/300188
+                "Duck coronavirus DK/GD/27/2014": "avian",
+                # https://www.genome.jp/virushostdb/12639
+                # https://en.wikipedia.org/wiki/Duck_hepatitis_B_virus
+                "Duck hepatitis B virus": "avian",
+                # https://www.genome.jp/virushostdb/1006585
+                # I don't count Vero cells as primate infectino
+                # because of interferon reduction, etc.
+                "Durania virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1163703
+                "Equus asinus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/446138
+                "Sus scrofa papillomavirus 1": "non_primate_mammals",
+                # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/dyoepsilonpapillomavirus
+                # https://www.genome.jp/virushostdb/485362
+                "Francolinus leucoscepus papillomavirus 1": "avian",
+                # https://www.genome.jp/virushostdb/445217
+                "Erinaceus europaeus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/940834
+                "Equus caballus papillomavirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1235428
+                "Equus caballus papillomavirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/634772
+                "Ovis aries papillomavirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1163708
+                "Rupicapra rupicapra papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1887214
+                "Bos taurus papillomavirus 16": "non_primate_mammals",
                 }
 
 

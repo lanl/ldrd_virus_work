@@ -151,7 +151,7 @@ def pull_ensembl_transcripts(email, cache, file):
     default="table.parquet.gzip",
     show_default=True,
     help=(
-        "Output data table contains the following columns: 'Species', the target column, and all calculated feature values. "
+        "Output data table contains the following columns: An unnamed index column, 'Species', the target column, and all calculated feature values. "
     ),
 )
 @click.option(
@@ -271,7 +271,7 @@ def calculate_table(
     needed_columns = ["Unnamed: 0", "Species", "Accessions", target_column]
     if set(needed_columns).issubset(df.columns) is False:
         raise ValueError(
-            "Provided .csv file must contain 'Unnamed: 0', 'Species', 'Accessions', and '"
+            "Provided .csv file must contain an unnamed index column, 'Species', 'Accessions', and '"
             + str(target_column)
             + "' columns."
         )

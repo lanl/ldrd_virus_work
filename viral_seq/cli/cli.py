@@ -135,7 +135,7 @@ def pull_ensembl_transcripts(email, cache, file):
     "-f",
     required=True,
     help=(
-        "A .csv file with the following columns: 'Species', 'Accessions', 'Human Host'. "
+        "A .csv file with the following columns: 'Species', 'Accessions', and a target column with name specified by '--target-column'. "
     ),
 )
 @click.option(
@@ -151,7 +151,7 @@ def pull_ensembl_transcripts(email, cache, file):
     default="table.parquet.gzip",
     show_default=True,
     help=(
-        "Output data table contains the following columns: 'Species', 'Human Host' and all calculated feature values. "
+        "Output data table contains the following columns: 'Species', the target column, and all calculated feature values. "
     ),
 )
 @click.option(
@@ -236,6 +236,12 @@ def pull_ensembl_transcripts(email, cache, file):
     default=123456789,
     help=("Random seed value used for mutual_info_classif. Does nothing otherwise."),
 )
+@click.option(
+    "--target-column",
+    "-tc",
+    default="Human Host",
+    help=("Target column to be used for binary classification."),
+)
 def calculate_table(
     cache,
     file,
@@ -253,6 +259,7 @@ def calculate_table(
     uni_type,
     num_select,
     random_state,
+    target_column,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -260,10 +267,17 @@ def calculate_table(
     if rfc_file is not None:
         with open(rfc_file, "rb") as f:
             rfc = pickle.load(f)
-    if set(["Species", "Accessions", "Human Host"]).issubset(df.columns) is False:
+
+    needed_columns = ["Unnamed: 0", "Species", "Accessions", target_column]
+    if set(needed_columns).issubset(df.columns) is False:
         raise ValueError(
-            "Provided .csv file must contain 'Species', 'Accessions', and 'Human Host' columns."
+            "Provided .csv file must contain 'Unnamed: 0', 'Species', 'Accessions', and '"
+            + str(target_column)
+            + "' columns."
         )
+
+    df = df[needed_columns]
+
     if (
         not features_genomic
         and not features_gc
@@ -299,6 +313,7 @@ def calculate_table(
         uni_type=uni_type,
         num_select=num_select,
         random_state=random_state,
+        target_column=target_column,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
@@ -309,6 +324,7 @@ def calculate_table(
                 gc=False,
                 kmers=False,
                 kmers_pc=False,
+                target_column=target_column,
             )
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)

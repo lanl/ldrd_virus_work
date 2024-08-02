@@ -363,6 +363,7 @@ def build_table(
     uni_type: str = "mutual_info_classif",
     num_select: int = 1_000,
     random_state: int = 123456789,
+    target_column: str = "Human Host",
 ):
     features: dict[str, Any] = {}
     calculated_feature_rows = []
@@ -433,7 +434,7 @@ def build_table(
                 temp_df = df.select(val).to_pandas()
                 res = univariate_selection(
                     drop_unshared_kmers(temp_df.fillna(0)),
-                    df["Human Host"].to_numpy().flatten(),
+                    df[target_column].to_numpy().flatten(),
                     uni_type,
                     num_select,
                     random_state,

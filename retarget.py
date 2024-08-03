@@ -713,6 +713,55 @@ organism_dict = {
                 "Rupicapra rupicapra papillomavirus 1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1887214
                 "Bos taurus papillomavirus 16": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1887216
+                "Bos taurus papillomavirus 18": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1747360
+                "Pudu puda papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/759701
+                "Bettongia penicillata papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/998829
+                "Zalophus californianus papillomavirus 1": "non_primate_mammals",
+                # https://doi.org/10.1093/gbe/evt211
+                # https://www.genome.jp/virushostdb/1464072
+                "Eptesicus serotinus papillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/990304
+                "Saimiri sciureus papillomavirus 1": "primate",
+                # https://www.genome.jp/virushostdb/1338506
+                "Talpa europaea papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/706527
+                "Phocoena phocoena papillomavirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1464071
+                "Eptesicus serotinus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1235427
+                "Equus caballus papillomavirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1352235
+                "Castor canadensis papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1195364
+                "Miniopterus schreibersii papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/568209
+                "Felis domesticus papillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1163701
+                "Eidolon helvum papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1001533
+                "Bos taurus papillomavirus 7": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1887217
+                "Bos taurus papillomavirus 19": "non_primate_mammals",
+                # https://doi.org/10.1038/s41598-017-16775-7
+                # https://www.genome.jp/virushostdb/2042482
+                "Eastern grey kangaroopox virus": "non_primate_mammals",
+                # https://doi.org/10.7554/eLife.79777
+                "Eidolon helvum bat coronavirus CMR704-P12": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1891722
+                "Eidolon polyomavirus 1": "non_primate_mammals",
+                # https://en.wikipedia.org/wiki/Elephant_endotheliotropic_herpesvirus
+                # https://www.genome.jp/virushostdb/146015
+                "Elephantid betaherpesvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/548914
+                "Elephant endotheliotropic herpesvirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/768738
+                "Elephant endotheliotropic herpesvirus 5": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1552409
+                "Sea otter polyomavirus 1": "non_primate_mammals",
                 }
 
 
@@ -800,7 +849,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=200)
+                                                           n_records=215)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

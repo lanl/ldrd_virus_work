@@ -762,6 +762,25 @@ organism_dict = {
                 "Elephant endotheliotropic herpesvirus 5": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1552409
                 "Sea otter polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052395
+                "Orthobunyavirus guajaraense": "non_primate_mammals",
+                # https://ictv.global/report/chapter/nairoviridae/nairoviridae/orthonairovirus
+                # https://en.wikipedia.org/wiki/Ixodes_uriae
+                "Tillamook virus": "no_mammals",
+                # https://en.wikipedia.org/wiki/Squirrelpox_virus
+                # https://www.genome.jp/virushostdb/240426
+                "Squirrelpox virus": "non_primate_mammals",
+                # https://doi.org/10.3390/pathogens9020116
+                # https://www.genome.jp/virushostdb/154334
+                "Macacine gammaherpesvirus 5": "primate",
+                # https://ictv.global/report/chapter/hantaviridae/hantaviridae/mammantavirinae/mobatvirus
+                # https://www.genome.jp/virushostdb/1841195
+                "Quezon virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/11901
+                # https://en.wikipedia.org/wiki/Bovine_leukemia_virus
+                # https://doi.org/10.1016%2Fj.virusres.2023.199186
+                # controversial--evidence of human infection...
+                "Bovine leukemia virus": "human",
                 }
 
 
@@ -845,7 +864,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=215)
+                                                              n_records=225)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

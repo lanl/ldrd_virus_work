@@ -802,6 +802,24 @@ organism_dict = {
                 # but I don't see concrete evidence of "strain 5" infecting
                 # humans so I'm not confident enough...
                 "Cercopithecine betaherpesvirus 5": "primate",
+                # https://www.genome.jp/virushostdb/1821545
+                # vertebrate hosts unknown as of 2022:
+                # https://doi.org/10.3390%2Fv14050987
+                "Enseada virus": "no_mammals",
+                # https://doi.org/10.1038/srep28526
+                # https://www.genome.jp/virushostdb/1826059
+                "Enterovirus SEV-gx": "primate",
+                # https://www.genome.jp/virushostdb/1434070
+                # https://doi.org/10.1128/genomea.00298-18
+                "Cervus papillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1329402
+                # (cell line not counted as primate evidence)
+                # https://doi.org/10.1177/03009858241231556
+                # no evidence of zoonotic activity:
+                # https://ictv.global/report/chapter/poxviridae/poxviridae/vespertilionpoxvirus
+                "Eptesipox virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1843738
+                "Faeces associated gemycircularvirus 18": "non_primate_mammals",
                 }
 
 
@@ -889,7 +907,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=215)
+                                                           n_records=220)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

@@ -112,7 +112,7 @@ def test_train_and_predict(capsys, model, name):
     params_predict = {"random_state": 0}
     params_optimized = {"random_state": 42, "verbose": 0}
     with runner.isolated_filesystem():
-        y_pred = classifier.train_and_predict(
+        clf, y_pred = classifier.train_and_predict(
             model,
             X_train,
             y_train,

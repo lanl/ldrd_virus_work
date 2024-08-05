@@ -757,8 +757,9 @@ if __name__ == "__main__":
     # train and predict on all models
     predictions = {}
     predictions["Species"] = pd.read_csv(test_file)["Species"]
+    models_fitted = {}
     for name, val in model_arguments.items():
-        predictions[name] = classifier.train_and_predict(
+        models_fitted[name], predictions[name] = classifier.train_and_predict(
             val["model"],
             X_train,
             y_train,

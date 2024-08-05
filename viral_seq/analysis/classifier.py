@@ -133,4 +133,4 @@ def train_and_predict(
             print("Saving trained model to", model_out)
             pickle.dump(clf, f)
     y_pred = clf.predict_proba(X_test)[..., 1]
-    return y_pred
+    return clf, y_pred

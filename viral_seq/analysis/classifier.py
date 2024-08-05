@@ -6,11 +6,80 @@ from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
 from sklearn.metrics import get_scorer
 from sklearn.model_selection import StratifiedKFold
+from sklearn.ensemble import RandomForestClassifier
 import ray
 from ray import tune
 from ray.tune.search.optuna import OptunaSearch
 from optuna.samplers import TPESampler
 import pickle
+from lightgbm import LGBMClassifier
+
+
+def get_model_arguments(n_jobs, random_state, num_samples, num_features):
+    """A simple helper function to store model parameters"""
+    one_sample = 1.0 / num_samples
+    one_feature = 1.0 / num_features
+    sqrt_feature = (num_features) ** 0.5 / num_features
+    model_arguments = {}
+    model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
+        "model": RandomForestClassifier,
+        "suffix": "rfc_" + str(random_state),
+        "optimize": {
+            "num_samples": 3_000,
+            "n_jobs_cv": 1,
+            "config": {
+                "n_estimators": 2_000,
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "max_samples": tune.uniform(one_sample, 1.0),
+                "min_samples_leaf": tune.uniform(
+                    one_sample, np.min([1.0, 10 * one_sample])
+                ),
+                "min_samples_split": tune.uniform(
+                    one_sample, np.min([1.0, 300 * one_sample])
+                ),
+                "max_features": tune.uniform(
+                    one_feature, np.min([1.0, 2 * sqrt_feature])
+                ),
+                "criterion": tune.choice(
+                    ["gini", "log_loss"]
+                ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
+                "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
+                "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
+            },
+        },
+        "predict": {
+            "n_estimators": 10_000,
+            "n_jobs": n_jobs,
+            "random_state": random_state,
+        },
+    }
+    model_arguments["LGBMClassifer Boost Seed:" + str(random_state)] = {
+        "model": LGBMClassifier,
+        "suffix": "lgbm_" + str(random_state),
+        "optimize": {
+            "num_samples": 2_000,
+            "n_jobs_cv": 1,
+            "config": {
+                "verbose": -1,
+                "force_col_wise": True,
+                "n_estimators": 500,
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "num_leaves": tune.randint(10, 100),
+                "learning_rate": tune.loguniform(1e-3, 0.01),
+                "subsample": tune.uniform(0.1, 1.0),
+                "subsample_freq": tune.randint(0, 10),
+                "max_depth": tune.randint(15, 100),
+                "min_child_samples": tune.randint(10, 200),
+                "colsample_bytree": tune.uniform(0.1, 1.0),
+            },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/lightgbm-tuning.html#lightgbm-tunable-hyperparameters
+        },
+        "predict": {
+            "verbose": 1,
+            "n_jobs": n_jobs,
+            "random_state": random_state,
+        },
+    }
+    return model_arguments
 
 
 def _cv_score_child(model, X, y, scoring, train, test, **kwargs) -> float:

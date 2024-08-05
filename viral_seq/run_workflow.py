@@ -814,7 +814,9 @@ if __name__ == "__main__":
             sorted_feature_names,
             top_feat_count=10,
             model_name=name,
-            fig_name_stem=str(plots_path / ("feat_imp_" + val["suffix"])),
+            fig_name_stem=str(
+                plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+            ),
         )
         feature_importances.append(clf.feature_importances_)
     (

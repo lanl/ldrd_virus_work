@@ -620,6 +620,13 @@ if __name__ == "__main__":
         default="yes",
         help="Option 'none' will not optimize hyperparameters and use mostly defaults, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
     )
+    parser.add_argument(
+        "-cp",
+        "--copies",
+        type=int,
+        default=1,
+        help="Select the number of copies of each model to use. Each copy will have a different random_state, starting at the value passed in'--random-state' and incrementing by 1.",
+    )
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
@@ -628,6 +635,7 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs
     random_state = args.random_state
     optimize = args.optimize
+    copies = args.copies
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
@@ -703,12 +711,16 @@ if __name__ == "__main__":
     best_params: Dict[str, Any] = {}
     plotting_data: Dict[str, Any] = {}
     model_arguments: Dict[str, Any] = {}
-    model_arguments = classifier.get_model_arguments(
-        n_jobs,
-        random_state,
-        num_samples=X_train.shape[0],
-        num_features=X_train.shape[1],
-    )
+    random_states = [random_state + i for i in range(copies)]
+    for rs in random_states:
+        model_arguments.update(
+            classifier.get_model_arguments(
+                n_jobs,
+                rs,
+                num_samples=X_train.shape[0],
+                num_features=X_train.shape[1],
+            )
+        )
     # optimize first if requested
     for name, val in model_arguments.items():
         params = val["optimize"]

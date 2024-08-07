@@ -781,35 +781,6 @@ if __name__ == "__main__":
             k: v for k, v in best_params[name].items() if k not in val["predict"]
         }
         print("Will train model and run prediction on test for", name)
-        clf = val["model"](**val["predict"], **best_params[name])
-        clf.fit(X_train, y_train)
-        model_out = str(model_path / ("model_" + val["suffix"] + ".p"))
-        with open(model_out, "wb") as f:
-            print("Saving trained model to", model_out)
-            pickle.dump(clf, f)
-        predictions[name] = clf.predict_proba(X_test)[..., 1]
-        this_auc = roc_auc_score(y_test, predictions[name])
-        print(name, "achieved ROC AUC", this_auc, "on test data.")
-        # Aaron's original preds
-        fpr_orig, tpr_orig, thresh_orig = roc_curve(y_test, predictions[name])
-        plot_confusion_eer(fpr_orig,
-                           tpr_orig,
-                           thresh_orig,
-                           predictions[name],
-                           y_test,
-                           clf,
-                           "original_confusion.png")
-        eer_data_orig = cal_eer_thresh_and_val(fpr_orig,
-                                               tpr_orig,
-                                               thresh_orig)
-        test_hard_votes_orig = predictions[name] > eer_data_orig.eer_threshold
-        index_disagree = np.nonzero(test_hard_votes_orig != y_test)[0]
-        orig_test_raw = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
-        orig_test_raw.iloc[index_disagree, 1:].to_html("mislabeled_test.html")
-
-        # now predict with same hyperparameters, but a model
-        # trained/tested on the partially relabeled target data
-        # from branch treddy_issue_54
         relabeled_data = np.load("/Users/treddy/rough_work/LDRD_DR_host_virus/relabeled_data.npz")
         y_human_train_relabel = relabeled_data["y_human_train"]
         y_human_test_relabel = relabeled_data["y_human_test"]
@@ -817,6 +788,36 @@ if __name__ == "__main__":
         y_mammal_test_relabel = relabeled_data["y_mammal_test"]
         y_primate_train_relabel = relabeled_data["y_primate_train"]
         y_primate_test_relabel = relabeled_data["y_primate_test"]
+
+        clf = val["model"](**val["predict"], **best_params[name])
+        clf.fit(X_train.iloc[:y_human_train_relabel.size, :], y_train[:y_human_train_relabel.size])
+        model_out = str(model_path / ("model_" + val["suffix"] + ".p"))
+        with open(model_out, "wb") as f:
+            print("Saving trained model to", model_out)
+            pickle.dump(clf, f)
+        predictions[name] = clf.predict_proba(X_test.iloc[:y_human_test_relabel.size, :])[..., 1]
+        this_auc = roc_auc_score(y_test[:y_human_test_relabel.size], predictions[name])
+        print(name, "achieved ROC AUC", this_auc, "on test data.")
+        # Aaron's original preds
+        fpr_orig, tpr_orig, thresh_orig = roc_curve(y_test[:y_human_test_relabel.size], predictions[name])
+        plot_confusion_eer(fpr_orig,
+                           tpr_orig,
+                           thresh_orig,
+                           predictions[name],
+                           y_test[:y_human_test_relabel.size],
+                           clf,
+                           "original_confusion.png")
+        eer_data_orig = cal_eer_thresh_and_val(fpr_orig,
+                                               tpr_orig,
+                                               thresh_orig)
+        test_hard_votes_orig = predictions[name] > eer_data_orig.eer_threshold
+        index_disagree = np.nonzero(test_hard_votes_orig != y_test[:y_human_test_relabel.size])[0]
+        orig_test_raw = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv").iloc[:y_human_test_relabel.size, :]
+        orig_test_raw.iloc[index_disagree, 1:].to_html("mislabeled_test.html")
+
+        # now predict with same hyperparameters, but a model
+        # trained/tested on the partially relabeled target data
+        # from branch treddy_issue_54
         percent_disagree_human_labels_train = calc_percent_disagree(y_train[:y_human_train_relabel.size], y_human_train_relabel)
         percent_disagree_human_labels_test = calc_percent_disagree(y_test[:y_human_test_relabel.size], y_human_test_relabel)
         print(f"Train human label disagreement = {percent_disagree_human_labels_train:.1f} %")
@@ -832,47 +833,43 @@ if __name__ == "__main__":
         y_train[:y_human_train_relabel.size] = y_human_train_relabel
         y_test[:y_human_test_relabel.size] = y_human_test_relabel
         clf_human_relabel = val["model"](**val["predict"], **best_params[name])
-        clf_human_relabel.fit(X_train, y_train)
-        predictions_human_relabel = clf_human_relabel.predict_proba(X_test)[..., 1]
-        human_auc_relabel = roc_auc_score(y_test, predictions_human_relabel)
-        fpr_human_relabel, tpr_human_relabel, thresh_human_relabel = roc_curve(y_test, predictions_human_relabel)
+        clf_human_relabel.fit(X_train.iloc[:y_human_train_relabel.size, :], y_human_train_relabel)
+        predictions_human_relabel = clf_human_relabel.predict_proba(X_test.iloc[:y_human_test_relabel.size, :])[..., 1]
+        human_auc_relabel = roc_auc_score(y_human_test_relabel, predictions_human_relabel)
+        fpr_human_relabel, tpr_human_relabel, thresh_human_relabel = roc_curve(y_human_test_relabel, predictions_human_relabel)
         plot_confusion_eer(fpr_human_relabel,
                            tpr_human_relabel,
                            thresh_human_relabel,
                            predictions_human_relabel,
-                           y_test,
+                           y_human_test_relabel,
                            clf_human_relabel,
                            "human_relabel_confusion.png")
         # once again predicting with the same hyperparameters, but
         # this time using mammal infection as the target from treddy_issue_54
         # initial data
-        y_train[:y_mammal_train_relabel.size] = y_mammal_train_relabel
-        y_test[:y_mammal_test_relabel.size] = y_mammal_test_relabel
         clf_mammal_relabel = val["model"](**val["predict"], **best_params[name])
-        clf_mammal_relabel.fit(X_train, y_train)
-        predictions_mammal_relabel = clf_mammal_relabel.predict_proba(X_test)[..., 1]
-        mammal_auc_relabel = roc_auc_score(y_test, predictions_mammal_relabel)
-        fpr_mammal_relabel, tpr_mammal_relabel, thresh_mammal_relabel = roc_curve(y_test, predictions_mammal_relabel)
+        clf_mammal_relabel.fit(X_train.iloc[:y_mammal_train_relabel.size, :], y_mammal_train_relabel)
+        predictions_mammal_relabel = clf_mammal_relabel.predict_proba(X_test.iloc[:y_mammal_test_relabel.size, :])[..., 1]
+        mammal_auc_relabel = roc_auc_score(y_mammal_test_relabel, predictions_mammal_relabel)
+        fpr_mammal_relabel, tpr_mammal_relabel, thresh_mammal_relabel = roc_curve(y_mammal_test_relabel, predictions_mammal_relabel)
         plot_confusion_eer(fpr_mammal_relabel,
                            tpr_mammal_relabel,
                            thresh_mammal_relabel,
                            predictions_mammal_relabel,
-                           y_test,
+                           y_mammal_test_relabel,
                            clf_mammal_relabel,
                            "mammal_relabel_confusion.png")
         # and similarly for primate target
-        y_train[:y_primate_train_relabel.size] = y_primate_train_relabel
-        y_test[:y_primate_test_relabel.size] = y_primate_test_relabel
         clf_primate_relabel = val["model"](**val["predict"], **best_params[name])
-        clf_primate_relabel.fit(X_train, y_train)
-        predictions_primate_relabel = clf_primate_relabel.predict_proba(X_test)[..., 1]
-        primate_auc_relabel = roc_auc_score(y_test, predictions_primate_relabel)
-        fpr_primate_relabel, tpr_primate_relabel, thresh_primate_relabel = roc_curve(y_test, predictions_primate_relabel)
+        clf_primate_relabel.fit(X_train.iloc[:y_primate_train_relabel.size, :], y_primate_train_relabel)
+        predictions_primate_relabel = clf_primate_relabel.predict_proba(X_test.iloc[:y_primate_test_relabel.size, :])[..., 1]
+        primate_auc_relabel = roc_auc_score(y_primate_test_relabel, predictions_primate_relabel)
+        fpr_primate_relabel, tpr_primate_relabel, thresh_primate_relabel = roc_curve(y_primate_test_relabel, predictions_primate_relabel)
         plot_confusion_eer(fpr_primate_relabel,
                            tpr_primate_relabel,
                            thresh_primate_relabel,
                            predictions_primate_relabel,
-                           y_test,
+                           y_primate_test_relabel,
                            clf_primate_relabel,
                            "primate_relabel_confusion.png")
 
@@ -901,12 +898,12 @@ if __name__ == "__main__":
         ax_roc.set_xlabel("False Positive Rate")
         ax_roc.set_ylabel("True Positive Rate")
         ax_roc.set_aspect("equal")
-        ax_roc.legend(loc=4)
+        ax_roc.legend(loc=4, fontsize=8)
         fig_roc.savefig("plots/roc_plot.png", dpi=300)
 
 
-    if optimize == "yes" or optimize == "skip":
-        optimization_plots(
-            plotting_data, optimization_plot_source, optimization_plot_figure
-        )
-    pd.DataFrame(predictions).to_csv(predictions_loc)
+    #if optimize == "yes" or optimize == "skip":
+        #optimization_plots(
+            #plotting_data, optimization_plot_source, optimization_plot_figure
+        #)
+    #pd.DataFrame(predictions).to_csv(predictions_loc)

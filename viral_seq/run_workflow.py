@@ -12,7 +12,8 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, RocCurveDisplay, auc
+from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
@@ -287,74 +288,18 @@ def build_tables(feature_checkpoint=0, debug=False):
             )
             debug = False
 
-    # tables are built in multiple parts as this is faster for reading/writing
-    for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-        prefix = "Train" if i == 0 else "Test"
-        this_checkpoint_modifier = (1 - i) * 8
-        this_checkpoint = 8 + this_checkpoint_modifier
-        this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-        if feature_checkpoint >= this_checkpoint:
-            print(
-                "Building table for",
-                prefix,
-                "which includes genomic features, gc content, kmers with k=2,3,4, pc kmers with k=2,3,4,5,6, and similarity features for ISG and housekeeping genes.",
-            )
-            print("To restart at this point use --features", this_checkpoint)
-            cli.calculate_table(
-                [
-                    "--file",
-                    file,
-                    "--cache",
-                    cache_viral,
-                    "--outfile",
-                    this_outfile,
-                    "--features-genomic",
-                    "--features-gc",
-                    "--features-kmers",
-                    "--kmer-k",
-                    "2 3 4",
-                    "--features-kmers-pc",
-                    "--kmer-k-pc",
-                    "2 3 4 5 6",
-                    "--similarity-genomic",
-                    "--similarity-cache",
-                    cache_isg + " " + cache_hk,
-                ],
-                standalone_mode=False,
-            )
-        if debug:
-            idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-            validate_feature_table(this_outfile, idx, prefix)
-        this_checkpoint -= 1
-        this_outfile = folder + "/" + prefix + "_kpc7.parquet.gzip"
-        if feature_checkpoint >= this_checkpoint:
-            print("Building table for", prefix, "which includes pc kmers with k=7.")
-            print("To restart at this point use --features", this_checkpoint)
-            cli.calculate_table(
-                [
-                    "--file",
-                    file,
-                    "--cache",
-                    cache_viral,
-                    "--outfile",
-                    this_outfile,
-                    "--features-kmers-pc",
-                    "--kmer-k-pc",
-                    "7",
-                ],
-                standalone_mode=False,
-            )
-        if debug:
-            idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-            validate_feature_table(this_outfile, idx, prefix)
-        for k in range(5, 11):
-            this_checkpoint -= 1
-            this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
+    if workflow == "DR":
+        # tables are built in multiple parts as this is faster for reading/writing
+        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+            prefix = "Train" if i == 0 else "Test"
+            this_checkpoint_modifier = (1 - i) * 8
+            this_checkpoint = 8 + this_checkpoint_modifier
+            this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
             if feature_checkpoint >= this_checkpoint:
                 print(
                     "Building table for",
                     prefix,
-                    "which includes kmers with k={}.".format(k),
+                    "which includes genomic features, gc content, kmers with k=2,3,4, pc kmers with k=2,3,4,5,6, and similarity features for ISG and housekeeping genes.",
                 )
                 print("To restart at this point use --features", this_checkpoint)
                 cli.calculate_table(
@@ -365,15 +310,118 @@ def build_tables(feature_checkpoint=0, debug=False):
                         cache_viral,
                         "--outfile",
                         this_outfile,
+                        "--features-genomic",
+                        "--features-gc",
                         "--features-kmers",
                         "--kmer-k",
-                        str(k),
+                        "2 3 4",
+                        "--features-kmers-pc",
+                        "--kmer-k-pc",
+                        "2 3 4 5 6",
+                        "--similarity-genomic",
+                        "--similarity-cache",
+                        cache_isg + " " + cache_hk,
+                        "--target-column",
+                        target_column,
                     ],
                     standalone_mode=False,
                 )
             if debug:
                 idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
                 validate_feature_table(this_outfile, idx, prefix)
+            this_checkpoint -= 1
+            this_outfile = folder + "/" + prefix + "_kpc7.parquet.gzip"
+            if feature_checkpoint >= this_checkpoint:
+                print("Building table for", prefix, "which includes pc kmers with k=7.")
+                print("To restart at this point use --features", this_checkpoint)
+                cli.calculate_table(
+                    [
+                        "--file",
+                        file,
+                        "--cache",
+                        cache_viral,
+                        "--outfile",
+                        this_outfile,
+                        "--features-kmers-pc",
+                        "--kmer-k-pc",
+                        "7",
+                        "--target-column",
+                        target_column,
+                    ],
+                    standalone_mode=False,
+                )
+            if debug:
+                idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
+                validate_feature_table(this_outfile, idx, prefix)
+            for k in range(5, 11):
+                this_checkpoint -= 1
+                this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
+                if feature_checkpoint >= this_checkpoint:
+                    print(
+                        "Building table for",
+                        prefix,
+                        "which includes kmers with k={}.".format(k),
+                    )
+                    print("To restart at this point use --features", this_checkpoint)
+                    cli.calculate_table(
+                        [
+                            "--file",
+                            file,
+                            "--cache",
+                            cache_viral,
+                            "--outfile",
+                            this_outfile,
+                            "--features-kmers",
+                            "--kmer-k",
+                            str(k),
+                            "--target-column",
+                            target_column,
+                        ],
+                        standalone_mode=False,
+                    )
+                if debug:
+                    idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
+                    validate_feature_table(this_outfile, idx, prefix)
+
+    elif workflow == "DTRA":
+        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+            if i == 0:
+                prefix = "Train"
+                debug = False
+                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+                feature_checkpoint = 10
+                this_checkpoint = feature_checkpoint
+
+                for k in range(6, 11):
+                    this_checkpoint -= 2
+                    this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
+                    if feature_checkpoint >= this_checkpoint:
+                        print(
+                            "Building table for Train",
+                            "which includes kmers and pc kmers with k={}.".format(k),
+                        )
+                        print(
+                            "To restart at this point use --features", this_checkpoint
+                        )
+                        cli.calculate_table(
+                            [
+                                "--file",
+                                file,
+                                "--cache",
+                                cache_viral,
+                                "--outfile",
+                                this_outfile,
+                                "--features-kmers",
+                                "--kmer-k",
+                                str(k),
+                                "--features-kmers-pc",
+                                "--kmer-k-pc",
+                                str(k),
+                                "--target-column",
+                                target_column,
+                            ],
+                            standalone_mode=False,
+                        )
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
@@ -381,7 +429,9 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
         train_files = tuple(glob(table_loc_train + "/*gzip"))
-        X, y = sp.get_training_columns(table_filename=train_files)
+        X, y = sp.get_training_columns(
+            table_filename=train_files, class_column=target_column
+        )
         if feature_selection == "none":
             print(
                 "All training features will be used as X_train in the following steps."
@@ -437,7 +487,7 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     elif feature_selection == "skip":
         print("Will use previously calculated X_train stored at", table_loc_train_best)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        y = pd.read_csv(train_file)["Human Host"]
+        y = pd.read_csv(train_file)[target_column]
     if debug and extract_cookie.is_file():
         # these might not exist if the workflow has only been run with --feature-selection none
         if Path(table_loc_train_best).is_file():
@@ -637,6 +687,35 @@ if __name__ == "__main__":
         action="store_true",
         help="Run hyperparameter optimization for every copy to compare how optimization is affected by seed.",
     )
+    parser.add_argument(
+        "-tr",
+        "--train-file",
+        choices=["receptor_training.csv", "Mollentze_Training.csv"],
+        default="Mollentze_Training.csv",
+        help="File to be used corresponding to training data.",
+    )
+    parser.add_argument(
+        "-ts",
+        "--test-file",
+        choices=["none", "Mollentze_Holdout.csv"],
+        default="Mollentze_Holdout.csv",
+        help="File to be used corresponding to test data.",
+    )
+    parser.add_argument(
+        "-tc",
+        "--target-column",
+        choices=["Is_Both", "Is_Integrin", "Is_Sialic_Acid", "Human Host"],
+        default="Human Host",
+        help="Target column to be used for binary clasification.",
+    )
+    parser.add_argument(
+        "-w",
+        "--workflow",
+        choices=["DTRA", "DR"],
+        default="DR",
+        help="Choice of machine learning workflow to be used.",
+    )
+
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
@@ -647,12 +726,20 @@ if __name__ == "__main__":
     optimize = args.optimize
     copies = args.copies
     check_optimization = args.check_optimization
+    train_file = args.train_file
+    test_file = args.test_file
+    target_column = args.target_column
+    workflow = args.workflow
 
     data = files("viral_seq.data")
-    train_file = str(data.joinpath("Mollentze_Training.csv"))
-    test_file = str(data.joinpath("Mollentze_Holdout.csv"))
+    train_file = str(data.joinpath(train_file))
+    test_file = str(data.joinpath(test_file))
     cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
-    viral_files = [train_file, test_file]
+    viral_files = (
+        [train_file, test_file]
+        if test_file != str(data.joinpath("none"))
+        else [train_file]
+    )
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
     hyperparams_stored_path = files("viral_seq.data.hyperparameters")
 
@@ -897,3 +984,152 @@ if __name__ == "__main__":
         fig_name=feature_imp_consensus_plot_figure,
         fig_source=feature_imp_consensus_plot_source,
     )
+
+    X = pl.read_parquet(table_loc_train_best).to_pandas()
+    tbl = pd.read_csv(train_file)
+    y = tbl[target_column]
+
+    random_state = np.random.RandomState(0)
+
+    n_folds = 5
+    cv = StratifiedKFold(n_splits=n_folds)
+    clfr = RandomForestClassifier(
+        n_estimators=10000, n_jobs=-1, random_state=random_state
+    )
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    counter = -1
+    n_features = 5
+    tmp1 = np.zeros((n_folds, n_features))
+
+    for fold, (train, test) in enumerate(cv.split(X, y)):
+        clfr.fit(X.iloc[train], y[train])
+        df = pd.DataFrame()
+        df["Features"] = X.iloc[train].columns
+        df["Importances"] = clfr.feature_importances_
+        df.sort_values(by=["Importances"], ascending=False, inplace=True)
+        df.reset_index(inplace=True)
+        print(df.iloc[:n_features])
+        viz = RocCurveDisplay.from_estimator(
+            clfr,
+            X.iloc[test],
+            y[test],
+            name=f"ROC fold {fold + 1}",
+            alpha=0.3,
+            lw=1,
+            ax=ax,
+            plot_chance_level=(fold == n_folds - 1),
+        )
+        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+        aucs.append(viz.roc_auc)
+
+        counter += 1
+        tmp1[counter, :] = df["index"][:n_features].to_numpy()
+
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    ax.plot(
+        mean_fpr,
+        mean_tpr,
+        color="b",
+        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+        lw=2,
+        alpha=0.8,
+    )
+
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    ax.fill_between(
+        mean_fpr,
+        tprs_lower,
+        tprs_upper,
+        color="grey",
+        alpha=0.2,
+        label=r"$\pm$ 1 std. dev.",
+    )
+
+    ax.set(
+        xlabel="False Positive Rate",
+        ylabel="True Positive Rate",
+        title="Mean ROC curve with variability\n(Positive label '"
+        + str(target_column)
+        + "')",
+    )
+    ax.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
+
+    (uniq, freq) = np.unique(tmp1.flatten(), return_counts=True)
+    tmp2 = np.column_stack((uniq, freq))
+    tmp3 = tmp2[tmp2[:, 1].argsort()]
+    tmp4 = [
+        df[df["index"] == tmp3[i, 0]]["Features"].to_numpy()
+        for i in range(tmp3.shape[0])
+    ]
+    arr1 = tmp3[:, 1]
+    arr2 = [tmp4[i][0] for i in range(len(tmp4))]
+    fig, ax = plt.subplots(figsize=(8, 8))
+    y_pos = np.arange(len(arr2))
+    ax.barh(y_pos, (arr1 / n_folds) * 100)
+    ax.set_xlim(0, 100)
+    ax.set_yticks(y_pos, labels=arr2)
+    ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
+    ax.set_xlabel("Percentage (%)")
+    fig.tight_layout()
+    fig.savefig(str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
+
+    records = sp.load_from_cache(cache=cache_viral, filter=False)
+
+    for ii in range(3):
+        kmer_type = arr2[ii][5:7]
+        kmer_specific = arr2[ii][8:]
+        viruses = []
+        products = []
+
+        for record in records:
+            for feature in record.features:
+                if feature.type == "CDS":
+                    nuc_seq = feature.location.extract(record.seq)
+                    if len(nuc_seq) % 3 != 0:
+                        continue
+                    this_seq = nuc_seq.translate()
+                    if kmer_type == "PC":
+                        new_seq = ""
+                        for each in this_seq:
+                            if each in "AGV":
+                                new_seq += "A"
+                            elif each in "C":
+                                new_seq += "B"
+                            elif each in "FLIP":
+                                new_seq += "C"
+                            elif each in "MSTY":
+                                new_seq += "D"
+                            elif each in "HNQW":
+                                new_seq += "E"
+                            elif each in "DE":
+                                new_seq += "F"
+                            elif each in "KR":
+                                new_seq += "G"
+                            else:
+                                new_seq += "*"
+                        this_seq = new_seq
+
+                    tmp5 = this_seq.find(kmer_specific)
+
+                    if tmp5 > -1:
+                        tmp6 = tbl.Accessions.isin([record.id])
+                        if sum(tmp6):
+                            viruses.append(tbl.Species[np.nonzero(tmp6)[0][0]])
+                            products.append(feature.qualifiers["product"][0])
+
+        print("Viruses: \n", viruses)
+        print("Associated viral proteins: \n", products)

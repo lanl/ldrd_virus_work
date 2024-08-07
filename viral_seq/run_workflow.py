@@ -977,12 +977,8 @@ if __name__ == "__main__":
             ) = classifier.train_and_predict(
                 val["model"],
                 X_train,
-                y_train,
-                X_test,
-                name=name,
-                model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
-                params_predict=val["predict"],
-                params_optimized=best_params[name],
+                extract_cookie,
+                debug=debug,
             )
             this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
             print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
@@ -1026,7 +1022,6 @@ if __name__ == "__main__":
             filename=str(plots_path / "roc_plot_comparison.png"),
             title=this_title,
         )
-
         # check feature importance and consensus
         feature_importances = []
         np.random.seed(random_state)  # used by `shap.summary_plot`
@@ -1034,65 +1029,22 @@ if __name__ == "__main__":
             print(f"Plotting feature importances for {name}")
             # built-in importances
             (
-                sorted_feature_importances,
-                sorted_feature_names,
-            ) = feature_importance.sort_features(
-                clf.feature_importances_, X_train.columns
-            )
-            feature_importance.plot_feat_import(
-                sorted_feature_importances,
-                sorted_feature_names,
-                top_feat_count=10,
-                model_name=name,
-                fig_name_stem=str(
-                    plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
-                ),
-            )
-            feature_importances.append(clf.feature_importances_)
-            # SHAP importances
-            print("Calculating & Plotting SHAP values...")
-            time_start = perf_counter()
-            explainer = shap.Explainer(clf, seed=random_state)
-            shap_values = explainer(X_train)
-            print("Finished SHAP calculation in", perf_counter() - time_start)
-            positive_shap_values = feature_importance.get_positive_shap_values(
-                shap_values
-            )
-            feature_importance.plot_shap_meanabs(
-                positive_shap_values,
-                model_name=name,
-                fig_name_stem=str(
-                    plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
-                ),
+                ranked_feature_names,
+                ranked_feature_counts,
+                num_input_models,
+            ) = feature_importance.feature_importance_consensus(
+                pos_class_feat_imps=feature_importances,
+                feature_names=X_train.columns,
                 top_feat_count=10,
             )
-            feature_importance.plot_shap_beeswarm(
-                positive_shap_values,
-                model_name=name,
-                fig_name=str(
-                    plots_path
-                    / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
-                ),
-                max_display=10,
+            feature_importance.plot_feat_import_consensus(
+                ranked_feature_names=ranked_feature_names,
+                ranked_feature_counts=ranked_feature_counts,
+                num_input_models=num_input_models,
+                top_feat_count=10,
+                fig_name=feature_imp_consensus_plot_figure,
+                fig_source=feature_imp_consensus_plot_source,
             )
-            feature_importances.append(positive_shap_values)
-        (
-            ranked_feature_names,
-            ranked_feature_counts,
-            num_input_models,
-        ) = feature_importance.feature_importance_consensus(
-            pos_class_feat_imps=feature_importances,
-            feature_names=X_train.columns,
-            top_feat_count=10,
-        )
-        feature_importance.plot_feat_import_consensus(
-            ranked_feature_names=ranked_feature_names,
-            ranked_feature_counts=ranked_feature_counts,
-            num_input_models=num_input_models,
-            top_feat_count=10,
-            fig_name=feature_imp_consensus_plot_figure,
-            fig_source=feature_imp_consensus_plot_source,
-        )
 
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
@@ -1444,9 +1396,7 @@ if __name__ == "__main__":
         ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
-        ax.set_title(
-            f"Feature importance consensus amongst {n_folds} folds for \n{target_column}"
-        )
+        ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
         ax.set_xlabel("Percentage (%)")
         counter2 = -1
 

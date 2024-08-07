@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from time import perf_counter
 import tarfile
 import shap
+from collections import defaultdict
 
 matplotlib.use("Agg")
 
@@ -515,14 +516,16 @@ def optimize_model(
     return res
 
 
-def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str):
+def optimization_plots(input_data: Dict[str, Any], name_prefix: str, plots_path: Path):
+    out_source = str(plots_path / (name_prefix + "_optimization_plot.csv"))
+    out_fig = str(plots_path / (name_prefix + "_optimization_plot.png"))
+    print("Writing optimization plot data to", out_source)
     for name, targets in input_data.items():
         target_max = np.maximum.accumulate(targets)
         df = pd.DataFrame(target_max, columns=[name])
         if Path(out_source).is_file():
             old_df = pd.read_csv(out_source)
             df = pd.concat([old_df.loc[:, list(old_df.columns != name)], df], axis=1)
-        print("Writing optimization plot data to", out_source)
         df.to_csv(out_source, index=False)
     print(
         "Generating plot of optimization progress for classifiers and saving to",
@@ -673,8 +676,6 @@ if __name__ == "__main__":
 
     plots_path = Path("plots")
     paths.append(plots_path)
-    optimization_plot_source = str(plots_path / "optimization_plot.csv")
-    optimization_plot_figure = str(plots_path / "optimization_plot.png")
     feature_imp_consensus_plot_source = str(plots_path / "feat_imp_consensus.csv")
     feature_imp_consensus_plot_figure = str(plots_path / "feat_imp_consensus.png")
 
@@ -709,7 +710,7 @@ if __name__ == "__main__":
         debug=debug,
     )
     best_params: Dict[str, Any] = {}
-    plotting_data: Dict[str, Any] = {}
+    plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
     model_arguments: Dict[str, Any] = {}
     random_states = [random_state + i for i in range(copies)]
     for rs in random_states:
@@ -749,11 +750,10 @@ if __name__ == "__main__":
                 "s",
             )
             best_params[name] = res["params"]
-            plotting_data[name] = res["targets"]
+            plotting_data[val["group"]][name] = res["targets"]
     if optimize == "yes" or optimize == "skip":
-        optimization_plots(
-            plotting_data, optimization_plot_source, optimization_plot_figure
-        )
+        for group, this_data in plotting_data.items():
+            optimization_plots(this_data, group, plots_path)
     # train and predict on all models
     predictions = {}
     predictions["Species"] = pd.read_csv(test_file)["Species"]

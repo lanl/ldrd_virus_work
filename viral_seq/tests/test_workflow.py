@@ -9,7 +9,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 
 
 @image_comparison(
-    baseline_images=["test_optimization_plotting"],
+    baseline_images=["test_optimization_plot"],
     remove_text=True,
     extensions=["png"],
     style="mpl20",
@@ -23,8 +23,8 @@ def test_optimization_plotting(tmp_path):
     }
     workflow.optimization_plots(
         data,
-        str(tmp_path / "test_optimization_plotting.csv"),
-        str(tmp_path / "test_optimization_plotting.png"),
+        "test",
+        tmp_path,
     )
 
 

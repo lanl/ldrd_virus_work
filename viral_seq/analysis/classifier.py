@@ -25,6 +25,7 @@ def get_model_arguments(
     model_arguments = {}
     model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
         "model": RandomForestClassifier,
+        "group": "RandomForestClassifier",
         "suffix": "rfc_" + str(random_state),
         "optimize": {
             "num_samples": 3_000,
@@ -58,6 +59,7 @@ def get_model_arguments(
     model_arguments["LGBMClassifer Boost Seed:" + str(random_state)] = {
         "model": LGBMClassifier,
         "suffix": "lgbm_" + str(random_state),
+        "group": "LGBMClassifier_Boost",
         "optimize": {
             "num_samples": 2_000,
             "n_jobs_cv": 1,

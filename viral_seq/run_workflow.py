@@ -12,8 +12,7 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, RocCurveDisplay, auc
-from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_auc_score
 from pathlib import Path
 from warnings import warn
 import json

@@ -73,7 +73,7 @@ https://doi.org/10.1128/JVI.01130-21,Tick-borne encephalitis virus (TBEV),integr
 https://doi.org/10.1099/vir.0.82158-0,Feline calicivirus,sialic_acid,True,NC_075569.1,False,True,False
 https://doi.org/10.1128/jvi.74.22.10639-10649.2000,Canine adenovirus type 2,integrin,True,AC_000020.1,False,True,False
 https://doi.org/10.1128/jvi.75.15.6884-6893.2001,Adeno-Associated Virus Type 4 (AAV4),sialic_acid,True,NC_001829.1,True,True,True
-https://doi.org/10.1128/jvi.03522-12,Equine herpesvirus type 1,integrin,True,NC_001491.1,False,True,False
+https://doi.org/10.1128/jvi.03522-12 https://doi.org/10.1099/jgv.0.000375,Equine herpesvirus type 1,both,True,NC_001491.2,False,True,False
 https://doi.org/10.1128/jvi.02245-08,Norwalk virus (murine norovirus),sialic_acid,False,MT358379.1,False,True,False
 https://doi.org/10.1016/j.chom.2013.02.006,Hepatitis C,integrin,True,NC_038882.1,True,True,True
 https://doi.org/10.1016/j.virol.2009.06.029,Bovine adenovirus 3,sialic_acid,True,NC_001876.1,False,True,False
@@ -87,3 +87,10 @@ https://doi.org/10.1128/jvi.73.5.3951-3959.1999,Seoul orthohantavirus,integrin,F
 https://doi.org/10.1099/vir.0.80207-0,Equine rhinitis A virus,sialic_acid,True,NC_039209.1,False,True,False
 https://doi.org/10.1007/978-3-642-56753-7_6,Tula orthohantavirus,integrin,True,NC_005226.1 NC_005228.1 NC_005227.1,True,True,True
 https://doi.org/10.1371/journal.ppat.1005411,Influenza D virus,sialic_acid,True,NC_036621.1 NC_036620.1 NC_036619.1 NC_036618.1 NC_036617.1 NC_036616.1 NC_036615.1,False,True,False
+https://doi.org/10.1073/pnas.250299897 https://doi.org/10.1128/jvi.76.20.10512-10517.2002,Simian rotavirus A strain RRV,both,False,HQ665462.1,False,True,True
+https://doi.org/10.1371/journal.ppat.1003714,African green monkey B-lymphotropic polyomavirus,sialic_acid,True,NC_004763.2,True,True,True
+https://doi.org/10.1128/mbio.00745-20,New Jersey polyomavirus (NJPyV),sialic_acid,True,NC_024118.1,True,True,True
+https://doi.org/10.1074/jbc.M409683200,Bovine torovirus (Breda virus),sialic_acid,True,NC_007447.1,False,True,False
+https://doi.org/10.1128/mbio.00745-20,Human polyomavirus 12,sialic_acid,True,NC_020890.1,True,True,True
+https://doi.org/10.1128%2FJVI.00718-07,Human parainfluenza virus 3,sialic_acid,True,NC_001796.2,True,True,True
+https://doi.org/10.1023/B:GLYC.0000043292.64358.f1,Murine coronavirus,sialic_acid,True,NC_012936.1,False,True,False

@@ -727,7 +727,7 @@ if __name__ == "__main__":
     optimize_model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
         "model": RandomForestClassifier,
         "outfile": hyperparams_rfc_file,
-        "num_samples": 10,
+        "num_samples": 3_000,
         "n_jobs_cv": 1,
         "config": {
             "n_estimators": 2_000,

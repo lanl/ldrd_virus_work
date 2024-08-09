@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Union, Any
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
-from sklearn.metrics import get_scorer
+from sklearn.metrics import get_scorer, roc_curve, auc
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 import ray
@@ -13,6 +13,7 @@ from ray.tune.search.optuna import OptunaSearch
 from optuna.samplers import TPESampler
 import pickle
 from lightgbm import LGBMClassifier
+from matplotlib import pyplot as plt
 
 
 def get_model_arguments(
@@ -224,3 +225,69 @@ def train_and_predict(
             pickle.dump(clf, f)
     y_pred = clf.predict_proba(X_test)[..., 1]
     return clf, y_pred
+
+
+def get_roc_curve(y_true, predictions):
+    """If passed one set of predictions, this functions identically to `sklearn.metrics.roc_curve`. If passed multiple sets of predictions, this instead returns a mean roc curve with standard deviation."""
+    fprs, tprs, tpr_std = [], [], []
+    for key in predictions:
+        fpr, tpr, thresh = roc_curve(y_true, predictions[key])
+        tprs.append(tpr)
+        fprs.append(fpr)
+    if len(tprs) > 1:
+        mean_fpr = np.linspace(0, 1, 100)
+        for i in range(len(tprs)):
+            tprs[i] = np.interp(mean_fpr, fprs[i], tprs[i])
+            tprs[i][0] = 0.0
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_tpr[-1] = 1.0
+        tpr_std = np.std(tprs, axis=0)
+        tpr = mean_tpr
+        fpr = mean_fpr
+    return fpr, tpr, tpr_std
+
+
+def plot_roc_curve(
+    name, fpr, tpr, tpr_std=None, filename="roc_plot.png", title="ROC curve"
+):
+    tpr_stds = None if tpr_std is None else [tpr_std]
+    plot_roc_curve_comparison([name], [fpr], [tpr], tpr_stds, filename, title)
+
+
+def plot_roc_curve_comparison(
+    names,
+    fprs,
+    tprs,
+    tpr_stds=None,
+    filename="roc_plot_comparison.png",
+    title="ROC curve",
+):
+    """Can plot one or multiple roc curves. Will plot a plus/minus 1 standard deviation shaded region for curves if provided."""
+    fig, ax = plt.subplots(figsize=(6, 6))
+    for i, name in enumerate(names):
+        this_auc = auc(fprs[i], tprs[i])
+        ax.plot(fprs[i], tprs[i], label=f"{name} (AUC = {this_auc:.2f})")
+        if tpr_stds and len(tpr_stds[i]) > 0:
+            tprs_upper = np.minimum(tprs[i] + tpr_stds[i], 1)
+            tprs_lower = np.maximum(tprs[i] - tpr_stds[i], 0)
+            ax.fill_between(
+                fprs[i],
+                tprs_lower,
+                tprs_upper,
+                label=f"{name} \u00B11 std. dev.",
+                alpha=0.2,
+            )
+    # chance line
+    ax.plot([0, 1], [0, 1], "r--")
+    ax.set(
+        xlim=[-0.05, 1.05],
+        ylim=[-0.05, 1.05],
+        xlabel="False Positive Rate",
+        ylabel="True Positive Rate",
+        title=title,
+    )
+    ax.axis("square")
+    ax.legend(loc="lower right")
+
+    fig.savefig(filename, dpi=300)
+    plt.close()

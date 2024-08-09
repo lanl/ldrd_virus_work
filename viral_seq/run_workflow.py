@@ -678,8 +678,8 @@ if __name__ == "__main__":
     table_loc_test_saved = str(paths[-1] / "X_test.parquet.gzip")
     hyperparams_path = Path("data_calculated/hyperparameters")
     paths.append(hyperparams_path)
-    paths.append(Path("data_calculated/predictions"))
-    predictions_loc = str(paths[-1] / "model_predictions.csv")
+    predictions_path = Path("data_calculated/predictions")
+    paths.append(predictions_path)
     model_path = Path("data_calculated/trained_models")
     paths.append(model_path)
 
@@ -780,11 +780,13 @@ if __name__ == "__main__":
         for group, this_data in plotting_data.items():
             optimization_plots(this_data, group, plots_path)
     # train and predict on all models
-    predictions = {}
-    predictions["Species"] = pd.read_csv(test_file)["Species"]
+    predictions: Dict[str, Dict[str, Any]] = defaultdict(dict)
     models_fitted = {}
     for name, val in model_arguments.items():
-        models_fitted[name], predictions[name] = classifier.train_and_predict(
+        (
+            models_fitted[name],
+            predictions[val["group"]][name],
+        ) = classifier.train_and_predict(
             val["model"],
             X_train,
             y_train,
@@ -794,9 +796,46 @@ if __name__ == "__main__":
             params_predict=val["predict"],
             params_optimized=best_params[name],
         )
-        this_auc = roc_auc_score(y_test, predictions[name])
+        this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
         print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
-    pd.DataFrame(predictions).to_csv(predictions_loc)
+    # ROC curve plotting
+    comp_names: list[str] = []
+    comp_fprs: list[Any] = []
+    comp_tprs: list[Any] = []
+    comp_tpr_stds: list[Any] = []
+    for group in predictions:
+        fpr, tpr, tpr_std = classifier.get_roc_curve(y_test, predictions[group])
+        this_title = (
+            f"ROC Curve\nAveraged over {copies} seeds" if copies > 1 else "ROC Curve"
+        )
+        classifier.plot_roc_curve(
+            group,
+            fpr,
+            tpr,
+            tpr_std,
+            filename=str(plots_path / f"{group}_roc_plot.png"),
+            title=this_title,
+        )
+        comp_names.append(group)
+        comp_fprs.append(fpr)
+        comp_tprs.append(tpr)
+        # output all predictions to .csv
+        predictions[group]["Species"] = pd.read_csv(test_file)["Species"]
+        pd.DataFrame(predictions[group]).to_csv(
+            str(predictions_path / (group + "_predictions.csv"))
+        )
+    this_title = (
+        f"ROC Curve\nEach model averaged over {copies} seeds"
+        if copies > 1
+        else "ROC Curve"
+    )
+    classifier.plot_roc_curve_comparison(
+        comp_names,
+        comp_fprs,
+        comp_tprs,
+        filename=str(plots_path / "roc_plot_comparison.png"),
+        title=this_title,
+    )
     # check feature importance and consensus
     feature_importances = []
     np.random.seed(random_state)  # used by `shap.summary_plot`

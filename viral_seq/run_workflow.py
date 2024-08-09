@@ -497,7 +497,7 @@ def optimize_model(
             % res["target"]
         )
 
-    print("Hyperparameters that will be used:", res["params"])
+    print("Hyperparameters that performed best:", res["params"])
     return res
 
 
@@ -521,6 +521,43 @@ def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str
     ax.set_ylabel("AUC")
     ax.legend(loc=4, fontsize=6)
     fig.savefig(out_fig, dpi=300)
+
+
+def get_test_features(
+    table_loc_test,
+    table_loc_test_saved,
+    test_file,
+    X_train,
+    extract_cookie,
+    debug=False,
+):
+    if not extract_cookie.is_file():
+        debug = False
+    print("Ensuring X_test has only the features in X_train...")
+    if Path(table_loc_test_saved).exists():
+        X_test = pl.read_parquet(table_loc_test_saved).to_pandas()
+        y_test = pd.read_csv(test_file)["Human Host"]
+        if set(X_test.columns) == set(X_train.columns):
+            print(
+                "Will use previously calculated X_test stored at", table_loc_test_saved
+            )
+            if debug:
+                validate_feature_table(table_loc_test_saved, 8, "Test")
+            return X_test, y_test
+        else:
+            print(
+                table_loc_test_saved,
+                "already exists, but no longer matches train data. Will re-make.",
+            )
+    print("Loading all feature tables for test...")
+    test_files = tuple(glob(table_loc_test + "/*gzip"))
+    X_test, y_test = sp.get_training_columns(table_filename=test_files)
+    X_test = X_test.reindex(columns=X_train.columns, fill_value=0)
+    print("Saving X_test to", table_loc_test_saved)
+    X_test.to_parquet(table_loc_test_saved)
+    if debug:
+        validate_feature_table(table_loc_test_saved, 8, "Test")
+    return X_test, y_test
 
 
 if __name__ == "__main__":
@@ -569,7 +606,6 @@ if __name__ == "__main__":
         default="yes",
         help="Option 'none' will not optimize hyperparameters and use mostly defaults, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
     )
-
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
@@ -604,8 +640,14 @@ if __name__ == "__main__":
     table_locs = [table_loc_train, table_loc_test]
     paths.append(Path("data_calculated/tables/train_best"))
     table_loc_train_best = str(paths[-1] / "X_train.parquet.gzip")
-    paths.append(Path("data_calculated/hyperparameters"))
-    hyperparams_rfc_file = str(paths[-1] / "params_rfc.json")
+    paths.append(Path("data_calculated/tables/test_saved"))
+    table_loc_test_saved = str(paths[-1] / "X_test.parquet.gzip")
+    hyperparams_path = Path("data_calculated/hyperparameters")
+    paths.append(hyperparams_path)
+    paths.append(Path("data_calculated/predictions"))
+    predictions_loc = str(paths[-1] / "model_predictions.csv")
+    model_path = Path("data_calculated/trained_models")
+    paths.append(model_path)
 
     paths.append(Path("plots"))
     optimization_plot_source = str(paths[-1] / "optimization_plot.csv")
@@ -633,42 +675,62 @@ if __name__ == "__main__":
         n_jobs=n_jobs,
         random_state=random_state,
     )
+    X_test, y_test = get_test_features(
+        table_loc_test,
+        table_loc_test_saved,
+        test_file,
+        X_train,
+        extract_cookie,
+        debug=debug,
+    )
     best_params: Dict[str, Any] = {}
     plotting_data: Dict[str, Any] = {}
-    optimize_model_arguments: Dict[str, Any] = {}
+    model_arguments: Dict[str, Any] = {}
     one_sample = 1.0 / X_train.shape[0]
     sqrt_feature = math.sqrt(X_train.shape[1]) / X_train.shape[1]
     one_feature = 1.0 / X_train.shape[1]
-    optimize_model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
+    model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
         "model": RandomForestClassifier,
-        "outfile": hyperparams_rfc_file,
-        "num_samples": 3_000,
-        "n_jobs_cv": 1,
-        "config": {
-            "n_estimators": 2_000,
-            "n_jobs": 1,  # it's better to let ray handle parallelization
-            "max_samples": tune.uniform(one_sample, 1.0),
-            "min_samples_leaf": tune.uniform(
-                one_sample, np.min([1.0, 10 * one_sample])
-            ),
-            "min_samples_split": tune.uniform(
-                one_sample, np.min([1.0, 300 * one_sample])
-            ),
-            "max_features": tune.uniform(one_feature, np.min([1.0, 2 * sqrt_feature])),
-            "criterion": tune.choice(
-                ["gini", "log_loss"]
-            ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
-            "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
-            "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
+        "suffix": "rfc",
+        "optimize": {
+            "num_samples": 3_000,
+            "n_jobs_cv": 1,
+            "config": {
+                "n_estimators": 2_000,
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "max_samples": tune.uniform(one_sample, 1.0),
+                "min_samples_leaf": tune.uniform(
+                    one_sample, np.min([1.0, 10 * one_sample])
+                ),
+                "min_samples_split": tune.uniform(
+                    one_sample, np.min([1.0, 300 * one_sample])
+                ),
+                "max_features": tune.uniform(
+                    one_feature, np.min([1.0, 2 * sqrt_feature])
+                ),
+                "criterion": tune.choice(
+                    ["gini", "log_loss"]
+                ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
+                "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
+                "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
+            },
+        },
+        "predict": {
+            "n_estimators": 10_000,
+            "n_jobs": n_jobs,
+            "random_state": random_state,
         },
     }
-    for name, params in optimize_model_arguments.items():
+    # optimize first if requested
+    for name, val in model_arguments.items():
+        params = val["optimize"]
         if optimize == "none":
             best_params[name] = {}
         else:
             print("===", name, "===")
             t_start = perf_counter()
             res = optimize_model(
+                model=val["model"],
                 X_train=X_train,
                 y_train=y_train,
                 optimize=optimize,
@@ -676,6 +738,7 @@ if __name__ == "__main__":
                 random_state=random_state,
                 name=name,
                 n_jobs=n_jobs,
+                outfile=str(hyperparams_path / ("params_" + val["suffix"] + ".json")),
                 **params,
             )
             print(
@@ -691,3 +754,21 @@ if __name__ == "__main__":
         optimization_plots(
             plotting_data, optimization_plot_source, optimization_plot_figure
         )
+    # train and predict on all models
+    predictions = {}
+    predictions["Species"] = pd.read_csv(test_file)["Species"]
+    models_fitted = {}
+    for name, val in model_arguments.items():
+        models_fitted[name], predictions[name] = classifier.train_and_predict(
+            val["model"],
+            X_train,
+            y_train,
+            X_test,
+            name=name,
+            model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
+            params_predict=val["predict"],
+            params_optimized=best_params[name],
+        )
+        this_auc = roc_auc_score(y_test, predictions[name])
+        print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
+    pd.DataFrame(predictions).to_csv(predictions_loc)

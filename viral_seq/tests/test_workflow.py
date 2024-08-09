@@ -2,7 +2,6 @@ from viral_seq import run_workflow as workflow
 from matplotlib.testing.decorators import image_comparison
 import numpy as np
 from importlib.resources import files
-from click.testing import CliRunner
 from contextlib import ExitStack
 import pytest
 import pandas as pd
@@ -30,7 +29,7 @@ def test_optimization_plotting(tmp_path):
 
 
 @pytest.mark.parametrize("extract", [True, False])
-def test_get_test_features(extract):
+def test_get_test_features(extract, tmpdir):
     raw_file = files("viral_seq.tests.inputs").joinpath(
         "get_test_features_test_file.csv"
     )
@@ -42,8 +41,7 @@ def test_get_test_features(extract):
         files("viral_seq.tests.inputs") / "get_test_features_table_loc_test"
     )
     extract_cookie = raw_file if extract else files("viral_seq.tests") / "fake_file.dat"
-    runner = CliRunner()
-    with runner.isolated_filesystem():
+    with tmpdir.as_cwd():
         with ExitStack() as stack:
             if extract:
                 stack.enter_context(pytest.raises(NameError, match="table_info"))

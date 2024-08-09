@@ -764,7 +764,6 @@ if __name__ == "__main__":
             X_train,
             y_train,
             X_test,
-            y_test,
             name=name,
             model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
             params_predict=val["predict"],

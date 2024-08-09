@@ -8,9 +8,9 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 import pytest
 from ray import tune
-from click.testing import CliRunner
 from pathlib import Path
 from importlib.resources import files
+from sklearn.utils.validation import check_is_fitted
 
 
 @pytest.mark.parametrize(
@@ -103,21 +103,19 @@ def test_get_hyperparameters(config, score, best_params):
 
 
 @pytest.mark.parametrize("model, name", [(RandomForestClassifier, "rfc")])
-def test_train_and_predict(capsys, model, name):
-    runner = CliRunner()
+def test_train_and_predict(capsys, model, name, tmpdir):
     X, y = make_classification(n_samples=15, n_features=10, random_state=0)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=5, random_state=0
     )
     params_predict = {"random_state": 0}
     params_optimized = {"random_state": 42, "verbose": 0}
-    with runner.isolated_filesystem():
+    with tmpdir.as_cwd():
         clf, y_pred = classifier.train_and_predict(
             model,
             X_train,
             y_train,
             X_test,
-            y_test,
             model_out="model.p",
             params_predict=params_predict,
             params_optimized=params_optimized,
@@ -130,8 +128,9 @@ def test_train_and_predict(capsys, model, name):
         )
         df = pd.DataFrame(y_pred)
         y_expected = files("viral_seq.tests.expected") / (
-            "test_train_and_predict_y_expected_" + str(name) + ".csv"
+            f"test_train_and_predict_y_expected_{name}.csv"
         )
         df_expected = pd.read_csv(y_expected)
         df_expected.columns = df_expected.columns.astype(int)
         assert_frame_equal(df, df_expected)
+        check_is_fitted(clf)

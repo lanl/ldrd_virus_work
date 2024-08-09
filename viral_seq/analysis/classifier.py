@@ -111,12 +111,29 @@ def train_and_predict(
     X_train,
     y_train,
     X_test,
-    y_test,
     name="Classifier",
     model_out="",
-    params_predict={},
-    params_optimized={},
+    params_predict=None,
+    params_optimized=None,
 ):
+    """Trains model with X_train, y_train, then predicts on X_test. We expect params_optimized come from an optimization procedure which may have parameters we want to adjust using params_predict.
+
+    Parameters:
+        model: expects sklearn-like interface
+        X_train: any form model accepts for fitting
+        y_train: any form model accepts for fitting
+        X_test: any form model accepts for prediction
+        name: customizes print statement for clarity with multiple calls
+        model_out: if not empty, fitted model is pickled to this filename
+        params_predict: model parameters to use which supersede params_optimized
+        params_optimized: model parameters to use if not overriden by params_predict
+    Returns:
+        fitted model and predictions on X_test
+    """
+    if params_predict is None:
+        params_predict = {}
+    if params_optimized is None:
+        params_optimized = {}
     params_optimized = {
         k: v for k, v in params_optimized.items() if k not in params_predict
     }

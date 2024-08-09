@@ -851,6 +851,16 @@ organism_dict = {
                 # of zoonotic activity:
                 # https://ictv.global/report/chapter/poxviridae/poxviridae/avipoxvirus
                 "Flamingopox virus FGPVKD09": "avian",
+                # https://www.sciencedirect.com/topics/immunology-and-microbiology/aviadenovirus#:~:text=Aviadenoviruses%20are%20serologically%20distinct%20from,lengths%20in%20each%20penton%20base.
+                # https://ictv.global/report/chapter/adenoviridae/adenoviridae/aviadenovirus
+                # https://www.genome.jp/virushostdb/190061
+                "Fowl aviadenovirus A": "avian",
+                # https://www.genome.jp/virushostdb/172861
+                "Fowl aviadenovirus 5": "avian",
+                # https://www.genome.jp/virushostdb/190063
+                "Fowl aviadenovirus C": "avian",
+                # https://www.genome.jp/virushostdb/190064
+                "Fowl aviadenovirus D": "avian",
                 }
 
 
@@ -938,7 +948,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=230)
+                                                           n_records=235)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

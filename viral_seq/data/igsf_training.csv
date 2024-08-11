@@ -26,3 +26,29 @@ https://doi.org/10.1371/journal.ppat.1002240,measles virus,IgSF,True,NC_001498.1
 https://doi.org/10.1371/journal.pone.0106281,phocine distemper virus,IgSF,False,AF525287.1,False,True,False
 https://doi.org/10.1128/jvi.02792-12,peste des petits ruminants virus,IgSF,True,NC_006383.2,False,True,False
 https://doi.org/10.1128/jvi.68.6.3453-3458.1994,encephalomyocarditis virus,IgSF,True,NC_001479.1,False,True,False
+https://doi.org/10.1371/journal.ppat.1003232,chikungunya virus,IgSF,True,NC_004162.2,True,True,True
+https://doi.org/10.1016/j.chom.2012.08.009,dengue virus,IgSF,True,NC_001474.2,True,True,True
+https://doi.org/10.1128/jvi.06451-11,lassa virus,IgSF,True,NC_004297.1 NC_004296.1,True,True,True
+https://doi.org/10.1292/jvms.12-0176,lymphocytic choriomeningitis virus,IgSF,False,KY514256.1,True,True,True
+https://doi.org/10.1128/jvi.01157-06,marburg virus,IgSF,True,NC_001608.3,True,True,True
+https://doi.org/10.1128/jvi.01157-06,reston ebolavirus,IgSF,True,NC_004161.1,True,True,True
+https://doi.org/10.1038/s41422-020-00460-y,severe acute respiratory syndrome-related coronavirus,IgSF,True,NC_045512.2,True,True,True
+https://doi.org/10.1016/j.chom.2011.03.012,sindbis virus,IgSF,True,NC_001547.1,True,True,True
+https://doi.org/10.1128/jvi.01157-06,sudan ebolavirus,IgSF,True,NC_006432.1,True,True,True
+https://doi.org/10.1128/jvi.01157-06,tai forest ebolavirus,IgSF,True,NC_014372.1,True,True,True
+https://doi.org/10.1128/jvi.01157-06,zaire ebolavirus,IgSF,True,NC_002549.1,True,True,True
+https://doi.org/10.1016/j.chom.2011.03.012,vaccinia virus,IgSF,True,NC_006998.1,True,True,True
+https://doi.org/10.1128/jvi.00354-15,zika virus,IgSF,True,NC_035889.1,True,True,True
+https://doi.org/10.1016/j.virol.2020.02.002,andes virus,IgSF,True,NC_003468.2 NC_003467.2 NC_003466.1,True,True,True
+https://doi.org/10.1371/journal.ppat.1003232,argentinian mammarenavirus,IgSF,True,NC_005081.1 NC_005080.1,True,True,True
+https://doi.org/10.1371/journal.ppat.1003232,eastern equine encephalitis virus,IgSF,True,NC_003899.1,True,True,True
+https://doi.org/10.1016/j.virol.2020.02.002,hantaan virus,IgSF,True,NC_005222.1 NC_005219.1 NC_005218.1,True,True,True
+https://doi.org/10.1002/j.1460-2075.1996.tb00803.x,hepatovirus A,IgSF,True,NC_001489.1,True,True,True
+https://doi.org/10.3390/v10110630,japanese encephalitis virus,IgSF,False,NC_001437.1,True,True,True
+https://doi.org/10.1371/journal.ppat.1003232,machupo mammarenavirus,IgSF,True,NC_005079.1 NC_005078.1,True,True,True
+https://doi.org/10.1128/jvi.00709-20,porcine reproductive and respiratory syndrome virus,IgSF,True,NC_001961.1,False,True,False
+https://doi.org/10.1128/jvi.01025-13,ross river virus,IgSF,True,NC_075016.1,True,True,True
+https://doi.org/10.1371/journal.ppat.1003232,serra do navio mammarenavirus,IgSF,True,NC_043641.1 NC_043640.1 NC_043639.1,True,True,True
+https://doi.org/10.1371/journal.ppat.1003232,tacaribe mammarenavirus,IgSF,True,NC_004293.1 NC_004292.1,True,True,True
+https://doi.org/10.1128/mbio.02860-21,tick-borne encephalitis virus,IgSF,True,NC_001672.1,True,True,True
+https://doi.org/10.1016/j.chom.2012.08.009,yellow fever virus,IgSF,True,NC_002031.1,True,True,True

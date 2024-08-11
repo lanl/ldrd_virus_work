@@ -52,3 +52,6 @@ https://doi.org/10.1371/journal.ppat.1003232,serra do navio mammarenavirus,IgSF,
 https://doi.org/10.1371/journal.ppat.1003232,tacaribe mammarenavirus,IgSF,True,NC_004293.1 NC_004292.1,True,True,True
 https://doi.org/10.1128/mbio.02860-21,tick-borne encephalitis virus,IgSF,True,NC_001672.1,True,True,True
 https://doi.org/10.1016/j.chom.2012.08.009,yellow fever virus,IgSF,True,NC_002031.1,True,True,True
+https://doi.org/10.1016/j.virol.2020.05.012,caviid betaherpesvirus 2,IgSF,True,NC_020231.1,False,True,False
+https://doi.org/10.1038/nm929,adeno-associated dependoparvovirus a,IgSF,False,KT599810.1,True,True,True
+https://doi.org/10.1128/jvi.00299-14,coxsackievirus B3,IgSF,True,NC_038307.1,True,True,True

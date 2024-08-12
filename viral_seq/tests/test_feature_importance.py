@@ -102,7 +102,7 @@ def test_feature_importance_consensus():
     extensions=["png"],
     style="mpl20",
 )
-def test_plot_feat_import():
+def test_plot_feat_import(tmpdir):
     sorted_feature_importances = [
         0.03632587,
         0.04453623,
@@ -115,9 +115,10 @@ def test_plot_feat_import():
         0.13530306,
         0.2744151,
     ]
-    fi.plot_feat_import(
-        sorted_feature_importances, ["Feature " + str(i) for i in range(10)], 10
-    )
+    with tmpdir.as_cwd():
+        fi.plot_feat_import(
+            sorted_feature_importances, ["Feature " + str(i) for i in range(10)], 10
+        )
 
 
 @image_comparison(
@@ -126,9 +127,10 @@ def test_plot_feat_import():
     extensions=["png"],
     style="mpl20",
 )
-def test_plot_feat_import_consensus():
+def test_plot_feat_import_consensus(tmpdir):
     ranked_feature_names = np.array(
         ["Feature 8", "Feature 0", "Feature 3", "Feature 1", "Feature 7", "Feature 2"]
     )
     ranked_feature_counts = np.array([1, 2, 3, 3, 3, 3])
-    fi.plot_feat_import_consensus(ranked_feature_names, ranked_feature_counts, 3, 5)
+    with tmpdir.as_cwd():
+        fi.plot_feat_import_consensus(ranked_feature_names, ranked_feature_counts, 3, 5)

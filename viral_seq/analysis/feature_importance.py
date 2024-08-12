@@ -79,6 +79,7 @@ def plot_feat_import(
     model_name: str = "",
     fig_name_stem: str = "feat_imp",
 ):
+    plt.close()
     fig_name = fig_name_stem + ".png"
     fig_source = fig_name_stem + ".csv"
     df = pd.DataFrame()
@@ -95,7 +96,6 @@ def plot_feat_import(
     ax.set_title(f"Feature importance for top {top_feat_count} features\n{model_name}")
     fig.tight_layout()
     fig.savefig(fig_name, dpi=300)  # type: ignore
-    return fig
 
 
 def plot_feat_import_consensus(
@@ -106,19 +106,21 @@ def plot_feat_import_consensus(
     fig_name: Optional[str] = "feat_imp_consensus.png",
     fig_source: Optional[str] = "feat_imp_consensus.csv",
 ):
+    plt.close()
     df = pd.DataFrame()
     df["Feature Name"] = ranked_feature_names
     df[
         f"Count Of Models where ranked in top {top_feat_count} features"
     ] = ranked_feature_counts
     df.to_csv(fig_source, index=False)
+    y_labels = ranked_feature_names[-20:]
+    x_vals = (ranked_feature_counts[-20:] / num_input_models) * 100
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-    y_pos = np.arange(ranked_feature_names.size)
-    ax.barh(y_pos, (ranked_feature_counts / num_input_models) * 100)
+    y_pos = np.arange(y_labels.size)
+    ax.barh(y_pos, x_vals)
     ax.set_xlim(0, 100)
     ax.set_xlabel(f"% ML models where ranked in top {top_feat_count} features")
-    ax.set_yticks(y_pos, labels=ranked_feature_names)
+    ax.set_yticks(y_pos, labels=y_labels)
     ax.set_title(f"Feature importance consensus amongst {num_input_models} models")
     fig.tight_layout()
     fig.savefig(fig_name, dpi=300)  # type: ignore
-    return fig

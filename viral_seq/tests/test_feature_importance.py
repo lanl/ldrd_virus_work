@@ -2,7 +2,8 @@ from viral_seq.analysis import feature_importance as fi
 import numpy as np
 from numpy.testing import assert_array_equal
 import matplotlib
-from matplotlib.testing.decorators import image_comparison
+from matplotlib.testing.compare import compare_images
+from importlib.resources import files
 
 matplotlib.use("Agg")
 
@@ -96,13 +97,10 @@ def test_feature_importance_consensus():
     assert num_input_models == 3
 
 
-@image_comparison(
-    baseline_images=["test_plot_feat_import"],
-    remove_text=True,
-    extensions=["png"],
-    style="mpl20",
-)
 def test_plot_feat_import(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_feat_import.png"
+    )
     sorted_feature_importances = [
         0.03632587,
         0.04453623,
@@ -119,18 +117,17 @@ def test_plot_feat_import(tmpdir):
         fi.plot_feat_import(
             sorted_feature_importances, ["Feature " + str(i) for i in range(10)], 10
         )
+        compare_images(expected_plot, "feat_imp.png", 0.001)
 
 
-@image_comparison(
-    baseline_images=["test_plot_feat_import_consensus"],
-    remove_text=True,
-    extensions=["png"],
-    style="mpl20",
-)
 def test_plot_feat_import_consensus(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_feat_import_consensus.png"
+    )
     ranked_feature_names = np.array(
         ["Feature 8", "Feature 0", "Feature 3", "Feature 1", "Feature 7", "Feature 2"]
     )
     ranked_feature_counts = np.array([1, 2, 3, 3, 3, 3])
     with tmpdir.as_cwd():
         fi.plot_feat_import_consensus(ranked_feature_names, ranked_feature_counts, 3, 5)
+        compare_images(expected_plot, "feat_imp_consensus.png", 0.001)

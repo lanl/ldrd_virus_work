@@ -31,7 +31,7 @@ def feature_importance_consensus(
                          selection), or to a reduced version of this data structure
                          like with random forest feature importances with shape
                          (n_features,)
-    features_names: an array-like of strings of the features names of size ``n_features``
+    feature_names: an array-like of strings of the features names of size ``n_features``
     top_feat_count: an integer representing the number of top features
                     to consider from each model when assessing the consensus
 
@@ -79,7 +79,6 @@ def plot_feat_import(
     model_name: str = "",
     fig_name_stem: str = "feat_imp",
 ):
-    plt.close()
     fig_name = fig_name_stem + ".png"
     fig_source = fig_name_stem + ".csv"
     df = pd.DataFrame()
@@ -96,6 +95,7 @@ def plot_feat_import(
     ax.set_title(f"Feature importance for top {top_feat_count} features\n{model_name}")
     fig.tight_layout()
     fig.savefig(fig_name, dpi=300)  # type: ignore
+    plt.close()
 
 
 def plot_feat_import_consensus(
@@ -106,7 +106,6 @@ def plot_feat_import_consensus(
     fig_name: Optional[str] = "feat_imp_consensus.png",
     fig_source: Optional[str] = "feat_imp_consensus.csv",
 ):
-    plt.close()
     df = pd.DataFrame()
     df["Feature Name"] = ranked_feature_names
     df[
@@ -124,3 +123,4 @@ def plot_feat_import_consensus(
     ax.set_title(f"Feature importance consensus amongst {num_input_models} models")
     fig.tight_layout()
     fig.savefig(fig_name, dpi=300)  # type: ignore
+    plt.close()

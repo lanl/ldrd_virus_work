@@ -12,7 +12,7 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve
 from pathlib import Path
 from warnings import warn
 import json
@@ -776,11 +776,12 @@ if __name__ == "__main__":
     # cross-validation
     test_folds: list = []
     predictions_cv = defaultdict(list)
+    model_eer_threshold = defaultdict(list)
     for name, val in model_arguments.items():
         these_params = {
             k: v for k, v in best_params[name].items() if k not in val["predict"]
         }
-        these_test_folds, these_preds, _ = classifier.cross_validation(
+        cv_data = classifier.cross_validation(
             val["model"],
             X_train,
             y_train,
@@ -789,11 +790,34 @@ if __name__ == "__main__":
         )
         if len(test_folds):
             assert np.allclose(
-                np.hstack(these_test_folds), np.hstack(test_folds)
+                np.hstack(cv_data.y_tests), np.hstack(test_folds)
             ), "`classifier.cross_validation` is not returning identical test sets for each model/copy"
         else:
-            test_folds = these_test_folds
-        predictions_cv[val["group"]].append(these_preds)
+            test_folds = cv_data.y_tests
+        predictions_cv[val["group"]].append(cv_data.y_preds)
+        # get EER data
+        eer_data_cv = []
+        fprs = []
+        tprs = []
+        thresholds = []
+        for i, pred in enumerate(cv_data.y_preds):
+            this_fpr, this_tpr, this_thresh = roc_curve(test_folds[i], pred)
+            fprs.append(this_fpr)
+            tprs.append(this_tpr)
+            this_eer_data = classifier.cal_eer_thresh_and_val(
+                this_fpr, this_tpr, this_thresh
+            )
+            eer_data_cv.append(this_eer_data)
+            thresholds.append(this_eer_data.eer_threshold)
+        model_eer_threshold[name] = np.mean(thresholds)
+        classifier.plot_roc_curve_comparison(
+            [f"Fold {i}" for i in range(len(test_folds))],
+            fprs,
+            tprs,
+            filename=str(plots_path / f"{name}_eer_roc_plot.png"),
+            title=f"ROC Curve\n{name}\nCross Validation on Training",
+            eer_data_list=eer_data_cv,
+        )
     assert int(len(model_arguments) / copies) == len(
         predictions_cv
     ), f"Number of cross-validation predictions doesn't match number of model types: {len(predictions_cv)} != {int(len(model_arguments)/copies)}"
@@ -886,8 +910,9 @@ if __name__ == "__main__":
         pd.DataFrame(predictions[group]).to_csv(
             str(predictions_path / (group + "_predictions.csv"))
         )
+        predictions[group].pop("Species")
     this_title = (
-        f"ROC Curve\nEach model averaged over {copies} seeds"
+        f"ROC Curve\nEach classifier type averaged over {copies} seeds."
         if copies > 1
         else "ROC Curve"
     )
@@ -897,6 +922,42 @@ if __name__ == "__main__":
         comp_tprs,
         filename=str(plots_path / "roc_plot_comparison.png"),
         title=this_title,
+    )
+    # ensemble models
+    comp_names_ensembles = []
+    comp_fprs_ensembles = []
+    comp_tprs_ensembles = []
+    predictions_ensemble_hard = {}
+    predictions_ensemble_hard_eer = {}
+    for group in predictions:
+        for name in predictions[group]:
+            # compare EER threshold to typical hard votes 0.5 threshold
+            predictions_ensemble_hard[name] = predictions[group][name] > 0.5
+            predictions_ensemble_hard_eer[name] = (
+                predictions[group][name] > model_eer_threshold[name]
+            )
+    for name, these_predictions in {
+        "0.5": predictions_ensemble_hard,
+        "EER": predictions_ensemble_hard_eer,
+    }.items():
+        df_ortho = pd.DataFrame.from_dict(these_predictions)
+        this_ensemble = df_ortho.mode(axis="columns").iloc[:, 0]  # type: ignore
+        this_ensemble_proba = df_ortho.sum(axis=1) / df_ortho.shape[1]
+        this_fpr, this_tpr, this_thresh = roc_curve(y_test, this_ensemble_proba)
+        df_out = pd.DataFrame(this_ensemble_proba, columns=["Ensemble Averaged Votes"])
+        df_out["Species"] = pd.read_csv(test_file)["Species"]
+        df_out.to_csv(
+            str(predictions_path / f"ensemble_hard_{name}_proba_predictions.csv")
+        )
+        comp_names_ensembles.append(f"Hard Votes Ensemble at {name} Threshold")
+        comp_fprs_ensembles.append(this_fpr)
+        comp_tprs_ensembles.append(this_tpr)
+    classifier.plot_roc_curve_comparison(
+        comp_names_ensembles,
+        comp_fprs_ensembles,
+        comp_tprs_ensembles,
+        filename=str(plots_path / "roc_plot_ensemble_comparison.png"),
+        title="ROC Curve\nEnsemble Models",
     )
     # check feature importance and consensus
     feature_importances = []

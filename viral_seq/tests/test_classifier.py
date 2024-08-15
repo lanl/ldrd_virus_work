@@ -188,17 +188,23 @@ def test_get_roc_curve():
     assert_allclose(tpr_std, expected_tpr_std)
 
 
-def test_plot_roc_curve(tmpdir):
+@pytest.mark.parametrize(
+    "eer_test, expected_filename",
+    [(False, "test_plot_roc_curve.png"), (True, "test_plot_roc_curve_eer.png")],
+)
+def test_plot_roc_curve(eer_test, expected_filename, tmpdir):
     rng = np.random.default_rng(951753)
-    expected_plot = files("viral_seq.tests.expected").joinpath(
-        "test_plot_roc_curve.png"
-    )
+    expected_plot = files("viral_seq.tests.expected").joinpath(expected_filename)
     # generate random input typical of fpr, tpr values
     # arrays of values increasing by random intervals from 0.0 to 1.0
     tpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
     fpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    eer_data = None
+    if eer_test:
+        threshold = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+        eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
     with tmpdir.as_cwd():
-        classifier.plot_roc_curve("Test", fpr, tpr)
+        classifier.plot_roc_curve("Test", fpr, tpr, eer_data=eer_data)
         assert compare_images(expected_plot, "roc_plot.png", 0.001) is None
 
 
@@ -262,7 +268,7 @@ def test_plot_roc_curve_comparison(tmpdir):
 def test_cross_validation(random_state, y_tests, y_preds, scores):
     X, y = make_classification(n_samples=10, n_features=10, random_state=random_state)
     X = pd.DataFrame(X)
-    test_y_tests, test_y_preds, test_scores = classifier.cross_validation(
+    cv_data = classifier.cross_validation(
         RandomForestClassifier,
         X,
         y,
@@ -270,9 +276,9 @@ def test_cross_validation(random_state, y_tests, y_preds, scores):
         n_estimators=10,
         random_state=random_state,
     )
-    assert_allclose(np.hstack(test_y_tests), np.hstack(y_tests))
-    assert_allclose(np.hstack(test_y_preds), np.hstack(y_preds))
-    assert_allclose(test_scores, scores)
+    assert_allclose(np.hstack(cv_data.y_tests), np.hstack(y_tests))
+    assert_allclose(np.hstack(cv_data.y_preds), np.hstack(y_preds))
+    assert_allclose(cv_data.scores, scores)
 
 
 def test_get_roc_curve_cv():
@@ -373,3 +379,17 @@ def test_plot_calibration_curve(tmpdir):
         assert (
             compare_images(expected_plot, "plot_calibration_curve.png", 0.001) is None
         )
+
+
+def test_cal_eer_thresh_and_val():
+    rng = np.random.default_rng(4684365)
+    expected_eer_data = classifier.EER_Data(
+        eer_threshold_index=5,
+        eer_threshold=0.6575733297477135,
+        eer_value=0.4434414483363267,
+    )
+    tpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    fpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    threshold = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
+    assert_allclose(eer_data, expected_eer_data)

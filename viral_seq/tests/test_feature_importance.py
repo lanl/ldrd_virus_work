@@ -1,9 +1,11 @@
 from viral_seq.analysis import feature_importance as fi
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 import matplotlib
 from matplotlib.testing.compare import compare_images
 from importlib.resources import files
+import pytest
+import pickle
 
 matplotlib.use("Agg")
 
@@ -131,3 +133,46 @@ def test_plot_feat_import_consensus(tmpdir):
     with tmpdir.as_cwd():
         fi.plot_feat_import_consensus(ranked_feature_names, ranked_feature_counts, 3, 5)
         assert compare_images(expected_plot, "feat_imp_consensus.png", 0.001) is None
+
+
+@pytest.mark.parametrize(
+    "filename", ["shap_values_ndim3.p", "shap_values_xgboost.p", "shap_values_list.p"]
+)
+def test_get_positive_shap_values(filename):
+    input_file = files("viral_seq.tests.inputs").joinpath(filename)
+    expected_file = files("viral_seq.tests.expected").joinpath(f"pos_{filename}")
+    with open(input_file, "rb") as f:
+        shap_values = pickle.load(f)
+    with open(expected_file, "rb") as f:
+        expected = pickle.load(f)
+    res = fi.get_positive_shap_values(shap_values)
+    if isinstance(res, np.ndarray):
+        actual = res
+    else:
+        actual = res.values
+    assert_allclose(actual, expected)
+
+
+def test_plot_shap_meanabs(tmpdir):
+    input_file = files("viral_seq.tests.inputs").joinpath("pos_shap_ndim3.p")
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_shap_meanabs.png"
+    )
+    with open(input_file, "rb") as f:
+        pos_shap_values = pickle.load(f)
+    with tmpdir.as_cwd():
+        fi.plot_shap_meanabs(pos_shap_values)
+        assert compare_images(expected_plot, "feat_shap_meanabs.png", 0.001) is None
+
+
+def test_plot_shap_beeswarm(tmpdir):
+    input_file = files("viral_seq.tests.inputs").joinpath("pos_shap_ndim3.p")
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_shap_beeswarm.png"
+    )
+    np.random.seed(0)  # beeswarm/summary_plot uses numpy for random
+    with open(input_file, "rb") as f:
+        pos_shap_values = pickle.load(f)
+    with tmpdir.as_cwd():
+        fi.plot_shap_beeswarm(pos_shap_values)
+        assert compare_images(expected_plot, "feat_shap_beeswarm.png", 0.001) is None

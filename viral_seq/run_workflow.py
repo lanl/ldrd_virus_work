@@ -24,6 +24,7 @@ from time import perf_counter
 import math
 import tarfile
 from lightgbm import LGBMClassifier
+import shap
 
 matplotlib.use("Agg")
 
@@ -804,7 +805,10 @@ if __name__ == "__main__":
     pd.DataFrame(predictions).to_csv(predictions_loc)
     # check feature importance and consensus
     feature_importances = []
+    np.random.seed(random_state)  # used by `shap.summary_plot`
     for name, clf in models_fitted.items():
+        print(f"Plotting feature importances for {name}")
+        # built-in importances
         (
             sorted_feature_importances,
             sorted_feature_names,
@@ -819,6 +823,30 @@ if __name__ == "__main__":
             ),
         )
         feature_importances.append(clf.feature_importances_)
+        # SHAP importances
+        print("Calculating & Plotting SHAP values...")
+        time_start = perf_counter()
+        explainer = shap.Explainer(clf, seed=random_state)
+        shap_values = explainer(X_train)
+        print("Finished SHAP calculation in", perf_counter() - time_start)
+        positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
+        feature_importance.plot_shap_meanabs(
+            positive_shap_values,
+            model_name=name,
+            fig_name_stem=str(
+                plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
+            ),
+            top_feat_count=10,
+        )
+        feature_importance.plot_shap_beeswarm(
+            positive_shap_values,
+            model_name=name,
+            fig_name=str(
+                plots_path / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
+            ),
+            max_display=10,
+        )
+        feature_importances.append(positive_shap_values)
     (
         ranked_feature_names,
         ranked_feature_counts,

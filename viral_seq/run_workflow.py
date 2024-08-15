@@ -1,6 +1,6 @@
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils, classifier
+from viral_seq.analysis import rfc_utils, classifier, feature_importance
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -650,9 +650,12 @@ if __name__ == "__main__":
     model_path = Path("data_calculated/trained_models")
     paths.append(model_path)
 
-    paths.append(Path("plots"))
-    optimization_plot_source = str(paths[-1] / "optimization_plot.csv")
-    optimization_plot_figure = str(paths[-1] / "optimization_plot.png")
+    plots_path = Path("plots")
+    paths.append(plots_path)
+    optimization_plot_source = str(plots_path / "optimization_plot.csv")
+    optimization_plot_figure = str(plots_path / "optimization_plot.png")
+    feature_imp_consensus_plot_source = str(plots_path / "feat_imp_consensus.csv")
+    feature_imp_consensus_plot_figure = str(plots_path / "feat_imp_consensus.png")
 
     for path in paths:
         path.mkdir(parents=True, exist_ok=True)
@@ -799,3 +802,37 @@ if __name__ == "__main__":
         this_auc = roc_auc_score(y_test, predictions[name])
         print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
     pd.DataFrame(predictions).to_csv(predictions_loc)
+    # check feature importance and consensus
+    feature_importances = []
+    for name, clf in models_fitted.items():
+        (
+            sorted_feature_importances,
+            sorted_feature_names,
+        ) = feature_importance.sort_features(clf.feature_importances_, X_train.columns)
+        feature_importance.plot_feat_import(
+            sorted_feature_importances,
+            sorted_feature_names,
+            top_feat_count=10,
+            model_name=name,
+            fig_name_stem=str(
+                plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+            ),
+        )
+        feature_importances.append(clf.feature_importances_)
+    (
+        ranked_feature_names,
+        ranked_feature_counts,
+        num_input_models,
+    ) = feature_importance.feature_importance_consensus(
+        pos_class_feat_imps=feature_importances,
+        feature_names=X_train.columns,
+        top_feat_count=10,
+    )
+    feature_importance.plot_feat_import_consensus(
+        ranked_feature_names=ranked_feature_names,
+        ranked_feature_counts=ranked_feature_counts,
+        num_input_models=num_input_models,
+        top_feat_count=10,
+        fig_name=feature_imp_consensus_plot_figure,
+        fig_source=feature_imp_consensus_plot_source,
+    )

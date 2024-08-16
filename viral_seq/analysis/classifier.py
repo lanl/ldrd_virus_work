@@ -6,7 +6,7 @@ from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
 from sklearn.metrics import get_scorer, roc_curve, auc
 from sklearn.model_selection import StratifiedKFold
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 import ray
 from ray import tune
 from ray.tune.search.optuna import OptunaSearch
@@ -102,6 +102,40 @@ def get_model_arguments(
             },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/xgboost-tuning.html#xgboost-tunable-hyperparameters
         },
         "predict": {
+            "n_jobs": n_jobs,
+            "random_state": random_state,
+        },
+    }
+    model_arguments["ExtraTreesClassifier Seed:" + str(random_state)] = {
+        "model": ExtraTreesClassifier,
+        "group": "ExtraTreesClassifier",
+        "suffix": "etc_" + str(random_state),
+        "optimize": {
+            "num_samples": 1_500,
+            "n_jobs_cv": 1,
+            "config": {
+                "bootstrap": True,
+                "n_estimators": 2_000,
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "max_samples": tune.uniform(one_sample, 1.0),
+                "min_samples_leaf": tune.uniform(
+                    one_sample, np.min([1.0, 10 * one_sample])
+                ),
+                "min_samples_split": tune.uniform(
+                    one_sample, np.min([1.0, 300 * one_sample])
+                ),
+                "max_features": tune.uniform(
+                    one_feature, np.min([1.0, 2 * sqrt_feature])
+                ),
+                "criterion": tune.choice(
+                    ["gini", "log_loss"]
+                ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
+                "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
+                "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
+            },
+        },
+        "predict": {
+            "n_estimators": 10_000,
             "n_jobs": n_jobs,
             "random_state": random_state,
         },

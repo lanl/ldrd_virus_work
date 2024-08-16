@@ -1056,3 +1056,218 @@ if __name__ == "__main__":
 
         print("Viruses: \n", viruses)
         print("Associated viral proteins: \n", products)
+
+    if workflow == "DTRA":
+    
+        X = pl.read_parquet(table_loc_train_best).to_pandas()
+        tbl = pd.read_csv(train_file)
+        tmp = tbl
+        tmp = tmp.drop(columns=['Citation_for_receptor','Whole_Genome','Mammal_Host','Primate_Host'])
+        tmp = tmp.rename(columns={'Virus_Name': 'Species', 'Human_Host': 'Human Host', 'Receptor_Type': 'Is_Integrin'})
+        tmp['Is_Sialic_Acid'] = pd.Series(dtype='bool')
+        tmp['Is_Both'] = pd.Series(dtype='bool')
+        tmp = tmp[['Species','Accessions','Human Host','Is_Integrin','Is_Sialic_Acid','Is_Both']]
+        tmp['Is_Sialic_Acid'] = np.where(tmp['Is_Integrin'] == 'integrin', False, True)
+        tmp['Is_Both'] = np.where(tmp['Is_Integrin'] == 'both', True, False)
+        tmp['Is_Integrin'] = np.where(tmp['Is_Integrin'] == 'sialic_acid', False, True)
+        tmp.to_csv(train_file)
+        tbl = pd.read_csv(train_file)
+        y = tbl[target_column]
+        v1 = list(X.columns)
+    
+        random_state = np.random.RandomState(0)
+    
+        n_folds = 5
+        cv = StratifiedKFold(n_splits=n_folds)
+        clfr = RandomForestClassifier(
+            n_estimators=10000, n_jobs=-1, random_state=random_state
+        )
+        tprs = []
+        aucs = []
+        mean_fpr = np.linspace(0, 1, 100)
+    
+        fig, ax = plt.subplots(figsize=(8, 8))
+    
+        counter = -1
+        n_features = 5
+        tmp1 = np.zeros((n_folds, n_features))
+    
+        for fold, (train, test) in enumerate(cv.split(X, y)):
+            clfr.fit(X.iloc[train], y[train])
+            df = pd.DataFrame()
+            df["Features"] = X.iloc[train].columns
+            df["Importances"] = clfr.feature_importances_
+            df.sort_values(by=["Importances"], ascending=False, inplace=True)
+            df.reset_index(inplace=True)
+            viz = RocCurveDisplay.from_estimator(
+                clfr,
+                X.iloc[test],
+                y[test],
+                name=f"ROC fold {fold + 1}",
+                alpha=0.3,
+                lw=1,
+                ax=ax,
+                plot_chance_level=(fold == n_folds - 1),
+            )
+            interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+            interp_tpr[0] = 0.0
+            tprs.append(interp_tpr)
+            aucs.append(viz.roc_auc)
+    
+            counter += 1
+            tmp1[counter, :] = df["index"][:n_features].to_numpy()
+    
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_tpr[-1] = 1.0
+        mean_auc = auc(mean_fpr, mean_tpr)
+        std_auc = np.std(aucs)
+        ax.plot(
+            mean_fpr,
+            mean_tpr,
+            color="b",
+            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+            lw=2,
+            alpha=0.8,
+        )
+    
+        std_tpr = np.std(tprs, axis=0)
+        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+        ax.fill_between(
+            mean_fpr,
+            tprs_lower,
+            tprs_upper,
+            color="grey",
+            alpha=0.2,
+            label=r"$\pm$ 1 std. dev.",
+        )
+    
+        ax.set(
+            xlabel="False Positive Rate",
+            ylabel="True Positive Rate",
+            title="Mean ROC curve with variability\n(Positive label '"
+            + str(target_column)
+            + "')",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
+    
+        (uniq, freq) = np.unique(tmp1.flatten(), return_counts=True)
+        tmp2 = np.column_stack((uniq, freq))
+        tmp3 = tmp2[tmp2[:, 1].argsort()]
+        tmp4 = [
+            df[df["index"] == tmp3[i, 0]]["Features"].to_numpy()
+            for i in range(tmp3.shape[0])
+        ]
+        arr1 = tmp3[:, 1]
+        arr2 = [tmp4[i][0] for i in range(len(tmp4))]
+        fig, ax = plt.subplots(figsize=(8, 8))
+        y_pos = np.arange(len(arr2))
+        ax.barh(y_pos, (arr1 / n_folds) * 100)
+        ax.set_xlim(0, 100)
+        ax.set_yticks(y_pos, labels=arr2)
+        ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
+        ax.set_xlabel("Percentage (%)")
+        fig.tight_layout()
+        fig.savefig(str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
+    
+        explainer = shap.Explainer(clfr, seed=random_state)
+        shap_values = explainer(X)
+        positive_shap_values = shap_values[:, np.array(tmp3[:, 0],dtype=int), 1]
+        fig, ax = plt.subplots(figsize=(8, 8))
+        shap.summary_plot(positive_shap_values, show=False, plot_type="violin")
+        fig, ax = plt.gcf(), plt.gca()
+        ax.tick_params(labelsize=9)
+        ax.set_title(f"Effect of Top {len(arr2)} Features for \n{i1}")
+        fig.tight_layout()
+        fig.savefig(fldr + str(i1.lower()) + '/plots/' + 'SHAP_' + str(i1) + '.png', dpi=300)
+        
+        records = sp.load_from_cache(cache=cache_viral, filter=False)
+        
+        viruses_AA = []
+        proteins_AA = []
+        start_loc_AA = []
+        explicit_seq_AA = []
+        kmers_AA = []
+        viruses_PC = []
+        proteins_PC = []
+        start_loc_PC = []
+        explicit_seq_AA_PC = []
+        explicit_seq_PC_PC = []
+        kmers_PC = []        
+    
+        for item in arr2:
+            kmer_type = item[5:7]
+            kmer_specific = item[8:]
+            
+            if kmer_type == 'AA':
+                for record in records:
+                    for feature in record.features:
+                        if feature.type == 'CDS':
+                            nuc_seq = feature.location.extract(record.seq)
+                            if len(nuc_seq) % 3 != 0:
+                                continue
+                            this_seq_AA = nuc_seq.translate()
+                            this_seq_AA = str(this_seq_AA)
+    
+                            v2 = [m.start() for m in re.finditer(kmer_specific,this_seq_AA)]
+                    
+                            if v2:
+                                v3 = tbl.Accessions.isin([record.id])
+                                if sum(v3):
+                                    viruses_AA.append(tbl.Species[np.nonzero(v3)[0][0]])
+                                    proteins_AA.append(feature.qualifiers['product'][0])
+                                    start_loc_AA.append([v2])
+                                    explicit_seq_AA.append(this_seq_AA) 
+                                    kmers_AA.append(kmer_specific) 
+    
+            elif kmer_type == 'PC':
+                for record in records:
+                    for feature in record.features:
+                        if feature.type == 'CDS':
+                            nuc_seq = feature.location.extract(record.seq)
+                            if len(nuc_seq) % 3 != 0:
+                                continue
+                            this_seq_AA = nuc_seq.translate()
+                            new_seq = ''
+                            for each in this_seq_AA:
+                                if each in 'AGV':
+                                    new_seq += 'A'
+                                elif each in 'C':
+                                    new_seq += 'B'
+                                elif each in 'FLIP':
+                                    new_seq += 'C'
+                                elif each in 'MSTY':
+                                    new_seq += 'D'
+                                elif each in 'HNQW':
+                                    new_seq += 'E'
+                                elif each in 'DE':
+                                    new_seq += 'F'
+                                elif each in 'KR':
+                                    new_seq += 'G'
+                                else:
+                                    new_seq += '*'
+                            this_seq_PC = new_seq
+                            this_seq_AA = str(this_seq_AA)
+                            this_seq_PC = str(this_seq_PC)                              
+    
+                            v4 = [m.start() for m in re.finditer(kmer_specific,this_seq_PC)]
+                            
+                            if v4:
+                                v5 = tbl.Accessions.isin([record.id])
+                                if sum(v5):
+                                    viruses_PC.append(tbl.Species[np.nonzero(v5)[0][0]])
+                                    proteins_PC.append(feature.qualifiers['product'][0])
+                                    start_loc_PC.append([v4])
+                                    explicit_seq_AA_PC.append(this_seq_AA)                 
+                                    explicit_seq_PC_PC.append(this_seq_PC)       
+                                    kmers_PC.append(kmer_specific)                                           
+    
+        with open(str(data.joinpath('start_loc_PC.txt')), 'w') as file:
+            for item in start_loc_PC:
+                    file.write(" ".join(map(str,item)))
+                    file.write("\n")
+                    
+        df = pd.DataFrame({'c1': kmers_PC,'c2': viruses_PC,'c3': proteins_PC})
+        df.to_csv(str(data.joinpath('structural_unannotated.csv')), header=False, index=False)

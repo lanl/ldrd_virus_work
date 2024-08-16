@@ -1,0 +1,930 @@
+FECAEA,hMPV,RNA-dependent RNA polymerase,n
+FECAEA,Human adenovirus type 5,E1A,n
+FECAEA,Murine adenovirus 3,TP,n
+FECAEA,Canine adenovirus type 2,pol,n
+FECAEA,Echovirus 1 (EV1),genome polyprotein,n
+FECAEA,Ross River virus (RR),non-structural polyprotein,n
+FECAEA,Classical swine fever virus (CSF),polyprotein,unk
+FECAEA,Epstein-Barr virus (EBV),nuclear antigen EBNA-3A,n
+FECAEA,Echovirus 9 strain Barty,polyprotein,unk
+FECAEA,Vaccinia virus,putative monoglyceride lipase,n
+FECAEA,Coxsackievirus A9 (CVA9),polyprotein,unk
+FECAEA,Simian adenovirus 11,E1A,n
+FECAEA,Equine herpesvirus type 1,DNA replication origin-binding helicase,n
+CCACAD,Hepatitis C,polyprotein,unk
+CCACAD,Human adenovirus type 5,E1A,n
+CCACAD,Human adenovirus type 5,protease,n
+CCACAD,Human adenovirus type 5,E3 RID-beta,n
+CCACAD,Transmissible gastroenteritis virus (TGEV),replicase,n
+CCACAD,Kaposi’s sarcoma-associated herpesvirus,ORF9,n
+CCACAD,Kaposi’s sarcoma-associated herpesvirus,LANA,n
+CCACAD,Porcine torovirus,membrane glycoprotein,y
+CCACAD,Human adenovirus species D,core protein precursor pX,y
+CCACAD,Murine adenovirus 3,pIVa2,n
+CCACAD,Murine adenovirus 3,pX,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 68 protein,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 78 protein,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 40 protein,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 52 protein,n
+CCACAD,Canine adenovirus type 2,IVa2,n
+CCACAD,Echovirus 1 (EV1),genome polyprotein,n
+CCACAD,human cytomegalovirus,protein UL29,n
+CCACAD,human cytomegalovirus,membrane glycoprotein UL40,y
+CCACAD,human cytomegalovirus,tegument protein UL16,y
+CCACAD,human cytomegalovirus,helicase-primase subunit,n
+CCACAD,human cytomegalovirus,capsid portal protein,y
+CCACAD,Adeno-Associated Virus Type 4 (AAV4),rep,n
+CCACAD,BKPyV human polyomavirus,large T antigen,n
+CCACAD,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+CCACAD,SARS-CoV-2,surface glycoprotein,y
+CCACAD,Classical swine fever virus (CSF),polyprotein,unk
+CCACAD,Murray Valley encephalitis virus,polyprotein,unk
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),envelope protein UL43,y
+CCACAD,Epstein-Barr virus (EBV),nuclear antigen EBNA-3A,n
+CCACAD,Epstein-Barr virus (EBV),protein UL92,n
+CCACAD,Epstein-Barr virus (EBV),nuclear protein UL24,n
+CCACAD,Bovine adenovirus 3,pX,n
+CCACAD,Simian virus 40,large T antigen,n
+CCACAD,Echovirus 9 strain Barty,polyprotein,unk
+CCACAD,Encephalomyocarditis virus (Cardiovirus A),hypothetical protein,n
+CCACAD,HSV-2,ubiquitin E3 ligase ICP0,n
+CCACAD,HSV-2,nuclear protein UL4,n
+CCACAD,HSV-2,envelope glycoprotein M,y
+CCACAD,HSV-2,tegument serine/threonine protein kinase,y
+CCACAD,HSV-2,single-stranded DNA-binding protein,n
+CCACAD,HSV-2,nuclear egress membrane protein,n
+CCACAD,HSV-2,large tegument protein,y
+CCACAD,HSV-2,tegument protein UL37,y
+CCACAD,HSV-2,ubiquitin E3 ligase ICP0,n
+CCACAD,HSV-2,envelope glycoprotein G,y
+CCACAD,HSV-2,envelope glycoprotein E,y
+CCACAD,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+CCACAD,FMDV,polyprotein,unk
+CCACAD,Mumps virus (MuV),hemagglutinin-neuraminidase,y
+CCACAD,Human Papillomavirus type 16 (HPV),minor capsid protein L2,y
+CCACAD,Human Papillomavirus type 16 (HPV),major capsid protein L1,y
+CCACAD,Zika virus,polyprotein,unk
+CCACAD,Coxsackievirus A9 (CVA9),polyprotein,unk
+CCACAD,Simian adenovirus 11,CR1-beta,n
+CCACAD,JCPyV human polyomavirus,hypothetical protein,n
+CCACAD,Porcine deltacoronavirus,spike glycoprotein,y
+CCACAD,Equine herpesvirus type 1,membrane protein V1,y
+CCACAD,Equine herpesvirus type 1,nuclear egress membrane protein,n
+CCACAD,Equine herpesvirus type 1,DNA replication origin-binding helicase,n
+CCACAD,Equine herpesvirus type 1,envelope glycoprotein G,y
+CCACAD,Equine herpesvirus type 1,envelope glycoprotein E,y
+DCCCCAC,Hepatitis C,polyprotein,unk
+DCCCCAC,Transmissible gastroenteritis virus (TGEV),membrane protein,y
+DCCCCAC,Kaposi’s sarcoma-associated herpesvirus,ORF19,n
+DCCCCAC,Porcine torovirus,spike glycoprotein,y
+DCCCCAC,Echovirus 1 (EV1),genome polyprotein,n
+DCCCCAC,human cytomegalovirus,helicase-primase subunit,n
+DCCCCAC,human cytomegalovirus,membrane protein US13,n
+DCCCCAC,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+DCCCCAC,Epstein-Barr virus (EBV),membrane protein LMP-2A,y
+DCCCCAC,Epstein-Barr virus (EBV),membrane protein LMP-2B,y
+DCCCCAC,Epstein-Barr virus (EBV),tegument protein G75,y
+DCCCCAC,Epstein-Barr virus (EBV),nuclear antigen EBNA-3B,n
+DCCCCAC,Epstein-Barr virus (EBV),latent membrane protein LMP-1,y
+DCCCCAC,Bovine adenovirus 3,hypothetical protein,n
+DCCCCAC,Echovirus 9 strain Barty,polyprotein,unk
+DCCCCAC,Vaccinia virus,sulfhydryl oxidase,n
+DCCCCAC,Vaccinia virus,putative viral membrane protein,y
+DCCCCAC,Vaccinia virus,late transcription factor VLTF-2,n
+DCCCCAC,HSV-2,tegument protein UL21,y
+DCCCCAC,HSV-2,large tegument protein,y
+DCCCCAC,HSV-2,envelope glycoprotein K,y
+DCCCCAC,Human Papillomavirus type 16 (HPV),transforming protein E5,n
+DCCCCAC,Human Papillomavirus type 16 (HPV),minor capsid protein L2,y
+DCCCCAC,Zika virus,polyprotein,unk
+DCCCCAC,Coxsackievirus A9 (CVA9),polyprotein,unk
+DCCCCAC,Simian adenovirus 11,CR1-beta,n
+DCCCCAC,MERS-CoV,spike protein,y
+DCCCCAC,Equine herpesvirus type 1,membrane protein UL56,y
+CECCAF,hMPV,RNA-dependent RNA polymerase,n
+CECCAF,Human adenovirus type 5,pol,n
+CECCAF,Murine coronavirus,internal protein,n
+CECCAF,Canine adenovirus type 2,pol,n
+CECCAF,human cytomegalovirus,tegument protein UL23,y
+CECCAF,HIV-1,Rev,n
+CECCAF,Ross River virus (RR),non-structural polyprotein,n
+CECCAF,Adeno-Associated Virus Type 4 (AAV4),rep,n
+CECCAF,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+CECCAF,SARS-CoV-2,ORF7a protein,n
+CECCAF,Classical swine fever virus (CSF),polyprotein,unk
+CECCAF,Epstein-Barr virus (EBV),helicase-primase primase subunit,n
+CECCAF,Rabies virus (RABV),phosphoprotein M1,n
+CECCAF,Vaccinia virus,Hypothetical protein,n
+CECCAF,Vaccinia virus,RNA helicase NPH-II,n
+CECCAF,HSV-2,deoxyribonuclease,n
+CECCAF,Human Papillomavirus type 16 (HPV),replication protein E1,n
+CECCAF,Equine herpesvirus type 1,ubiquitin E3 ligase ICP0,n
+ECDGDE,Murine rotavirus,VP3,y
+ECDGDE,WNV,polyprotein,unk
+ECDGDE,Kaposi’s sarcoma-associated herpesvirus,ORF9,n
+ECDGDE,Kaposi’s sarcoma-associated herpesvirus,ORF70,n
+ECDGDE,human cytomegalovirus,DNA packaging tegument protein UL25,y
+ECDGDE,Dengue virus type 2,polyprotein,unk
+ECDGDE,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+ECDGDE,SARS-CoV-2,ORF1ab polyprotein,unk
+ECDGDE,Classical swine fever virus (CSF),polyprotein,unk
+ECDGDE,Murray Valley encephalitis virus,polyprotein,unk
+ECDGDE,Epstein-Barr virus (EBV),nuclear antigen EBNA-2,n
+ECDGDE,Epstein-Barr virus (EBV),envelope glycoprotein H,y
+ECDGDE,Vaccinia virus,RAP94,n
+ECDGDE,JEV,polyprotein,unk
+ECDGDE,Zika virus,polyprotein,unk
+ACFAFD,WNV,polyprotein,unk
+ACFAFD,WNV,truncated polyprotein NS1 prime,n
+ACFAFD,Kaposi’s sarcoma-associated herpesvirus,ORF50,n
+ACFAFD,Echovirus 1 (EV1),genome polyprotein,n
+ACFAFD,Ross River virus (RR),non-structural polyprotein,n
+ACFAFD,Dengue virus type 2,polyprotein,unk
+ACFAFD,Murray Valley encephalitis virus,polyprotein,unk
+ACFAFD,Murray Valley encephalitis virus,truncated polyprotein,unk
+ACFAFD,Epstein-Barr virus (EBV),nuclear antigen EBNA-3C,n
+ACFAFD,Echovirus 9 strain Barty,polyprotein,unk
+ACFAFD,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo147,n
+ACFAFD,HSV-2,multifunctional expression regulator,n
+ACFAFD,JEV,polyprotein,unk
+ACFAFD,JEV,truncated JEV polyprotein,unk
+ACFAFD,Zika virus,polyprotein,unk
+ACFAFD,Coxsackievirus A9 (CVA9),polyprotein,unk
+ACFAFD,Equine herpesvirus type 1,envelope glycoprotein H,y
+CACDGA,WNV,polyprotein,unk
+CACDGA,WNV,truncated polyprotein NS1 prime,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF6,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF8,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF32,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF63,n
+CACDGA,HCoV-OC43,ORF1ab polyprotein,unk
+CACDGA,Murine adenovirus 3,52k,n
+CACDGA,Murine adenovirus 3,pIII,n
+CACDGA,Echovirus 1 (EV1),genome polyprotein,n
+CACDGA,human cytomegalovirus,protein UL21A,n
+CACDGA,human cytomegalovirus,protein UL135,n
+CACDGA,Dengue virus type 2,polyprotein,unk
+CACDGA,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+CACDGA,SARS-CoV-2,ORF3a protein,n
+CACDGA,Classical swine fever virus (CSF),polyprotein,unk
+CACDGA,Human parvovirus B19,non-structural protein NS1,n
+CACDGA,Murray Valley encephalitis virus,polyprotein,unk
+CACDGA,Murray Valley encephalitis virus,truncated polyprotein,unk
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),large tegument protein,y
+CACDGA,Vaccinia virus,hypothetical protein,n
+CACDGA,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo132,n
+CACDGA,HSV-2,major capsid protein,y
+CACDGA,HSV-2,tegument protein VP13/14,y
+CACDGA,HSV-2,tegument protein UL51,y
+CACDGA,JEV,polyprotein,unk
+CACDGA,JEV,truncated JEV polyprotein,unk
+CACDGA,Mengovirus,polyprotein,unk
+CACDGA,Zika virus,polyprotein,unk
+CACDGA,Equine herpesvirus type 1,major capsid protein,y
+AFDAEF,WNV,polyprotein,unk
+AFDAEF,WNV,truncated polyprotein NS1 prime,n
+AFDAEF,human cytomegalovirus,protein UL112,n
+AFDAEF,HIV-1,Gag-Pol,y
+AFDAEF,Dengue virus type 2,polyprotein,unk
+AFDAEF,Human parvovirus B19,non-structural protein NS1,n
+AFDAEF,Murray Valley encephalitis virus,polyprotein,unk
+AFDAEF,Murray Valley encephalitis virus,truncated polyprotein,unk
+AFDAEF,Vaccinia virus,"ATPase, nucleoside triphosphate phosphohydrolase-I, NPH-I",n
+AFDAEF,JEV,polyprotein,unk
+AFDAEF,JEV,truncated JEV polyprotein,unk
+AFDAEF,Zika virus,polyprotein,unk
+GDDEDCE,WNV,polyprotein,unk
+GDDEDCE,Echovirus 1 (EV1),genome polyprotein,n
+GDDEDCE,Dengue virus type 2,polyprotein,unk
+GDDEDCE,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+GDDEDCE,SARS-CoV-2,membrane glycoprotein,y
+GDDEDCE,Murray Valley encephalitis virus,polyprotein,unk
+GDDEDCE,Epstein-Barr virus (EBV),DNA polymerase catalytic subunit,n
+GDDEDCE,Rabies virus (RABV),L protein,n
+GDDEDCE,Echovirus 9 strain Barty,polyprotein,unk
+GDDEDCE,JEV,polyprotein,unk
+GDDEDCE,Human parainfluenza virus 3,hemagglutinin-neuraminidase,y
+GDDEDCE,Zika virus,polyprotein,unk
+GDDEDCE,Coxsackievirus A9 (CVA9),polyprotein,unk
+CCCFCF,Bovine torovirus (Breda virus),polyprotein 1ab,n
+CCCFCF,Bovine torovirus (Breda virus),replicase,n
+CCCFCF,Human adenovirus type 5,E1B 55K,n
+CCCFCF,WNV,polyprotein,unk
+CCCFCF,Transmissible gastroenteritis virus (TGEV),replicase,n
+CCCFCF,Kaposi’s sarcoma-associated herpesvirus,ORF32,n
+CCCFCF,Human adenovirus species D,control protein E1A,n
+CCCFCF,Human adenovirus species D,DNA polymerase,n
+CCCFCF,Echovirus 1 (EV1),genome polyprotein,n
+CCCFCF,human cytomegalovirus,protein UL27,n
+CCCFCF,human cytomegalovirus,tegument protein pp65,y
+CCCFCF,human cytomegalovirus,tegument protein IRS1,y
+CCCFCF,human cytomegalovirus,tegument protein US22,y
+CCCFCF,human cytomegalovirus,tegument protein TRS1,y
+CCCFCF,Goat torovirus,polyprotein 1ab,n
+CCCFCF,Goat torovirus,polyprotein 1a,n
+CCCFCF,Dengue virus type 2,polyprotein,unk
+CCCFCF,Murray Valley encephalitis virus,polyprotein,unk
+CCCFCF,Epstein-Barr virus (EBV),tegument protein G75,y
+CCCFCF,Epstein-Barr virus (EBV),large tegument protein,y
+CCCFCF,Simian virus 40,large T antigen,n
+CCCFCF,Theiler's murine encephalomyelitis virus (TMEV),polyprotein,unk
+CCCFCF,Echovirus 9 strain Barty,polyprotein,unk
+CCCFCF,Vaccinia virus,DNA polymerase,n
+CCCFCF,Vaccinia virus,cowpox A-type inclusion protein,n
+CCCFCF,HSV-2,uracil-DNA glycosylase,n
+CCCFCF,HSV-2,helicase-primase primase subunit,n
+CCCFCF,JEV,polyprotein,unk
+CCCFCF,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+CCCFCF,Zika virus,polyprotein,unk
+CCCFCF,Coxsackievirus A9 (CVA9),polyprotein,unk
+CCCFCF,MERS-CoV,1AB polyprotein,unk
+CCCFCF,MERS-CoV,1A polyprotein,unk
+CCCFCF,Equine herpesvirus type 1,DNA polymerase processivity subunit,n
+CCCFCF,Equine herpesvirus type 1,DNA packaging protein UL32,n
+CCCFCF,Equine herpesvirus type 1,tegument protein UL21,y
+GCCGDE,human cytomegalovirus,protein UL13,n
+GCCGDE,Ross River virus (RR),non-structural polyprotein,n
+GCCGDE,SARS-CoV-2,ORF1ab polyprotein,unk
+GCCGDE,Epstein-Barr virus (EBV),protein BLLF2,n
+GCCGDE,Epstein-Barr virus (EBV),nuclear antigen EBNA-3B,n
+GCCGDE,Vaccinia virus,82kDa large subunit of early gene transcription factor VETF,n
+GCCGDE,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+GCCGDE,FMDV,polyprotein,unk
+GCCGDE,Human Papillomavirus type 16 (HPV),replication protein E1,n
+GCCGDE,Equine herpesvirus type 1,tegument protein VP13/14,y
+GCCGDE,Equine herpesvirus type 1,DNA polymerase processivity subunit,n
+GCCGDE,Equine herpesvirus type 1,envelope glycoprotein M,y
+GCCGDE,Equine herpesvirus type 1,helicase-primase helicase subunit,n
+EADAAC,hMPV,matrix protein,y
+EADAAC,Murine rotavirus,VP3,y
+EADAAC,WNV,polyprotein,unk
+EADAAC,WNV,truncated polyprotein NS1 prime,n
+EADAAC,Kaposi’s sarcoma-associated herpesvirus,ORF33,n
+EADAAC,Kaposi’s sarcoma-associated herpesvirus,ORF47,n
+EADAAC,Canine adenovirus type 2,E4 ORF6/7,n
+EADAAC,human cytomegalovirus,regulatory protein IE1,n
+EADAAC,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+EADAAC,Murray Valley encephalitis virus,polyprotein,unk
+EADAAC,Murray Valley encephalitis virus,truncated polyprotein,unk
+EADAAC,Epstein-Barr virus (EBV),nuclear antigen EBNA-3B,n
+EADAAC,Epstein-Barr virus (EBV),protein Zta,n
+EADAAC,Epstein-Barr virus (EBV),helicase-primase helicase subunit,n
+EADAAC,Epstein-Barr virus (EBV),protein LF3,n
+EADAAC,Epstein-Barr virus (EBV),DNA polymerase catalytic subunit,n
+EADAAC,Epstein-Barr virus (EBV),single-stranded DNA-binding protein,n
+EADAAC,Simian virus 40,hypothetical protein,n
+EADAAC,Vaccinia virus,phospholipase-D-like protein,n
+EADAAC,Vaccinia virus,precursor p4a of core protein 4a,n
+EADAAC,JEV,polyprotein,unk
+EADAAC,JEV,truncated JEV polyprotein,unk
+EADAAC,FMDV,polyprotein,unk
+EADAAC,Human Papillomavirus type 16 (HPV),replication protein E1,n
+EADAAC,Porcine deltacoronavirus,spike glycoprotein,y
+EADAAC,Equine herpesvirus type 1,membrane protein UL45,y
+FCCGDA,hMPV,RNA-dependent RNA polymerase,n
+FCCGDA,Human adenovirus type 5,DBP,n
+FCCGDA,WNV,polyprotein,unk
+FCCGDA,Kaposi’s sarcoma-associated herpesvirus,ORF70,n
+FCCGDA,Kaposi’s sarcoma-associated herpesvirus,ORF35,n
+FCCGDA,Tulane virus,capsid protein,y
+FCCGDA,Echovirus 1 (EV1),genome polyprotein,n
+FCCGDA,human cytomegalovirus,large tegument protein,y
+FCCGDA,human cytomegalovirus,membrane protein UL124,n
+FCCGDA,human cytomegalovirus,membrane protein US12,n
+FCCGDA,human cytomegalovirus,tegument protein US24,y
+FCCGDA,HIV-1,Rev,n
+FCCGDA,Classical swine fever virus (CSF),polyprotein,unk
+FCCGDA,Murray Valley encephalitis virus,polyprotein,unk
+FCCGDA,Epstein-Barr virus (EBV),ribonucleotide reductase subunit 2,n
+FCCGDA,Epstein-Barr virus (EBV),protein UL91,n
+FCCGDA,Echovirus 9 strain Barty,polyprotein,unk
+FCCGDA,Vaccinia virus,Hypothetical protein,n
+FCCGDA,Vaccinia virus,IMV heparin binding surface protein,y
+FCCGDA,Vaccinia virus,hypothetical protein,n
+FCCGDA,HSV-2,tegument protein VP11/12,y
+FCCGDA,JEV,polyprotein,unk
+FCCGDA,Human parechovirus 1,hypothetical protein,n
+FCCGDA,Coxsackievirus A9 (CVA9),polyprotein,unk
+FCCGDA,Equine herpesvirus type 1,multifunctional expression regulator,n
+DFDCCC,hMPV,RNA-dependent RNA polymerase,n
+DFDCCC,Murine rotavirus,VP3,y
+DFDCCC,Kaposi’s sarcoma-associated herpesvirus,ORF9,n
+DFDCCC,Human adenovirus species D,terminal protein precursor pTP,n
+DFDCCC,HCoV-HKU1,nucleocapsid phosphoprotein 2,y
+DFDCCC,human cytomegalovirus,envelope glycoprotein UL37,y
+DFDCCC,human cytomegalovirus,tegument protein UL51,y
+DFDCCC,human cytomegalovirus,membrane protein UL120,n
+DFDCCC,HIV-1,Asp,n
+DFDCCC,Dengue virus type 2,polyprotein,unk
+DFDCCC,Epstein-Barr virus (EBV),nuclear antigen EBNA-2,n
+DFDCCC,Epstein-Barr virus (EBV),DNA polymerase catalytic subunit,n
+DFDCCC,Theiler's murine encephalomyelitis virus (TMEV),polyprotein,unk
+DFDCCC,Vaccinia virus,phospholipase-D-like protein,n
+DFDCCC,Vaccinia virus,Kelch-like protein,n
+DFDCCC,Vaccinia virus,hypothetical protein,n
+DFDCCC,Vaccinia virus,EEV maturation protein,n
+DFDCCC,Vaccinia virus,palmytilated EEV membrane glycoprotein,y
+DFDCCC,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo147,n
+DFDCCC,Vaccinia virus,cowpox A-type inclusion protein,n
+DFDCCC,Vaccinia virus,Toll/IL1-receptor,n
+DFDCCC,HSV-2,ubiquitin E3 ligase ICP0,n
+DFDCCC,HSV-2,membrane protein UL56,n
+DFDCCC,HSV-2,ubiquitin E3 ligase ICP0,n
+DFDCCC,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+DFDCCC,Sendai virus,nucleocapsid protein,y
+DFDCCC,Human parainfluenza virus 1,nucleoprotein,n
+DFDCCC,Equine herpesvirus type 1,envelope protein UL20,y
+DGACFC,WNV,polyprotein,unk
+DGACFC,Kaposi’s sarcoma-associated herpesvirus,ORF62,n
+DGACFC,Kaposi’s sarcoma-associated herpesvirus,ORF63,n
+DGACFC,Adeno-Associated Virus Type 2 (AAV2),Rep 68 protein,n
+DGACFC,Adeno-Associated Virus Type 2 (AAV2),Rep 78 protein,n
+DGACFC,Echovirus 1 (EV1),genome polyprotein,n
+DGACFC,Merkel cell polyomavirus,large T antigen,n
+DGACFC,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+DGACFC,SARS-CoV-2,ORF1ab polyprotein,unk
+DGACFC,SARS-CoV-2,envelope protein,y
+DGACFC,Murray Valley encephalitis virus,polyprotein,unk
+DGACFC,Epstein-Barr virus (EBV),uracil-DNA glycosylase,n
+DGACFC,Epstein-Barr virus (EBV),deoxyribonuclease,n
+DGACFC,Rabies virus (RABV),L protein,n
+DGACFC,Echovirus 9 strain Barty,polyprotein,unk
+DGACFC,Porcine epidemic diarrhea virus,Pol1,n
+DGACFC,Vaccinia virus,ankyrin-like protein,n
+DGACFC,Vaccinia virus,viral core cysteine proteinase,n
+DGACFC,Vaccinia virus,"ATPase, nucleoside triphosphate phosphohydrolase-I, NPH-I",n
+DGACFC,HSV-2,tegument protein VP11/12,y
+DGACFC,HSV-2,envelope glycoprotein E,y
+DGACFC,JEV,polyprotein,unk
+DGACFC,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+DGACFC,FMDV,polyprotein,unk
+DGACFC,Zika virus,polyprotein,unk
+DGACFC,Coxsackievirus A9 (CVA9),polyprotein,unk
+DGACFC,Equine herpesvirus type 1,major capsid protein,y
+DGACFC,Porcine hemagglutinating encephalomyelitis virus (PHEV),spike glycoprotein,y
+DGACFC,Enterovirus 70,genome polyprotein,n
+DEAFCC,hMPV,RNA-dependent RNA polymerase,n
+DEAFCC,Bovine torovirus (Breda virus),polyprotein 1ab,n
+DEAFCC,Bovine torovirus (Breda virus),replicase,n
+DEAFCC,Transmissible gastroenteritis virus (TGEV),nucleoprotein,n
+DEAFCC,Kaposi’s sarcoma-associated herpesvirus,ORF9,n
+DEAFCC,human cytomegalovirus,DNA packaging protein UL33,n
+DEAFCC,SARS-CoV-2,ORF1ab polyprotein,unk
+DEAFCC,SARS-CoV-2,ORF1a polyprotein,unk
+DEAFCC,Classical swine fever virus (CSF),polyprotein,unk
+DEAFCC,Murray Valley encephalitis virus,polyprotein,unk
+DEAFCC,Epstein-Barr virus (EBV),multifunctional expression regulator,n
+DEAFCC,Epstein-Barr virus (EBV),deoxyribonuclease,n
+DEAFCC,Epstein-Barr virus (EBV),envelope glycoprotein B,y
+DEAFCC,HSV-2,DNA polymerase catalytic subunit,n
+DEAFCC,JEV,polyprotein,unk
+DEAFCC,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+DEAFCC,Human parechovirus 1,hypothetical protein,n
+DEAFCC,Equine herpesvirus type 1,helicase-primase subunit,n
+GCECFD,Echovirus 1 (EV1),genome polyprotein,n
+GCECFD,human cytomegalovirus,tegument protein pp71,y
+GCECFD,Dengue virus type 2,polyprotein,unk
+GCECFD,Epstein-Barr virus (EBV),multifunctional expression regulator,n
+GCECFD,Echovirus 9 strain Barty,polyprotein,unk
+GCECFD,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo19,n
+GCECFD,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+GCECFD,Coxsackievirus A9 (CVA9),polyprotein,unk
+DECAAD,Kaposi’s sarcoma-associated herpesvirus,ORF36,n
+DECAAD,Adeno-Associated Virus Type 2 (AAV2),major coat protein VP1,y
+DECAAD,Adeno-Associated Virus Type 2 (AAV2),major coat protein VP2,y
+DECAAD,Adeno-Associated Virus Type 2 (AAV2),major coat protein VP3,y
+DECAAD,Canine adenovirus type 2,III,n
+DECAAD,human cytomegalovirus,tegument protein UL37,y
+DECAAD,human cytomegalovirus,membrane glycoprotein US7,y
+DECAAD,Murine polyomavirus strain BG,large T antigen,n
+DECAAD,Murine polyomavirus strain BG,middle T antigen,n
+DECAAD,Murine polyomavirus strain BG,small T antigen,n
+DECAAD,Dengue virus type 2,polyprotein,unk
+DECAAD,SARS-CoV-2,ORF3a protein,n
+DECAAD,Classical swine fever virus (CSF),polyprotein,unk
+DECAAD,Rabies virus (RABV),transmembrane glycoprotein G,y
+DECAAD,Theiler's murine encephalomyelitis virus (TMEV),polyprotein,unk
+DECAAD,Vaccinia virus,CD47-like putative membrane protein,y
+DECAAD,Vaccinia virus,ankyrin-like protein,n
+DECAAD,HSV-2,ubiquitin E3 ligase ICP0,n
+DECAAD,HSV-2,single-stranded DNA-binding protein,n
+DECAAD,HSV-2,ubiquitin E3 ligase ICP0,n
+DECAAD,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+DECAAD,FMDV,polyprotein,unk
+DECAAD,Equine herpesvirus type 1,deoxyuridine triphosphatase,n
+DECAAD,Equine herpesvirus type 1,ribonucleotide reductase subunit 1,n
+DECAAD,Equine herpesvirus type 1,capsid portal protein,y
+CFCEDD,WNV,polyprotein,unk
+CFCEDD,WNV,truncated polyprotein NS1 prime,n
+CFCEDD,Kaposi’s sarcoma-associated herpesvirus,ORF68,n
+CFCEDD,Minute virus of mice (MVM),nonstructural protein,n
+CFCEDD,Minute virus of mice (MVM),nonstructural protein,n
+CFCEDD,HCoV-HKU1,nucleocapsid phosphoprotein,y
+CFCEDD,Adeno-Associated Virus Type 2 (AAV2),major coat protein VP1,y
+CFCEDD,Adeno-Associated Virus Type 2 (AAV2),major coat protein VP2,y
+CFCEDD,Adeno-Associated Virus Type 2 (AAV2),major coat protein VP3,y,y
+CFCEDD,Echovirus 1 (EV1),genome polyprotein,n
+CFCEDD,human cytomegalovirus,tegument protein UL35,y
+CFCEDD,human cytomegalovirus,large tegument protein,y
+CFCEDD,Human parvovirus B19,non-structural protein NS1,n
+CFCEDD,Murray Valley encephalitis virus,polyprotein,unk
+CFCEDD,Murray Valley encephalitis virus,truncated polyprotein,unk
+CFCEDD,Epstein-Barr virus (EBV),nuclear antigen EBNA-2,n
+CFCEDD,Simian virus 40,large T antigen,n
+CFCEDD,Echovirus 9 strain Barty,polyprotein,unk
+CFCEDD,Vaccinia virus,hypothetical protein,n
+CFCEDD,Vaccinia virus,ribonucleotide reductase large subunit,n
+CFCEDD,Vaccinia virus,secreted glycoprotein,y
+CFCEDD,Vaccinia virus,hydroxysteroid dehydrogenase,n
+CFCEDD,Simian adenovirus 11,pol,n
+CFCEDD,Equine herpesvirus type 1,virion protein V67,n
+CFCEDD,Equine herpesvirus type 1,virion protein V67,n
+EGCCAC,Hepatitis C,polyprotein,unk
+EGCCAC,Human adenovirus type 5,hexon,y
+EGCCAC,Transmissible gastroenteritis virus (TGEV),replicase,n
+EGCCAC,Kaposi’s sarcoma-associated herpesvirus,K6,n
+EGCCAC,Human adenovirus species D,hexon,y
+EGCCAC,Murine adenovirus 3,hexon,y
+EGCCAC,Canine adenovirus type 2,hexon,y
+EGCCAC,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+EGCCAC,SARS-CoV-2,ORF1ab polyprotein,unk
+EGCCAC,SARS-CoV-2,ORF1a polyprotein,unk
+EGCCAC,Epstein-Barr virus (EBV),tegument protein G75,y
+EGCCAC,Epstein-Barr virus (EBV),capsid triplex subunit 1,y
+EGCCAC,Epstein-Barr virus (EBV),helicase-primase primase subunit,n
+EGCCAC,Human rubulavirus 2,hemagglutinin-neuraminidase,y
+EGCCAC,Bovine adenovirus 3,DNA polymerase,n
+EGCCAC,Bovine adenovirus 3,hexon protein,y
+EGCCAC,Simian virus 40,hypothetical protein,n
+EGCCAC,Vaccinia virus,Hypothetical protein,n
+EGCCAC,Vaccinia virus,ribonucleotide reductase large subunit,n
+EGCCAC,Vaccinia virus,hypothetical protein,n
+EGCCAC,Vaccinia virus,DNA helicase,n
+EGCCAC,HSV-2,DNA packaging terminase subunit 2,n
+EGCCAC,HSV-2,large tegument protein,y
+EGCCAC,HSV-2,tegument protein UL37,y
+EGCCAC,HSV-2,tegument protein VP13/14,y
+EGCCAC,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+EGCCAC,Human Papillomavirus type 16 (HPV),major capsid protein L1,y
+EGCCAC,Zika virus,polyprotein,unk
+EGCCAC,Simian adenovirus 11,hexon,y
+EGCCAC,Equine herpesvirus type 1,DNA packaging terminase subunit 2,n
+DGDACD,Bovine torovirus (Breda virus),polyprotein 1ab,n
+DGDACD,Bovine torovirus (Breda virus),replicase,n
+DGDACD,Kaposi’s sarcoma-associated herpesvirus,ORF40,n
+DGDACD,Murine adenovirus 3,100k,n
+DGDACD,human cytomegalovirus,nuclear egress lamina protein,n
+DGDACD,human cytomegalovirus,envelope glycoprotein M,y
+DGDACD,Goat torovirus,polyprotein 1ab,n
+DGDACD,Goat torovirus,polyprotein 1a,n
+DGDACD,Dengue virus type 2,polyprotein,unk
+DGDACD,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+DGDACD,SARS-CoV-2,ORF1ab polyprotein,unk
+DGDACD,SARS-CoV-2,ORF1a polyprotein,unk
+DGDACD,Classical swine fever virus (CSF),polyprotein,unk
+DGDACD,Epstein-Barr virus (EBV),capsid portal protein,y
+DGDACD,Simian virus 40,hypothetical protein,n
+DGDACD,Rabies virus (RABV),nucleoprotein N,n
+DGDACD,Vaccinia virus,TNF-alpha-receptor-like protein,n
+DGDACD,Vaccinia virus,ankyrin-like protein,n
+DGDACD,Vaccinia virus,serine protease inhibitor-like protein,n
+DGDACD,Vaccinia virus,ankyrin-like protein,n
+DGDACD,Vaccinia virus,TNF-alpha-receptor-like protein,n
+DGDACD,HSV-2,large tegument protein,y
+DGDACD,HSV-2,helicase-primase primase subunit,n
+DGDACD,JEV,polyprotein,unk
+DGDACD,Human Papillomavirus type 16 (HPV),replication protein E1,n
+DGDACD,Coxsackievirus A9 (CVA9),polyprotein,unk
+DGDACD,Equine herpesvirus type 1,envelope glycoprotein H,y
+FGACCA,Human adenovirus type 5,E4 ORFB,n
+FGACCA,Kaposi’s sarcoma-associated herpesvirus,K2,n
+FGACCA,human cytomegalovirus,tegument protein UL35,y
+FGACCA,human cytomegalovirus,membrane protein US15,n
+FGACCA,Dengue virus type 2,polyprotein,unk
+FGACCA,Classical swine fever virus (CSF),polyprotein,unk
+FGACCA,Murray Valley encephalitis virus,polyprotein,unk
+FGACCA,Murray Valley encephalitis virus,truncated polyprotein,unk
+FGACCA,Epstein-Barr virus (EBV),ribonucleotide reductase subunit 1,n
+FGACCA,Epstein-Barr virus (EBV),latent membrane protein LMP-1,n
+FGACCA,HSV-2,DNA polymerase processivity subunit,n
+FGACCA,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+FGACCA,Zika virus,polyprotein,unk
+FGACCA,Simian adenovirus 11,pol,n
+FGACCA,Equine herpesvirus type 1,ribonucleotide reductase subunit 1,n
+FGACCA,Equine herpesvirus type 1,tegument serine/threonine protein kinase,y
+ECDGDE,Murine rotavirus,VP3,y
+ECDGDE,WNV,polyprotein,unk
+ECDGDE,Kaposi’s sarcoma-associated herpesvirus,ORF9,n
+ECDGDE,Kaposi’s sarcoma-associated herpesvirus,ORF70,n
+ECDGDE,human cytomegalovirus,DNA packaging tegument protein UL25,y
+ECDGDE,Dengue virus type 2,polyprotein,unk
+ECDGDE,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+ECDGDE,SARS-CoV-2,ORF1ab polyprotein,unk
+ECDGDE,Classical swine fever virus (CSF),polyprotein,unk
+ECDGDE,Murray Valley encephalitis virus,polyprotein,unk
+ECDGDE,Epstein-Barr virus (EBV),nuclear antigen EBNA-2,n
+ECDGDE,Epstein-Barr virus (EBV),envelope glycoprotein H,y
+ECDGDE,Vaccinia virus,RAP94,n
+ECDGDE,JEV,polyprotein,unk
+ECDGDE,Zika virus,polyprotein,unk
+GCECFD,Echovirus 1 (EV1),genome polyprotein,n
+GCECFD,human cytomegalovirus,tegument protein pp71,y
+GCECFD,Dengue virus type 2,polyprotein,unk
+GCECFD,Epstein-Barr virus (EBV),multifunctional expression regulator,n
+GCECFD,Echovirus 9 strain Barty,polyprotein,unk
+GCECFD,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo19,n
+GCECFD,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+GCECFD,Coxsackievirus A9 (CVA9),polyprotein,unk
+CFCAEE,WNV,polyprotein,unk
+CFCAEE,WNV,truncated polyprotein NS1 prime,n
+CFCAEE,Kaposi’s sarcoma-associated herpesvirus,ORF2,n
+CFCAEE,Human adenovirus species D,membrane protein E3 RID-beta,n
+CFCAEE,Murine adenovirus 3,hexon,y
+CFCAEE,Canine adenovirus type 2,pVI,n
+CFCAEE,human cytomegalovirus,tegument protein UL51,y
+CFCAEE,human cytomegalovirus,protein US31,n
+CFCAEE,HIV-1,Gag-Pol,y
+CFCAEE,Classical swine fever virus (CSF),polyprotein,unk
+CFCAEE,Epstein-Barr virus (EBV),DNA packaging protein UL33,n
+CFCAEE,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+CFCAEE,Simian adenovirus 11,E1B 19K,n
+CACDGA,WNV,polyprotein,unk
+CACDGA,WNV,truncated polyprotein NS1 prime,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF6,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF8,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF32,n
+CACDGA,Kaposi’s sarcoma-associated herpesvirus,ORF63,n
+CACDGA,HCoV-OC43,ORF1ab polyprotein,unk
+CACDGA,Murine adenovirus 3,52k,n
+CACDGA,Murine adenovirus 3,pIII,n
+CACDGA,Echovirus 1 (EV1),genome polyprotein,n
+CACDGA,human cytomegalovirus,protein UL21A,n
+CACDGA,human cytomegalovirus,protein UL135,n
+CACDGA,Dengue virus type 2,polyprotein,unk
+CACDGA,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+CACDGA,SARS-CoV-2,ORF3a protein,n
+CACDGA,Classical swine fever virus (CSF),polyprotein,unk
+CACDGA,Human parvovirus B19,non-structural protein NS1,n
+CACDGA,Murray Valley encephalitis virus,polyprotein,unk
+CACDGA,Murray Valley encephalitis virus,truncated polyprotein,unk
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),protein BWRF1,n
+CACDGA,Epstein-Barr virus (EBV),large tegument protein,y
+CACDGA,Vaccinia virus,hypothetical protein,n
+CACDGA,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo132,n
+CACDGA,HSV-2,major capsid protein,y
+CACDGA,HSV-2,tegument protein VP13/14,y
+CACDGA,HSV-2,tegument protein UL51,y
+CACDGA,JEV,polyprotein,unk
+CACDGA,JEV,truncated JEV polyprotein,unk
+CACDGA,Mengovirus,polyprotein,unk
+CACDGA,Zika virus,polyprotein,unk
+CACDGA,Equine herpesvirus type 1,major capsid protein,y
+FCCGDA,hMPV,RNA-dependent RNA polymerase,n
+FCCGDA,Human adenovirus type 5,DBP,n
+FCCGDA,WNV,polyprotein,unk
+FCCGDA,Kaposi’s sarcoma-associated herpesvirus,ORF70,n
+FCCGDA,Kaposi’s sarcoma-associated herpesvirus,ORF35,n
+FCCGDA,Tulane virus,capsid protein,y
+FCCGDA,Echovirus 1 (EV1),genome polyprotein,n
+FCCGDA,human cytomegalovirus,large tegument protein,y
+FCCGDA,human cytomegalovirus,membrane protein UL124,n
+FCCGDA,human cytomegalovirus,membrane protein US12,n
+FCCGDA,human cytomegalovirus,tegument protein US24,y
+FCCGDA,HIV-1,Rev,n
+FCCGDA,Classical swine fever virus (CSF),polyprotein,unk
+FCCGDA,Murray Valley encephalitis virus,polyprotein,unk
+FCCGDA,Epstein-Barr virus (EBV),ribonucleotide reductase subunit 2,n
+FCCGDA,Epstein-Barr virus (EBV),protein UL91,n
+FCCGDA,Echovirus 9 strain Barty,polyprotein,unk
+FCCGDA,Vaccinia virus,Hypothetical protein,n
+FCCGDA,Vaccinia virus,IMV heparin binding surface protein,n
+FCCGDA,Vaccinia virus,hypothetical protein,n
+FCCGDA,HSV-2,tegument protein VP11/12,y
+FCCGDA,JEV,polyprotein,unk
+FCCGDA,Human parechovirus 1,hypothetical protein,n
+FCCGDA,Coxsackievirus A9 (CVA9),polyprotein,unk
+FCCGDA,Equine herpesvirus type 1,multifunctional expression regulator,n
+DGACFC,WNV,polyprotein,unk
+DGACFC,Kaposi’s sarcoma-associated herpesvirus,ORF62,n
+DGACFC,Kaposi’s sarcoma-associated herpesvirus,ORF63,n
+DGACFC,Adeno-Associated Virus Type 2 (AAV2),Rep 68 protein,n
+DGACFC,Adeno-Associated Virus Type 2 (AAV2),Rep 78 protein,n
+DGACFC,Echovirus 1 (EV1),genome polyprotein,n
+DGACFC,Merkel cell polyomavirus,large T antigen,n
+DGACFC,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+DGACFC,SARS-CoV-2,ORF1ab polyprotein,unk
+DGACFC,SARS-CoV-2,envelope protein,y
+DGACFC,Murray Valley encephalitis virus,polyprotein,unk
+DGACFC,Epstein-Barr virus (EBV),uracil-DNA glycosylase,n
+DGACFC,Epstein-Barr virus (EBV),deoxyribonuclease,n
+DGACFC,Rabies virus (RABV),L protein,n
+DGACFC,Echovirus 9 strain Barty,polyprotein,unk
+DGACFC,Porcine epidemic diarrhea virus,Pol1,n
+DGACFC,Vaccinia virus,ankyrin-like protein,n
+DGACFC,Vaccinia virus,viral core cysteine proteinase,n
+DGACFC,Vaccinia virus,"ATPase, nucleoside triphosphate phosphohydrolase-I, NPH-I",n
+DGACFC,HSV-2,tegument protein VP11/12,y
+DGACFC,HSV-2,envelope glycoprotein E,y
+DGACFC,JEV,polyprotein,unk
+DGACFC,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+DGACFC,FMDV,polyprotein,unk
+DGACFC,Zika virus,polyprotein,unk
+DGACFC,Coxsackievirus A9 (CVA9),polyprotein,unk
+DGACFC,Equine herpesvirus type 1,major capsid protein,y
+DGACFC,Porcine hemagglutinating encephalomyelitis virus (PHEV),spike glycoprotein,y
+DGACFC,Enterovirus 70,genome polyprotein,n
+ACFAFD,WNV,polyprotein,unk
+ACFAFD,WNV,truncated polyprotein NS1 prime,n
+ACFAFD,Kaposi’s sarcoma-associated herpesvirus,ORF50,n
+ACFAFD,Echovirus 1 (EV1),genome polyprotein,n
+ACFAFD,Ross River virus (RR),non-structural polyprotein,n
+ACFAFD,Dengue virus type 2,polyprotein,unk
+ACFAFD,Murray Valley encephalitis virus,polyprotein,unk
+ACFAFD,Murray Valley encephalitis virus,truncated polyprotein,unk
+ACFAFD,Epstein-Barr virus (EBV),nuclear antigen EBNA-3C,n
+ACFAFD,Echovirus 9 strain Barty,polyprotein,unk
+ACFAFD,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo147,n
+ACFAFD,HSV-2,multifunctional expression regulator,n
+ACFAFD,JEV,polyprotein,unk
+ACFAFD,JEV,truncated JEV polyprotein,unk
+ACFAFD,Zika virus,polyprotein,unk
+ACFAFD,Coxsackievirus A9 (CVA9),polyprotein,unk
+ACFAFD,Equine herpesvirus type 1,envelope glycoprotein H,y
+CCDGDCA,Human adenovirus type 5,pVII,n
+CCDGDCA,Transmissible gastroenteritis virus (TGEV),membrane protein,y
+CCDGDCA,Transmissible gastroenteritis virus (TGEV),non-structural protein 7,n
+CCDGDCA,Kaposi’s sarcoma-associated herpesvirus,K2,n
+CCDGDCA,Echovirus 1 (EV1),genome polyprotein,n
+CCDGDCA,Echovirus 9 strain Barty,polyprotein,unk
+CCDGDCA,Vaccinia virus,late transcription factor VLTF-1,n
+CCDGDCA,Vaccinia virus,"ATPase, nucleoside triphosphate phosphohydrolase-I, NPH-I",n
+CCDGDCA,Coxsackievirus A9 (CVA9),polyprotein,unk
+CECCAF,hMPV,RNA-dependent RNA polymerase,n
+CECCAF,Human adenovirus type 5,pol,n
+CECCAF,Murine coronavirus,internal protein,n
+CECCAF,Canine adenovirus type 2,pol,n
+CECCAF,human cytomegalovirus,tegument protein UL23,y
+CECCAF,HIV-1,Rev,n
+CECCAF,Ross River virus (RR),non-structural polyprotein,n
+CECCAF,Adeno-Associated Virus Type 4 (AAV4),rep,n
+CECCAF,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+CECCAF,SARS-CoV-2,ORF7a protein,n
+CECCAF,Classical swine fever virus (CSF),polyprotein,unk
+CECCAF,Epstein-Barr virus (EBV),helicase-primase primase subunit,n
+CECCAF,Rabies virus (RABV),phosphoprotein M1,n
+CECCAF,Vaccinia virus,Hypothetical protein,n
+CECCAF,Vaccinia virus,RNA helicase NPH-II,n
+CECCAF,HSV-2,deoxyribonuclease,n
+CECCAF,Human Papillomavirus type 16 (HPV),replication protein E1,n
+CECCAF,Equine herpesvirus type 1,ubiquitin E3 ligase ICP0,n
+CGCCCE,hMPV,RNA-dependent RNA polymerase,n
+CGCCCE,Kaposi’s sarcoma-associated herpesvirus,ORF60,n
+CGCCCE,Kaposi’s sarcoma-associated herpesvirus,ORF64,n
+CGCCCE,Murine adenovirus 3,pIVa2,n
+CGCCCE,HIV-1,Gag-Pol,y
+CGCCCE,Human polyomavirus 12,large T antigen,n
+CGCCCE,SARS-CoV-2,ORF1ab polyprotein,unk
+CGCCCE,Human parvovirus B19,capsid protein 1,y
+CGCCCE,Human parvovirus B19,capsid protein 2,y
+CGCCCE,Epstein-Barr virus (EBV),large tegument protein,y
+CGCCCE,Epstein-Barr virus (EBV),deoxyuridine triphosphatase,n
+CGCCCE,Epstein-Barr virus (EBV),tegument protein G48,y
+CGCCCE,Bovine adenovirus 3,DNA polymerase,n
+CGCCCE,Bovine adenovirus 3,protease,n
+CGCCCE,Rabies virus (RABV),L protein,n
+CGCCCE,Porcine epidemic diarrhea virus,Pol1,n
+CGCCCE,Vaccinia virus,ankyrin-like protein,n
+CGCCCE,Vaccinia virus,Hypothetical protein,n
+CGCCCE,Vaccinia virus,hypothetical protein,n
+CGCCCE,Vaccinia virus,RNA helicase NPH-II,n
+CGCCCE,Vaccinia virus,32kDa small subunit of transcription factor VITF-3,n
+CGCCCE,Vaccinia virus,Toll/IL-receptor-like protein,n
+CGCCCE,Vaccinia virus,ankyrin-like protein,n
+CGCCCE,Vaccinia virus,ankyrin-like protein,n
+CGCCCE,Vaccinia virus,ankyrin-like protein,n
+CGCCCE,HSV-2,DNA polymerase catalytic subunit,n
+CGCCCE,HSV-2,ribonucleotide reductase subunit 1,n
+CGCCCE,HSV-2,multifunctional expression regulator,n
+CGCCCE,Human parechovirus 1,hypothetical protein,n
+CGCCCE,FMDV,polyprotein,unk
+CGCCCE,Simian adenovirus 11,pol,n
+CGCCCE,Equine herpesvirus type 1,transcriptional regulator ICP4,n
+CGCCCE,Equine herpesvirus type 1,transcriptional regulator ICP4,n
+FDACEA,Kaposi’s sarcoma-associated herpesvirus,ORF55,n
+FDACEA,Echovirus 1 (EV1),genome polyprotein,n
+FDACEA,human cytomegalovirus,deoxyuridine triphosphatase,n
+FDACEA,human cytomegalovirus,membrane protein UL148,n
+FDACEA,Human parvovirus B19,capsid protein 1,y
+FDACEA,Murray Valley encephalitis virus,polyprotein,unk
+FDACEA,Murray Valley encephalitis virus,truncated polyprotein,unk
+FDACEA,Epstein-Barr virus (EBV),deoxyribonuclease,n
+FDACEA,Bovine adenovirus 3,fiber protein,y
+FDACEA,Echovirus 9 strain Barty,polyprotein,unk
+FDACEA,Vaccinia virus,DNA polymerase,n
+FDACEA,Vaccinia virus,Hypothetical protein,n
+FDACEA,Vaccinia virus,putative virion core protein,y
+FDACEA,HSV-2,major capsid protein,y
+FDACEA,HSV-2,tegument protein UL37,y
+FDACEA,Sendai virus,P protein,n
+FDACEA,Simian adenovirus 11,E1B 55K,n
+DDCCFA,hMPV,phosphoprotein,n
+DDCCFA,Human adenovirus type 5,fiber,y
+DDCCFA,Kaposi’s sarcoma-associated herpesvirus,ORF22,n
+DDCCFA,Kaposi’s sarcoma-associated herpesvirus,ORF57,n
+DDCCFA,Kaposi’s sarcoma-associated herpesvirus,ORF64,n
+DDCCFA,Minute virus of mice (MVM),hypothetical protein,n
+DDCCFA,Minute virus of mice (MVM),hypothetical protein,n
+DDCCFA,Murine adenovirus 3,fiber,y
+DDCCFA,Canine adenovirus type 2,V,n
+DDCCFA,Canine adenovirus type 2,E3 12.5K,n
+DDCCFA,human cytomegalovirus,DNA polymerase catalytic subunit,n
+DDCCFA,human cytomegalovirus,helicase-primase primase subunit,n
+DDCCFA,Epstein-Barr virus (EBV),nuclear antigen EBNA-3B,n
+DDCCFA,Epstein-Barr virus (EBV),tegument protein UL88,y
+DDCCFA,Epstein-Barr virus (EBV),capsid maturation protease,y
+DDCCFA,Epstein-Barr virus (EBV),capsid scaffold protein,y
+DDCCFA,Vaccinia virus,RNA helicase NPH-II,n
+DDCCFA,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo132,n
+DDCCFA,Vaccinia virus,serine protease inhibitor-like SPI-1,n
+DDCCFA,HSV-2,DNA packaging tegument protein UL25,y
+DDCCFA,HSV-2,ribonucleotide reductase subunit 1,n
+DDCCFA,JEV,polyprotein,unk
+DDCCFA,JEV,truncated JEV polyprotein,unk
+DDCCFA,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+DDCCFA,Human Papillomavirus type 16 (HPV),minor capsid protein L2,y
+DDCCFA,MERS-CoV,1AB polyprotein,unk
+DDCCFA,MERS-CoV,1A polyprotein,unk
+DDCCFA,Equine herpesvirus type 1,large tegument protein,y
+DDCCFA,Equine herpesvirus type 1,major capsid protein,y
+DDCCFA,Equine herpesvirus type 1,serine/threonine protein kinase US3,n
+CCACAD,Hepatitis C,polyprotein,unk
+CCACAD,Human adenovirus type 5,E1A,n
+CCACAD,Human adenovirus type 5,protease,n
+CCACAD,Human adenovirus type 5,E3 RID-beta,n
+CCACAD,Transmissible gastroenteritis virus (TGEV),replicase,n
+CCACAD,Kaposi’s sarcoma-associated herpesvirus,ORF9,n
+CCACAD,Kaposi’s sarcoma-associated herpesvirus,LANA,n
+CCACAD,Porcine torovirus,membrane glycoprotein,y
+CCACAD,Human adenovirus species D,core protein precursor pX,y
+CCACAD,Murine adenovirus 3,pIVa2,n
+CCACAD,Murine adenovirus 3,pX,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 68 protein,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 78 protein,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 40 protein,n
+CCACAD,Adeno-Associated Virus Type 2 (AAV2),Rep 52 protein,n
+CCACAD,Canine adenovirus type 2,IVa2,n
+CCACAD,Echovirus 1 (EV1),genome polyprotein,n
+CCACAD,human cytomegalovirus,protein UL29,n
+CCACAD,human cytomegalovirus,membrane glycoprotein UL40,y
+CCACAD,human cytomegalovirus,tegument protein UL16,y
+CCACAD,human cytomegalovirus,helicase-primase subunit,n
+CCACAD,human cytomegalovirus,capsid portal protein,y
+CCACAD,Adeno-Associated Virus Type 4 (AAV4),rep,n
+CCACAD,BKPyV human polyomavirus,large T antigen,n
+CCACAD,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+CCACAD,SARS-CoV-2,surface glycoprotein,y
+CCACAD,Classical swine fever virus (CSF),polyprotein,unk
+CCACAD,Murray Valley encephalitis virus,polyprotein,unk
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),protein BWRF1,n
+CCACAD,Epstein-Barr virus (EBV),envelope protein UL43,y
+CCACAD,Epstein-Barr virus (EBV),nuclear antigen EBNA-3A,n
+CCACAD,Epstein-Barr virus (EBV),protein UL92,n
+CCACAD,Epstein-Barr virus (EBV),nuclear protein UL24,n
+CCACAD,Bovine adenovirus 3,pX,n
+CCACAD,Simian virus 40,large T antigen,n
+CCACAD,Echovirus 9 strain Barty,polyprotein,unk
+CCACAD,Encephalomyocarditis virus (Cardiovirus A),hypothetical protein,n
+CCACAD,HSV-2,ubiquitin E3 ligase ICP0,n
+CCACAD,HSV-2,nuclear protein UL4,n
+CCACAD,HSV-2,envelope glycoprotein M,y
+CCACAD,HSV-2,tegument serine/threonine protein kinase,y
+CCACAD,HSV-2,single-stranded DNA-binding protein,n
+CCACAD,HSV-2,nuclear egress membrane protein,n
+CCACAD,HSV-2,large tegument protein,y
+CCACAD,HSV-2,tegument protein UL37,y
+CCACAD,HSV-2,ubiquitin E3 ligase ICP0,n
+CCACAD,HSV-2,envelope glycoprotein G,y
+CCACAD,HSV-2,envelope glycoprotein E,y
+CCACAD,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+CCACAD,FMDV,polyprotein,unk
+CCACAD,Mumps virus (MuV),hemagglutinin-neuraminidase,y
+CCACAD,Human Papillomavirus type 16 (HPV),minor capsid protein L2,y
+CCACAD,Human Papillomavirus type 16 (HPV),major capsid protein L1,y
+CCACAD,Zika virus,polyprotein,unk
+CCACAD,Coxsackievirus A9 (CVA9),polyprotein,unk
+CCACAD,Simian adenovirus 11,CR1-beta,n
+CCACAD,JCPyV human polyomavirus,hypothetical protein,n
+CCACAD,Porcine deltacoronavirus,spike glycoprotein,y
+CCACAD,Equine herpesvirus type 1,membrane protein V1,y
+CCACAD,Equine herpesvirus type 1,nuclear egress membrane protein,n
+CCACAD,Equine herpesvirus type 1,DNA replication origin-binding helicase,n
+CCACAD,Equine herpesvirus type 1,envelope glycoprotein G,y
+CCACAD,Equine herpesvirus type 1,envelope glycoprotein E,y
+DDCGGD,Murine rotavirus,VP3,y
+DDCGGD,Human adenovirus type 5,pol,n
+DDCGGD,WNV,polyprotein,unk
+DDCGGD,Bovine coronavirus,32 kDa non-structural protein,n
+DDCGGD,Human adenovirus species D,DNA polymerase,n
+DDCGGD,HCoV-HKU1,ORF1ab polyprotein,unk
+DDCGGD,Canine adenovirus type 2,pol,n
+DDCGGD,Echovirus 1 (EV1),genome polyprotein,n
+DDCGGD,human cytomegalovirus,large tegument protein,y
+DDCGGD,human cytomegalovirus,tegument protein US24,y
+DDCGGD,Echovirus 9 strain Barty,polyprotein,unk
+DDCGGD,JEV,polyprotein,unk
+DDCGGD,Sendai virus,RNA polymerase protein,n
+DDCGGD,Human parainfluenza virus 1,L polymerase protein,n
+DDCGGD,Coxsackievirus A9 (CVA9),polyprotein,unk
+DDCGGD,Simian adenovirus 11,E1B 55K,n
+DDCGGD,Simian adenovirus 11,pol,n
+DFCFCG,Kaposi’s sarcoma-associated herpesvirus,ORF72,n
+DFCFCG,SARS-CoV-2,ORF1ab polyprotein,unk
+DFCFCG,SARS-CoV-2,ORF1a polyprotein,unk
+DFCFCG,Epstein-Barr virus (EBV),tegument protein G75,y
+DFCFCG,Epstein-Barr virus (EBV),protein UL49,n
+DFCFCG,Epstein-Barr virus (EBV),protein Zta,n
+DFCFCG,Rabies virus (RABV),L protein,n
+DFCFCG,Vaccinia virus,Hypothetical protein,n
+DFCFCG,Vaccinia virus,DNA-dependent RNA polymerase subunit rpo19,n
+DFCFCG,Zika virus,polyprotein,unk
+DFCFCG,Simian adenovirus 11,E1B 55K,n
+FGACCA,Human adenovirus type 5,E4 ORFB,n
+FGACCA,Kaposi’s sarcoma-associated herpesvirus,K2,n
+FGACCA,human cytomegalovirus,tegument protein UL35,y
+FGACCA,human cytomegalovirus,membrane protein US15,y
+FGACCA,Dengue virus type 2,polyprotein,unk
+FGACCA,Classical swine fever virus (CSF),polyprotein,unk
+FGACCA,Murray Valley encephalitis virus,polyprotein,unk
+FGACCA,Murray Valley encephalitis virus,truncated polyprotein,unk
+FGACCA,Epstein-Barr virus (EBV),ribonucleotide reductase subunit 1,n
+FGACCA,Epstein-Barr virus (EBV),latent membrane protein LMP-1,y
+FGACCA,HSV-2,DNA polymerase processivity subunit,n
+FGACCA,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+FGACCA,Zika virus,polyprotein,unk
+FGACCA,Simian adenovirus 11,pol,n
+FGACCA,Equine herpesvirus type 1,ribonucleotide reductase subunit 1,n
+FGACCA,Equine herpesvirus type 1,tegument serine/threonine protein kinase,y
+GACGFG,Murine rotavirus,VP3,y
+GACGFG,WNV,polyprotein,unk
+GACGFG,HCoV-OC43,spike surface glycoprotein,y
+GACGFG,human cytomegalovirus,DNA packaging tegument protein UL17,y
+GACGFG,human cytomegalovirus,helicase-primase helicase subunit,n
+GACGFG,Ross River virus (RR),non-structural polyprotein,n
+GACGFG,Dengue virus type 2,polyprotein,unk
+GACGFG,Tick-borne encephalitis virus (TBEV),polyprotein,unk
+GACGFG,Human parvovirus B19,non-structural protein NS1,n
+GACGFG,Murray Valley encephalitis virus,polyprotein,unk
+GACGFG,JEV,polyprotein,unk
+GACGFG,Seoul orthohantavirus,RNA-dependent RNA polymerase,n
+GACGFG,Zika virus,polyprotein,unk
+CCAAACD,WNV,polyprotein,unk
+CCAAACD,Kaposi’s sarcoma-associated herpesvirus,K4,n
+CCAAACD,Kaposi’s sarcoma-associated herpesvirus,ORF39,n
+CCAAACD,Echovirus 1 (EV1),genome polyprotein,n
+CCAAACD,human cytomegalovirus,membrane glycoprotein UL16,y
+CCAAACD,human cytomegalovirus,protein UL42,n
+CCAAACD,human cytomegalovirus,large tegument protein,y
+CCAAACD,human cytomegalovirus,protein US34,n
+CCAAACD,HIV-1,"Envelope surface glycoprotein gp160, precursor",y
+CCAAACD,SARS-CoV-2,ORF1ab polyprotein,unk
+CCAAACD,SARS-CoV-2,ORF1a polyprotein,unk
+CCAAACD,Epstein-Barr virus (EBV),nuclear antigen EBNA-3A,n
+CCAAACD,Epstein-Barr virus (EBV),envelope glycoprotein 150,y
+CCAAACD,Echovirus 9 strain Barty,polyprotein,unk
+CCAAACD,Vaccinia virus,putative virion core protein,y
+CCAAACD,HSV-2,envelope glycoprotein H,y
+CCAAACD,Equine rhinitis A virus,polyprotein,unk
+CCAAACD,Human Papillomavirus type 16 (HPV),major capsid protein L1,y
+CCAAACD,Zika virus,polyprotein,unk
+CCAAACD,Coxsackievirus A9 (CVA9),polyprotein,unk
+CCAAACD,Equine herpesvirus type 1,DNA packaging terminase subunit 2,n

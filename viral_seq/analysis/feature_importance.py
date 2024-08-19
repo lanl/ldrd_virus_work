@@ -139,12 +139,16 @@ def get_positive_shap_values(shap_values):
     # for the type handling here, see release 0.45.0 and
     # https://github.com/shap/shap/pull/3318
     if isinstance(shap_values, list):
+        # legacy handling of `explainer.shap_values`
         positive_class_shap_values = shap_values[1]
     else:
-        if shap_values.values.ndim == 3:
+        # shap 0.46.0 now returns np.ndarray for `explainer.shap_values`
+        if (hasattr(shap_values, "values") and shap_values.values.ndim == 3) or (
+            hasattr(shap_values, "ndim") and shap_values.ndim == 3
+        ):
             positive_class_shap_values = shap_values[:, :, 1]
         else:
-            # XGBoost case?
+            # XGBoost case
             positive_class_shap_values = shap_values
     return positive_class_shap_values
 

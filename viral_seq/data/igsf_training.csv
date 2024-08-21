@@ -16,8 +16,8 @@ https://doi.org/10.1128/jvi.01227-21,varicella-zoster virus,IgSF,True,NC_001348.
 https://doi.org/10.1128/jvi.00041-12,herpes B virus,IgSF,True,NC_076165.1,False,True,True
 https://doi.org/10.1126/science.280.5369.1618,herpes simplex virus 1,IgSF,True,NC_001806.2,True,True,True
 https://doi.org/10.1126/science.280.5369.1618,herpes simplex virus 2,IgSF,True,NC_001798.2,True,True,True
-https://doi.org/10.1126/science.280.5369.1618,porcine pseudorabies virus (PRV),IgSF,False,OR161249.1,False,True,False
-https://doi.org/10.1126/science.280.5369.1618,bovine herpesvirus 1 (BHV-1),IgSF,True,NC_075689.1,True,True,True
+https://doi.org/10.1126/science.280.5369.1618,porcine pseudorabies virus (PRV),IgSF,True,NC_075689.1,False,True,False
+https://doi.org/10.1126/science.280.5369.1618,bovine herpesvirus 1 (BHV-1),IgSF,True,NC_063268.1,True,True,True
 https://doi.org/10.3390/v14010160,human herpesvirus 6B (HHV-6B),IgSF,True,NC_000898.1,True,True,True
 https://doi.org/10.1128/jvi.00824-12,canine distemper virus,IgSF,True,NC_001921.1,False,True,False
 https://doi.org/10.1371/journal.ppat.1002240,measles virus,IgSF,True,NC_001498.1,True,True,True

@@ -409,10 +409,25 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
                     "OOB score of RandomForestClassifier is too poor for feature ranking to be reliable.\nActual score: %s\nExpected score: > 0.75"
                     % oob_score
                 )
-            keep_feats = sp.get_best_features(
+            keep_feats_rf = sp.get_best_features(
                 rfc.feature_importances_, rfc.feature_names_in_
             )
-            print("Selected", len(keep_feats), "features")
+            print("Selected", len(keep_feats_rf), "features from native RF")
+            explainer = shap.Explainer(rfc, seed=random_state)
+            shap_values = explainer(X)
+            positive_shap_values = feature_importance.get_positive_shap_values(
+                shap_values
+            )
+            mean_abs_shap_values = positive_shap_values.abs.mean(0).values
+            mean_abs_shap_values /= mean_abs_shap_values.sum()
+            keep_feats_shap = sp.get_best_features(mean_abs_shap_values, X.columns)
+            print("Selected", len(keep_feats_shap), "features from RF SHAP")
+            keep_feats = np.intersect1d(keep_feats_rf, keep_feats_shap)
+            print(
+                "Keeping",
+                len(keep_feats),
+                "features from intersection of the RF and RF SHAP approaches",
+            )
             if debug:
                 assert len(keep_feats) < 50_000, (
                     "Too many features selected by feature selection.\nAcutal: %s\nExpected: < 50_000"

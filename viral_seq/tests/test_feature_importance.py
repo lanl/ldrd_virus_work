@@ -1,9 +1,11 @@
 from viral_seq.analysis import feature_importance as fi
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 import matplotlib
 from matplotlib.testing.compare import compare_images
 from importlib.resources import files
+import shap
+
 
 matplotlib.use("Agg")
 
@@ -131,3 +133,56 @@ def test_plot_feat_import_consensus(tmpdir):
     with tmpdir.as_cwd():
         fi.plot_feat_import_consensus(ranked_feature_names, ranked_feature_counts, 3, 5)
         assert compare_images(expected_plot, "feat_imp_consensus.png", 0.001) is None
+
+
+def test_get_positive_shap_values():
+    rng = np.random.default_rng(123)
+    cases = []
+    # our expected will remain the same, but we'll shape it into different shap_value cases
+    expected = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
+    list_case = [-expected, expected]
+    cases.append(list_case)
+    cases.append(expected)  # xgboost, raw values case
+    cases.append(shap.Explanation(values=expected))  # xgboost case
+    shap_values = np.moveaxis(np.array(list_case), 0, -1)
+    cases.append(shap_values)  # ndim==3, raw values case
+    cases.append(shap.Explanation(values=shap_values))  # ndim==3 case
+    for case in cases:
+        res = fi.get_positive_shap_values(case)
+        if isinstance(res, np.ndarray):
+            actual = res
+        else:
+            actual = res.values
+        assert_allclose(actual, expected)
+
+
+def test_plot_shap_meanabs(tmpdir):
+    rng = np.random.default_rng(42)
+    values = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
+    data = np.copy(values)  # feature values
+    rng.shuffle(data)
+    feature_names = [f"Feature {i}" for i in range(values.shape[1])]
+    explanation = shap.Explanation(
+        values=values, data=data, feature_names=feature_names
+    )
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_shap_meanabs.png"
+    )
+    with tmpdir.as_cwd():
+        fi.plot_shap_meanabs(explanation, top_feat_count=2)
+        assert compare_images(expected_plot, "feat_shap_meanabs.png", 0.001) is None
+
+
+def test_plot_shap_beeswarm(tmpdir):
+    rng = np.random.default_rng(1984)
+    values = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
+    data = np.copy(values)  # feature values
+    rng.shuffle(data)
+    explanation = shap.Explanation(values=values, data=data)
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_shap_beeswarm.png"
+    )
+    np.random.seed(0)  # beeswarm/summary_plot uses numpy for random
+    with tmpdir.as_cwd():
+        fi.plot_shap_beeswarm(explanation)
+        assert compare_images(expected_plot, "feat_shap_beeswarm.png", 0.001) is None

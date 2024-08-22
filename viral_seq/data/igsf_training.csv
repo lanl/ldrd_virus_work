@@ -33,3 +33,8 @@ https://doi.org/10.1099/vir.0.020503-0,porcine reproductive and respiratory synd
 https://doi.org/10.1038/s41564-019-0453-2,zaire ebolavirus,IgSF,True,NC_002549.1,True,True,True
 https://doi.org/10.1016/0092-8674(89)90690-9,poliovirus,IgSF,True,NC_002058.3,True,True,True
 https://doi.org/10.1128/jvi.00465-14,saimiriine alphaherpesvirus 1,IgSF,True,NC_014567.1,False,True,True
+https://doi.org/10.1091/mbc.8.1.47,simian virus 40,IgSF,True,NC_001669.1,False,True,True
+https://doi.org/10.1128/jvi.00287-10,equine herpesvirus type 1,IgSF,True,NC_001491.2,False,True,False
+https://doi.org/10.1099/vir.0.066407-0,equine herpesvirus type 4,IgSF,True,NC_001844.1,False,True,False
+https://doi.org/10.1128/jvi.71.6.4657-4662.1997,Epstein-Barr virus,IgSF,True,NC_007605.1,True,True,True
+https://doi.org/10.1038/s41586-019-0955-3,bat influenza A virus,IgSF,True,PQ109491.1 PQ109490.1 PQ109489.1 PQ109488.1 PQ109487.1 PQ109486.1 PQ109485.1 PQ109484.1,False,True,False

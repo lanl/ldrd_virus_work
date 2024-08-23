@@ -424,3 +424,27 @@ def test_cal_eer_thresh_and_val_functional(input_data, expected_eer_data):
     threshold = input_data
     eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
     assert_allclose(eer_data, expected_eer_data)
+
+
+def test_plot_confusion_matrix(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_confusion_matrix.png"
+    )
+    rng = np.random.default_rng(123)
+    y_test = rng.integers(2, size=10)
+    y_pred = rng.integers(2, size=10)
+    with tmpdir.as_cwd():
+        classifier.plot_confusion_matrix(y_test, y_pred)
+        assert compare_images(expected_plot, "confusion_matrix.png", 0.001) is None
+
+
+def test_plot_confusion_matrix_mean(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_confusion_matrix_mean.png"
+    )
+    rng = np.random.default_rng(123)
+    y_test = rng.integers(2, size=10)
+    y_preds = [rng.integers(2, size=10) for i in range(3)]
+    with tmpdir.as_cwd():
+        classifier.plot_confusion_matrix_mean(y_test, y_preds)
+        assert compare_images(expected_plot, "confusion_matrix_mean.png", 0.001) is None

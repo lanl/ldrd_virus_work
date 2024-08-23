@@ -568,6 +568,46 @@ def get_test_features(
     return X_test, y_test
 
 
+def _plot_confusion_matrices(
+    y_test: np.ndarray,
+    model_arguments: Dict[str, Any],
+    predictions_ensemble_hard_eer: Dict[str, np.ndarray],
+    comp_names_ensembles: list[str],
+    comp_preds_ensembles: list[np.ndarray],
+    plots_path: Path,
+):
+    predictions_group = defaultdict(list)
+    # individual classifiers
+    for name, val in model_arguments.items():
+        group = val["group"]
+        # for group confusion matrix
+        predictions_group[group].append(predictions_ensemble_hard_eer[name])
+        classifier.plot_confusion_matrix(
+            y_test,
+            predictions_ensemble_hard_eer[name],
+            title=f"Confusion Matrix on Test\n{name}\nPredictions at EER threshold",
+            filename=str(plots_path / f"{name}_confusion_matrix.png"),
+        )
+    copies = len(predictions_group[group])
+    # groups mean +/- std
+    if copies > 1:
+        for group in predictions_group:
+            classifier.plot_confusion_matrix_mean(
+                y_test,
+                predictions_group[group],
+                title=f"Confusion Matrix Mean on Test\n{group} over {copies} seeds\nPredictions at EER threshold",
+                filename=str(plots_path / f"{group}_confusion_matrix.png"),
+            )
+    # ensembles
+    for this_name, this_ensemble in zip(comp_names_ensembles, comp_preds_ensembles):
+        classifier.plot_confusion_matrix(
+            y_test,
+            this_ensemble,
+            title=f"Confusion Matrix on Test\n{this_name}",
+            filename=str(plots_path / f"{this_name}_confusion_matrix.png"),
+        )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -970,6 +1010,7 @@ if __name__ == "__main__":
     )
     # ensemble models
     comp_names_ensembles = []
+    comp_preds_ensembles = []
     comp_fprs_ensembles = []
     comp_tprs_ensembles = []
     predictions_ensemble_hard = {}
@@ -995,6 +1036,7 @@ if __name__ == "__main__":
             str(predictions_path / f"ensemble_hard_{name}_proba_predictions.csv")
         )
         comp_names_ensembles.append(f"Hard Votes Ensemble at {name} Threshold")
+        comp_preds_ensembles.append(this_ensemble)
         comp_fprs_ensembles.append(this_fpr)
         comp_tprs_ensembles.append(this_tpr)
     this_title = (
@@ -1008,6 +1050,14 @@ if __name__ == "__main__":
         comp_tprs_ensembles,
         filename=str(plots_path / "roc_plot_ensemble_comparison.png"),
         title=this_title,
+    )
+    _plot_confusion_matrices(
+        y_test,
+        model_arguments,
+        predictions_ensemble_hard_eer,
+        comp_names_ensembles,
+        comp_preds_ensembles,
+        plots_path,
     )
     # check feature importance and consensus
     feature_importances = []

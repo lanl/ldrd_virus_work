@@ -1,0 +1,95 @@
+,Species,Accessions,Human Host,Is_Integrin,Is_Sialic_Acid
+0,hMPV,NC_039199.1,True,True,False
+1,MERS-CoV,NC_019843.3,True,False,True
+2,FMDV,NC_039210.1,True,True,False
+3,influenza_A_H1N1,NC_026438.1 NC_026435.1 NC_026437.1 NC_026433.1 NC_026436.1 NC_026434.1 NC_026432.1 NC_026431.1,True,False,True
+4,HSV-2,NC_001798.2,True,True,False
+5,type_3_reovirus,NC_077846.1 NC_077845.1 NC_077844.1 NC_077843.1 NC_077842.1 NC_077841.1 NC_077840.1 NC_077839.1 NC_077838.1 NC_077837.1,True,False,True
+6,WNV,NC_001563.2,True,True,False
+7,type_1_reovirus,MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1,False,False,True
+8,JEV,NC_001437.1,True,True,False
+9,BKPyV human polyomavirus,NC_001538.1,True,False,True
+10,SARS-CoV-2,NC_045512.2,True,True,False
+11,JCPyV human polyomavirus,NC_001699.1,True,False,True
+12,Zika virus,NC_012532.1,False,True,False
+13,bovine parvovirus,NC_001540.1,False,False,True
+14,Human adenovirus type 5,AC_000008.1,True,True,False
+15,Sendai virus,NC_001552.1,False,False,True
+16,human cytomegalovirus,NC_006273.2,True,True,False
+17,Human rotavirus B,NC_021541.1 NC_021545.1 NC_021551.1 NC_021543.1 NC_021546.1 NC_021544.1 NC_021547.1 NC_021548.1 NC_021542.1 NC_021550.1 NC_021549.1,True,True,True
+18,Enterovirus 70,NC_001430.1,True,False,True
+19,Kaposi’s sarcoma-associated herpesvirus,NC_009333.1,True,True,False
+20,Human parainfluenza virus 1,NC_003461.1,True,False,True
+21,Epstein-Barr virus (EBV),NC_007605.1,True,True,False
+22,Tulane virus,NC_043512.1,False,False,True
+23,HIV-1,NC_001802.1,True,True,False
+24,HCoV-OC43,NC_006213.1,True,False,True
+25,Sin Nombre virus,NC_005217.1 NC_005215.1 NC_005216.1,True,True,False
+26,HCoV-HKU1,NC_006577.2,True,False,True
+27,Human parechovirus 1,NC_038319.1,True,True,False
+28,Mumps virus (MuV),NC_002200.1,True,False,True
+29,Ross River virus (RR),NC_075016.1,True,True,False
+30,Human adenovirus species D,NC_010956.1,True,False,True
+31,Coxsackievirus A9 (CVA9),OQ842435.1,True,True,False
+32,Human rubulavirus 2,NC_003443.1,True,False,True
+33,Echovirus 1 (EV1),NC_001472.1,True,True,False
+34,Bovine coronavirus,NC_003045.1,False,False,True
+35,Human Papillomavirus type 16 (HPV),NC_001526.4,True,True,False
+36,Murine polyomavirus strain BG,NC_001515.2,False,False,True
+37,Murine adenovirus 3,NC_012584.1,False,True,False
+38,Merkel cell polyomavirus,NC_010277.2,True,False,True
+39,Simian adenovirus 11,KP329562.1,False,True,False
+40,Porcine sapovirus,PQ001586.1,False,False,True
+41,Theiler's murine encephalomyelitis virus (TMEV),KF680264.1,False,True,True
+42,Porcine hemagglutinating encephalomyelitis virus (PHEV),OQ798806.1,False,False,True
+43,Vaccinia virus,NC_006998.1,True,True,False
+44,Transmissible gastroenteritis virus (TGEV),NC_038861.1,False,False,True
+45,Rabies virus (RABV),NC_001542.1,True,True,False
+46,Porcine deltacoronavirus,MT505456.1,True,False,True
+47,Human parvovirus B19,NC_000883.2,True,True,False
+48,Goat torovirus,NC_034976.1,False,False,True
+49,Adeno-Associated Virus Type 2 (AAV2),NC_001401.2,True,True,False
+50,Mengovirus,KX231802.1,True,False,True
+51,Classical swine fever virus (CSF),NC_002657.1,False,True,False
+52,Encephalomyocarditis virus (Cardiovirus A),NC_001479.1,True,False,True
+53,Porcine epidemic diarrhea virus,NC_003436.1,False,False,True
+54,Dengue virus type 2,NC_001474.2,True,True,False
+55,Coxsackievirus A24 (CVA24),MT741537.1,True,False,True
+56,Murine adenovirus 1,JB420430.1,False,True,False
+57,Highly Pathogenic Avian Influenza A (H5N1),NC_007364.1 NC_007363.1 NC_007362.1 NC_007361.1 NC_007360.1 NC_007359.1 NC_007358.1 NC_007357.1,True,False,True
+58,Andes hantavirus (ANDV),NC_003468.2 NC_003467.2 NC_003466.1,True,True,False
+59,Monkey lymphotropic papovavirus (LPV),D00055.1,True,False,True
+60,Simian virus 40,NC_001669.1,False,True,True
+61,Hantaan virus,NC_005222.1 NC_005219.1 NC_005218.1,True,True,False
+62,Minute virus of mice (MVM),NC_001510.1,False,False,True
+63,Prospect hill hantavirus (PHV),NC_038939.1 NC_038940.1 NC_038938.1,True,True,False
+64,Human respirovirus 3,NC_075446.1,True,False,True
+65,Echovirus 9 strain Barty,X92886.1,True,True,False
+66,Bluetongue virus,NC_006023.1 NC_006013.2 NC_006014.1 NC_006024.2 NC_006025.1 NC_006010.1 NC_006022.1 NC_006007.1 NC_006008.2 NC_006015.1,False,False,True
+67,Dobrava virus,NC_005235.1 NC_005234.1 NC_005233.1,True,True,False
+68,Murray Valley encephalitis virus,NC_000943.1,True,True,False
+69,Bovine adeno-associated virus (BAAV),NC_005889.1,False,False,True
+70,Tick-borne encephalitis virus (TBEV),NC_001672.1,True,True,False
+71,Feline calicivirus,NC_075569.1,False,False,True
+72,Canine adenovirus type 2,AC_000020.1,False,True,False
+73,Adeno-Associated Virus Type 4 (AAV4),NC_001829.1,True,False,True
+74,Equine herpesvirus type 1,NC_001491.2,False,True,True
+75,Norwalk virus (murine norovirus),MT358379.1,False,False,True
+76,Hepatitis C,NC_038882.1,True,True,False
+77,Bovine adenovirus 3,NC_001876.1,False,False,True
+78,Murine rotavirus,KJ477107.1,False,True,False
+79,Porcine torovirus,NC_022787.1,False,False,True
+80,Puumala orthohantavirus,NC_005225.1 NC_005223.1 NC_005224.1,True,True,False
+81,Sapporo virus,NC_010624.1,True,False,True
+82,Sangassou orthohantavirus,NC_034517.1 NC_034516.1 NC_034526.1,True,True,False
+83,Porcine sapelovirus,NC_003987.1,False,False,True
+84,Seoul orthohantavirus,OP899813.1,True,True,False
+85,Equine rhinitis A virus,NC_039209.1,False,False,True
+86,Tula orthohantavirus,NC_005226.1 NC_005228.1 NC_005227.1,True,True,False
+87,Influenza D virus,NC_036621.1 NC_036620.1 NC_036619.1 NC_036618.1 NC_036617.1 NC_036616.1 NC_036615.1,False,False,True
+88,African green monkey B-lymphotropic polyomavirus,NC_004763.2,True,False,True
+89,New Jersey polyomavirus (NJPyV),NC_024118.1,True,False,True
+90,Bovine torovirus (Breda virus),NC_007447.1,False,False,True
+91,Human polyomavirus 12,NC_020890.1,True,False,True
+92,Human parainfluenza virus 3,NC_001796.2,True,False,True
+93,Murine coronavirus,NC_012936.1,False,False,True

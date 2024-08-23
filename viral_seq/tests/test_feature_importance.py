@@ -7,6 +7,10 @@ from matplotlib.testing.compare import compare_images
 from importlib.resources import files
 import shap
 import pytest
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.calibration import CalibratedClassifierCV
+import pandas as pd
 
 
 matplotlib.use("Agg")
@@ -201,3 +205,30 @@ def test_plot_shap_beeswarm(tmpdir, interference):
     with tmpdir.as_cwd():
         fi.plot_shap_beeswarm(explanation)
         assert compare_images(expected_plot, "feat_shap_beeswarm.png", 0.001) is None
+
+
+@pytest.mark.parametrize(
+    "calibrated, expected_values",
+    [(False, [0.07291667, -0.05625]), (True, [-0.01875, 0.00208333333])],
+)
+def test_get_shap_values(calibrated, expected_values):
+    random_state = 457698
+    X_train, y_train = make_classification(
+        n_samples=6,
+        n_features=2,
+        n_informative=1,
+        n_redundant=0,
+        n_clusters_per_class=1,
+        random_state=random_state,
+    )
+    clf = RandomForestClassifier(n_estimators=10, random_state=random_state)
+    if calibrated:
+        clf = CalibratedClassifierCV(clf, cv=2).fit(X_train, y_train)
+    else:
+        clf.fit(X_train, y_train)
+    shap_values = fi.get_shap_values(clf, pd.DataFrame(X_train), random_state)
+    # reduce what we need to store for assertion
+    mean_pos_shap_values = np.mean(
+        fi.get_positive_shap_values(shap_values).values, axis=0
+    )
+    assert_allclose(mean_pos_shap_values, expected_values)

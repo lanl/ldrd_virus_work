@@ -1161,7 +1161,7 @@ if __name__ == "__main__":
         ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
-        ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
+        ax.set_title(f"Feature importance consensus amongst {n_folds} folds for \n{str(target_column)")
         ax.set_xlabel("Percentage (%)")
         counter2 = -1
 

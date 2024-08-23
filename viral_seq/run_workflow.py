@@ -12,7 +12,8 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, RocCurveDisplay, auc
+from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
@@ -22,6 +23,7 @@ import matplotlib.pyplot as plt
 from time import perf_counter
 import tarfile
 import shap
+from scipy.stats import pearsonr
 
 matplotlib.use("Agg")
 
@@ -686,7 +688,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Is_Both", "Is_Integrin", "Is_Sialic_Acid", "Human Host"],
+        choices=["Is_Integrin", "Is_Sialic_Acid", "Human Host"],
         default="Human Host",
         help="Target column to be used for binary clasification.",
     )
@@ -1057,26 +1059,66 @@ if __name__ == "__main__":
         print("Viruses: \n", viruses)
         print("Associated viral proteins: \n", products)
 
-    if workflow == "DTRA":
-    
+    if (
+        workflow == "DTRA"
+    ):  # Update by AM as of 08/23/24: There are no functions (yet) in the code below - only a monolithic script to accomplish the task. AM intends to split the workflow into rigorously tested functions and perform regression testing in the coming days.
+        records = sp.load_from_cache(cache=cache_viral, filter=False)
+
+        # Here is a list of common integrin-binding motifs. These motifs interact with
+        # specific integrins, playing critical roles in cell adhesion, signaling, and
+        # interaction with the extracellular matrix:
+        # RGD (Arg-Gly-Asp)
+        # KGE (Lys-Gly-Glu)
+        # LDV (Leu-Asp-Val)
+        # DGEA (Asp-Gly-Glu-Ala)
+        # REDV (Arg-Glu-Asp-Val)
+        # YGRK (Tyr-Gly-Arg-Lys)
+        # PHSRN (Pro-His-Ser-Arg-Asn)
+        # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
+
+        list_of_positive_controls_for_AA_k_mers = [
+            "RGD",
+            "KGE",
+            "LDV",
+            "DGEA",
+            "REDV",
+            "YGRK",
+            "PHSRN",
+            "SVVYGLR",
+        ]
+        list_of_positive_controls_for_PC_k_mers = [
+            "GAF",
+            "CFA",
+            "FAFA",
+            "GFFA",
+            "DAGG",
+            "CEDGE",
+            "DAADACG",
+        ]
+
+        # 'GAF' corresponds to both RGD and KGE
+        # 'CFA' corresponds to LDV
+        # 'FAFA' corresponds to DGEA
+        # 'GFFA' corresponds to REDV
+        # 'DAGG' corresponds to YGRK
+        # 'CEDGE' corresponds to PHSRN
+        # 'DAADACG' corresponds to SVVYGLR
+
+        ### Create empty lists for eventual post-processing of data output
+
+        viruses_PC = []
+        protein_name_PC = []
+        k_mers_PC = []
+
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        tbl = pd.read_csv(train_file)
-        tmp = tbl
-        tmp = tmp.drop(columns=['Citation_for_receptor','Whole_Genome','Mammal_Host','Primate_Host'])
-        tmp = tmp.rename(columns={'Virus_Name': 'Species', 'Human_Host': 'Human Host', 'Receptor_Type': 'Is_Integrin'})
-        tmp['Is_Sialic_Acid'] = pd.Series(dtype='bool')
-        tmp['Is_Both'] = pd.Series(dtype='bool')
-        tmp = tmp[['Species','Accessions','Human Host','Is_Integrin','Is_Sialic_Acid','Is_Both']]
-        tmp['Is_Sialic_Acid'] = np.where(tmp['Is_Integrin'] == 'integrin', False, True)
-        tmp['Is_Both'] = np.where(tmp['Is_Integrin'] == 'both', True, False)
-        tmp['Is_Integrin'] = np.where(tmp['Is_Integrin'] == 'sialic_acid', False, True)
-        tmp.to_csv(train_file)
         tbl = pd.read_csv(train_file)
         y = tbl[target_column]
         v1 = list(X.columns)
-    
-        random_state = np.random.RandomState(0)
-    
+
+        ### Estimation and visualization of the variance of the
+        ### Receiver Operating Characteristic (ROC) metric using cross-validation.
+        ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
+
         n_folds = 5
         cv = StratifiedKFold(n_splits=n_folds)
         clfr = RandomForestClassifier(
@@ -1085,13 +1127,13 @@ if __name__ == "__main__":
         tprs = []
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
-    
+
         fig, ax = plt.subplots(figsize=(8, 8))
-    
+
         counter = -1
         n_features = 5
-        tmp1 = np.zeros((n_folds, n_features))
-    
+        temp1 = np.zeros((n_folds, n_features))
+
         for fold, (train, test) in enumerate(cv.split(X, y)):
             clfr.fit(X.iloc[train], y[train])
             df = pd.DataFrame()
@@ -1113,10 +1155,10 @@ if __name__ == "__main__":
             interp_tpr[0] = 0.0
             tprs.append(interp_tpr)
             aucs.append(viz.roc_auc)
-    
+
             counter += 1
-            tmp1[counter, :] = df["index"][:n_features].to_numpy()
-    
+            temp1[counter, :] = df["index"][:n_features].to_numpy()
+
         mean_tpr = np.mean(tprs, axis=0)
         mean_tpr[-1] = 1.0
         mean_auc = auc(mean_fpr, mean_tpr)
@@ -1129,7 +1171,7 @@ if __name__ == "__main__":
             lw=2,
             alpha=0.8,
         )
-    
+
         std_tpr = np.std(tprs, axis=0)
         tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
         tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
@@ -1141,7 +1183,7 @@ if __name__ == "__main__":
             alpha=0.2,
             label=r"$\pm$ 1 std. dev.",
         )
-    
+
         ax.set(
             xlabel="False Positive Rate",
             ylabel="True Positive Rate",
@@ -1151,123 +1193,326 @@ if __name__ == "__main__":
         )
         ax.legend(loc="lower right")
         fig.tight_layout()
-        fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
-    
-        (uniq, freq) = np.unique(tmp1.flatten(), return_counts=True)
-        tmp2 = np.column_stack((uniq, freq))
-        tmp3 = tmp2[tmp2[:, 1].argsort()]
-        tmp4 = [
-            df[df["index"] == tmp3[i, 0]]["Features"].to_numpy()
-            for i in range(tmp3.shape[0])
+        fig.savefig(
+            str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300
+        )
+
+        ### Populate 'array1' and 'array2' with useful information
+        ### for the Feature Importance Consensus (FIC) and SHAP plots
+
+        (uniq, freq) = np.unique(temp1.flatten(), return_counts=True)
+        temp2 = np.column_stack((uniq, freq))
+        temp3 = temp2[temp2[:, 1].argsort()]
+        temp4 = [
+            df[df["index"] == temp3[i, 0]]["Features"].to_numpy()
+            for i in range(temp3.shape[0])
         ]
-        arr1 = tmp3[:, 1]
-        arr2 = [tmp4[i][0] for i in range(len(tmp4))]
-        fig, ax = plt.subplots(figsize=(8, 8))
-        y_pos = np.arange(len(arr2))
-        ax.barh(y_pos, (arr1 / n_folds) * 100)
-        ax.set_xlim(0, 100)
-        ax.set_yticks(y_pos, labels=arr2)
-        ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
-        ax.set_xlabel("Percentage (%)")
-        fig.tight_layout()
-        fig.savefig(str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
-    
+        array1 = temp3[:, 1]
+        array2 = [temp4[i][0] for i in range(len(temp4))]
+
+        ### Check how many AA- and PC- kmers contain a positive control from the lists
+        ### defined at the beginning of the DTRA workflow. Repeat this process for both
+        ### the entire feature list and only the top features present in array2. The
+        ### printed output will be used to manually produce a table for the weekly meeting.
+
+        z1, z2, z3, z4 = [], [], [], []
+        for item1 in list_of_positive_controls_for_AA_k_mers:
+            z1.append(
+                sum([item2.count(item1) for item2 in list(X.iloc[train].columns)])
+            )
+            z2.append(sum([item2.count(item1) for item2 in array2]))
+        print(z1)
+        print(z2)
+
+        for item1 in list_of_positive_controls_for_PC_k_mers:
+            z3.append(
+                sum([item2.count(item1) for item2 in list(X.iloc[train].columns)])
+            )
+            z4.append(sum([item2.count(item1) for item2 in array2]))
+        print(z3)
+        print(z4)
+
+        for (
+            item
+        ) in (
+            array2
+        ):  # 'array2' contains only PC-kmers; all of the AA-kmers just so happen to be filtered out by the Random Forest Classifier
+            k_mer = item[8:]
+
+            for record in records:
+                for feature in record.features:
+                    if feature.type == "CDS":
+                        nuc_seq = feature.location.extract(record.seq)
+                        if len(nuc_seq) % 3 != 0:
+                            continue
+                        this_seq_AA = nuc_seq.translate()
+                        this_seq_AA = str(this_seq_AA)
+
+                    if (
+                        feature.type == "mat_peptide"
+                    ):  # using help from Tyler's code in the comments to MR !49 on GitLab
+                        new_seq = ""
+
+                        for each in this_seq_AA:
+                            if each in "AGV":
+                                new_seq += "A"
+                            elif each in "C":
+                                new_seq += "B"
+                            elif each in "FLIP":
+                                new_seq += "C"
+                            elif each in "MSTY":
+                                new_seq += "D"
+                            elif each in "HNQW":
+                                new_seq += "E"
+                            elif each in "DE":
+                                new_seq += "F"
+                            elif each in "KR":
+                                new_seq += "G"
+                            else:
+                                new_seq += "*"
+                        this_seq_PC = new_seq
+                        this_seq_PC = str(this_seq_PC)
+
+                        v2 = [m.start() for m in re.finditer(k_mer, this_seq_PC)]
+
+                        if v2:
+                            v3 = tbl.Accessions.isin([record.id])
+                            if sum(v3):
+                                viruses_PC.append(tbl.Species[np.nonzero(v3)[0][0]])
+                                protein_name_PC.append(
+                                    str(feature.qualifiers.get("product"))[2:-2]
+                                )
+                                k_mers_PC.append(k_mer)
+
+        # manually curated on the basis of output from `np.unique(protein_name_PC)`
+        surface_exposed = [
+            "1B(VP2)",
+            "1C(VP3)",
+            "1D(VP1)",
+            "Envelope surface glycoprotein gp120",
+            "PreM protein",
+            "VP1",
+            "VP1 protein",
+            "VP2",
+            "VP2 protein",
+            "VP3",
+            "VP3 protein",
+            "envelope glycoprotein E1",
+            "envelope glycoprotein E2",
+            "envelope protein",
+            "envelope protein E",
+            "membrane glycoprotein M",
+            "membrane glycoprotein precursor prM",
+            "membrane protein M",
+        ]
+        # list comprehension
+        surface_exposed_status = [
+            "Yes" if item in surface_exposed else "No" for item in protein_name_PC
+        ]
+        # manually curated on the basis of links (DOIs and ViralZone urls) that I could find for a subset of items in `np.unique(protein_name_PC)`. The curation of references is currently incomplete.
+        references = [
+            "membrane protein M",
+            "1B(VP2)",
+            "1C(VP3)",
+            "1D(VP1)",
+            "Envelope surface glycoprotein gp120",
+            "3C",
+            "3C protein",
+            "3D",
+            "3D protein",
+            "3D-POL protein",
+            "Hel protein",
+            "Lab protein",
+            "Lb protein",
+            "1A(VP4)",
+            "nucleocapsid",
+            "p1",
+            "p2",
+            "p6",
+            "p66 subunit",
+            "p7 protein",
+            "pre-membrane protein prM",
+            "protein VP0",
+            "protein pr",
+            "protien 3A",
+            "protein 1A",
+            "protein 1B",
+            "protein 1C",
+            "protein 1D",
+            "protein 2A",
+            "protein 2B",
+            "protein 2C",
+            "protien 2K",
+            "protein 3A",
+            "protein 3AB",
+            "protein 3C",
+            "protein 3D",
+        ]
+        urls = [
+            "https://doi.org/10.1099/0022-1317-69-5-1105",
+            "https://doi.org/10.3389/fmicb.2020.562768",
+            "https://doi.org/10.3389/fmicb.2020.562768",
+            "https://doi.org/10.3389/fmicb.2020.562768",
+            "https://doi.org/10.1038/31405",
+            "https://doi.org/10.3390/v15122413",
+            "https://doi.org/10.3390/v15122413",
+            "https://doi.org/10.3389/fimmu.2024.1365521",
+            "https://doi.org/10.3389/fimmu.2024.1365521",
+            "https://doi.org/10.3389/fimmu.2024.1365521",
+            "https://doi.org/10.1016/j.virusres.2024.199401",
+            "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
+            "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
+            "https://doi.org/10.3389/fmicb.2020.562768",
+            "https://doi.org/10.1007/s11904-011-0107-3",
+            "https://doi.org/10.1007/s11904-011-0107-3",
+            "https://doi.org/10.1007/s11904-011-0107-3",
+            "https://doi.org/10.1007/s11904-011-0107-3",
+            "https://doi.org/10.1002/cbic.202000263",
+            "https://doi.org/10.1038/s41598-019-44413-x",
+            "https://doi.org/10.1016/0042-6822(92)90267-S",
+            "https://doi.org/10.1128/jvi.73.11.9072-9079.1999",
+            "https://doi.org/10.1042/BJ20061136",
+            "https://doi.org/10.1128/jvi.00791-17",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+            "https://viralzone.expasy.org/99",
+        ]
+        refs_urls_dict = dict(zip(references, urls))
+        # list comprehension
+        citations = [
+            refs_urls_dict[item] if item in references else "missing"
+            for item in protein_name_PC
+        ]
+
+        ### For later use in +/- labeling of 'surface_exposed' or 'not' on the FIC plot
+        temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
+        res1 = [x[0] for x in temp5 if x[1] == "Yes"]
+        res1.sort()
+        res1 += [""] * (len(array2) - len(res1))
+        res2 = [x[0] for x in temp5 if x[1] == "No"]
+        res2.sort()
+        res2 += [""] * (len(array2) - len(res2))
+        res3 = [temp4[ii][0][8:] for ii in range(len(array2))]
+        res3.sort()
+
+        ### Production of the annotated CSV file with information for each case of `target_column`
+        df = pd.DataFrame(
+            {
+                "Virus (corresponding to PC k-mer)": viruses_PC,
+                "Protein (corresponding to virus)": protein_name_PC,
+                "Status of protein (surface-exposed or not)": surface_exposed_status,
+                "Citation corresponding to protein status": citations,
+            }
+        )
+        df.to_csv("annotated_" + str(target_column) + ".csv", header=True, index=False)
+
+        ### Production of the SHAP plot
+
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(X)
-        positive_shap_values = shap_values[:, np.array(tmp3[:, 0],dtype=int), 1]
+        positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
         fig, ax = plt.subplots(figsize=(8, 8))
-        shap.summary_plot(positive_shap_values, show=False, plot_type="violin")
+        shap.plots.violin(
+            positive_shap_values, show=False, max_display=len(array2), sort=False
+        )
         fig, ax = plt.gcf(), plt.gca()
         ax.tick_params(labelsize=9)
-        ax.set_title(f"Effect of Top {len(arr2)} Features for \n{i1}")
+        ax.set_title(f"Effect of Top {len(array2)} Features for \n{str(target_column)}")
         fig.tight_layout()
-        fig.savefig(fldr + str(i1.lower()) + '/plots/' + 'SHAP_' + str(i1) + '.png', dpi=300)
-        
-        records = sp.load_from_cache(cache=cache_viral, filter=False)
-        
-        viruses_AA = []
-        proteins_AA = []
-        start_loc_AA = []
-        explicit_seq_AA = []
-        kmers_AA = []
-        viruses_PC = []
-        proteins_PC = []
-        start_loc_PC = []
-        explicit_seq_AA_PC = []
-        explicit_seq_PC_PC = []
-        kmers_PC = []        
-    
-        for item in arr2:
-            kmer_type = item[5:7]
-            kmer_specific = item[8:]
-            
-            if kmer_type == 'AA':
-                for record in records:
-                    for feature in record.features:
-                        if feature.type == 'CDS':
-                            nuc_seq = feature.location.extract(record.seq)
-                            if len(nuc_seq) % 3 != 0:
-                                continue
-                            this_seq_AA = nuc_seq.translate()
-                            this_seq_AA = str(this_seq_AA)
-    
-                            v2 = [m.start() for m in re.finditer(kmer_specific,this_seq_AA)]
-                    
-                            if v2:
-                                v3 = tbl.Accessions.isin([record.id])
-                                if sum(v3):
-                                    viruses_AA.append(tbl.Species[np.nonzero(v3)[0][0]])
-                                    proteins_AA.append(feature.qualifiers['product'][0])
-                                    start_loc_AA.append([v2])
-                                    explicit_seq_AA.append(this_seq_AA) 
-                                    kmers_AA.append(kmer_specific) 
-    
-            elif kmer_type == 'PC':
-                for record in records:
-                    for feature in record.features:
-                        if feature.type == 'CDS':
-                            nuc_seq = feature.location.extract(record.seq)
-                            if len(nuc_seq) % 3 != 0:
-                                continue
-                            this_seq_AA = nuc_seq.translate()
-                            new_seq = ''
-                            for each in this_seq_AA:
-                                if each in 'AGV':
-                                    new_seq += 'A'
-                                elif each in 'C':
-                                    new_seq += 'B'
-                                elif each in 'FLIP':
-                                    new_seq += 'C'
-                                elif each in 'MSTY':
-                                    new_seq += 'D'
-                                elif each in 'HNQW':
-                                    new_seq += 'E'
-                                elif each in 'DE':
-                                    new_seq += 'F'
-                                elif each in 'KR':
-                                    new_seq += 'G'
-                                else:
-                                    new_seq += '*'
-                            this_seq_PC = new_seq
-                            this_seq_AA = str(this_seq_AA)
-                            this_seq_PC = str(this_seq_PC)                              
-    
-                            v4 = [m.start() for m in re.finditer(kmer_specific,this_seq_PC)]
-                            
-                            if v4:
-                                v5 = tbl.Accessions.isin([record.id])
-                                if sum(v5):
-                                    viruses_PC.append(tbl.Species[np.nonzero(v5)[0][0]])
-                                    proteins_PC.append(feature.qualifiers['product'][0])
-                                    start_loc_PC.append([v4])
-                                    explicit_seq_AA_PC.append(this_seq_AA)                 
-                                    explicit_seq_PC_PC.append(this_seq_PC)       
-                                    kmers_PC.append(kmer_specific)                                           
-    
-        with open(str(data.joinpath('start_loc_PC.txt')), 'w') as file:
-            for item in start_loc_PC:
-                    file.write(" ".join(map(str,item)))
-                    file.write("\n")
-                    
-        df = pd.DataFrame({'c1': kmers_PC,'c2': viruses_PC,'c3': proteins_PC})
-        df.to_csv(str(data.joinpath('structural_unannotated.csv')), header=False, index=False)
+        fig.savefig(
+            str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png", dpi=300
+        )
+        plt.close()
+
+        ### Production of the FIC plot
+
+        fig, ax = plt.subplots(figsize=(8, 8))
+        y_pos = np.arange(len(array2))
+        ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
+        ax.set_xlim(0, 100)
+        ax.set_yticks(y_pos, labels=array2)
+        ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
+        ax.set_xlabel("Percentage (%)")
+        counter2 = -1
+
+        # `array_sign_1` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
+        # For each PC-kmer in the FIC plot, AH and AM posit the metric as the sign of the (linear) Pearson correlation between the array of
+        # feature data and the array of not averaged, not absolute-valued, SHAP values.
+
+        array_sign_1 = []
+        array_sign_2 = []
+        for p in ax.patches:
+            counter2 += 1
+            left, bottom, width, height = p.get_bbox().bounds
+            pearson_r = pearsonr(
+                positive_shap_values.values[:, counter2],
+                positive_shap_values.data[:, counter2],
+            )[0]
+            if pearson_r < 0:
+                array_sign_1.append("-")
+                ax.annotate(
+                    array_sign_1[counter2],
+                    xy=(left + width / 4, bottom + height / 2),
+                    ha="center",
+                    va="center",
+                    color="r",
+                    fontsize="xx-large",
+                )
+            elif pearson_r > 0:
+                array_sign_1.append("+")
+                ax.annotate(
+                    array_sign_1[counter2],
+                    xy=(left + width / 4, bottom + height / 2),
+                    ha="center",
+                    va="center",
+                    color="g",
+                    fontsize="xx-large",
+                )
+            else:
+                array_sign_1.append("0")
+                ax.annotate(
+                    array_sign_1[counter2],
+                    xy=(left + width / 4, bottom + height / 2),
+                    ha="center",
+                    va="center",
+                    color="y",
+                    fontsize="xx-large",
+                )
+            if res2[counter2] in res3 and res1[counter2] not in res3:
+                array_sign_2.append("-")
+                ax.annotate(
+                    array_sign_2[counter2],
+                    xy=(left + 3 * width / 4, bottom + height / 2),
+                    ha="center",
+                    va="center",
+                    color="r",
+                    fontsize="xx-large",
+                )
+            else:
+                array_sign_2.append("+")
+                ax.annotate(
+                    array_sign_2[counter2],
+                    xy=(left + 3 * width / 4, bottom + height / 2),
+                    ha="center",
+                    va="center",
+                    color="g",
+                    fontsize="xx-large",
+                )
+        ax.annotate("'+' symbol on left: Positive effect on response", xy=(36, 4))
+        ax.annotate("'-' symbol on left: Negative effect on response", xy=(36, 3))
+        ax.annotate("'+' symbol on right: Protein is surface-exposed", xy=(36, 2))
+        ax.annotate("'-' symbol on right: Protein is not surface-exposed", xy=(36, 1))
+        fig.tight_layout()
+        fig.savefig(
+            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
+        )
+        plt.close()

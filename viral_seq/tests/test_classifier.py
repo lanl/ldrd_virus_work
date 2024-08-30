@@ -134,3 +134,12 @@ def test_train_and_predict(capsys, model, name, tmpdir):
         df_expected.columns = df_expected.columns.astype(int)
         assert_frame_equal(df, df_expected)
         check_is_fitted(clf)
+
+
+def test_get_model_args():
+    actual = classifier.get_model_arguments(
+        n_jobs=1, random_state=1, num_samples=10, num_features=10
+    )
+    expected_keys = {"model", "suffix", "optimize", "predict"}
+    for key, subdict in actual.items():
+        assert set(subdict.keys()) == expected_keys

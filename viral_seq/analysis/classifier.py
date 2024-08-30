@@ -15,7 +15,9 @@ import pickle
 from lightgbm import LGBMClassifier
 
 
-def get_model_arguments(n_jobs, random_state, num_samples, num_features):
+def get_model_arguments(
+    n_jobs: int, random_state: int, num_samples: int, num_features: int
+):
     """A simple helper function to store model parameters"""
     one_sample = 1.0 / num_samples
     one_feature = 1.0 / num_features

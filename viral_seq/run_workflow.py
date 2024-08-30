@@ -19,11 +19,8 @@ import json
 from typing import Dict, Any
 import matplotlib
 import matplotlib.pyplot as plt
-from ray import tune
 from time import perf_counter
-import math
 import tarfile
-from lightgbm import LGBMClassifier
 import shap
 
 matplotlib.use("Agg")
@@ -706,67 +703,12 @@ if __name__ == "__main__":
     best_params: Dict[str, Any] = {}
     plotting_data: Dict[str, Any] = {}
     model_arguments: Dict[str, Any] = {}
-    one_sample = 1.0 / X_train.shape[0]
-    sqrt_feature = math.sqrt(X_train.shape[1]) / X_train.shape[1]
-    one_feature = 1.0 / X_train.shape[1]
-    model_arguments["RandomForestClassifier Seed:" + str(random_state)] = {
-        "model": RandomForestClassifier,
-        "suffix": "rfc",
-        "optimize": {
-            "num_samples": 3_000,
-            "n_jobs_cv": 1,
-            "config": {
-                "n_estimators": 2_000,
-                "n_jobs": 1,  # it's better to let ray handle parallelization
-                "max_samples": tune.uniform(one_sample, 1.0),
-                "min_samples_leaf": tune.uniform(
-                    one_sample, np.min([1.0, 10 * one_sample])
-                ),
-                "min_samples_split": tune.uniform(
-                    one_sample, np.min([1.0, 300 * one_sample])
-                ),
-                "max_features": tune.uniform(
-                    one_feature, np.min([1.0, 2 * sqrt_feature])
-                ),
-                "criterion": tune.choice(
-                    ["gini", "log_loss"]
-                ),  # no entropy, see Geron ISBN 1098125975 Chapter 6
-                "class_weight": tune.choice([None, "balanced", "balanced_subsample"]),
-                "max_depth": tune.choice([None] + [i for i in range(1, 31)]),
-            },
-        },
-        "predict": {
-            "n_estimators": 10_000,
-            "n_jobs": n_jobs,
-            "random_state": random_state,
-        },
-    }
-    model_arguments["LGBMClassifier Boost Seed:" + str(random_state)] = {
-        "model": LGBMClassifier,
-        "suffix": "lgbm",
-        "optimize": {
-            "num_samples": 2_000,
-            "n_jobs_cv": 1,
-            "config": {
-                "verbose": -1,
-                "force_col_wise": True,
-                "n_estimators": 500,
-                "n_jobs": 1,  # it's better to let ray handle parallelization
-                "num_leaves": tune.randint(10, 100),
-                "learning_rate": tune.loguniform(1e-3, 0.01),
-                "subsample": tune.uniform(0.1, 1.0),
-                "subsample_freq": tune.randint(0, 10),
-                "max_depth": tune.randint(15, 100),
-                "min_child_samples": tune.randint(10, 200),
-                "colsample_bytree": tune.uniform(0.1, 1.0),
-            },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/lightgbm-tuning.html#lightgbm-tunable-hyperparameters
-        },
-        "predict": {
-            "verbose": 1,
-            "n_jobs": n_jobs,
-            "random_state": random_state,
-        },
-    }
+    model_arguments = classifier.get_model_arguments(
+        n_jobs,
+        random_state,
+        num_samples=X_train.shape[0],
+        num_features=X_train.shape[1],
+    )
     # optimize first if requested
     for name, val in model_arguments.items():
         params = val["optimize"]

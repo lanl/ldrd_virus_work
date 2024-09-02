@@ -1,3 +1,4 @@
+from functools import cache
 from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
 from Bio.SeqUtils import gc_fraction
@@ -46,24 +47,8 @@ def get_kmers(records, k=10, kmer_type="AA"):
                 this_seq = nuc_seq.translate()
                 if kmer_type == "PC":
                     new_seq = ""
-                    # Categories defined in https://doi.org/10.1073/pnas.0607879104
                     for each in this_seq:
-                        if each in "AGV":
-                            new_seq += "A"
-                        elif each in "C":
-                            new_seq += "B"
-                        elif each in "FLIP":
-                            new_seq += "C"
-                        elif each in "MSTY":
-                            new_seq += "D"
-                        elif each in "HNQW":
-                            new_seq += "E"
-                        elif each in "DE":
-                            new_seq += "F"
-                        elif each in "KR":
-                            new_seq += "G"
-                        else:
-                            new_seq += "*"
+                        new_seq += aa_map(each, method="shen_2007")
                     this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
@@ -222,3 +207,50 @@ def split_seq(seq: str, coding: bool = False):
         codons = [seq[i : i + 3] for i in range(0, seq_len, 3)]
     pairs = [seq[i : i + 2] for i in range(0, seq_len - 1)]
     return pairs, bridge_pairs, nonbridge_pairs, codons
+
+
+@cache
+def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
+    """
+    Remap canonical single-character amino acid representations
+    to other representation schemes.
+
+    Parameters
+    ----------
+    explicit_aa : str
+        A single-character string representing the input/explicit
+        or canonical amino acid letter.
+    method : str, optional
+        A string representing the name of the method used to remap
+        the input single-character amino acid code to some other
+        amino acid representation scheme. Default is `shen_2007`.
+
+    Returns
+    -------
+    mapped_aa : str
+        A string representing a single character that is the remapped
+        version of the input amino acid letter code.
+
+    """
+    if len(explicit_aa) != 1:
+        raise ValueError(f"{explicit_aa=}; does not have length 1")
+    if method == "shen_2007":
+        # Categories defined in https://doi.org/10.1073/pnas.0607879104
+        if explicit_aa in "AGV":
+            return "A"
+        elif explicit_aa in "C":
+            return "B"
+        elif explicit_aa in "FLIP":
+            return "C"
+        elif explicit_aa in "MSTY":
+            return "D"
+        elif explicit_aa in "HNQW":
+            return "E"
+        elif explicit_aa in "DE":
+            return "F"
+        elif explicit_aa in "KR":
+            return "G"
+        else:
+            return "*"
+    else:
+        raise NotImplementedError(f"{method=} not supported")

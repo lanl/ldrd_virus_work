@@ -630,6 +630,12 @@ if __name__ == "__main__":
         default=1,
         help="Select the number of copies of each model to use. Each copy will have a different random_state, starting at the value passed in'--random-state' and incrementing by 1.",
     )
+    parser.add_argument(
+        "-co",
+        "--check-optimization",
+        action="store_true",
+        help="Run calibration for every copy to compare how calibration is affected by seed.",
+    )
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
@@ -639,6 +645,7 @@ if __name__ == "__main__":
     random_state = args.random_state
     optimize = args.optimize
     copies = args.copies
+    check_optimization = args.check_optimization
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
@@ -710,6 +717,7 @@ if __name__ == "__main__":
         debug=debug,
     )
     best_params: Dict[str, Any] = {}
+    best_params_group: Dict[str, Any] = {}
     plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
     model_arguments: Dict[str, Any] = {}
     random_states = [random_state + i for i in range(copies)]
@@ -727,6 +735,8 @@ if __name__ == "__main__":
         params = val["optimize"]
         if optimize == "none":
             best_params[name] = {}
+        elif val["group"] in best_params_group:
+            best_params[name] = best_params_group[val["group"]]
         else:
             print("===", name, "===")
             t_start = perf_counter()
@@ -750,6 +760,11 @@ if __name__ == "__main__":
                 "s",
             )
             best_params[name] = res["params"]
+            if not check_optimization:
+                print(
+                    f"All other copies of {val['group']} will use the same parameters."
+                )
+                best_params_group[val["group"]] = res["params"]
             plotting_data[val["group"]][name] = res["targets"]
     if optimize == "yes" or optimize == "skip":
         for group, this_data in plotting_data.items():

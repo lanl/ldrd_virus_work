@@ -889,6 +889,15 @@ organism_dict = {
                 # https://ictv.global/report/chapter/parvoviridae/parvoviridae/aveparvovirus
                 # https://www.genome.jp/virushostdb/740934
                 "Turkey parvovirus 260": "avian",
+                # https://www.genome.jp/virushostdb/1846259
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/lyssavirus
+                "Gannoruwa bat lyssavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985381
+                "Gerygone associated gemycircularvirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1985382
+                "Gerygone associated gemycircularvirus 2": "avian",
+                # https://www.genome.jp/virushostdb/1985383
+                "Gerygone associated gemycircularvirus 3": "avian",
                 }
 
 
@@ -976,7 +985,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=245)
+                                                           n_records=270)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

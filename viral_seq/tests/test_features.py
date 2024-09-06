@@ -1,3 +1,4 @@
+from viral_seq.analysis import get_features
 from viral_seq.analysis.get_features import get_genomic_features, get_kmers
 from viral_seq.analysis.spillover_predict import _append_recs
 import pandas as pd
@@ -62,3 +63,31 @@ def test_genomic_features_bad_cds():
     records = [SeqIO.read(data_path, "genbank")]
     actual = get_genomic_features(records)
     assert len(actual) == 16
+
+
+def test_aa_map_wrong_method():
+    with pytest.raises(NotImplementedError, match="not supported"):
+        get_features.aa_map("A", method="zzz")
+
+
+def test_aa_map_wrong_input():
+    with pytest.raises(ValueError, match="length 1"):
+        get_features.aa_map("AC", method="shen_2007")
+
+
+@pytest.mark.parametrize(
+    "method, aa_in, aa_expected",
+    [
+        ("shen_2007", "A", "A"),
+        ("shen_2007", "C", "B"),
+        ("shen_2007", "P", "C"),
+        ("shen_2007", "M", "D"),
+        ("shen_2007", "Q", "E"),
+        ("shen_2007", "E", "F"),
+        ("shen_2007", "K", "G"),
+        ("shen_2007", "Z", "*"),
+    ],
+)
+def test_aa_map(method, aa_in, aa_expected):
+    actual = get_features.aa_map(aa_in, method=method)
+    assert actual == aa_expected

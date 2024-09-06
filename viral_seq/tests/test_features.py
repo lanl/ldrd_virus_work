@@ -66,18 +66,17 @@ def test_genomic_features_bad_cds():
 
 
 def test_aa_map_wrong_method():
-    with pytest.raises(NotImplementedError,
-                       match="not supported"):
+    with pytest.raises(NotImplementedError, match="not supported"):
         get_features.aa_map("A", method="zzz")
 
 
 def test_aa_map_wrong_input():
-    with pytest.raises(ValueError,
-                       match="length 1"):
+    with pytest.raises(ValueError, match="length 1"):
         get_features.aa_map("AC", method="shen_2007")
 
 
-@pytest.mark.parametrize("method, aa_in, aa_expected",
+@pytest.mark.parametrize(
+    "method, aa_in, aa_expected",
     [
         ("shen_2007", "A", "A"),
         ("shen_2007", "C", "B"),
@@ -87,7 +86,7 @@ def test_aa_map_wrong_input():
         ("shen_2007", "E", "F"),
         ("shen_2007", "K", "G"),
         ("shen_2007", "Z", "*"),
-    ]
+    ],
 )
 def test_aa_map(method, aa_in, aa_expected):
     actual = get_features.aa_map(aa_in, method=method)

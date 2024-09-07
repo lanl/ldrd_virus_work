@@ -927,6 +927,19 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2870359
                 # https://ictv.global/report/chapter/picornaviridae/picornaviridae/grusopivirus
                 "grusopivirus A1": "avian",
+                # https://www.genome.jp/virushostdb/2870360
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/grusopivirus
+                "grusopivirus B1": "avian",
+                # https://www.genome.jp/virushostdb/400121
+                "Gull circovirus": "avian",
+                # https://www.genome.jp/virushostdb/28300
+                # https://doi.org/10.1128/jvi.62.10.3832-3839.1988
+                # https://en.wikipedia.org/wiki/Avihepadnavirus
+                "Heron hepatitis B virus": "avian",
+                # I don't accept the cell culture line evidence
+                # as strong enough, so counting as bats/mammals:
+                # https://www.genome.jp/virushostdb/1554500
+                "Hervey virus": "non_primate_mammals",
                 }
 
 
@@ -1014,7 +1027,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=280)
+                                                           n_records=285)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

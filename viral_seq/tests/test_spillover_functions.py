@@ -499,6 +499,36 @@ def test_build_table_bad_version(accession):
     assert table["GC Content"].values[0] == pytest.approx(0.5050986292209964)
 
 
+@pytest.mark.parametrize("target_column", ["Column1", "Column2"])
+def test_build_table_target_column(target_column):
+    this_cache = files("viral_seq.tests") / "cache"
+    cache_str = str(this_cache.resolve())
+    df = pd.read_csv(csv_train)
+    df.rename({"Human Host": target_column}, inplace=True, axis=1)
+    df_test = sp.build_table(
+        df=df,
+        cache=cache_str,
+        genomic=False,
+        kmers=True,
+        kmer_k=[2],
+        kmers_pc=False,
+        gc=False,
+        uni_select=True,
+        num_select=10,
+        target_column=target_column,
+    )
+    df_expected = pd.read_csv(
+        files("viral_seq.tests") / "expected" / "target_column_test.csv"
+    )
+    df_test.drop(columns=[target_column], inplace=True)
+    assert_frame_equal(
+        df_test,
+        df_expected,
+        rtol=1e-9,
+        atol=1e-9,
+    )
+
+
 def test_get_best_features():
     X, y = make_classification(
         n_samples=300,

@@ -798,14 +798,15 @@ if __name__ == "__main__":
         n_jobs=n_jobs,
         random_state=random_state,
     )
-    X_test, y_test = get_test_features(
-        table_loc_test,
-        table_loc_test_saved,
-        test_file,
-        X_train,
-        extract_cookie,
-        debug=debug,
-    )
+    if workflow == "DR":
+        X_test, y_test = get_test_features(
+            table_loc_test,
+            table_loc_test_saved,
+            test_file,
+            X_train,
+            extract_cookie,
+            debug=debug,
+        )
     best_params: Dict[str, Any] = {}
     best_params_group: Dict[str, Any] = {}
     plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
@@ -930,212 +931,98 @@ if __name__ == "__main__":
     for name, clf in models_fitted.items():
         print(f"Plotting feature importances for {name}")
         # built-in importances
+        optimization_plots(
+            plotting_data, optimization_plot_source, optimization_plot_figure
+        )
+
+    if workflow == "DR":
+        # train and predict on all models
+        predictions = {}
+        predictions["Species"] = pd.read_csv(test_file)["Species"]
+        models_fitted = {}
+        for name, val in model_arguments.items():
+            models_fitted[name], predictions[name] = classifier.train_and_predict(
+                val["model"],
+                X_train,
+                y_train,
+                X_test,
+                name=name,
+                model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
+                params_predict=val["predict"],
+                params_optimized=best_params[name],
+            )
+            this_auc = roc_auc_score(y_test, predictions[name])
+            print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
+        pd.DataFrame(predictions).to_csv(predictions_loc)
+        # check feature importance and consensus
+        feature_importances = []
+        np.random.seed(random_state)  # used by `shap.summary_plot`
+        for name, clf in models_fitted.items():
+            print(f"Plotting feature importances for {name}")
+            # built-in importances
+            (
+                sorted_feature_importances,
+                sorted_feature_names,
+            ) = feature_importance.sort_features(
+                clf.feature_importances_, X_train.columns
+            )
+            feature_importance.plot_feat_import(
+                sorted_feature_importances,
+                sorted_feature_names,
+                top_feat_count=10,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+                ),
+            )
+            feature_importances.append(clf.feature_importances_)
+            # SHAP importances
+            print("Calculating & Plotting SHAP values...")
+            time_start = perf_counter()
+            explainer = shap.Explainer(clf, seed=random_state)
+            shap_values = explainer(X_train)
+            print("Finished SHAP calculation in", perf_counter() - time_start)
+            positive_shap_values = feature_importance.get_positive_shap_values(
+                shap_values
+            )
+            feature_importance.plot_shap_meanabs(
+                positive_shap_values,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
+                ),
+                top_feat_count=10,
+            )
+            feature_importance.plot_shap_beeswarm(
+                positive_shap_values,
+                model_name=name,
+                fig_name=str(
+                    plots_path
+                    / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
+                ),
+                max_display=10,
+            )
+            feature_importances.append(positive_shap_values)
+>>>>>>> d0a431d (MAINT: Patched workflow to be compatible with DR changes on `main`)
         (
-            sorted_feature_importances,
-            sorted_feature_names,
-        ) = feature_importance.sort_features(clf.feature_importances_, X_train.columns)
-        feature_importance.plot_feat_import(
-            sorted_feature_importances,
-            sorted_feature_names,
-            top_feat_count=10,
-            model_name=name,
-            fig_name_stem=str(
-                plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
-            ),
-        )
-        feature_importances.append(clf.feature_importances_)
-        # SHAP importances
-        print("Calculating & Plotting SHAP values...")
-        time_start = perf_counter()
-        explainer = shap.Explainer(clf, seed=random_state)
-        shap_values = explainer(X_train)
-        print("Finished SHAP calculation in", perf_counter() - time_start)
-        positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
-        feature_importance.plot_shap_meanabs(
-            positive_shap_values,
-            model_name=name,
-            fig_name_stem=str(
-                plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
-            ),
+            ranked_feature_names,
+            ranked_feature_counts,
+            num_input_models,
+        ) = feature_importance.feature_importance_consensus(
+            pos_class_feat_imps=feature_importances,
+            feature_names=X_train.columns,
             top_feat_count=10,
         )
-        feature_importance.plot_shap_beeswarm(
-            positive_shap_values,
-            model_name=name,
-            fig_name=str(
-                plots_path / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
-            ),
-            max_display=10,
+        feature_importance.plot_feat_import_consensus(
+            ranked_feature_names=ranked_feature_names,
+            ranked_feature_counts=ranked_feature_counts,
+            num_input_models=num_input_models,
+            top_feat_count=10,
+            fig_name=feature_imp_consensus_plot_figure,
+            fig_source=feature_imp_consensus_plot_source,
         )
-        feature_importances.append(positive_shap_values)
-    (
-        ranked_feature_names,
-        ranked_feature_counts,
-        num_input_models,
-    ) = feature_importance.feature_importance_consensus(
-        pos_class_feat_imps=feature_importances,
-        feature_names=X_train.columns,
-        top_feat_count=10,
-    )
-    feature_importance.plot_feat_import_consensus(
-        ranked_feature_names=ranked_feature_names,
-        ranked_feature_counts=ranked_feature_counts,
-        num_input_models=num_input_models,
-        top_feat_count=10,
-        fig_name=feature_imp_consensus_plot_figure,
-        fig_source=feature_imp_consensus_plot_source,
-    )
 
-    X = pl.read_parquet(table_loc_train_best).to_pandas()
-    tbl = pd.read_csv(train_file)
-    y = tbl[target_column]
-
-    random_state = np.random.RandomState(0)
-
-    n_folds = 5
-    cv = StratifiedKFold(n_splits=n_folds)
-    clfr = RandomForestClassifier(
-        n_estimators=10000, n_jobs=-1, random_state=random_state
-    )
-    tprs = []
-    aucs = []
-    mean_fpr = np.linspace(0, 1, 100)
-
-    fig, ax = plt.subplots(figsize=(8, 8))
-
-    counter = -1
-    n_features = 5
-    tmp1 = np.zeros((n_folds, n_features))
-
-    for fold, (train, test) in enumerate(cv.split(X, y)):
-        clfr.fit(X.iloc[train], y[train])
-        df = pd.DataFrame()
-        df["Features"] = X.iloc[train].columns
-        df["Importances"] = clfr.feature_importances_
-        df.sort_values(by=["Importances"], ascending=False, inplace=True)
-        df.reset_index(inplace=True)
-        print(df.iloc[:n_features])
-        viz = RocCurveDisplay.from_estimator(
-            clfr,
-            X.iloc[test],
-            y[test],
-            name=f"ROC fold {fold + 1}",
-            alpha=0.3,
-            lw=1,
-            ax=ax,
-            plot_chance_level=(fold == n_folds - 1),
-        )
-        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-        interp_tpr[0] = 0.0
-        tprs.append(interp_tpr)
-        aucs.append(viz.roc_auc)
-
-        counter += 1
-        tmp1[counter, :] = df["index"][:n_features].to_numpy()
-
-    mean_tpr = np.mean(tprs, axis=0)
-    mean_tpr[-1] = 1.0
-    mean_auc = auc(mean_fpr, mean_tpr)
-    std_auc = np.std(aucs)
-    ax.plot(
-        mean_fpr,
-        mean_tpr,
-        color="b",
-        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
-        lw=2,
-        alpha=0.8,
-    )
-
-    std_tpr = np.std(tprs, axis=0)
-    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-    ax.fill_between(
-        mean_fpr,
-        tprs_lower,
-        tprs_upper,
-        color="grey",
-        alpha=0.2,
-        label=r"$\pm$ 1 std. dev.",
-    )
-
-    ax.set(
-        xlabel="False Positive Rate",
-        ylabel="True Positive Rate",
-        title="Mean ROC curve with variability\n(Positive label '"
-        + str(target_column)
-        + "')",
-    )
-    ax.legend(loc="lower right")
-    fig.tight_layout()
-    fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
-
-    (uniq, freq) = np.unique(tmp1.flatten(), return_counts=True)
-    tmp2 = np.column_stack((uniq, freq))
-    tmp3 = tmp2[tmp2[:, 1].argsort()]
-    tmp4 = [
-        df[df["index"] == tmp3[i, 0]]["Features"].to_numpy()
-        for i in range(tmp3.shape[0])
-    ]
-    arr1 = tmp3[:, 1]
-    arr2 = [tmp4[i][0] for i in range(len(tmp4))]
-    fig, ax = plt.subplots(figsize=(8, 8))
-    y_pos = np.arange(len(arr2))
-    ax.barh(y_pos, (arr1 / n_folds) * 100)
-    ax.set_xlim(0, 100)
-    ax.set_yticks(y_pos, labels=arr2)
-    ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
-    ax.set_xlabel("Percentage (%)")
-    fig.tight_layout()
-    fig.savefig(str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
-
-    records = sp.load_from_cache(cache=cache_viral, filter=False)
-
-    for ii in range(3):
-        kmer_type = arr2[ii][5:7]
-        kmer_specific = arr2[ii][8:]
-        viruses = []
-        products = []
-
-        for record in records:
-            for feature in record.features:
-                if feature.type == "CDS":
-                    nuc_seq = feature.location.extract(record.seq)
-                    if len(nuc_seq) % 3 != 0:
-                        continue
-                    this_seq = nuc_seq.translate()
-                    if kmer_type == "PC":
-                        new_seq = ""
-                        for each in this_seq:
-                            if each in "AGV":
-                                new_seq += "A"
-                            elif each in "C":
-                                new_seq += "B"
-                            elif each in "FLIP":
-                                new_seq += "C"
-                            elif each in "MSTY":
-                                new_seq += "D"
-                            elif each in "HNQW":
-                                new_seq += "E"
-                            elif each in "DE":
-                                new_seq += "F"
-                            elif each in "KR":
-                                new_seq += "G"
-                            else:
-                                new_seq += "*"
-                        this_seq = new_seq
-
-                    tmp5 = this_seq.find(kmer_specific)
-
-                    if tmp5 > -1:
-                        tmp6 = tbl.Accessions.isin([record.id])
-                        if sum(tmp6):
-                            viruses.append(tbl.Species[np.nonzero(tmp6)[0][0]])
-                            products.append(feature.qualifiers["product"][0])
-
-        print("Viruses: \n", viruses)
-        print("Associated viral proteins: \n", products)
-
-    if (
+    elif (
         workflow == "DTRA"
     ):  # Update by AM as of 08/23/24: There are no functions (yet) in the code below - only a monolithic script to accomplish the task. AM intends to split the workflow into rigorously tested functions and perform regression testing in the coming days.
         records = sp.load_from_cache(cache=cache_viral, filter=False)
@@ -1516,7 +1403,9 @@ if __name__ == "__main__":
         ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
-        ax.set_title(f"Feature importance consensus amongst {n_folds} folds for \n{str(target_column)}")
+        ax.set_title(
+            f"Feature importance consensus amongst {n_folds} folds for \n{str(target_column)}"
+        )
         ax.set_xlabel("Percentage (%)")
         counter2 = -1
 

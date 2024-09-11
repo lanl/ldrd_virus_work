@@ -29,6 +29,48 @@ from scipy.stats import pearsonr
 matplotlib.use("Agg")
 
 
+def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
+    """
+    Convert the original version of the input CSV table
+    (i.e., that is merged to main) to a new DataFrame stored in memory
+    (i.e., that is compatible with the ML workflow)
+
+    Parameters
+    ----------
+    input_csv : str
+        A string representing the name of the input table that will undergo conversion.
+        Default is `receptor_training.csv`.
+
+    Returns
+    -------
+    output_df : pd.DataFrame
+        A Pandas DataFrame representing the converted form of the input table
+        that accounts for the target column(s) of interest.
+
+    """
+
+    table = pd.read_csv(input_csv)
+
+    table = table.drop(
+        columns=["Citation_for_receptor", "Whole_Genome", "Mammal_Host", "Primate_Host"]
+    )
+    table = table.rename(
+        columns={
+            "Virus_Name": "Species",
+            "Human_Host": "Human Host",
+            "Receptor_Type": "Is_Integrin",
+        }
+    )
+    table["Is_Sialic_Acid"] = pd.Series(dtype="bool")
+    table = table[
+        ["Species", "Accessions", "Human Host", "Is_Integrin", "Is_Sialic_Acid"]
+    ]
+    table["Is_Sialic_Acid"] = np.where(table["Is_Integrin"] == "integrin", False, True)
+    table["Is_Integrin"] = np.where(table["Is_Integrin"] == "sialic_acid", False, True)
+    output_df = table
+    return output_df
+
+
 def validate_feature_table(file_name, idx, prefix):
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()

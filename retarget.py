@@ -965,6 +965,20 @@ organism_dict = {
                 # neutralizing antibodies detected in rodents:
                 # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/arurhavirus
                 "Inhangapi virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1074206
+                "Peromyscus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1459044
+                # I don't see evidence beyond tick hosts
+                "Long Island tick rhabdovirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/655689
+                "Itaituba virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/629735
+                "Itaporanga virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1006586
+                # I don't typically accept Vero cells as
+                # solid evidence of primate infection
+                # (prefer actual cases of infection)
+                "Ixcanal virus": "no_mammals",
                 }
 
 
@@ -1052,7 +1066,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=325)
+                                                           n_records=330)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

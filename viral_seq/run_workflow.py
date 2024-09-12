@@ -1115,7 +1115,20 @@ if __name__ == "__main__":
         ]
 
         ### For later use in +/- labeling of 'surface_exposed' or 'not' on the FIC plot
+        unique_kmers = set(k_mers_PC)
         temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
+        filtered_unique_kmers = unique_kmers.copy()
+        for unique_kmer in unique_kmers:
+            for k_mer, surface_status in temp5:
+                if unique_kmer == k_mer:
+                    if surface_status == "Yes":
+                        # if a k-mer is on the surface in one case, consider that a "+"
+                        try:
+                            filtered_unique_kmers.remove((k_mer, "No"))
+                        except KeyError:
+                            pass
+
+        temp5 = filtered_unique_kmers
         res1 = [x[0] for x in temp5 if x[1] == "Yes"]
         res1.sort()
         res1 += [""] * (len(array2) - len(res1))

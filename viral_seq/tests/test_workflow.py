@@ -70,6 +70,16 @@ def test_csv_conversion():
     postprocessed_df = workflow.csv_conversion(input_csv)
     assert_array_equal(
         postprocessed_df.columns,
-        ["Species", "Accessions", "Human Host", "Is_Integrin", "Is_Sialic_Acid"],
+        [
+            "Species",
+            "Accessions",
+            "Human Host",
+            "Is_Integrin",
+            "Is_Sialic_Acid",
+            "Is_Both",
+        ],
     )
-    assert postprocessed_df.shape == (94, 5)
+    assert postprocessed_df.shape == (94, 6)
+    assert postprocessed_df.sum().Is_Integrin == 45
+    assert postprocessed_df.sum().Is_Sialic_Acid == 53
+    assert postprocessed_df.sum().Is_Both == 4

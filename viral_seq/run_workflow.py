@@ -688,7 +688,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Is_Integrin", "Is_Sialic_Acid", "Human Host"],
+        choices=["Is_Integrin", "Is_Sialic_Acid", "Is_Both", "Human Host"],
         default="Human Host",
         help="Target column to be used for binary clasification.",
     )

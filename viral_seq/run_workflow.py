@@ -852,7 +852,7 @@ if __name__ == "__main__":
         fig, ax = plt.subplots(figsize=(8, 8))
 
         counter = -1
-        n_features = 5
+        n_features = 90
         temp1 = np.zeros((n_folds, n_features))
 
         for fold, (train, test) in enumerate(cv.split(X, y)):
@@ -1168,7 +1168,29 @@ if __name__ == "__main__":
         plt.close()
 
         ### Production of the FIC plot
+        # try to filter to just + effect on response
+        idx_to_retain = []
+        new_array2 = []
+        new_array1 = []
+        for idx in range(len(array2)):
+            pearson_r = pearsonr(
+                positive_shap_values.values[:, idx],
+                positive_shap_values.data[:, idx],
+            )[0]
+            if pearson_r > 0:
+                idx_to_retain.append(idx)
+                new_array2.append(array2[idx])
+                new_array1.append(array1[idx])
+            else:
+                print(f"negative {pearson_r=}")
 
+
+
+        print("idx_to_retain:", idx_to_retain)
+        array1 = np.asarray(new_array1)
+        print("array1:", array1)
+        array2 = new_array2
+        print("array2:", array2)
         fig, ax = plt.subplots(figsize=(8, 8))
         y_pos = np.arange(len(array2))
         ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
@@ -1186,10 +1208,11 @@ if __name__ == "__main__":
         array_sign_2 = []
         for p in ax.patches:
             counter2 += 1
+            effective_idx = idx_to_retain[counter2]
             left, bottom, width, height = p.get_bbox().bounds
             pearson_r = pearsonr(
-                positive_shap_values.values[:, counter2],
-                positive_shap_values.data[:, counter2],
+                positive_shap_values.values[:, effective_idx],
+                positive_shap_values.data[:, effective_idx],
             )[0]
             if pearson_r < 0:
                 array_sign_1.append("-")
@@ -1241,10 +1264,10 @@ if __name__ == "__main__":
                     color="g",
                     fontsize="xx-large",
                 )
-        ax.annotate("'+' symbol on left: Positive effect on response", xy=(36, 4))
-        ax.annotate("'-' symbol on left: Negative effect on response", xy=(36, 3))
-        ax.annotate("'+' symbol on right: Protein is surface-exposed", xy=(36, 2))
-        ax.annotate("'-' symbol on right: Protein is not surface-exposed", xy=(36, 1))
+        #ax.annotate("'+' symbol on left: Positive effect on response", xy=(36, 4))
+        #ax.annotate("'-' symbol on left: Negative effect on response", xy=(36, 3))
+        #ax.annotate("'+' symbol on right: Protein is surface-exposed", xy=(36, 2))
+        #ax.annotate("'-' symbol on right: Protein is not surface-exposed", xy=(36, 1))
         fig.tight_layout()
         fig.savefig(
             str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300

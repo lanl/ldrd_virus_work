@@ -6,6 +6,7 @@ from contextlib import ExitStack
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
+from numpy.testing import assert_array_equal
 
 
 @image_comparison(
@@ -62,3 +63,23 @@ def test_get_test_features(extract, tmpdir):
         )["Human Host"]
         assert_frame_equal(X_test, X_expected)
         assert_series_equal(y_test, y_expected)
+
+
+def test_csv_conversion():
+    input_csv = files("viral_seq.data") / "receptor_training.csv"
+    postprocessed_df = workflow.csv_conversion(input_csv)
+    assert_array_equal(
+        postprocessed_df.columns,
+        [
+            "Species",
+            "Accessions",
+            "Human Host",
+            "Is_Integrin",
+            "Is_Sialic_Acid",
+            "Is_Both",
+        ],
+    )
+    assert postprocessed_df.shape == (94, 6)
+    assert postprocessed_df.sum().Is_Integrin == 45
+    assert postprocessed_df.sum().Is_Sialic_Acid == 53
+    assert postprocessed_df.sum().Is_Both == 4

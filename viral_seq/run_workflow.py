@@ -1313,18 +1313,12 @@ if __name__ == "__main__":
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(X)
         positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
-        fig, ax = plt.subplots(figsize=(8, 8))
-        shap.plots.violin(
-            positive_shap_values, show=False, max_display=len(array2), sort=False
+        feature_importance.plot_shap_beeswarm(
+            positive_shap_values,
+            model_name="Random Forest",
+            fig_name=str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png",
+            max_display=len(array2),
         )
-        fig, ax = plt.gcf(), plt.gca()
-        ax.tick_params(labelsize=9)
-        ax.set_title(f"Effect of Top {len(array2)} Features for \n{str(target_column)}")
-        fig.tight_layout()
-        fig.savefig(
-            str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png", dpi=300
-        )
-        plt.close()
 
         ### Production of the FIC plot
 

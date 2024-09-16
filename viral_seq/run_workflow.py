@@ -1128,9 +1128,7 @@ if __name__ == "__main__":
             fig_source=feature_imp_consensus_plot_source,
         )
 
-    elif (
-        workflow == "DTRA"
-    ):  
+    elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
         # Here is a list of common integrin-binding motifs. These motifs interact with

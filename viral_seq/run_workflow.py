@@ -1073,7 +1073,7 @@ if __name__ == "__main__":
 
     elif (
         workflow == "DTRA"
-    ):  # Update by AM as of 08/23/24: There are no functions (yet) in the code below - only a monolithic script to accomplish the task. AM intends to split the workflow into rigorously tested functions and perform regression testing in the coming days.
+    ):  
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
         # Here is a list of common integrin-binding motifs. These motifs interact with
@@ -1123,7 +1123,7 @@ if __name__ == "__main__":
         k_mers_PC = []
 
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        tbl = pd.read_csv(train_file)
+        tbl = csv_conversion(train_file)
         y = tbl[target_column]
         v1 = list(X.columns)
 

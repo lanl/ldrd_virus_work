@@ -1,6 +1,6 @@
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils, classifier, feature_importance
+from viral_seq.analysis import rfc_utils, classifier, feature_importance, get_features
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -839,23 +839,23 @@ if __name__ == "__main__":
             },
         )
 
-    build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
-    X_train, y_train = feature_selection_rfc(
-        feature_selection=feature_selection,
-        debug=debug,
-        n_jobs=n_jobs,
-        random_state=random_state,
-    )
-    if workflow == "DR":
-        X_test, y_test = get_test_features(
-            table_loc_test,
-            table_loc_test_saved,
-            test_file,
-            X_train,
-            extract_cookie,
+        build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
+        build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+        X_train, y_train = feature_selection_rfc(
+            feature_selection=feature_selection,
             debug=debug,
+            n_jobs=n_jobs,
+            random_state=random_state,
         )
+        X_test, y_test = get_test_features(
+        table_loc_test,
+        table_loc_test_saved,
+        test_file,
+        X_train,
+        extract_cookie,
+        debug=debug,
+        )
+
     best_params: Dict[str, Any] = {}
     best_params_group: Dict[str, Any] = {}
     plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
@@ -1048,68 +1048,143 @@ if __name__ == "__main__":
         models_fitted = {}
         for name, val in model_arguments.items():
             models_fitted[name], predictions[name] = classifier.train_and_predict(
-                val["model"],
+                val["model"],        
                 X_train,
-                y_train,
-                X_test,
-                name=name,
-                model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
-                params_predict=val["predict"],
-                params_optimized=best_params[name],
+                extract_cookie,
+                debug=debug,
             )
-            this_auc = roc_auc_score(y_test, predictions[name])
-            print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
-        pd.DataFrame(predictions).to_csv(predictions_loc)
-        # check feature importance and consensus
-        feature_importances = []
-        np.random.seed(random_state)  # used by `shap.summary_plot`
-        for name, clf in models_fitted.items():
-            print(f"Plotting feature importances for {name}")
-            # built-in importances
+        best_params: Dict[str, Any] = {}
+        plotting_data: Dict[str, Any] = {}
+        model_arguments: Dict[str, Any] = {}
+        model_arguments = classifier.get_model_arguments(
+            n_jobs,
+            random_state,
+            num_samples=X_train.shape[0],
+            num_features=X_train.shape[1],
+        )
+        # optimize first if requested
+        for name, val in model_arguments.items():
+            params = val["optimize"]
+            if optimize == "none":
+                best_params[name] = {}
+            else:
+                print("===", name, "===")
+                t_start = perf_counter()
+                res = optimize_model(
+                    model=val["model"],
+                    X_train=X_train,
+                    y_train=y_train,
+                    optimize=optimize,
+                    debug=debug,
+                    random_state=random_state,
+                    name=name,
+                    n_jobs=n_jobs,
+                    outfile=str(
+                        hyperparams_path / ("params_" + val["suffix"] + ".json")
+                    ),
+                    **params,
+                )
+                print(
+                    "Hyperparameter optimization of",
+                    name,
+                    "took",
+                    perf_counter() - t_start,
+                    "s",
+                )
+                best_params[name] = res["params"]
+                plotting_data[name] = res["targets"]
+        if optimize == "yes" or optimize == "skip":
+            optimization_plots(
+                plotting_data, optimization_plot_source, optimization_plot_figure
+            )
+
+        if workflow == "DR":
+            # train and predict on all models
+            predictions = {}
+            predictions["Species"] = pd.read_csv(test_file)["Species"]
+            models_fitted = {}
+            for name, val in model_arguments.items():
+                models_fitted[name], predictions[name] = classifier.train_and_predict(
+                    val["model"],
+                    X_train,
+                    y_train,
+                    X_test,
+                    name=name,
+                    model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
+                    params_predict=val["predict"],
+                    params_optimized=best_params[name],
+                )
+                this_auc = roc_auc_score(y_test, predictions[name])
+                print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
+            pd.DataFrame(predictions).to_csv(predictions_loc)
+            # check feature importance and consensus
+            feature_importances = []
+            np.random.seed(random_state)  # used by `shap.summary_plot`
+            for name, clf in models_fitted.items():
+                print(f"Plotting feature importances for {name}")
+                # built-in importances
+                (
+                    sorted_feature_importances,
+                    sorted_feature_names,
+                ) = feature_importance.sort_features(
+                    clf.feature_importances_, X_train.columns
+                )
+                feature_importance.plot_feat_import(
+                    sorted_feature_importances,
+                    sorted_feature_names,
+                    top_feat_count=10,
+                    model_name=name,
+                    fig_name_stem=str(
+                        plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+                    ),
+                )
+                feature_importances.append(clf.feature_importances_)
+                # SHAP importances
+                print("Calculating & Plotting SHAP values...")
+                time_start = perf_counter()
+                explainer = shap.Explainer(clf, seed=random_state)
+                shap_values = explainer(X_train)
+                print("Finished SHAP calculation in", perf_counter() - time_start)
+                positive_shap_values = feature_importance.get_positive_shap_values(
+                    shap_values
+                )
+                feature_importance.plot_shap_meanabs(
+                    positive_shap_values,
+                    model_name=name,
+                    fig_name_stem=str(
+                        plots_path
+                        / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
+                    ),
+                    top_feat_count=10,
+                )
+                feature_importance.plot_shap_beeswarm(
+                    positive_shap_values,
+                    model_name=name,
+                    fig_name=str(
+                        plots_path
+                        / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
+                    ),
+                    max_display=10,
+                )
+                feature_importances.append(positive_shap_values)
             (
-                sorted_feature_importances,
-                sorted_feature_names,
-            ) = feature_importance.sort_features(
-                clf.feature_importances_, X_train.columns
-            )
-            feature_importance.plot_feat_import(
-                sorted_feature_importances,
-                sorted_feature_names,
-                top_feat_count=10,
-                model_name=name,
-                fig_name_stem=str(
-                    plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
-                ),
-            )
-            feature_importances.append(clf.feature_importances_)
-            # SHAP importances
-            print("Calculating & Plotting SHAP values...")
-            time_start = perf_counter()
-            explainer = shap.Explainer(clf, seed=random_state)
-            shap_values = explainer(X_train)
-            print("Finished SHAP calculation in", perf_counter() - time_start)
-            positive_shap_values = feature_importance.get_positive_shap_values(
-                shap_values
-            )
-            feature_importance.plot_shap_meanabs(
-                positive_shap_values,
-                model_name=name,
-                fig_name_stem=str(
-                    plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
-                ),
+                ranked_feature_names,
+                ranked_feature_counts,
+                num_input_models,
+            ) = feature_importance.feature_importance_consensus(
+                pos_class_feat_imps=feature_importances,
+                feature_names=X_train.columns,
                 top_feat_count=10,
             )
-            feature_importance.plot_shap_beeswarm(
-                positive_shap_values,
-                model_name=name,
-                fig_name=str(
-                    plots_path
-                    / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
-                ),
-                max_display=10,
+            feature_importance.plot_feat_import_consensus(
+                ranked_feature_names=ranked_feature_names,
+                ranked_feature_counts=ranked_feature_counts,
+                num_input_models=num_input_models,
+                top_feat_count=10,
+                fig_name=feature_imp_consensus_plot_figure,
+                fig_source=feature_imp_consensus_plot_source,
             )
             feature_importances.append(positive_shap_values)
->>>>>>> d0a431d (MAINT: Patched workflow to be compatible with DR changes on `main`)
         (
             ranked_feature_names,
             ranked_feature_counts,
@@ -1180,7 +1255,6 @@ if __name__ == "__main__":
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
         y = tbl[target_column]
-        v1 = list(X.columns)
 
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
@@ -1321,22 +1395,7 @@ if __name__ == "__main__":
                         new_seq = ""
 
                         for each in this_seq_AA:
-                            if each in "AGV":
-                                new_seq += "A"
-                            elif each in "C":
-                                new_seq += "B"
-                            elif each in "FLIP":
-                                new_seq += "C"
-                            elif each in "MSTY":
-                                new_seq += "D"
-                            elif each in "HNQW":
-                                new_seq += "E"
-                            elif each in "DE":
-                                new_seq += "F"
-                            elif each in "KR":
-                                new_seq += "G"
-                            else:
-                                new_seq += "*"
+                            new_seq += get_features.aa_map(each, method="shen_2007")
                         this_seq_PC = new_seq
                         this_seq_PC = str(this_seq_PC)
 

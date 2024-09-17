@@ -83,3 +83,29 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Integrin == 45
     assert postprocessed_df.sum().Is_Sialic_Acid == 53
     assert postprocessed_df.sum().Is_Both == 4
+
+
+def test_label_surface_exposed():
+    kmers_list = ["CADAFFE", "CCABDAC", "CCAACDA", "CADAFFE", "ECDGDE"]
+    kmers_status = ["Yes", "No", "Yes", "No", "Yes"]
+    kmers_list_status = list(set(zip(kmers_list, kmers_status)))
+
+    kmers_topN = [
+        "kmer_PC_CADAFFE",
+        "kmer_PC_CCABDAC",
+        "kmer_PC_CCAACDA",
+        "kmer_PC_CADAFFE",
+        "kmer_PC_ECDGDE",
+    ]
+
+    expected_out_res1 = ["CADAFFE", "CCAACDA", "ECDGDE", "", ""]
+    expected_out_res2 = ["CADAFFE", "CCABDAC", "", "", ""]
+    expected_out_res3 = ["CADAFFE", "CADAFFE", "CCAACDA", "CCABDAC", "ECDGDE"]
+
+    res1, res2, res3 = workflow.label_surface_exposed(
+        kmers_list_status, kmers_topN, kmers_topN
+    )
+
+    np.testing.assert_array_equal(res1, expected_out_res1)
+    np.testing.assert_array_equal(res2, expected_out_res2)
+    np.testing.assert_array_equal(res3, expected_out_res3)

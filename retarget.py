@@ -1037,6 +1037,24 @@ organism_dict = {
                 "Lleida bat lyssavirus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2169904
                 "Gammapolyomavirus lonmaja": "avian",
+                # https://en.wikipedia.org/wiki/Lone_star_bandavirus
+                # https://www.genome.jp/virushostdb/1219465
+                # (I don't typically accept cell culture evidence)
+                # I don't see concrete evidence of animal infection,
+                # but I suspect it will show up eventually given the
+                # tick was isolated feeding on a mammal...
+                "Lone Star virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2050037
+                # no solid evidence for actual primate infection, but
+                # cell lines susceptible:
+                # https://doi.org/10.1073%2Fpnas.1308049110
+                "Long-fingered bat hepatitis B virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2116559
+                # https://ictv.global/report/chapter/paramyxoviridae/paramyxoviridae/jeilongvirus
+                "Mount Mabu Lophuromys virus 1": "non_primate_mammals",
+                "Mount Mabu Lophuromys virus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1399914
+                "African elephant polyomavirus 1": "non_primate_mammals",
                 }
 
 
@@ -1124,7 +1142,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=350)
+                                                           n_records=355)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

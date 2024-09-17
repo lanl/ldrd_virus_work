@@ -1337,6 +1337,7 @@ if __name__ == "__main__":
         fig.savefig(
             str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300
         )
+        plt.close(fig)
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots
@@ -1561,7 +1562,7 @@ if __name__ == "__main__":
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
         ax.set_title(
-            f"Feature importance consensus amongst {n_folds} folds for \n{str(target_column)}"
+            f"Feature importance consensus amongst {n_folds} folds for \n{target_column}"
         )
         ax.set_xlabel("Percentage (%)")
         counter2 = -1
@@ -1579,7 +1580,8 @@ if __name__ == "__main__":
                 positive_shap_values.values[:, counter2],
                 positive_shap_values.data[:, counter2],
             )[0]
-            if pearson_r < 0:
+            tolerance = 0.01
+            if pearson_r < -tolerance:
                 array_sign_1.append("-")
                 ax.annotate(
                     array_sign_1[counter2],
@@ -1589,7 +1591,7 @@ if __name__ == "__main__":
                     color="r",
                     fontsize="xx-large",
                 )
-            elif pearson_r > 0:
+            elif pearson_r > tolerance:
                 array_sign_1.append("+")
                 ax.annotate(
                     array_sign_1[counter2],

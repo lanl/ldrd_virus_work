@@ -1021,6 +1021,22 @@ organism_dict = {
                 # cattle but not humans:
                 # https://doi.org/10.1099%2Fvir.0.028308-0
                 "Leanyer virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/481315
+                # this viral family usually has a restricted host range:
+                # (the virus tends to co-evolve with its host)
+                # https://ictv.global/report/chapter/orthoherpesviridae/orthoherpesviridae
+                "Leporid alphaherpesvirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1925019
+                "Betapolyomavirus lepweddellii": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2847826
+                # don't see much info on this one...
+                "Leticia virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1213198
+                # https://doi.org/10.3201%2Feid1905.121071
+                # not reported in humans.. yet..
+                "Lleida bat lyssavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2169904
+                "Gammapolyomavirus lonmaja": "avian",
                 }
 
 
@@ -1108,7 +1124,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=345)
+                                                           n_records=350)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

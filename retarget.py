@@ -1055,6 +1055,19 @@ organism_dict = {
                 "Mount Mabu Lophuromys virus 2": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1399914
                 "African elephant polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1508224
+                "Lucheng Rn rat coronavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2079465
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/ludopivirus
+                "ludopivirus A1": "avian",
+                # https://www.genome.jp/virushostdb/80940
+                # neutralizing antibodies in many humans
+                # https://doi.org/10.1186/s13071-017-2559-9
+                "Lumbo virus": "human",
+                # https://www.genome.jp/virushostdb/1236398
+                "Macaca fascicularis polyomavirus 1": "primate",
+                # https://www.genome.jp/virushostdb/2560567
+                "macacine betaherpesvirus 8": "primate",
                 }
 
 
@@ -1142,7 +1155,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=355)
+                                                           n_records=360)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

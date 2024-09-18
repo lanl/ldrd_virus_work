@@ -30,6 +30,7 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 
+
 matplotlib.use("Agg")
 
 
@@ -318,6 +319,125 @@ def percent_surface_exposed(
     }
 
     return percent_exposed_dict
+
+
+def train_rfc(
+    train_data: pd.DataFrame,
+    data_target: pd.Series,
+    n_folds: int,
+    paths: list,
+    target_column: str,
+    random_state: int,
+) -> tuple[RandomForestClassifier, np.ndarray, np.ndarray, pd.DataFrame]:
+    """
+    Trains Random Forest Classifier and plots ROC curves for
+    cross-validation
+
+    Parameters:
+    -----------
+    train_data: DataFrame
+        training dataset for classifier cross-validation
+    data_target: Series
+        target classes for train data
+    n_folds: int
+        number of cross-validation training folds
+    paths: list
+        list of file paths
+    target_column: str
+        dataset column on which to train classifier
+    random_state: int
+        random seed to initialize RFC
+
+    Returns:
+    --------
+    clfr: RandomForestClassifier
+        trained, cross-validated classifier
+    topN: array
+        indices of topN features from ranked list of important features
+    train: array
+        array of indices corresponding to training data points
+    df: df
+        dataframe containing the training dataset from cross-validation
+    """
+
+    cv = StratifiedKFold(n_splits=n_folds)
+    clfr = RandomForestClassifier(
+        n_estimators=10000, n_jobs=-1, random_state=random_state
+    )
+
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+
+    counter = -1
+    n_features = 5
+    topN = np.zeros((n_folds, n_features))
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
+        clfr.fit(train_data.iloc[train], data_target[train])
+        df = pd.DataFrame()
+        df["Features"] = train_data.iloc[train].columns
+        df["Importances"] = clfr.feature_importances_
+        df.sort_values(by=["Importances"], ascending=False, inplace=True)
+        df.reset_index(inplace=True)
+        viz = RocCurveDisplay.from_estimator(
+            clfr,
+            train_data.iloc[test],
+            data_target[test],
+            name=f"ROC fold {fold + 1}",
+            alpha=0.3,
+            lw=1,
+            ax=ax,
+            plot_chance_level=(fold == n_folds - 1),
+        )
+        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+        aucs.append(viz.roc_auc)
+
+        counter += 1
+        topN[counter, :] = df["index"][:n_features].to_numpy()
+
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    ax.plot(
+        mean_fpr,
+        mean_tpr,
+        color="b",
+        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+        lw=2,
+        alpha=0.8,
+    )
+
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    ax.fill_between(
+        mean_fpr,
+        tprs_lower,
+        tprs_upper,
+        color="grey",
+        alpha=0.2,
+        label=r"$\pm$ 1 std. dev.",
+    )
+
+    ax.set(
+        xlabel="False Positive Rate",
+        ylabel="True Positive Rate",
+        title="Mean ROC curve with variability\n(Positive label '"
+        + str(target_column)
+        + "')",
+    )
+    ax.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
+    plt.close(fig)
+
+    return clfr, topN, train, df
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -1455,84 +1575,10 @@ if __name__ == "__main__":
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
-
         n_folds = 5
-        cv = StratifiedKFold(n_splits=n_folds)
-        clfr = RandomForestClassifier(
-            n_estimators=10000, n_jobs=-1, random_state=random_state
+        clfr, temp1, train, df = train_rfc(
+            X, y, n_folds, paths, target_column, random_state
         )
-        tprs = []
-        aucs = []
-        mean_fpr = np.linspace(0, 1, 100)
-
-        fig, ax = plt.subplots(figsize=(8, 8))
-
-        counter = -1
-        n_features = 5
-        temp1 = np.zeros((n_folds, n_features))
-
-        for fold, (train, test) in enumerate(cv.split(X, y)):
-            clfr.fit(X.iloc[train], y[train])
-            df = pd.DataFrame()
-            df["Features"] = X.iloc[train].columns
-            df["Importances"] = clfr.feature_importances_
-            df.sort_values(by=["Importances"], ascending=False, inplace=True)
-            df.reset_index(inplace=True)
-            viz = RocCurveDisplay.from_estimator(
-                clfr,
-                X.iloc[test],
-                y[test],
-                name=f"ROC fold {fold + 1}",
-                alpha=0.3,
-                lw=1,
-                ax=ax,
-                plot_chance_level=(fold == n_folds - 1),
-            )
-            interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-            interp_tpr[0] = 0.0
-            tprs.append(interp_tpr)
-            aucs.append(viz.roc_auc)
-            counter += 1
-            temp1[counter, :] = df["index"][:n_features].to_numpy()
-
-        mean_tpr = np.mean(tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
-        std_auc = np.std(aucs)
-        ax.plot(
-            mean_fpr,
-            mean_tpr,
-            color="b",
-            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
-            lw=2,
-            alpha=0.8,
-        )
-
-        std_tpr = np.std(tprs, axis=0)
-        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-        ax.fill_between(
-            mean_fpr,
-            tprs_lower,
-            tprs_upper,
-            color="grey",
-            alpha=0.2,
-            label=r"$\pm$ 1 std. dev.",
-        )
-
-        ax.set(
-            xlabel="False Positive Rate",
-            ylabel="True Positive Rate",
-            title="Mean ROC curve with variability\n(Positive label '"
-            + str(target_column)
-            + "')",
-        )
-        ax.legend(loc="lower right")
-        fig.tight_layout()
-        fig.savefig(
-            str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300
-        )
-        plt.close(fig)
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots

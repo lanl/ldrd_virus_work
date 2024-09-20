@@ -1112,6 +1112,18 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/391640
                 # https://doi.org/10.1089%2Fvbz.2008.0131
                 "Massilia virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1891768
+                "Betapolyomavirus mastomysis": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1775957
+                # https://doi.org/10.1099/jgv.0.000389
+                "Medjerda Valley virus": "human",
+                # https://www.genome.jp/virushostdb/1477515
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/megrivirus
+                "megrivirus C1": "avian",
+                # https://www.genome.jp/virushostdb/2870375
+                "megrivirus D1": "avian",
+                # https://www.genome.jp/virushostdb/2079598
+                "megrivirus E1": "avian",
                 }
 
 
@@ -1199,7 +1211,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=375)
+                                                           n_records=380)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

@@ -1094,6 +1094,24 @@ organism_dict = {
                 "Mallard associated gemycircularvirus 1": "avian",
                 # https://www.genome.jp/virushostdb/1843734
                 "Faeces associated gemycircularvirus 14": "avian",
+                # https://www.genome.jp/virushostdb/2495433
+                # cell culture evidence not sufficient; bats
+                # and ferret infection seems clear
+                "Alston virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1654930
+                # https://doi.org/10.1128%2FgenomeA.00781-15
+                # CMVs are considered to be host restrictive due
+                # to the lack of evidence of cross-species infection
+                # and are thought to have co-evolved with their host.
+                "Mandrillus leucophaeus cytomegalovirus": "primate",
+                # https://www.genome.jp/virushostdb/3052318
+                # https://ictv.global/report/chapter/arenaviridae/arenaviridae/mammarenavirus
+                # could infect humans based on ICTV discussion, but don't
+                # see explicit evidence for this particular virus
+                "Mammarenavirus marientalense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/391640
+                # https://doi.org/10.1089%2Fvbz.2008.0131
+                "Massilia virus": "no_mammals",
                 }
 
 
@@ -1181,7 +1199,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=370)
+                                                           n_records=375)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

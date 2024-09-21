@@ -1,3 +1,4 @@
+import tempfile
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import rfc_utils, classifier, feature_importance, get_features
@@ -435,6 +436,9 @@ def build_tables(feature_checkpoint=0, debug=False):
 
     elif workflow == "DTRA":
         for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+            with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+                csv_conversion(file).to_csv(temp_file)
+                file = temp_file.name
             if i == 0:
                 prefix = "Train"
                 debug = False
@@ -839,13 +843,22 @@ if __name__ == "__main__":
             },
         )
 
-        build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-        build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
-        X_train, y_train = feature_selection_rfc(
-            feature_selection=feature_selection,
+    build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
+    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    X_train, y_train = feature_selection_rfc(
+        feature_selection=feature_selection,
+        debug=debug,
+        n_jobs=n_jobs,
+        random_state=random_state,
+    )
+    if workflow == "DR":
+        X_test, y_test = get_test_features(
+            table_loc_test,
+            table_loc_test_saved,
+            test_file,
+            X_train,
+            extract_cookie,
             debug=debug,
-            n_jobs=n_jobs,
-            random_state=random_state,
         )
         X_test, y_test = get_test_features(
         table_loc_test,
@@ -1093,10 +1106,10 @@ if __name__ == "__main__":
                 )
                 best_params[name] = res["params"]
                 plotting_data[name] = res["targets"]
-        if optimize == "yes" or optimize == "skip":
-            optimization_plots(
-                plotting_data, optimization_plot_source, optimization_plot_figure
-            )
+    if optimize == "yes" or optimize == "skip":
+        optimization_plots(
+            plotting_data, optimization_plot_source, optimization_plot_figure
+        )
 
         if workflow == "DR":
             # train and predict on all models
@@ -1580,8 +1593,7 @@ if __name__ == "__main__":
                 positive_shap_values.values[:, counter2],
                 positive_shap_values.data[:, counter2],
             )[0]
-            tolerance = 0.01
-            if pearson_r < -tolerance:
+            if pearson_r < 0:
                 array_sign_1.append("-")
                 ax.annotate(
                     array_sign_1[counter2],
@@ -1591,7 +1603,7 @@ if __name__ == "__main__":
                     color="r",
                     fontsize="xx-large",
                 )
-            elif pearson_r > tolerance:
+            elif pearson_r > 0:
                 array_sign_1.append("+")
                 ax.annotate(
                     array_sign_1[counter2],

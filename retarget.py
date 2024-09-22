@@ -1124,6 +1124,52 @@ organism_dict = {
                 "megrivirus D1": "avian",
                 # https://www.genome.jp/virushostdb/2079598
                 "megrivirus E1": "avian",
+                # https://www.genome.jp/virushostdb/35515
+                # https://doi.org/10.1371%2Fjournal.pntd.0009494
+                "Melao virus": "human",
+                # https://www.genome.jp/virushostdb/37108
+                "Meleagrid alphaherpesvirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1608323
+                "Meles meles polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1919071
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/almendravirus
+                "Menghai virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/159147
+                # https://doi.org/10.4269/ajtmh.1981.30.473
+                "Mermet virus": "avian",
+                # https://www.genome.jp/virushostdb/1737523
+                "Common vole polyomavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1891769
+                "Betapolyomavirus mafricanus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985387
+                "Miniopterus associated gemycircularvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1904408
+                "Miniopterus schreibersii polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1904409
+                "Miniopterus schreibersii polyomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1475143
+                "Mink circovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2003500
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/mischivirus
+                "mischivirus B1": "non_primate_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/mischivirus
+                "mischivirus D1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2758136
+                "bat polyomavirus 3b": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1634487
+                "Mongoose feces-associated gemycircularvirus d": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1634486
+                "Mongoose feces-associated gemycircularvirus b": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1434720
+                "Beluga whale alphaherpesvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2161809
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/mosavirus
+                "Marmot mosavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2734558
+                # https://doi.org/10.1016/j.virol.2021.01.007
+                "Mosquito X virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2304514
+                "Culex circovirus-like virus": "no_mammals",
                 }
 
 
@@ -1211,7 +1257,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=380)
+                                                           n_records=400)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

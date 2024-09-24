@@ -1188,6 +1188,20 @@ organism_dict = {
                 # related viruses do infect humans, but I don't see hard evidence for MSV yet?
                 # (just the original mosquito isolation)
                 "Muir Springs virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1569922
+                # no live mammals infected in this study:
+                # https://doi.org/10.3389%2Ffmicb.2022.791563
+                # (just cell culture)
+                # antibodies found in deer here:
+                # https://doi.org/10.1016/j.ttbdis.2018.11.012
+                "Mukawa virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/305674
+                # https://ictv.global/report/chapter/poxviridae/poxviridae/cervidpoxvirus
+                "Deerpox virus W-848-83": "non_primate_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/mupivirus
+                "mupivirus A1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1940555
+                "Murine roseolovirus": "non_primate_mammals",
                 }
 
 
@@ -1275,7 +1289,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=405)
+                                                           n_records=410)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

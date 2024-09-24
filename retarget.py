@@ -1170,6 +1170,24 @@ organism_dict = {
                 "Mosquito X virus": "no_mammals",
                 # https://www.genome.jp/virushostdb/2304514
                 "Culex circovirus-like virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1034805
+                "Mosquito VEM virus SDBVL G": "no_mammals",
+                # https://www.genome.jp/virushostdb/241630
+                # https://doi.org/10.1016/j.virol.2003.08.013
+                # https://ictv.global/report/chapter/paramyxoviridae/paramyxoviridae
+                # > Most viruses have a narrow host range in nature but can infect a broader range of cultured cells
+                "Mossman virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2169856
+                "Mouse associated cyclovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2012619
+                # not yet determined to pose a spillover risk as of 2024:
+                # https://doi.org/10.1038/s41522-024-00543-3
+                "Olivier's shrew virus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/932700
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/barhavirus
+                # related viruses do infect humans, but I don't see hard evidence for MSV yet?
+                # (just the original mosquito isolation)
+                "Muir Springs virus": "no_mammals",
                 }
 
 
@@ -1257,7 +1275,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=400)
+                                                           n_records=405)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

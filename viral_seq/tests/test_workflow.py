@@ -1,5 +1,6 @@
 from viral_seq import run_workflow as workflow
 from matplotlib.testing.decorators import image_comparison
+from matplotlib.testing.compare import compare_images
 import numpy as np
 from importlib.resources import files
 from contextlib import ExitStack
@@ -8,6 +9,8 @@ import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from numpy.testing import assert_array_equal
 from sklearn.utils.validation import check_is_fitted
+from sklearn.datasets import make_classification
+import pdb
 
 
 @image_comparison(
@@ -86,54 +89,31 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Both == 4
 
 
-def test_train_rfc():
-    data_header = [
-        "kmer_AA_AACDEFG",
-        "kmer_AA_ADTWKST",
-        "kmer_PC_AELKTSR",
-        "kmer_AA_AACDEFG",
-        "kmer_AA_AACADAG",
-        "kmer_PC_BACCEFG",
-        "kmer_AA_BATGKGT",
-        "kmer_PC_GALKTSR",
-        "kmer_AA_GGCDEFG",
-        "kmer_PC_GCCAGGE",
-    ]
-    data_values = np.zeros((10, 10))
-    train_data = pd.DataFrame(data_values, columns=data_header)
-    data_target = pd.Series(
-        np.array((True, False, True, False, True, False, True, False, True, False)),
-        name="Test",
-    )
+def test_train_clfr(tmp_path):
 
-    file_folder = files("viral_seq.tests.expected")
-    file_paths = [item for item in file_folder.iterdir()]
-    out_path = [file_paths[-1].parent]
+    X, y = make_classification(n_samples=15, n_features=10, random_state=0)
+    X = pd.DataFrame(X)
 
-    clfr, topN, train, df = workflow.train_rfc(
-        train_data,
-        data_target,
-        n_folds=5,
+    out_path = [tmp_path]
+    clfr_name = ["rfc"]
+    trained_clfrs, topN_features, train, df = workflow.train_clfr(
+        X,
+        y,
+        clfrs=clfr_name,
+        n_folds=2,
         paths=out_path,
         target_column="Test",
         random_state=0,
     )
-
-    topN_df = pd.DataFrame(topN)
-
-    topN_expected = pd.read_csv(
-        files("viral_seq.tests.expected") / ("test_train_rfc_expected_topN.csv"),
-        index_col=[0],
-    )
-    df_expected = pd.read_csv(
-        files("viral_seq.tests.expected") / ("test_train_rfc_expected_df.csv"),
-        index_col=[0],
+    img_out = compare_images(
+        files("viral_seq.tests.expected") / "ROC_rfc_Test_expected.png",
+        str(tmp_path / f"ROC_{clfr_name[0]}_Test.png"),
+        50,
     )
 
-    topN_expected.columns = topN_expected.columns.astype(int)
-    expected_train_idx = np.array([0, 1, 2, 3, 4, 5, 6, 7])
-
-    assert_frame_equal(topN_df, topN_expected)
-    assert_frame_equal(df, df_expected)
-    assert_array_equal(train, expected_train_idx)
-    check_is_fitted(clfr)
+    assert img_out is None
+    assert df.shape == (10, 3)
+    assert topN_features[0].shape == (2, 5)
+    assert train.shape == (8,)
+    for clfr in trained_clfrs:
+        check_is_fitted(clfr)

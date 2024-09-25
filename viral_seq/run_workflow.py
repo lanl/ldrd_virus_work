@@ -25,22 +25,25 @@ from time import perf_counter
 import tarfile
 import shap
 from scipy.stats import pearsonr
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+import sys
 
 
 matplotlib.use("Agg")
 
 
-def train_rfc(
+def train_clfr(
     train_data: pd.DataFrame,
     data_target: pd.Series,
+    clfrs: list,
     n_folds: int,
     paths: list,
     target_column: str,
     random_state: int,
-) -> tuple[RandomForestClassifier, np.ndarray, np.ndarray, pd.DataFrame]:
+) -> tuple[list, list, np.ndarray, pd.DataFrame]:
     """
-    Trains Random Forest Classifier and plots ROC curves for
-    cross-validation
+    Trains machine learning classifiers and plots ROC curves for cross-validation
 
     Parameters:
     -----------
@@ -48,6 +51,8 @@ def train_rfc(
         training dataset for classifier cross-validation
     data_target: Series
         target classes for train data
+    clfrs: list
+        list of classifier names to be trained
     n_folds: int
         number of cross-validation training folds
     paths: list
@@ -59,94 +64,110 @@ def train_rfc(
 
     Returns:
     --------
-    clfr: RandomForestClassifier
-        trained, cross-validated classifier
-    topN: array
+    trained_clfrs: list
+        trained, cross-validated classifiers
+    topN_features: list
         indices of topN features from ranked list of important features
     train: array
         array of indices corresponding to training data points
-    df: df
+    df: DataFrame
         dataframe containing the training dataset from cross-validation
     """
 
-    cv = StratifiedKFold(n_splits=n_folds)
-    clfr = RandomForestClassifier(
-        n_estimators=10000, n_jobs=-1, random_state=random_state
-    )
+    trained_clfrs = []
+    topN_features = []
+    for clfr_name in clfrs:
 
-    tprs = []
-    aucs = []
-    mean_fpr = np.linspace(0, 1, 100)
+        cv = StratifiedKFold(n_splits=n_folds)
+        if clfr_name == "rfc":
+            clfr = RandomForestClassifier(
+                n_estimators=10000, n_jobs=-1, random_state=random_state
+            )
+        elif clfr_name == "xgb":
+            clfr = XGBClassifier()
+        elif clfr_name == "lgbm":
+            clfr = LGBMClassifier()
 
-    counter = -1
-    n_features = 5
-    topN = np.zeros((n_folds, n_features))
+        tprs = []
+        aucs = []
+        mean_fpr = np.linspace(0, 1, 100)
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+        counter = -1
+        n_features = 5
+        topN = np.zeros((n_folds, n_features))
 
-    for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
-        clfr.fit(train_data.iloc[train], data_target[train])
-        df = pd.DataFrame()
-        df["Features"] = train_data.iloc[train].columns
-        df["Importances"] = clfr.feature_importances_
-        df.sort_values(by=["Importances"], ascending=False, inplace=True)
-        df.reset_index(inplace=True)
-        viz = RocCurveDisplay.from_estimator(
-            clfr,
-            train_data.iloc[test],
-            data_target[test],
-            name=f"ROC fold {fold + 1}",
-            alpha=0.3,
-            lw=1,
-            ax=ax,
-            plot_chance_level=(fold == n_folds - 1),
+        fig, ax = plt.subplots(figsize=(8, 8))
+
+        for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
+            sys.stdout.write(f"Training {clfr_name} Classifier: {fold}/{n_folds}")
+            clfr.fit(train_data.iloc[train], data_target[train])
+            df = pd.DataFrame()
+            df["Features"] = train_data.iloc[train].columns
+            df["Importances"] = clfr.feature_importances_
+            df.sort_values(by=["Importances"], ascending=False, inplace=True)
+            df.reset_index(inplace=True)
+            viz = RocCurveDisplay.from_estimator(
+                clfr,
+                train_data.iloc[test],
+                data_target[test],
+                name=f"ROC fold {fold + 1}",
+                alpha=0.3,
+                lw=1,
+                ax=ax,
+                plot_chance_level=(fold == n_folds - 1),
+            )
+            interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+            interp_tpr[0] = 0.0
+            tprs.append(interp_tpr)
+            aucs.append(viz.roc_auc)
+
+            counter += 1
+            topN[counter, :] = df["index"][:n_features].to_numpy()
+
+        topN_features.append(topN)
+        trained_clfrs.append(clfr)
+
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_tpr[-1] = 1.0
+        mean_auc = auc(mean_fpr, mean_tpr)
+        std_auc = np.std(aucs)
+        ax.plot(
+            mean_fpr,
+            mean_tpr,
+            color="b",
+            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+            lw=2,
+            alpha=0.8,
         )
-        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-        interp_tpr[0] = 0.0
-        tprs.append(interp_tpr)
-        aucs.append(viz.roc_auc)
 
-        counter += 1
-        topN[counter, :] = df["index"][:n_features].to_numpy()
+        std_tpr = np.std(tprs, axis=0)
+        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+        ax.fill_between(
+            mean_fpr,
+            tprs_lower,
+            tprs_upper,
+            color="grey",
+            alpha=0.2,
+            label=r"$\pm$ 1 std. dev.",
+        )
 
-    mean_tpr = np.mean(tprs, axis=0)
-    mean_tpr[-1] = 1.0
-    mean_auc = auc(mean_fpr, mean_tpr)
-    std_auc = np.std(aucs)
-    ax.plot(
-        mean_fpr,
-        mean_tpr,
-        color="b",
-        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
-        lw=2,
-        alpha=0.8,
-    )
+        ax.set(
+            xlabel="False Positive Rate",
+            ylabel="True Positive Rate",
+            title="Mean ROC curve with variability\n(Positive label '"
+            + str(target_column)
+            + "')",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            str(paths[-1]) + "/" + f"ROC_{clfr_name}_" + str(target_column) + ".png",
+            dpi=300,
+        )
+        plt.close(fig)
 
-    std_tpr = np.std(tprs, axis=0)
-    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-    ax.fill_between(
-        mean_fpr,
-        tprs_lower,
-        tprs_upper,
-        color="grey",
-        alpha=0.2,
-        label=r"$\pm$ 1 std. dev.",
-    )
-
-    ax.set(
-        xlabel="False Positive Rate",
-        ylabel="True Positive Rate",
-        title="Mean ROC curve with variability\n(Positive label '"
-        + str(target_column)
-        + "')",
-    )
-    ax.legend(loc="lower right")
-    fig.tight_layout()
-    fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
-    plt.close(fig)
-
-    return clfr, topN, train, df
+    return trained_clfrs, topN_features, train, df
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -555,7 +576,7 @@ def build_tables(feature_checkpoint=0, debug=False):
 
     elif workflow == "DTRA":
         for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-            with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                 csv_conversion(file).to_csv(temp_file)
                 file = temp_file.name
             if i == 0:
@@ -1151,14 +1172,14 @@ if __name__ == "__main__":
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
         n_folds = 5
-        clfr, temp1, train, df = train_rfc(
-            X, y, n_folds, paths, target_column, random_state
+        clfr_names = ["rfc", "xgb", "lgbm"]
+        trained_clfrs, topN_features, train, df = train_clfr(
+            X, y, clfr_names, n_folds, paths, target_column, random_state
         )
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots
-
-        (uniq, freq) = np.unique(temp1.flatten(), return_counts=True)
+        (uniq, freq) = np.unique(np.array(topN_features).flatten(), return_counts=True)
         temp2 = np.column_stack((uniq, freq))
         temp3 = temp2[temp2[:, 1].argsort()]
         temp4 = [
@@ -1358,27 +1379,39 @@ if __name__ == "__main__":
         )
         df.to_csv("annotated_" + str(target_column) + ".csv", header=True, index=False)
 
-        ### Production of the SHAP plot
-
-        explainer = shap.Explainer(clfr, seed=random_state)
-        shap_values = explainer(X)
-        positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
-        feature_importance.plot_shap_beeswarm(
-            positive_shap_values,
-            model_name="Random Forest",
-            fig_name=str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png",
-            max_display=len(array2),
-        )
+        ### Production of the SHAP plots
+        clfr_shap_values = []
+        for i, trained_clfr in enumerate(trained_clfrs):
+            explainer = shap.Explainer(trained_clfr, seed=random_state)
+            shap_values = explainer(X)
+            if clfr_names[i] == "rfc":
+                positive_shap_values = shap_values[
+                    :, np.array(temp3[:, 0][::-1], dtype=int), 1
+                ]
+            else:
+                positive_shap_values = shap_values[
+                    :, np.array(temp3[:, 0][::-1], dtype=int)
+                ]
+            feature_importance.plot_shap_beeswarm(
+                positive_shap_values,
+                model_name=clfr_names[i],
+                fig_name=str(paths[-1])
+                + "/"
+                + f"SHAP_{clfr_names[i]}"
+                + str(target_column)
+                + ".png",
+                max_display=len(array2),
+            )
+            clfr_shap_values.append(positive_shap_values)
 
         ### Production of the FIC plot
-
         fig, ax = plt.subplots(figsize=(8, 8))
         y_pos = np.arange(len(array2))
-        ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
+        ax.barh(y_pos, (array1 / (n_folds * 3)) * 100, color="k")
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
         ax.set_title(
-            f"Feature importance consensus amongst {n_folds} folds for \n{target_column}"
+            f"Feature importance consensus amongst {n_folds} folds of \n{len(clfr_names)} classifiers (total of {n_folds*len(clfr_names)}) for {target_column}"
         )
         ax.set_xlabel("Percentage (%)")
         counter2 = -1
@@ -1392,10 +1425,29 @@ if __name__ == "__main__":
         for p in ax.patches:
             counter2 += 1
             left, bottom, width, height = p.get_bbox().bounds
-            pearson_r = pearsonr(
-                positive_shap_values.values[:, counter2],
-                positive_shap_values.data[:, counter2],
-            )[0]
+            # build consensus here...
+            pearsonr_consensus = []
+            # iterate through shap values for different ML classifiers
+            for clfr_shap_value in clfr_shap_values:
+                # check if input array is constant
+                if not all(clfr_shap_value.values[:, counter2]):
+                    # skip adding nan values to consensus
+                    continue
+                else:
+                    pearsonr_consensus.append(
+                        pearsonr(
+                            clfr_shap_value.values[:, counter2],
+                            clfr_shap_value.data[:, counter2],
+                        )[0]
+                    )
+            # check if all values nan, if so, no consensus
+            if not pearsonr_consensus:
+                pearson_r = 0
+            else:
+                # take mean value of pearson coefficients
+                # from classifiers as final value for decision
+                pearson_r = np.mean(pearsonr_consensus)
+
             if pearson_r < 0:
                 array_sign_1.append("-")
                 ax.annotate(
@@ -1404,7 +1456,6 @@ if __name__ == "__main__":
                     ha="center",
                     va="center",
                     color="r",
-                    fontsize="xx-large",
                 )
             elif pearson_r > 0:
                 array_sign_1.append("+")
@@ -1414,17 +1465,15 @@ if __name__ == "__main__":
                     ha="center",
                     va="center",
                     color="g",
-                    fontsize="xx-large",
                 )
             else:
-                array_sign_1.append("0")
+                array_sign_1.append("x")
                 ax.annotate(
                     array_sign_1[counter2],
                     xy=(left + width / 4, bottom + height / 2),
                     ha="center",
                     va="center",
                     color="y",
-                    fontsize="xx-large",
                 )
             if res2[counter2] in res3 and res1[counter2] not in res3:
                 array_sign_2.append("-")
@@ -1434,7 +1483,6 @@ if __name__ == "__main__":
                     ha="center",
                     va="center",
                     color="r",
-                    fontsize="xx-large",
                 )
             else:
                 array_sign_2.append("+")
@@ -1444,14 +1492,15 @@ if __name__ == "__main__":
                     ha="center",
                     va="center",
                     color="g",
-                    fontsize="xx-large",
                 )
-        ax.annotate("'+' symbol on left: Positive effect on response", xy=(36, 4))
-        ax.annotate("'-' symbol on left: Negative effect on response", xy=(36, 3))
+        ax.annotate("'+' symbol on left: Positive effect on response", xy=(36, 5))
+        ax.annotate("'-' symbol on left: Negative effect on response", xy=(36, 4))
+        ax.annotate("'x' symbol on left: No consensus across classifiers", xy=(36, 3))
         ax.annotate("'+' symbol on right: Protein is surface-exposed", xy=(36, 2))
         ax.annotate("'-' symbol on right: Protein is not surface-exposed", xy=(36, 1))
         fig.tight_layout()
         fig.savefig(
-            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
+            str(paths[-1]) + "/" + "FIC_consensus_" + str(target_column) + ".png",
+            dpi=300,
         )
         plt.close()

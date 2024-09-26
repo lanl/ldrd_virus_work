@@ -1225,6 +1225,19 @@ organism_dict = {
                 "Pohorje myodes paramyxovirus 1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2756244
                 "bank vole virus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/563775
+                "Myotis polyomavirus VM-2008": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1503289
+                # https://ictv.global/report/chapter/coronaviridae/coronaviridae/alphacoronavirus
+                "BtMr-AlphaCoV/SAX2011": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1920748
+                "NL63-related bat coronavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1172195
+                # https://ictv.global/report/chapter/caliciviridae/caliciviridae/nacovirus
+                "Turkey calicivirus": "avian",
+                # https://www.genome.jp/virushostdb/590647
+                # https://ictv.global/report/chapter/paramyxoviridae/paramyxoviridae/narmovirus
+                "Nariva virus": "non_primate_mammals",
                 }
 
 
@@ -1312,7 +1325,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=420)
+                                                           n_records=425)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

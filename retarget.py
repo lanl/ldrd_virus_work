@@ -20,6 +20,17 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1186/s40168-017-0308-0
+                # giant pandas
+                "Aimelvirus 1": "non_primate_mammals",
+                # https://doi.org/10.1111/tbed.12355
+                "Avian metaavulavirus 5": "avian",
+                # https://www.swinehealth.org/wp-content/uploads/2016/03/Porcine-sapelovirus-PSV.pdf
+                "Porcine sapelovirus 1": "non_primate_mammals",
+                # https://meridian.allenpress.com/jwd/article-abstract/37/1/138/122832
+                "Aleutian mink disease virus": "non_primate_mammals",
+                # https://ictv.global/report/chapter/pneumoviridae/pneumoviridae/orthopneumovirus
+                "Bovine orthopneumovirus": "non_primate_mammals",
                 # https://en.wikipedia.org/wiki/Royal_Farm_virus
                 "Karshi virus": "human", 
                 # https://www.merckvetmanual.com/poultry/viral-encephalitides-in-birds/israel-turkey-meningoencephalitis-virus-in-birds

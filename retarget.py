@@ -1252,6 +1252,22 @@ organism_dict = {
                 "BtNv-AlphaCoV/SC2013": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/318852
                 "Oak-Vale virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1048855
+                # https://ictv.global/report_9th/RNAneg/Bunyaviridae
+                # can't find any support for animal infection of any kind,
+                # just mosquito so far..
+                "Odrenisrou virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/461322
+                "Ursus maritimus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1565990
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/orivirus
+                "Chicken orivirus 1": "avian",
+                # https://ictv.global/report_9th/RNAneg/Bunyaviridae
+                # https://www.genome.jp/virushostdb/655691
+                # I don't see evidence of infection beyond insects..
+                "Oriximina virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1391027
+                "Faeces associated gemycircularvirus 12": "avian",
                 }
 
 
@@ -1339,7 +1355,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=430)
+                                                           n_records=435)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

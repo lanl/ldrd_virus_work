@@ -635,7 +635,7 @@ if __name__ == "__main__":
         "-co",
         "--check-optimization",
         action="store_true",
-        help="Run calibration for every copy to compare how calibration is affected by seed.",
+        help="Run hyperparameter optimization for every copy to compare how optimization is affected by seed.",
     )
     args = parser.parse_args()
     cache_checkpoint = args.cache

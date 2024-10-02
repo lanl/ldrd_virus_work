@@ -629,7 +629,7 @@ if __name__ == "__main__":
         "--copies",
         type=int,
         default=1,
-        help="Select the number of copies of each model to use. Each copy will have a different random_state, starting at the value passed in'--random-state' and incrementing by 1.",
+        help="Select the number of copies of each model to use. Each copy will have a different seed chosen deterministically by '--random-state'",
     )
     parser.add_argument(
         "-co",
@@ -721,7 +721,9 @@ if __name__ == "__main__":
     best_params_group: Dict[str, Any] = {}
     plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
     model_arguments: Dict[str, Any] = {}
-    random_states = [random_state + i for i in range(copies)]
+    rng = np.random.default_rng(random_state)
+    # sklearn only accepts random_state in the range [0, 4294967295]; uint32
+    random_states = rng.integers(np.iinfo(np.uint32).max, dtype=np.uint32, size=copies)
     for rs in random_states:
         model_arguments.update(
             classifier.get_model_arguments(

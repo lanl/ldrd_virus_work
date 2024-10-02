@@ -1,10 +1,12 @@
 from viral_seq.analysis import feature_importance as fi
+from viral_seq import run_workflow as workflow
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
 import matplotlib
 from matplotlib.testing.compare import compare_images
 from importlib.resources import files
 import shap
+import pytest
 
 
 matplotlib.use("Agg")
@@ -173,7 +175,8 @@ def test_plot_shap_meanabs(tmpdir):
         assert compare_images(expected_plot, "feat_shap_meanabs.png", 0.001) is None
 
 
-def test_plot_shap_beeswarm(tmpdir):
+@pytest.mark.parametrize("interference", [False, True])
+def test_plot_shap_beeswarm(tmpdir, interference):
     rng = np.random.default_rng(1984)
     values = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
     data = np.copy(values)  # feature values
@@ -182,6 +185,18 @@ def test_plot_shap_beeswarm(tmpdir):
     expected_plot = files("viral_seq.tests.expected").joinpath(
         "test_plot_shap_beeswarm.png"
     )
+    # checking BUG caused by not closing optimization plot; see MR !50 https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/merge_requests/50#note_309148
+    if interference:
+        data2 = {
+            "Classifier1": rng.uniform(size=30),
+            "Classifier2": rng.uniform(size=10),
+            "Classifier3": rng.uniform(size=51),
+        }
+        workflow.optimization_plots(
+            data2,
+            "test",
+            tmpdir,
+        )
     np.random.seed(0)  # beeswarm/summary_plot uses numpy for random
     with tmpdir.as_cwd():
         fi.plot_shap_beeswarm(explanation)

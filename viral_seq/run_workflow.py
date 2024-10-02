@@ -538,6 +538,7 @@ def optimization_plots(input_data: Dict[str, Any], name_prefix: str, plots_path:
     ax.set_ylabel("AUC")
     ax.legend(loc=4, fontsize=6)
     fig.savefig(out_fig, dpi=300)
+    plt.close()
 
 
 def get_test_features(

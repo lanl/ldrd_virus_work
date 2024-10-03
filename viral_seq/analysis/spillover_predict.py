@@ -471,7 +471,7 @@ def build_table(
     if ordered:
         if df is not None:
             # rows need to be ordered for viruses
-            table.sort_values(by=["Unnamed: 0"], inplace=True)
+            table.sort_index(inplace=True)
         # columns should be ordered for everything (viruses, human gene sets)
         table = table.reindex(sorted(table.columns), axis=1)
     table.reset_index(drop=True, inplace=True)

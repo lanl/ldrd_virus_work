@@ -268,10 +268,10 @@ def calculate_table(
         with open(rfc_file, "rb") as f:
             rfc = pickle.load(f)
 
-    needed_columns = ["Unnamed: 0", "Species", "Accessions", target_column]
+    needed_columns = ["Species", "Accessions", target_column]
     if set(needed_columns).issubset(df.columns) is False:
         raise ValueError(
-            "Provided .csv file must contain an unnamed index column, 'Species', 'Accessions', and '"
+            "Provided .csv file must contain 'Species', 'Accessions', and '"
             + str(target_column)
             + "' columns."
         )

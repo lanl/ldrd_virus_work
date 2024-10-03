@@ -20,6 +20,18 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1128/jvi.01394-12
+                "Rhinolophus ferrumequinum circovirus 1": "non_primate_mammals",
+                # https://doi.org/10.3389/fmicb.2017.00786
+                "Avian paramyxovirus UPO216": "avian",
+                # https://doi.org/10.1371/journal.pone.0260360
+                # "In our analyses, avian metaavulavirus 20 revealed the
+                # highest degree of similarity with SARS-CoV-2 spike protein. "
+                "Avian metaavulavirus 20": "avian",
+                # https://doi.org/10.1016/j.virusres.2016.11.018
+                "Avian paramyxovirus 14": "avian",
+                # https://doi.org/10.1016/j.virol.2013.05.007
+                "Mesocricetus auratus papillomavirus 1": "non_primate_mammals",
                 # https://doi.org/10.7589/0090-3558-37.1.208
                 "Anatid alphaherpesvirus 1": "avian",
                 # https://doi.org/10.3390/v15091847
@@ -1970,7 +1982,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=240)
+                                                              n_records=245)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

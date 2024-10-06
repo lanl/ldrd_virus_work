@@ -1293,6 +1293,12 @@ organism_dict = {
                 "Alphapolyomavirus septipanos": "primate",
                 # https://www.genome.jp/virushostdb/1762023
                 "Pan troglodytes verus polyomavirus 8": "primate",
+                # https://www.genome.jp/virushostdb/332937
+                "Chimpanzee herpesvirus strain 105640": "primate",
+                # https://www.genome.jp/virushostdb/1667587
+                "Papio ursinus cytomegalovirus": "primate",
+                # https://www.genome.jp/virushostdb/1286213
+                "Yellow baboon polyomavirus 1": "primate",
                 }
 
 
@@ -1380,7 +1386,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=447)
+                                                           n_records=450)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

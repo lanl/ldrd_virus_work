@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from time import perf_counter
 import tarfile
 import shap
+from collections import defaultdict
 
 matplotlib.use("Agg")
 
@@ -515,14 +516,16 @@ def optimize_model(
     return res
 
 
-def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str):
+def optimization_plots(input_data: Dict[str, Any], name_prefix: str, plots_path: Path):
+    out_source = str(plots_path / (name_prefix + "_optimization_plot.csv"))
+    out_fig = str(plots_path / (name_prefix + "_optimization_plot.png"))
+    print("Writing optimization plot data to", out_source)
     for name, targets in input_data.items():
         target_max = np.maximum.accumulate(targets)
         df = pd.DataFrame(target_max, columns=[name])
         if Path(out_source).is_file():
             old_df = pd.read_csv(out_source)
             df = pd.concat([old_df.loc[:, list(old_df.columns != name)], df], axis=1)
-        print("Writing optimization plot data to", out_source)
         df.to_csv(out_source, index=False)
     print(
         "Generating plot of optimization progress for classifiers and saving to",
@@ -535,6 +538,7 @@ def optimization_plots(input_data: Dict[str, Any], out_source: str, out_fig: str
     ax.set_ylabel("AUC")
     ax.legend(loc=4, fontsize=6)
     fig.savefig(out_fig, dpi=300)
+    plt.close()
 
 
 def get_test_features(
@@ -620,6 +624,19 @@ if __name__ == "__main__":
         default="yes",
         help="Option 'none' will not optimize hyperparameters and use mostly defaults, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
     )
+    parser.add_argument(
+        "-cp",
+        "--copies",
+        type=int,
+        default=1,
+        help="Select the number of copies of each model to use. Each copy will have a different seed chosen deterministically by '--random-state'",
+    )
+    parser.add_argument(
+        "-co",
+        "--check-optimization",
+        action="store_true",
+        help="Run hyperparameter optimization for every copy to compare how optimization is affected by seed.",
+    )
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
@@ -628,6 +645,8 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs
     random_state = args.random_state
     optimize = args.optimize
+    copies = args.copies
+    check_optimization = args.check_optimization
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
@@ -665,8 +684,6 @@ if __name__ == "__main__":
 
     plots_path = Path("plots")
     paths.append(plots_path)
-    optimization_plot_source = str(plots_path / "optimization_plot.csv")
-    optimization_plot_figure = str(plots_path / "optimization_plot.png")
     feature_imp_consensus_plot_source = str(plots_path / "feat_imp_consensus.csv")
     feature_imp_consensus_plot_figure = str(plots_path / "feat_imp_consensus.png")
 
@@ -701,19 +718,28 @@ if __name__ == "__main__":
         debug=debug,
     )
     best_params: Dict[str, Any] = {}
-    plotting_data: Dict[str, Any] = {}
+    best_params_group: Dict[str, Any] = {}
+    plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
     model_arguments: Dict[str, Any] = {}
-    model_arguments = classifier.get_model_arguments(
-        n_jobs,
-        random_state,
-        num_samples=X_train.shape[0],
-        num_features=X_train.shape[1],
-    )
+    rng = np.random.default_rng(random_state)
+    # sklearn only accepts random_state in the range [0, 4294967295]; uint32
+    random_states = rng.integers(np.iinfo(np.uint32).max, dtype=np.uint32, size=copies)
+    for rs in random_states:
+        model_arguments.update(
+            classifier.get_model_arguments(
+                n_jobs,
+                rs,
+                num_samples=X_train.shape[0],
+                num_features=X_train.shape[1],
+            )
+        )
     # optimize first if requested
     for name, val in model_arguments.items():
         params = val["optimize"]
         if optimize == "none":
             best_params[name] = {}
+        elif val["group"] in best_params_group:
+            best_params[name] = best_params_group[val["group"]]
         else:
             print("===", name, "===")
             t_start = perf_counter()
@@ -737,11 +763,15 @@ if __name__ == "__main__":
                 "s",
             )
             best_params[name] = res["params"]
-            plotting_data[name] = res["targets"]
+            if not check_optimization:
+                print(
+                    f"All other copies of {val['group']} will use the same parameters."
+                )
+                best_params_group[val["group"]] = res["params"]
+            plotting_data[val["group"]][name] = res["targets"]
     if optimize == "yes" or optimize == "skip":
-        optimization_plots(
-            plotting_data, optimization_plot_source, optimization_plot_figure
-        )
+        for group, this_data in plotting_data.items():
+            optimization_plots(this_data, group, plots_path)
     # train and predict on all models
     predictions = {}
     predictions["Species"] = pd.read_csv(test_file)["Species"]

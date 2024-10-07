@@ -1,31 +1,32 @@
 from viral_seq import run_workflow as workflow
-from matplotlib.testing.decorators import image_comparison
 import numpy as np
 from importlib.resources import files
 from contextlib import ExitStack
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
+from matplotlib.testing.compare import compare_images
 
 
-@image_comparison(
-    baseline_images=["test_optimization_plotting"],
-    remove_text=True,
-    extensions=["png"],
-    style="mpl20",
-)
-def test_optimization_plotting(tmp_path):
+def test_optimization_plotting(tmpdir):
     rng = np.random.default_rng(seed=2024)
     data = {
         "Classifier1": rng.uniform(size=30),
         "Classifier2": rng.uniform(size=10),
         "Classifier3": rng.uniform(size=51),
     }
-    workflow.optimization_plots(
-        data,
-        str(tmp_path / "test_optimization_plotting.csv"),
-        str(tmp_path / "test_optimization_plotting.png"),
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_optimization_plotting.png"
     )
+    with tmpdir.as_cwd():
+        workflow.optimization_plots(
+            data,
+            "test",
+            tmpdir,
+        )
+        assert (
+            compare_images(expected_plot, "test_optimization_plot.png", 0.001) is None
+        )
 
 
 @pytest.mark.parametrize("extract", [True, False])

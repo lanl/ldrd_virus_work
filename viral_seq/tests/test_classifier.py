@@ -140,6 +140,6 @@ def test_get_model_args():
     actual = classifier.get_model_arguments(
         n_jobs=1, random_state=1, num_samples=10, num_features=10
     )
-    expected_keys = {"model", "suffix", "optimize", "predict"}
+    expected_keys = {"model", "group", "suffix", "optimize", "predict"}
     for key, subdict in actual.items():
         assert set(subdict.keys()) == expected_keys

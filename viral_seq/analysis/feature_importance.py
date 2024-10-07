@@ -117,9 +117,9 @@ def plot_feat_import_consensus(
 ):
     df = pd.DataFrame()
     df["Feature Name"] = ranked_feature_names
-    df[f"Count Of Models where ranked in top {top_feat_count} features"] = (
-        ranked_feature_counts
-    )
+    df[
+        f"Count Of Models where ranked in top {top_feat_count} features"
+    ] = ranked_feature_counts
     df.to_csv(fig_source, index=False)
     y_labels = ranked_feature_names[-20:]
     x_vals = (ranked_feature_counts[-20:] / num_input_models) * 100

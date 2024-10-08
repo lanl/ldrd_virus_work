@@ -20,6 +20,19 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1128%2FJVI.01858-14
+                "Blacklegged tick phlebovirus 1": "no_mammals",
+                # https://doi.org/10.1371/journal.pone.0118070
+                "Bat circovirus POA/2012/II": "non_primate_mammals",
+                # https://doi.org/10.1128%2FgenomeA.01393-15
+                "Tadarida brasiliensis circovirus 1": "non_primate_mammals",
+                # https://doi.org/10.1016/j.micpath.2023.106222
+                "Orthorubulavirus suis": "non_primate_mammals",
+                # https://doi.org/10.1371/journal.pone.0096934
+                # Antibodies found in human subjects, "further work
+                # needed to determine if these exposures result in virus
+                # replication and/or clinical disease"
+                "Turkey astrovirus 2": "avian",
                 # https://doi.org/10.1128/jvi.01394-12
                 "Rhinolophus ferrumequinum circovirus 1": "non_primate_mammals",
                 # https://doi.org/10.3389/fmicb.2017.00786
@@ -1982,7 +1995,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=245)
+                                                              n_records=250)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

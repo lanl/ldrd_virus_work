@@ -435,7 +435,7 @@ def build_tables(feature_checkpoint=0, debug=False):
 
     elif workflow == "DTRA":
         for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-            with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                 csv_conversion(file).to_csv(temp_file)
                 file = temp_file.name
             if i == 0:

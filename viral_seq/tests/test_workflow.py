@@ -313,3 +313,14 @@ def test_feature_sign():
 
     assert_array_equal(response_effect_out, response_effect_exp)
     assert_array_equal(surface_exposed_out, surface_exposed_exp)
+
+
+def test_percent_surface_exposed():
+    syn_kmers = ["CAACAAD", "CAACAAD", "FEAGAD", "FEAGAD", "FEAGAD", "FEAGAD", "GACADA"]
+    syn_status = ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"]
+
+    out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
+
+    assert out_dict["CAACAAD"] == [1, 1]
+    assert out_dict["FEAGAD"] == [3, 1]
+    assert out_dict["GACADA"] == [0, 1]

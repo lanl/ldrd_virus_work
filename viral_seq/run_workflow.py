@@ -242,6 +242,38 @@ def FIC_plot(
         fig.tight_layout()
         fig.savefig(str(path) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
         plt.close()
+=======
+def percent_surface_exposed(k_mers_PC, surface_exposed_status):
+    """
+    Determine the ratio of surface exposed to not surface exposed viral proteins
+    for the dataset of important kmers as decided by the ML classifier
+
+    Parameters
+    ----------
+    k_mers_PC: list
+        list of PC kmers that are found in the dataset of viral proteins
+    surface_exposed_status: list
+        corresponding 'Yes' or 'No' for 'is surface exposed' for each PC kmer
+
+    Returns
+    -------
+    surface_exposed_dict: dict
+        dictionary of kmers and associated ratio of surface exposed vs.
+        not surface exposed from dataset of known viral proteins
+    """
+
+    surface_exposed_dict = {}
+    all_kmers = sorted(zip(k_mers_PC, surface_exposed_status))
+    for kmer_status in all_kmers:
+        # check if kmer exists in dictionary already
+        if kmer_status[0] not in surface_exposed_dict:
+            surface_exposed_dict[kmer_status[0]] = [0, 0]
+        if kmer_status[1] == "Yes":
+            surface_exposed_dict[kmer_status[0]][0] += 1
+        elif kmer_status[1] == "No":
+            surface_exposed_dict[kmer_status[0]][1] += 1
+
+    return surface_exposed_dict
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -1686,7 +1718,14 @@ if __name__ == "__main__":
         ]
 
         temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
+
         res1, res2, res3 = label_surface_exposed(temp5, array2)
+
+        # search through all the important kmers found in the viral dataset
+        # and index the number of surface exposed vs. not for all proteins
+        surface_exposed_dict = percent_surface_exposed(
+            k_mers_PC, surface_exposed_status
+        )
 
         ### Production of the annotated CSV file with information for each case of `target_column`
         df = pd.DataFrame(

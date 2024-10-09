@@ -620,9 +620,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o",
         "--optimize",
-        choices=["none", "skip", "yes"],
-        default="yes",
-        help="Option 'none' will not optimize hyperparameters and use mostly defaults, while 'skip' assumes this step has already been performed and will attempt to use its result in the following steps.",
+        choices=["none", "skip", "yes", "pre-optimized"],
+        default="pre-optimized",
+        help="Default option 'pre-optimized' uses parameters previously calculated by the authors, while 'yes' will run the same optimization procedure but the results are not deterministic due to parallelization. Option 'skip' assumes this step has been performed previously with option 'yes' and will attempt to use that result in the following steps. Option 'none' will not optimize hyperparameters and use mostly defaults.",
     )
     parser.add_argument(
         "-cp",
@@ -654,6 +654,7 @@ if __name__ == "__main__":
     cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
     viral_files = [train_file, test_file]
     table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+    hyperparams_stored_path = files("viral_seq.data.hyperparameters")
 
     paths = []
     cache_extract_path = Path("data_external")
@@ -740,6 +741,12 @@ if __name__ == "__main__":
             best_params[name] = {}
         elif val["group"] in best_params_group:
             best_params[name] = best_params_group[val["group"]]
+        elif optimize == "pre-optimized":
+            print("Using hyperparameters pre-caclulated for", val["group"])
+            this_filename = "params_" + val["group"] + ".json"
+            with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
+                res = json.load(f)
+            best_params[name] = res["params"]
         else:
             print("===", name, "===")
             t_start = perf_counter()

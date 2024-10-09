@@ -83,3 +83,14 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Integrin == 45
     assert postprocessed_df.sum().Is_Sialic_Acid == 53
     assert postprocessed_df.sum().Is_Both == 4
+
+
+def test_percent_surface_exposed():
+    syn_kmers = ["CAACAAD", "CAACAAD", "FEAGAD", "FEAGAD", "FEAGAD", "FEAGAD", "GACADA"]
+    syn_status = ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"]
+
+    out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
+
+    assert out_dict["CAACAAD"] == [1, 1]
+    assert out_dict["FEAGAD"] == [3, 1]
+    assert out_dict["GACADA"] == [0, 1]

@@ -1309,6 +1309,22 @@ organism_dict = {
                 "parabovirus C1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1964370
                 "Falcon picornavirus": "avian",
+                # https://www.genome.jp/virushostdb/1128118
+                # https://ictv.global/report/chapter/hepadnaviridae/hepadnaviridae/avihepadnavirus
+                "Parrot hepatitis B virus": "avian",
+                # https://www.genome.jp/virushostdb/2065211
+                # https://en.wikipedia.org/wiki/Passerivirus
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/passerivirus
+                "Passerivirus sp.": "avian",
+                # https://www.genome.jp/virushostdb/159151
+                "Peaton virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1434088
+                # https://ictv.global/report/chapter/adenoviridae/adenoviridae/siadenovirus
+                "Chinstrap penguin adenovirus 2": "avian",
+                # https://www.genome.jp/virushostdb/648998
+                # https://en.wikipedia.org/wiki/Avipoxvirus
+                # https://ictv.global/report/chapter/poxviridae/poxviridae/avipoxvirus
+                "Penguinpox virus": "avian",
                 }
 
 
@@ -1396,7 +1412,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=455)
+                                                           n_records=460)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

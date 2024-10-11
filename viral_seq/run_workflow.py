@@ -242,7 +242,8 @@ def FIC_plot(
         fig.tight_layout()
         fig.savefig(str(path) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
         plt.close()
-=======
+
+
 def percent_surface_exposed(k_mers_PC, surface_exposed_status):
     """
     Determine the ratio of surface exposed to not surface exposed viral proteins
@@ -1719,7 +1720,7 @@ if __name__ == "__main__":
 
         temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
 
-        res1, res2, res3 = label_surface_exposed(temp5, array2)
+        is_exposed, not_exposed, found_kmers = label_surface_exposed(temp5, array2)
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins

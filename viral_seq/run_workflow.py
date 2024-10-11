@@ -30,6 +30,231 @@ from scipy.stats import pearsonr
 matplotlib.use("Agg")
 
 
+def FIC_plot(
+    topN_kmers,
+    kmer_count,
+    n_folds,
+    target_column,
+    positive_shap_values,
+    found_kmers,
+    surface_exposed_dict,
+    not_exposed,
+    is_exposed,
+    paths,
+):
+    """
+    Create Feature Importance Consensus (FIC) plot from SHAP explainer values using
+    important kmers found during ML classification. Include the following information
+    for each kmer as labels on the plot:
+        1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
+        2. the status of the kmer as surface exposed or not surface exposed on the known virus (+/-)
+        3. the percent of found kmers that are surface exposed based on the dataset of viral proteins
+
+    Parameters:
+    -----------
+    topN_kmers: list
+        list of top_N kmers from ML classifiers
+    kmer_count: array
+        consensus number of classifer folds agreeing upon corresponding kmer in topN_kmers
+    n_folds: int
+        number of cv folds performed by classifier
+    target_column: str
+        name of column on which classifier was trained
+    positive_shap_values: shap.Explainer
+        SHAP explainer output
+    found_kmers: list
+        list of topN kmers
+    surface_exposed_dict: dict
+        dictionary containing found kmer and ratio of surface exposed
+        to not surface exposed viral proteins with given kmer
+    not_exposed: list
+        list of which topN kmers are known to be surface exposed
+    is_exposed: list
+        list of which topN kmers are known to not be surface exposed
+    paths: list
+        paths to save files
+
+    Returns:
+    --------
+    response_effect: list
+        list of characters (+/-) denoting the sign of the pearson correlation coefficient
+        between the array of the feature data and the array of the shap values
+    surface_exposed_sign: list
+        list of characters (+/-) denoting the surface exposure status of the viral protein
+        associated with the found kmer
+    """
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    y_pos = np.arange(len(topN_kmers))
+    ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
+    ax.set_xlim(0, 100)
+    ax.set_yticks(y_pos, labels=topN_kmers)
+    ax.set_title(
+        f"Feature importance consensus amongst {n_folds} folds for {target_column}\n Value to right of bar indicates percentage of found proteins 'surface exposed'"
+    )
+    ax.set_xlabel("Classifier Consensus Percentage (%)")
+    kmer_idx = -1
+
+    # `response_effect` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
+    # For each PC-kmer in the FIC plot the metric as the sign of the (linear) Pearson correlation between the array of
+    # feature data and the array of not averaged, not absolute-valued, SHAP values.
+    response_effect = []
+    surface_exposed_sign = []
+    for p in ax.patches:
+        kmer_idx += 1
+        left, bottom, width, height = p.get_bbox().bounds
+        pearson_r = pearsonr(
+            positive_shap_values.values[:, kmer_idx],
+            positive_shap_values.data[:, kmer_idx],
+        )[0]
+
+        # calculate percentage of kmers that are surface exposed
+        kmer_name = found_kmers[kmer_idx]
+        if kmer_name in surface_exposed_dict:
+            percent_exposed = (
+                surface_exposed_dict[kmer_name][0]
+                / np.sum(surface_exposed_dict[kmer_name])
+                * 100
+            )
+        else:
+            percent_exposed = "Not Found"
+
+        if pearson_r < 0:
+            response_effect.append("-")
+            ax.annotate(
+                response_effect[kmer_idx],
+                xy=(left + width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="r",
+                fontsize="xx-large",
+            )
+        elif pearson_r > 0:
+            response_effect.append("+")
+            ax.annotate(
+                response_effect[kmer_idx],
+                xy=(left + width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="g",
+                fontsize="xx-large",
+            )
+        else:
+            response_effect.append("0")
+            ax.annotate(
+                response_effect[kmer_idx],
+                xy=(left + width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="y",
+                fontsize="xx-large",
+            )
+        if (
+            not_exposed[kmer_idx] in found_kmers
+            and is_exposed[kmer_idx] not in found_kmers
+        ):
+            surface_exposed_sign.append("-")
+            ax.annotate(
+                surface_exposed_sign[kmer_idx],
+                xy=(left + 3 * width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="r",
+                fontsize="xx-large",
+            )
+            if isinstance(percent_exposed, float):
+                percent_lbl = f"{percent_exposed:.2f}%"
+            elif isinstance(percent_exposed, str):
+                percent_lbl = percent_exposed
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width + 8, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="k",
+                fontsize="large",
+            )
+        elif is_exposed[kmer_idx] in found_kmers:
+            surface_exposed_sign.append("+")
+            ax.annotate(
+                surface_exposed_sign[kmer_idx],
+                xy=(left + 3 * width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="g",
+                fontsize="xx-large",
+            )
+            if isinstance(percent_exposed, float):
+                percent_lbl = f"{percent_exposed:.2f}%"
+            elif isinstance(percent_exposed, str):
+                percent_lbl = percent_exposed
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width + 8, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="k",
+                fontsize="large",
+            )
+        else:
+            surface_exposed_sign.append("x")
+            ax.annotate(
+                surface_exposed_sign[kmer_idx],
+                xy=(left + 3 * width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="y",
+                fontsize="xx-large",
+            )
+            if isinstance(percent_exposed, float):
+                percent_lbl = f"{percent_exposed:.2f}%"
+            elif isinstance(percent_exposed, str):
+                percent_lbl = percent_exposed
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width + 8, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="k",
+                fontsize="large",
+            )
+        plus_symbol = Line2D(
+            [0], [0], marker="+", color="green", markersize=12, linestyle=""
+        )
+        minus_symbol = Line2D(
+            [0], [0], marker="_", color="red", markersize=12, linestyle=""
+        )
+        cross_symbol = Line2D(
+            [0], [0], marker="x", color="gold", markersize=12, linestyle=""
+        )
+
+        plt.legend(
+            handles=[
+                plus_symbol,
+                minus_symbol,
+                plus_symbol,
+                minus_symbol,
+                cross_symbol,
+            ],
+            labels=[
+                "on left: Positive effect on response",
+                "on left: Negative effect on response",
+                "on right: Protein is surface-exposed",
+                "on right: Protein is not surface-exposed",
+                "on right: Not found in protein dataset",
+            ],
+            loc="lower right",
+        )
+
+        fig.tight_layout()
+        fig.savefig(
+            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
+        )
+        plt.close()
+
+    return response_effect, surface_exposed_sign
+
+
 def percent_surface_exposed(k_mers_PC, surface_exposed_status):
     """
     Determine the ratio of surface exposed to not surface exposed viral proteins
@@ -1328,15 +1553,16 @@ if __name__ == "__main__":
         ### For later use in +/- labeling of 'surface_exposed' or 'not' on the FIC plot
         temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
         is_exposed = [x[0] for x in temp5 if x[1] == "Yes"]
-        is_exposed.sort()
-
         is_exposed += [""] * (len(array2) - len(is_exposed))
-        not_exposed = [x[0] for x in temp5 if x[1] == "No"]
-        not_exposed.sort()
 
+        not_exposed = [x[0] for x in temp5 if x[1] == "No"]
         not_exposed += [""] * (len(array2) - len(not_exposed))
+
         found_kmers = [temp4[ii][0][8:] for ii in range(len(array2))]
-        found_kmers.sort()
+
+        # reorder lists of exposed and not exposed kmers to align with topN kmers
+        is_exposed = [s if s in is_exposed else "" for s in found_kmers]
+        not_exposed = [s if s in not_exposed else "" for s in found_kmers]
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
@@ -1368,138 +1594,15 @@ if __name__ == "__main__":
         )
 
         ### Production of the FIC plot
-
-        fig, ax = plt.subplots(figsize=(8, 8))
-        y_pos = np.arange(len(array2))
-        ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
-        ax.set_xlim(0, 100)
-        ax.set_yticks(y_pos, labels=array2)
-        ax.set_title(
-            f"Feature importance consensus amongst {n_folds} folds for {target_column}\n Value to right of bar indicates percentage of found proteins 'surface exposed'"
+        response_effect, surface_exposed_sign = FIC_plot(
+            array2,
+            array1,
+            n_folds,
+            target_column,
+            positive_shap_values,
+            found_kmers,
+            surface_exposed_dict,
+            not_exposed,
+            is_exposed,
+            paths,
         )
-        ax.set_xlabel("Percentage (%)")
-        kmer_idx = -1
-
-        # `response_effect` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
-        # For each PC-kmer in the FIC plot, AH and AM posit the metric as the sign of the (linear) Pearson correlation between the array of
-        # feature data and the array of not averaged, not absolute-valued, SHAP values.
-        response_effect = []
-        surface_exposed_sign = []
-        for p in ax.patches:
-            kmer_idx += 1
-            left, bottom, width, height = p.get_bbox().bounds
-            pearson_r = pearsonr(
-                positive_shap_values.values[:, kmer_idx],
-                positive_shap_values.data[:, kmer_idx],
-            )[0]
-
-            # calculate percentage of kmers that are surface exposed
-            kmer_name = found_kmers[kmer_idx]
-            if kmer_name in surface_exposed_dict:
-                percent_exposed = (
-                    surface_exposed_dict[kmer_name][0]
-                    / np.sum(surface_exposed_dict[kmer_name])
-                    * 100
-                )
-            else:
-                percent_exposed = "Not Found"
-            if pearson_r < 0:
-                response_effect.append("-")
-                ax.annotate(
-                    response_effect[kmer_idx],
-                    xy=(left + width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="r",
-                    fontsize="xx-large",
-                )
-            elif pearson_r > 0:
-                response_effect.append("+")
-                ax.annotate(
-                    response_effect[kmer_idx],
-                    xy=(left + width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="g",
-                    fontsize="xx-large",
-                )
-            else:
-                response_effect.append("0")
-                ax.annotate(
-                    response_effect[kmer_idx],
-                    xy=(left + width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="y",
-                    fontsize="xx-large",
-                )
-            if (
-                not_exposed[kmer_idx] in found_kmers
-                and is_exposed[kmer_idx] not in found_kmers
-            ):
-                surface_exposed_sign.append("-")
-                ax.annotate(
-                    surface_exposed_sign[kmer_idx],
-                    xy=(left + 3 * width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="r",
-                    fontsize="xx-large",
-                )
-                if isinstance(percent_exposed, float):
-                    out_msg = f"{percent_exposed:.2f}%"
-                elif isinstance(percent_exposed, str):
-                    out_msg = percent_exposed
-                ax.annotate(
-                    out_msg,
-                    xy=(left + width + 8, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="k",
-                    fontsize="large",
-                )
-            else:
-                surface_exposed_sign.append("+")
-                ax.annotate(
-                    surface_exposed_sign[kmer_idx],
-                    xy=(left + 3 * width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="g",
-                    fontsize="xx-large",
-                )
-                if isinstance(percent_exposed, float):
-                    out_msg = f"{percent_exposed:.2f}%"
-                elif isinstance(percent_exposed, str):
-                    out_msg = percent_exposed
-                ax.annotate(
-                    out_msg,
-                    xy=(left + width + 8, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="k",
-                    fontsize="large",
-                )
-        plus_symbol = Line2D(
-            [0], [0], marker="+", color="green", markersize=12, linestyle=""
-        )
-        minus_symbol = Line2D(
-            [0], [0], marker="_", color="red", markersize=12, linestyle=""
-        )
-
-        plt.legend(
-            handles=[plus_symbol, minus_symbol, plus_symbol, minus_symbol],
-            labels=[
-                "on left: Positive effect on response",
-                "on left: Negative effect on response",
-                "on right: Protein is surface-exposed",
-                "on right: Protein is not surface-exposed",
-            ],
-            loc="lower right",
-        )
-
-        fig.tight_layout()
-        fig.savefig(
-            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
-        )
-        plt.close()

@@ -252,5 +252,38 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
             return "G"
         else:
             return "*"
+    elif method == "schein_2012":
+        # NOTE: these mappings appear to be inspired by
+        # this manuscript from Jurgen Schmidt's collaborators
+        # at UTMB: https://doi.org/10.1186/1471-2105-13-s13-s9
+        # However, as far as I can tell, that manuscript uses
+        # more sophisticated (eigenvector?) approaches to achieve the actual
+        # mappings, so these are mostly conformant with Jurgen's
+        # specific requests at
+        # https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/67#note_307079
+        if explicit_aa in "AG":
+            return "A"
+        elif explicit_aa in "C":
+            return "B"
+        elif explicit_aa in "STY":
+            return "D"
+        elif explicit_aa in "NQH":
+            return "E"
+        elif explicit_aa in "DE":
+            return "F"
+        elif explicit_aa in "KR":
+            return "G"
+        elif explicit_aa in "IVLM":
+            # NOTE: Jurgen labeled this "F," but that's
+            # presumably an accidental duplication?
+            return "H"
+        elif explicit_aa in "FW":
+            # NOTE: Jurgen didn't specify a letter for this
+            # category
+            return "I"
+        elif explicit_aa in "P":
+            return "P"
+        else:
+            return "*"
     else:
         raise NotImplementedError(f"{method=} not supported")

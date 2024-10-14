@@ -1352,6 +1352,16 @@ organism_dict = {
                 "Pigeonpox virus": "avian",
                 # https://www.genome.jp/virushostdb/1236406
                 "Piliocolobus badius polyomavirus 2": "primate",
+                # https://www.genome.jp/virushostdb/1236407
+                "Piliocolobus rufomitratus polyomavirus 1": "primate",
+                # https://www.genome.jp/virushostdb/1519097
+                "Sesavirus CSL10538": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1427158
+                "Seal parvovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/392505
+                "Mastomys coucha papillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2850049
+                "Apore virus": "non_primate_mammals",
                 }
 
 
@@ -1439,7 +1449,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=470)
+                                                           n_records=475)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

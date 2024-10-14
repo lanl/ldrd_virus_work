@@ -48,7 +48,7 @@ def get_kmers(records, k=10, kmer_type="AA"):
                 if kmer_type == "PC":
                     new_seq = ""
                     for each in this_seq:
-                        new_seq += aa_map(each, method="shen_2007")
+                        new_seq += aa_map(each, method="schein_2012")
                     this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1

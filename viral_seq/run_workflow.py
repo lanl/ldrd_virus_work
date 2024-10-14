@@ -1426,7 +1426,7 @@ if __name__ == "__main__":
                         new_seq = ""
 
                         for each in this_seq_AA:
-                            new_seq += get_features.aa_map(each, method="shen_2007")
+                            new_seq += get_features.aa_map(each, method="schein_2012")
                         this_seq_PC = new_seq
                         this_seq_PC = str(this_seq_PC)
 

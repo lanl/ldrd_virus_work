@@ -87,26 +87,37 @@ def test_csv_conversion():
 
 
 def test_label_surface_exposed():
-    kmers_list = ["CADAFFE", "CCABDAC", "CCAACDA", "CADAFFE", "ECDGDE"]
-    kmers_status = ["Yes", "No", "Yes", "No", "Yes"]
+    kmers_list = [
+        "CADAFFE",
+        "CADAFFE",
+        "CCABDAC",
+        "CCABDAC",
+        "CCABDAC",
+        "CCAACDA",
+        "CCAACDA",
+        "CADAFFE",
+        "CADAFFE",
+        "ECDGDE",
+    ]
+    kmers_status = ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"]
     kmers_list_status = list(set(zip(kmers_list, kmers_status)))
 
     kmers_topN = [
         "kmer_PC_CADAFFE",
-        "kmer_PC_CCABDAC",
+        "kmer_AA_CCABDAC",
         "kmer_PC_CCAACDA",
-        "kmer_PC_CADAFFE",
+        "kmer_AA_CADAFFE",
         "kmer_PC_ECDGDE",
     ]
 
-    expected_out_res1 = ["CADAFFE", "CCAACDA", "ECDGDE", "", ""]
-    expected_out_res2 = ["CADAFFE", "CCABDAC", "", "", ""]
-    expected_out_res3 = ["CADAFFE", "CADAFFE", "CCAACDA", "CCABDAC", "ECDGDE"]
+    is_exposed_exp = ["CADAFFE", "", "CCAACDA", "CADAFFE", "ECDGDE"]
+    not_exposed_exp = ["CADAFFE", "CCABDAC", "", "CADAFFE", ""]
+    found_kmers_exp = ["CADAFFE", "CCABDAC", "CCAACDA", "CADAFFE", "ECDGDE"]
 
-    res1, res2, res3 = workflow.label_surface_exposed(
-        kmers_list_status, kmers_topN, kmers_topN
+    is_exposed, not_exposed, found_kmers = workflow.label_surface_exposed(
+        kmers_list_status, kmers_topN
     )
 
-    np.testing.assert_array_equal(res1, expected_out_res1)
-    np.testing.assert_array_equal(res2, expected_out_res2)
-    np.testing.assert_array_equal(res3, expected_out_res3)
+    np.testing.assert_array_equal(is_exposed, is_exposed_exp)
+    np.testing.assert_array_equal(not_exposed, not_exposed_exp)
+    np.testing.assert_array_equal(found_kmers, found_kmers_exp)

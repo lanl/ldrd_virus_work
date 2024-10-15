@@ -21,6 +21,7 @@ import json
 from typing import Dict, Any, Sequence, List
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from time import perf_counter
 import tarfile
 import shap
@@ -68,6 +69,175 @@ def label_surface_exposed(
     not_exposed = [s if s in not_exposed else "" for s in found_kmers]
 
     return is_exposed, not_exposed, found_kmers
+
+
+def FIC_plot(
+    topN_kmers,
+    kmer_count,
+    n_folds,
+    target_column,
+    positive_shap_values,
+    found_kmers,
+    not_exposed,
+    is_exposed,
+    paths,
+):
+    """
+    Create Feature Importance Consensus (FIC) plot from SHAP explainer values using
+    important kmers found during ML classification. Include the following information
+    for each kmer as labels on the plot:
+        1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
+        2. the status of the kmer as surface exposed or not surface exposed on the known virus (+/-)
+
+    Parameters:
+    -----------
+    topN_kmers: list
+        list of top_N kmers from ML classifiers
+    kmer_count: array
+        consensus number of classifer folds agreeing upon corresponding kmer in topN_kmers
+    n_folds: int
+        number of cv folds performed by classifier
+    target_column: str
+        name of column on which classifier was trained
+    positive_shap_values: shap.Explainer
+        SHAP explainer output
+    found_kmers: list
+        list of topN kmers
+    not_exposed: list
+        list of which topN kmers are known to be surface exposed
+    is_exposed: list
+        list of which topN kmers are known to not be surface exposed
+    paths: list
+        paths to save files
+
+    Returns:
+    --------
+    response_effect: list
+        list of characters (+/-) denoting the sign of the pearson correlation coefficient
+        between the array of the feature data and the array of the shap values
+    surface_exposed_sign: list
+        list of characters (+/-) denoting the surface exposure status of the viral protein
+        associated with the found kmer
+    """
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    y_pos = np.arange(len(topN_kmers))
+    ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
+    ax.set_xlim(0, 100)
+    ax.set_yticks(y_pos, labels=topN_kmers)
+    ax.set_title(
+        f"Feature importance consensus amongst {n_folds} folds for {target_column}\n Value to right of bar indicates percentage of found proteins 'surface exposed'"
+    )
+    ax.set_xlabel("Classifier Consensus Percentage (%)")
+    kmer_idx = -1
+
+    # `response_effect` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
+    # For each PC-kmer in the FIC plot the metric as the sign of the (linear) Pearson correlation between the array of
+    # feature data and the array of not averaged, not absolute-valued, SHAP values.
+    response_effect = []
+    surface_exposed_sign = []
+    for p in ax.patches:
+        kmer_idx += 1
+        left, bottom, width, height = p.get_bbox().bounds
+        pearson_r = pearsonr(
+            positive_shap_values.values[:, kmer_idx],
+            positive_shap_values.data[:, kmer_idx],
+        )[0]
+        if pearson_r < 0:
+            response_effect.append("-")
+            ax.annotate(
+                response_effect[kmer_idx],
+                xy=(left + width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="r",
+                fontsize="xx-large",
+            )
+        elif pearson_r > 0:
+            response_effect.append("+")
+            ax.annotate(
+                response_effect[kmer_idx],
+                xy=(left + width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="g",
+                fontsize="xx-large",
+            )
+        else:
+            response_effect.append("0")
+            ax.annotate(
+                response_effect[kmer_idx],
+                xy=(left + width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="y",
+                fontsize="xx-large",
+            )
+        if (
+            not_exposed[kmer_idx] in found_kmers
+            and is_exposed[kmer_idx] not in found_kmers
+        ):
+            surface_exposed_sign.append("-")
+            ax.annotate(
+                surface_exposed_sign[kmer_idx],
+                xy=(left + 3 * width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="r",
+                fontsize="xx-large",
+            )
+        elif is_exposed[kmer_idx] in found_kmers:
+            surface_exposed_sign.append("+")
+            ax.annotate(
+                surface_exposed_sign[kmer_idx],
+                xy=(left + 3 * width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="g",
+                fontsize="xx-large",
+            )
+        else:
+            surface_exposed_sign.append("x")
+            ax.annotate(
+                surface_exposed_sign[kmer_idx],
+                xy=(left + 3 * width / 4, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="y",
+                fontsize="xx-large",
+            )
+
+        plus_symbol = Line2D(
+            [0], [0], marker="+", color="green", markersize=12, linestyle=""
+        )
+        minus_symbol = Line2D(
+            [0], [0], marker="_", color="red", markersize=12, linestyle=""
+        )
+        Line2D([0], [0], marker="x", color="gold", markersize=12, linestyle="")
+
+        plt.legend(
+            handles=[
+                plus_symbol,
+                minus_symbol,
+                plus_symbol,
+                minus_symbol,
+            ],
+            labels=[
+                "on left: Positive effect on response",
+                "on left: Negative effect on response",
+                "on right: Protein is surface-exposed",
+                "on right: Protein is not surface-exposed",
+            ],
+            loc="lower right",
+        )
+
+        fig.tight_layout()
+        fig.savefig(
+            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
+        )
+        plt.close()
+
+    return response_effect, surface_exposed_sign
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -1527,88 +1697,15 @@ if __name__ == "__main__":
             max_display=len(array2),
         )
 
-        ### Production of the FIC plot
-
-        fig, ax = plt.subplots(figsize=(8, 8))
-        y_pos = np.arange(len(array2))
-        ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
-        ax.set_xlim(0, 100)
-        ax.set_yticks(y_pos, labels=array2)
-        ax.set_title(
-            f"Feature importance consensus amongst {n_folds} folds for\n {target_column}"
+        # Production of the FIC plot
+        response_effect, surface_exposed_sign = FIC_plot(
+            array2,
+            array1,
+            n_folds,
+            target_column,
+            positive_shap_values,
+            res3,
+            res2,
+            res1,
+            paths,
         )
-        ax.set_xlabel("Percentage (%)")
-        counter2 = -1
-
-        # `array_sign_1` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
-        # For each PC-kmer in the FIC plot, AH and AM posit the metric as the sign of the (linear) Pearson correlation between the array of
-        # feature data and the array of not averaged, not absolute-valued, SHAP values.
-
-        array_sign_1 = []
-        array_sign_2 = []
-        for p in ax.patches:
-            counter2 += 1
-            left, bottom, width, height = p.get_bbox().bounds
-            pearson_r = pearsonr(
-                positive_shap_values.values[:, counter2],
-                positive_shap_values.data[:, counter2],
-            )[0]
-            if pearson_r < 0:
-                array_sign_1.append("-")
-                ax.annotate(
-                    array_sign_1[counter2],
-                    xy=(left + width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="r",
-                    fontsize="xx-large",
-                )
-            elif pearson_r > 0:
-                array_sign_1.append("+")
-                ax.annotate(
-                    array_sign_1[counter2],
-                    xy=(left + width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="g",
-                    fontsize="xx-large",
-                )
-            else:
-                array_sign_1.append("0")
-                ax.annotate(
-                    array_sign_1[counter2],
-                    xy=(left + width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="y",
-                    fontsize="xx-large",
-                )
-            if res2[counter2] in res3 and res1[counter2] not in res3:
-                array_sign_2.append("-")
-                ax.annotate(
-                    array_sign_2[counter2],
-                    xy=(left + 3 * width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="r",
-                    fontsize="xx-large",
-                )
-            else:
-                array_sign_2.append("+")
-                ax.annotate(
-                    array_sign_2[counter2],
-                    xy=(left + 3 * width / 4, bottom + height / 2),
-                    ha="center",
-                    va="center",
-                    color="g",
-                    fontsize="xx-large",
-                )
-        ax.annotate("'+' symbol on left: Positive effect on response", xy=(36, 4))
-        ax.annotate("'-' symbol on left: Negative effect on response", xy=(36, 3))
-        ax.annotate("'+' symbol on right: Protein is surface-exposed", xy=(36, 2))
-        ax.annotate("'-' symbol on right: Protein is not surface-exposed", xy=(36, 1))
-        fig.tight_layout()
-        fig.savefig(
-            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
-        )
-        plt.close()

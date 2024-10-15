@@ -7,6 +7,11 @@ import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.datasets import make_classification
+from matplotlib.testing.compare import compare_images
+import shap
 
 
 def test_optimization_plotting(tmpdir):
@@ -237,3 +242,97 @@ def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
         pd.DataFrame.from_dict(expected_dict).replace({np.nan: None}).convert_dtypes()
     )
     assert_frame_equal(out_df, expected_df)
+
+
+def test_fic_plot(tmp_path):
+    array2 = [
+        "kmer_PC_CDDEEC",
+        "kmer_PC_CCGDEA",
+        "kmer_PC_CCCFCF",
+        "kmer_PC_CCAAACD",
+        "kmer_PC_CACDGA",
+        "kmer_PC_CFCEDD",
+        "kmer_PC_GCECFD",
+        "kmer_PC_ECDGDE",
+        "kmer_PC_CCACAD",
+        "kmer_PC_FECAEA",
+    ]
+    array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0])
+    target_column = "0"
+    found_kmers = [
+        "CDDEEC",
+        "CCGDEA",
+        "CCCFCF",
+        "CCAAACD",
+        "CACDGA",
+        "CFCEDD",
+        "GCECFD",
+        "ECDGDE",
+        "CCACAD",
+        "FECAEA",
+    ]
+
+    not_exposed = [
+        "CDDEEC",
+        "CCGDEA",
+        "",
+        "CCAAACD",
+        "CACDGA",
+        "CFCEDD",
+        "GCECFD",
+        "ECDGDE",
+        "CCACAD",
+        "FECAEA",
+    ]
+    is_exposed = [
+        "CDDEEC",
+        "",
+        "",
+        "CCAAACD",
+        "CACDGA",
+        "CFCEDD",
+        "GCECFD",
+        "ECDGDE",
+        "CCACAD",
+        "FECAEA",
+    ]
+
+    X, y = make_classification(n_samples=15, n_features=10, random_state=0)
+    X = pd.DataFrame(X)
+    random_state = 0
+    n_folds = 2
+    clfr = RandomForestClassifier(
+        n_estimators=10000, n_jobs=-1, random_state=random_state
+    )
+    cv = StratifiedKFold(n_splits=n_folds)
+    for fold, (train, test) in enumerate(cv.split(X, y)):
+        clfr.fit(X.iloc[train], y[train])
+
+    explainer = shap.Explainer(clfr, seed=random_state)
+    shap_values = explainer(X)
+    positive_shap_values = shap_values[:, :, 1]
+
+    response_effect, surface_exposed_sign = workflow.FIC_plot(
+        array2,
+        array1,
+        n_folds,
+        target_column,
+        positive_shap_values,
+        found_kmers,
+        not_exposed,
+        is_exposed,
+        paths=[tmp_path],
+    )
+
+    response_effect_exp = ["-", "-", "+", "+", "-", "+", "+", "-", "+", "+"]
+    surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+
+    img_out = compare_images(
+        files("viral_seq.tests.expected") / "FIC_expected.png",
+        str(tmp_path / "FIC_0.png"),
+        50,
+    )
+
+    assert img_out is None
+    assert_array_equal(response_effect, response_effect_exp)
+    assert_array_equal(surface_exposed_sign, surface_exposed_exp)

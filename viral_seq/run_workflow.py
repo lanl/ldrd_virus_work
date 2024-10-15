@@ -18,7 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Sequence
 import matplotlib
 import matplotlib.pyplot as plt
 from time import perf_counter
@@ -27,6 +27,46 @@ import shap
 from scipy.stats import pearsonr
 
 matplotlib.use("Agg")
+
+
+def label_surface_exposed(
+    list_of_kmers: Sequence[tuple], kmers_topN: list[str]
+) -> tuple:
+    """
+    Creates lists of kmers denoting whether or not they are
+    surface exposed ambiguous of PC or AA kmer status
+
+    Parameters:
+    -----------
+    list_of_kmers: list
+        list containing kmers and corresponding status of surface exposure as
+        determined by cross-referencing top-N kmers with list of known surface
+        exposed proteins
+
+    kmers_topN: list
+        list containing topN kmers from classifier
+
+    Returns:
+    --------
+    is_exposed, not_exposed, found_kmers: tuple
+        ordered lists of protein kmers that are either positively labeled as 'surface_exposed',
+        negatively labeled as 'surface_exposed' or all kmers without PC/AA prefix in kmers_topN
+
+    """
+
+    # make lists 'is_exposed', 'not_exposed', found_kmers by cross-
+    # referencing surface exposed status with protein kmers list
+    is_exposed = [x[0] for x in list_of_kmers if x[1] == "Yes"]
+    not_exposed = [x[0] for x in list_of_kmers if x[1] == "No"]
+    found_kmers = [
+        x.replace("kmer_PC_", "").replace("kmer_AA_", "") for x in kmers_topN
+    ]
+
+    # and re-order lists to align with the list of found kmers
+    is_exposed = [s if s in is_exposed else "" for s in found_kmers]
+    not_exposed = [s if s in not_exposed else "" for s in found_kmers]
+
+    return is_exposed, not_exposed, found_kmers
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -1291,16 +1331,8 @@ if __name__ == "__main__":
             for item in protein_name_PC
         ]
 
-        ### For later use in +/- labeling of 'surface_exposed' or 'not' on the FIC plot
         temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
-        res1 = [x[0] for x in temp5 if x[1] == "Yes"]
-        res1.sort()
-        res1 += [""] * (len(array2) - len(res1))
-        res2 = [x[0] for x in temp5 if x[1] == "No"]
-        res2.sort()
-        res2 += [""] * (len(array2) - len(res2))
-        res3 = [temp4[ii][0][8:] for ii in range(len(array2))]
-        res3.sort()
+        res1, res2, res3 = label_surface_exposed(temp5, array2)
 
         ### Production of the annotated CSV file with information for each case of `target_column`
         df = pd.DataFrame(

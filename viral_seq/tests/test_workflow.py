@@ -83,3 +83,40 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Integrin == 45
     assert postprocessed_df.sum().Is_Sialic_Acid == 53
     assert postprocessed_df.sum().Is_Both == 4
+
+
+def test_label_surface_exposed():
+    kmers_list = [
+        "CADAFFE",
+        "CADAFFE",
+        "CCABDAC",
+        "CCABDAC",
+        "CCABDAC",
+        "CCAACDA",
+        "CCAACDA",
+        "CADAFFE",
+        "CADAFFE",
+        "ECDGDE",
+    ]
+    kmers_status = ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"]
+    kmers_list_status = list(set(zip(kmers_list, kmers_status)))
+
+    kmers_topN = [
+        "kmer_PC_CADAFFE",
+        "kmer_AA_CCABDAC",
+        "kmer_PC_CCAACDA",
+        "kmer_AA_CADAFFE",
+        "kmer_PC_ECDGDE",
+    ]
+
+    is_exposed_exp = ["CADAFFE", "", "CCAACDA", "CADAFFE", "ECDGDE"]
+    not_exposed_exp = ["CADAFFE", "CCABDAC", "", "CADAFFE", ""]
+    found_kmers_exp = ["CADAFFE", "CCABDAC", "CCAACDA", "CADAFFE", "ECDGDE"]
+
+    is_exposed, not_exposed, found_kmers = workflow.label_surface_exposed(
+        kmers_list_status, kmers_topN
+    )
+
+    np.testing.assert_array_equal(is_exposed, is_exposed_exp)
+    np.testing.assert_array_equal(not_exposed, not_exposed_exp)
+    np.testing.assert_array_equal(found_kmers, found_kmers_exp)

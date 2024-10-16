@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from typing import Union, Any
+from typing import Union, Any, Optional
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
 from sklearn.metrics import get_scorer, roc_curve, auc
@@ -227,9 +227,11 @@ def train_and_predict(
     return clf, y_pred
 
 
-def get_roc_curve(y_true, predictions):
+def get_roc_curve(
+    y_true: npt.ArrayLike, predictions: dict[str, npt.ArrayLike]
+) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
     """If passed one set of predictions, this functions identically to `sklearn.metrics.roc_curve`. If passed multiple sets of predictions, this instead returns a mean roc curve with standard deviation."""
-    fprs, tprs, tpr_std = [], [], []
+    fprs, tprs, tpr_std = [], [], None
     for key in predictions:
         fpr, tpr, thresh = roc_curve(y_true, predictions[key])
         tprs.append(tpr)
@@ -248,26 +250,31 @@ def get_roc_curve(y_true, predictions):
 
 
 def plot_roc_curve(
-    name, fpr, tpr, tpr_std=None, filename="roc_plot.png", title="ROC curve"
+    name: str,
+    fpr: np.ndarray,
+    tpr: np.ndarray,
+    tpr_std: Optional[np.ndarray] = None,
+    filename: str = "roc_plot.png",
+    title: str = "ROC curve",
 ):
     tpr_stds = None if tpr_std is None else [tpr_std]
     plot_roc_curve_comparison([name], [fpr], [tpr], tpr_stds, filename, title)
 
 
 def plot_roc_curve_comparison(
-    names,
-    fprs,
-    tprs,
-    tpr_stds=None,
-    filename="roc_plot_comparison.png",
-    title="ROC curve",
+    names: list[str],
+    fprs: list[np.ndarray],
+    tprs: list[np.ndarray],
+    tpr_stds: Optional[list[np.ndarray]] = None,
+    filename: str = "roc_plot_comparison.png",
+    title: str = "ROC curve",
 ):
     """Can plot one or multiple roc curves. Will plot a plus/minus 1 standard deviation shaded region for curves if provided."""
     fig, ax = plt.subplots(figsize=(6, 6))
     for i, name in enumerate(names):
         this_auc = auc(fprs[i], tprs[i])
         ax.plot(fprs[i], tprs[i], label=f"{name} (AUC = {this_auc:.2f})")
-        if tpr_stds and len(tpr_stds[i]) > 0:
+        if tpr_stds and tpr_stds[i] is not None:
             tprs_upper = np.minimum(tprs[i] + tpr_stds[i], 1)
             tprs_lower = np.maximum(tprs[i] - tpr_stds[i], 0)
             ax.fill_between(

@@ -1362,6 +1362,19 @@ organism_dict = {
                 "Mastomys coucha papillomavirus 2": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2850049
                 "Apore virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/994672
+                # https://doi.org/10.1371/journal.ppat.1002155
+                "Titi monkey adenovirus ECC-2011": "human",
+                # https://www.genome.jp/virushostdb/2848036
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/poecivirus
+                # https://en.wikipedia.org/wiki/Avian_keratin_disorder
+                "poecivirus A1": "avian",
+                # https://www.genome.jp/virushostdb/2250215
+                "Polar bear adenovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2049933
+                "Pomona bat hepatitis B virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1604875
+                "Sumatran orang-utan polyomavirus": "primate",
                 }
 
 
@@ -1449,7 +1462,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=475)
+                                                           n_records=480)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

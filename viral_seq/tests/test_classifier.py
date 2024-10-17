@@ -11,6 +11,7 @@ from ray import tune
 from pathlib import Path
 from importlib.resources import files
 from sklearn.utils.validation import check_is_fitted
+from matplotlib.testing.compare import compare_images
 
 
 @pytest.mark.parametrize(
@@ -143,3 +144,60 @@ def test_get_model_args():
     expected_keys = {"model", "group", "suffix", "optimize", "predict"}
     for key, subdict in actual.items():
         assert set(subdict.keys()) == expected_keys
+
+
+def test_get_roc_curve():
+    rng = np.random.default_rng(123)
+    y_true = rng.integers(2, size=10)
+    predictions = {}
+    predictions["Test1"] = rng.random((10,))
+    predictions["Test2"] = rng.random((10,))
+    fpr, tpr, tpr_std = classifier.get_roc_curve(y_true, predictions)
+    expected_fpr = np.linspace(0, 1, 100)
+    expected_tpr = np.ones(100)
+    expected_tpr[0] = 0
+    expected_tpr[1:43] = 0.5
+    expected_tpr[43:57] = 2 / 3
+    expected_tpr[57:71] = 5 / 6
+    expected_tpr_std = np.zeros(100)
+    expected_tpr_std[1:43] = 1 / 6
+    expected_tpr_std[57:71] = 1 / 6
+    assert_allclose(fpr, expected_fpr)
+    assert_allclose(tpr, expected_tpr)
+    assert_allclose(tpr_std, expected_tpr_std)
+
+
+def test_plot_roc_curve(tmpdir):
+    rng = np.random.default_rng(951753)
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_roc_curve.png"
+    )
+    # generate random input typical of fpr, tpr values
+    # arrays of values increasing by random intervals from 0.0 to 1.0
+    tpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    fpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    with tmpdir.as_cwd():
+        classifier.plot_roc_curve("Test", fpr, tpr)
+        assert compare_images(expected_plot, "roc_plot.png", 0.001) is None
+
+
+def test_plot_roc_curve_comparison(tmpdir):
+    rng = np.random.default_rng(654987)
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_roc_curve_comparison.png"
+    )
+    # generate random input typical of fpr, tpr, and tpr_std values
+    # list of two arrays; each of values increasing by random intervals from 0.0 to 1.0
+    fprs = [np.sort(np.append(rng.random((8,)), [0.0, 1.0]))] + [
+        np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    ]
+    tprs = [np.sort(np.append(rng.random((8,)), [0.0, 1.0]))] + [
+        np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    ]
+    # list of two arrays; each beginning and ending with 0.0, with middle values in the range [0.0, 0.1)
+    tpr_stds = [np.append(np.append([0.0], rng.uniform(0.0, 0.1, (8,))), [0.0])] + [
+        np.append(np.append([0.0], rng.uniform(0.0, 0.1, (8,))), [0.0])
+    ]
+    with tmpdir.as_cwd():
+        classifier.plot_roc_curve_comparison(["Test1", "Test2"], fprs, tprs, tpr_stds)
+        assert compare_images(expected_plot, "roc_plot_comparison.png", 0.001) is None

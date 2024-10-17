@@ -35,7 +35,7 @@ def get_similarity_features(
     return df_features.join(df_simfeats, rsuffix=suffix)
 
 
-def get_kmers(records, k=10, kmer_type="AA"):
+def get_kmers(records, k=10, kmer_type="AA", mapping_method="shen_2007"):
     kmers = defaultdict(int)
     for record in records:
         for feature in record.features:
@@ -48,7 +48,7 @@ def get_kmers(records, k=10, kmer_type="AA"):
                 if kmer_type == "PC":
                     new_seq = ""
                     for each in this_seq:
-                        new_seq += aa_map(each, method="shen_2007")
+                        new_seq += aa_map(each, method=mapping_method)
                     this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
@@ -271,6 +271,7 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
         elif explicit_aa in "IVLMJ":
             return "6"
         elif explicit_aa in "FW":
+
             return "7"
         elif explicit_aa in "P":
             return "8"

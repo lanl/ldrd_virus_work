@@ -748,6 +748,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                                 str(k),
                                 "--target-column",
                                 target_column,
+                                "--mapping-method",
+                                mapping_method,
                             ],
                             standalone_mode=False,
                         )
@@ -1045,6 +1047,12 @@ if __name__ == "__main__":
         default="DR",
         help="Choice of machine learning workflow to be used.",
     )
+    parser.add_argument(
+        "-m",
+        "--mapping-method",
+        choices=["shen_2007", "schein_2012"],
+        help="Preference of sheme for mapping AA-kmers to PC-kmers",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1060,6 +1068,7 @@ if __name__ == "__main__":
     test_file = args.test_file
     target_column = args.target_column
     workflow = args.workflow
+    mapping_method = args.mapping_method
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))

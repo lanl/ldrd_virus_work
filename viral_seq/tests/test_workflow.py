@@ -1,13 +1,13 @@
 from viral_seq import run_workflow as workflow
 import numpy as np
 from importlib.resources import files
-from contextlib import ExitStack
+from contextlib import ExitStack, nullcontext
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
-from contextlib import nullcontext
+from viral_seq.analysis import spillover_predict as sp
 
 
 def test_optimization_plotting(tmpdir):
@@ -432,3 +432,117 @@ def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
 def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
     with exp:
         workflow.check_kmer_feature_lengths(kmer_features, kmer_range)
+
+
+@pytest.mark.parametrize(
+    "accession, exp",
+    [
+        (
+            "NC_001563.2",
+            130,
+        ),
+        (
+            "AC_000008.1",
+            0,
+        ),
+    ],
+)
+def test_get_kmer_info(accession, exp):
+    this_cache = files("viral_seq.tests") / "cache_test"
+    cache_str = str(this_cache.resolve())
+    records = sp.load_from_cache(
+        accessions=[accession], cache=cache_str, verbose=True, filter=False
+    )
+    data_table = {
+        "Species": {
+            0: "hMPV",
+            1: "MERS-CoV",
+            2: "FMDV",
+            3: "influenza_A_H1N1",
+            4: "HSV-2",
+            5: "type_3_reovirus",
+            6: "WNV",
+            7: "type_1_reovirus",
+            8: "JEV",
+            9: "BKPyV human polyomavirus",
+        },
+        "Accessions": {
+            0: "NC_039199.1",
+            1: "NC_019843.3",
+            2: "NC_039210.1",
+            3: "NC_026438.1 NC_026435.1 NC_026437.1 NC_026433.1 NC_026436.1 NC_026434.1 NC_026432.1 NC_026431.1",
+            4: "NC_001798.2",
+            5: "NC_077846.1 NC_077845.1 NC_077844.1 NC_077843.1 NC_077842.1 NC_077841.1 NC_077840.1 NC_077839.1 NC_077838.1 NC_077837.1",
+            6: "NC_001563.2",
+            7: "MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1",
+            8: "NC_001437.1",
+            9: "NC_001538.1",
+        },
+        "Human Host": {
+            0: True,
+            1: True,
+            2: True,
+            3: True,
+            4: True,
+            5: True,
+            6: True,
+            7: False,
+            8: True,
+            9: True,
+        },
+        "Is_Integrin": {
+            0: True,
+            1: False,
+            2: True,
+            3: False,
+            4: True,
+            5: False,
+            6: True,
+            7: False,
+            8: True,
+            9: False,
+        },
+        "Is_Sialic_Acid": {
+            0: False,
+            1: True,
+            2: False,
+            3: True,
+            4: False,
+            5: True,
+            6: False,
+            7: True,
+            8: False,
+            9: True,
+        },
+        "Is_Both": {
+            0: False,
+            1: False,
+            2: False,
+            3: False,
+            4: False,
+            5: False,
+            6: False,
+            7: False,
+            8: False,
+            9: False,
+        },
+    }
+    tbl = pd.DataFrame(data_table)
+    topN_kmers = [
+        "kmer_PC_AFDAEF",
+        "kmer_PC_FCCGDA",
+        "kmer_PC_EGCCAC",
+        "kmer_PC_EADAAC",
+        "kmer_PC_DGDACD",
+        "kmer_PC_DGACFC",
+        "kmer_PC_DFDCCC",
+        "kmer_PC_FGACCA",
+        "kmer_PC_DFDCCA",
+        "kmer_PC_CECCAF",
+    ]
+        
+    viruses_PC, kmers_PC, protein_name_PC = workflow.get_kmer_info(
+        topN_kmers, records, tbl
+    )
+
+    assert len(viruses_PC) == len(kmers_PC) == len(protein_name_PC) == exp

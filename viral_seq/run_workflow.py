@@ -107,6 +107,64 @@ def feature_signs(
     return surface_exposed_sign, response_effect
 
 
+def get_kmer_info(topN_kmers: list, records: list, tbl: pd.DataFrame) -> tuple:
+    """
+    for topN kmers from ml classifier output, gather information regarding
+    the virus and viral protein in which the kmer is found from the dataset
+
+    Parameters:
+    -----------
+    topN_kmers: list
+        list of topN_kmers from output of ML classifier
+    records: list
+        list of viral sequence records from cache
+    tbl: pd.DataFrame
+        training dataframe
+
+    Returns:
+    --------
+    viruses_PC: list
+        list of virus names corresponding to sequences where PC kmers were identified
+    k_mers_PC: list
+        list of kmers that were found in viral sequence
+    protein_name_PC: list
+        list of viral proteins associated with virues where kmers were identified in viral protein sequence
+    """
+    viruses_PC = []
+    protein_name_PC = []
+    k_mers_PC = []
+    for item in topN_kmers:
+        k_mer = item.replace("kmer_PC_", "").replace("kmer_AA_", "")
+
+        for record in records:
+            for feature in record.features:
+                if feature.type == "CDS":
+                    nuc_seq = feature.location.extract(record.seq)
+                    if len(nuc_seq) % 3 != 0:
+                        continue
+                    this_seq_AA = nuc_seq.translate()
+                    this_seq_AA = str(this_seq_AA)
+
+                if feature.type == "mat_peptide":
+                    new_seq = ""
+
+                    for each in this_seq_AA:
+                        new_seq += get_features.aa_map(each, method="shen_2007")
+                    this_seq_PC = new_seq
+                    this_seq_PC = str(this_seq_PC)
+
+                    kmer_idx = [m.start() for m in re.finditer(k_mer, this_seq_PC)]
+                    if kmer_idx:
+                        acc_exist = tbl.Accessions.isin([record.id])
+                        if sum(acc_exist):
+                            viruses_PC.append(tbl.Species[np.nonzero(acc_exist)[0][0]])
+                            protein_name_PC.append(
+                                str(feature.qualifiers.get("product"))[2:-2]
+                            )
+                            k_mers_PC.append(k_mer)
+    return viruses_PC, k_mers_PC, protein_name_PC
+
+
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> tuple:
@@ -1489,12 +1547,6 @@ if __name__ == "__main__":
             "SVVYGLR",
         ]
 
-        ### Create empty lists for eventual post-processing of data output
-
-        viruses_PC = []
-        protein_name_PC = []
-        k_mers_PC = []
-
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
         y = tbl[target_column]
@@ -1666,42 +1718,8 @@ if __name__ == "__main__":
             index=False,
         )
 
-        for (
-            item
-        ) in (
-            array2
-        ):  # 'array2' contains only PC-kmers; all of the AA-kmers just so happen to be filtered out by the Random Forest Classifier
-            k_mer = item[8:]
-
-            for record in records:
-                for feature in record.features:
-                    if feature.type == "CDS":
-                        nuc_seq = feature.location.extract(record.seq)
-                        if len(nuc_seq) % 3 != 0:
-                            continue
-                        this_seq_AA = nuc_seq.translate()
-                        this_seq_AA = str(this_seq_AA)
-
-                    if (
-                        feature.type == "mat_peptide"
-                    ):  # using help from Tyler's code in the comments to MR !49 on GitLab
-                        new_seq = ""
-
-                        for each in this_seq_AA:
-                            new_seq += get_features.aa_map(each, method=mapping_method)
-                        this_seq_PC = new_seq
-                        this_seq_PC = str(this_seq_PC)
-
-                        v2 = [m.start() for m in re.finditer(k_mer, this_seq_PC)]
-
-                        if v2:
-                            v3 = tbl.Accessions.isin([record.id])
-                            if sum(v3):
-                                viruses_PC.append(tbl.Species[np.nonzero(v3)[0][0]])
-                                protein_name_PC.append(
-                                    str(feature.qualifiers.get("product"))[2:-2]
-                                )
-                                k_mers_PC.append(k_mer)
+        # gather relevant information for important kmers from classifier output
+        viruses_PC, k_mers_PC, protein_name_PC = get_kmer_info(array2, records, tbl)
 
         # manually curated on the basis of output from `np.unique(protein_name_PC)`
         surface_exposed = [

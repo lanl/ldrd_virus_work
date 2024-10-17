@@ -34,7 +34,11 @@ def label_surface_exposed(
 ) -> tuple:
     """
     Creates lists of kmers denoting whether or not they are
+<<<<<<< HEAD
     surface exposed ambiguous of PC or AA kmer status
+=======
+    surface exposed ambigious of PC or AA kmer status
+>>>>>>> 6a6f634 (BUG: Fix bug associated with flip-flop of surface exposed status)
 
     Parameters:
     -----------

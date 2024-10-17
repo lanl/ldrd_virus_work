@@ -535,16 +535,17 @@ def build_tables(feature_checkpoint=0, debug=False):
                     validate_feature_table(this_outfile, idx, prefix)
 
     elif workflow == "DTRA":
-        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                csv_conversion(file).to_csv(temp_file)
-                file = temp_file.name
-            if i == 0:
-                prefix = "Train"
-                debug = False
-                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                feature_checkpoint = 10
-                this_checkpoint = feature_checkpoint
+        if feature_checkpoint > 0:
+            for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+                    csv_conversion(file).to_csv(temp_file)
+                    file = temp_file.name
+                if i == 0:
+                    prefix = "Train"
+                    debug = False
+                    this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+                    feature_checkpoint = 10
+                    this_checkpoint = feature_checkpoint
 
                 for k in range(6, 11):
                     this_checkpoint -= 2
@@ -577,6 +578,36 @@ def build_tables(feature_checkpoint=0, debug=False):
                             ],
                             standalone_mode=False,
                         )
+                        if feature_checkpoint >= this_checkpoint:
+                            print(
+                                "Building table for Train",
+                                "which includes kmers and pc kmers with k={}.".format(
+                                    k
+                                ),
+                            )
+                            print(
+                                "To restart at this point use --features",
+                                this_checkpoint,
+                            )
+                            cli.calculate_table(
+                                [
+                                    "--file",
+                                    file,
+                                    "--cache",
+                                    cache_viral,
+                                    "--outfile",
+                                    this_outfile,
+                                    "--features-kmers",
+                                    "--kmer-k",
+                                    str(k),
+                                    "--features-kmers-pc",
+                                    "--kmer-k-pc",
+                                    str(k),
+                                    "--target-column",
+                                    target_column,
+                                ],
+                                standalone_mode=False,
+                            )
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):

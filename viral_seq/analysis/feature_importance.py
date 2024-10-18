@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import shap
+from pathlib import Path
 
 matplotlib.use("Agg")
 
@@ -199,4 +200,47 @@ def plot_shap_beeswarm(
     plt.title(f"Effect of Top {max_display} Features\n{model_name}")
     plt.tight_layout()
     plt.savefig(fig_name, dpi=300)
+    plt.close()
+
+
+def plot_shap_consensus(
+    shap_clfr_consensus: tuple[float, float],
+    train_data: pd.DataFrame,
+    target_column: str,
+    max_features: int,
+    path: Path,
+    random_state: int = 123,
+):
+    """
+    plots the shap beeswarm plot from the consensus of aggregated SHAP values over multiple cv folds
+
+    Parameters:
+    -----------
+    shap_clfr_consensus: tuple
+        aggregated shap explainer values and associated target data across all training folds
+    train_data: pd.DataFrame
+        training dataset
+    target_column: str
+        training column from dataset
+    max_features: int
+        maximum number of features to display on plot
+    path: Path
+        path to file for saving figure
+    random_state: int
+        value for initializing pseudorandom number generator for plotting shap
+    """
+    rng = np.random.default_rng(random_state)
+
+    shap.summary_plot(
+        shap_clfr_consensus[0],
+        shap_clfr_consensus[1],
+        max_display=max_features,
+        feature_names=train_data.columns,
+        show=False,
+        rng=rng,
+    )
+    # TODO: need to fix upstream `shap.summary_plot` to accept `fig` and `ax` handles per issue #89
+    plt.title(f"Effect of Top {max_features} Features\n Random Forest")
+    plt.tight_layout()
+    plt.savefig(str(path) + "/" + "SHAP_" + str(target_column) + ".png")
     plt.close()

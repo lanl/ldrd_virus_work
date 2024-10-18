@@ -29,16 +29,125 @@ from scipy.stats import pearsonr
 matplotlib.use("Agg")
 
 
+def train_clfr(
+    train_data: pd.DataFrame,
+    data_target: pd.Series,
+    n_folds: int,
+    target_column: str,
+    random_state: int,
+):
+    cv = StratifiedKFold(n_splits=n_folds)
+    clfr = RandomForestClassifier(
+        n_estimators=10000, n_jobs=-1, random_state=random_state
+    )
+
+    tprs = []
+    aucs = []
+    fig, ax = plt.subplots(figsize=(8, 8))
+    mean_fpr = np.linspace(0, 1, 100)
+
+    counter = -1
+    n_features = 10
+    temp1 = np.zeros((n_folds, n_features))
+
+    feature_count = pd.DataFrame()
+    feature_count["Features"] = X.columns
+    feature_count["Counts"] = 0
+    pearson_r_clfr = []
+    shap_values_clfr = []
+    for fold, (train, test) in enumerate(cv.split(X, y)):
+        train_fold = X.iloc[train]
+        train_target = y[train]
+        clfr.fit(train_fold, train_target)
+
+        # index classifier importances
+        clfr_importances = pd.DataFrame()
+        clfr_importances["Features"] = X.iloc[train].columns
+        clfr_importances["Importances"] = clfr.feature_importances_
+        clfr_importances.sort_values(by=["Importances"], ascending=False, inplace=True)
+        clfr_importances.reset_index(inplace=True)
+
+        # aggregate kmer voting based on shap/RF features for each fold
+        # get shap output for training dataset and rank
+        explainer = shap.Explainer(clfr, seed=random_state)
+        shap_values = explainer(train_fold)
+        positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
+
+        shap_importances = pd.DataFrame()
+        shap_importances["Features"] = X.iloc[train].columns
+        shap_importances["Importances"] = positive_shap_values.abs.mean(0).values
+        shap_importances.sort_values(by=["Importances"], ascending=False, inplace=True)
+        shap_importances.reset_index(inplace=True)
+
+        # index feature counts dataframe
+        for i in range(n_features):
+            clfr_feature = clfr_importances["Features"][i]
+            shap_feature = shap_importances["Features"][i]
+            feature_count.loc[feature_count["Features"] == clfr_feature, "Counts"] += 1
+            feature_count.loc[feature_count["Features"] == shap_feature, "Counts"] += 1
+
+        # aggregate the raw shap values to be used in the beeswarm plot
+        # still unclear what to do  with the mismatch in train row length
+        # i.e. 75 or 76 values depending on cv split
+        shap_values_clfr.append(positive_shap_values.values[:75])
+
+        # aggregate the pearson R coefficients for all kmer features
+        pearson_out = pearsonr(positive_shap_values.values, positive_shap_values.data)[
+            0
+        ]
+        pearson_r_clfr.append(np.nan_to_num(pearson_out, nan=0))
+
+        # this can possibly be a separate MR for the ROC plot...
+        viz = RocCurveDisplay.from_estimator(
+            clfr,
+            X.iloc[test],
+            y[test],
+            name=f"ROC fold {fold + 1}",
+            alpha=0.3,
+            lw=1,
+            ax=ax,
+            plot_chance_level=(fold == n_folds - 1),
+        )
+        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+        aucs.append(viz.roc_auc)
+
+        counter += 1
+        # still the previous method of finding the indices
+        # of important features used further down in code
+        temp1[counter, :] = clfr_importances["index"][:n_features].to_numpy()
+
+    # sort feature counts and corresponding pearson coefficients by value and average
+    # across two feature vectors i.e. classifier features and shap features counts
+    pearson_r_clfr = np.mean(pearson_r_clfr, axis=0)
+    feature_count["Pearson R"] = pearson_r_clfr
+    feature_count.sort_values(by=["Counts"], ascending=False, inplace=True)
+    feature_count["Counts"] = feature_count["Counts"] / 2
+
+    # average the shap feature consensus values across all training folds
+    shap_clfr_consensus = np.mean(np.array(shap_values_clfr), axis=0)
+
+    return (
+        feature_count,
+        shap_clfr_consensus,
+        clfr_importances,
+        tprs,
+        aucs,
+        mean_fpr,
+        temp1,
+        fig,
+        ax,
+        train,
+    )
+
+
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> tuple:
     """
     Creates lists of kmers denoting whether or not they are
-<<<<<<< HEAD
     surface exposed ambiguous of PC or AA kmer status
-=======
-    surface exposed ambigious of PC or AA kmer status
->>>>>>> 6a6f634 (BUG: Fix bug associated with flip-flop of surface exposed status)
 
     Parameters:
     -----------
@@ -1075,46 +1184,24 @@ if __name__ == "__main__":
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
 
+        # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
         n_folds = 5
-        cv = StratifiedKFold(n_splits=n_folds)
-        clfr = RandomForestClassifier(
-            n_estimators=10000, n_jobs=-1, random_state=random_state
-        )
-        tprs = []
-        aucs = []
-        mean_fpr = np.linspace(0, 1, 100)
+        (
+            feature_count,
+            shap_clfr_consensus,
+            clfr_importances,
+            # pearson_r_clfr,
+            tprs,
+            aucs,
+            mean_fpr,
+            temp1,
+            fig,
+            ax,
+            train,
+        ) = train_clfr(X, y, n_folds, target_column, random_state)
 
-        fig, ax = plt.subplots(figsize=(8, 8))
-
-        counter = -1
-        n_features = 5
-        temp1 = np.zeros((n_folds, n_features))
-
-        for fold, (train, test) in enumerate(cv.split(X, y)):
-            clfr.fit(X.iloc[train], y[train])
-            df = pd.DataFrame()
-            df["Features"] = X.iloc[train].columns
-            df["Importances"] = clfr.feature_importances_
-            df.sort_values(by=["Importances"], ascending=False, inplace=True)
-            df.reset_index(inplace=True)
-            viz = RocCurveDisplay.from_estimator(
-                clfr,
-                X.iloc[test],
-                y[test],
-                name=f"ROC fold {fold + 1}",
-                alpha=0.3,
-                lw=1,
-                ax=ax,
-                plot_chance_level=(fold == n_folds - 1),
-            )
-            interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-            interp_tpr[0] = 0.0
-            tprs.append(interp_tpr)
-            aucs.append(viz.roc_auc)
-
-            counter += 1
-            temp1[counter, :] = df["index"][:n_features].to_numpy()
-
+        # this can be a separate function for making ROC curve
+        # i.e. make_roc_plot(tprs, aucs, mean_fpr, target_column, paths)
         mean_tpr = np.mean(tprs, axis=0)
         mean_tpr[-1] = 1.0
         mean_auc = auc(mean_fpr, mean_tpr)
@@ -1161,7 +1248,9 @@ if __name__ == "__main__":
         temp2 = np.column_stack((uniq, freq))
         temp3 = temp2[temp2[:, 1].argsort()]
         temp4 = [
-            df[df["index"] == temp3[i, 0]]["Features"].to_numpy()
+            clfr_importances[clfr_importances["index"] == temp3[i, 0]][
+                "Features"
+            ].to_numpy()
             for i in range(temp3.shape[0])
         ]
         array1 = temp3[:, 1]
@@ -1350,24 +1439,28 @@ if __name__ == "__main__":
         df.to_csv("annotated_" + str(target_column) + ".csv", header=True, index=False)
 
         ### Production of the SHAP plot
-
-        explainer = shap.Explainer(clfr, seed=random_state)
-        shap_values = explainer(X)
-        positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
-        feature_importance.plot_shap_beeswarm(
-            positive_shap_values,
-            model_name="Random Forest",
-            fig_name=str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png",
-            max_display=len(array2),
+        shap.summary_plot(
+            shap_clfr_consensus,
+            X[: len(shap_clfr_consensus)],
+            max_display=20,
+            feature_names=X.columns,
+            show=False,
         )
+        plt.title("Effect of Top 20 Features\n Random Forest")
+        plt.tight_layout()
+        plt.savefig(str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png")
+
+        top_feature_count = feature_count[:10]
+        top_counts = np.flip(top_feature_count["Counts"].values)
+        top_features = np.flip(top_feature_count["Features"].values)
+        top_pearson = np.flip(top_feature_count["Pearson R"].values)
 
         ### Production of the FIC plot
-
         fig, ax = plt.subplots(figsize=(8, 8))
-        y_pos = np.arange(len(array2))
-        ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
+        y_pos = np.arange(len(top_counts))
+        ax.barh(y_pos, (top_counts / n_folds) * 100, color="k")
         ax.set_xlim(0, 100)
-        ax.set_yticks(y_pos, labels=array2)
+        ax.set_yticks(y_pos, labels=list(top_features))
         ax.set_title(
             f"Feature importance consensus amongst {n_folds} folds for \n{target_column}"
         )
@@ -1383,10 +1476,8 @@ if __name__ == "__main__":
         for p in ax.patches:
             counter2 += 1
             left, bottom, width, height = p.get_bbox().bounds
-            pearson_r = pearsonr(
-                positive_shap_values.values[:, counter2],
-                positive_shap_values.data[:, counter2],
-            )[0]
+            pearson_r = top_pearson[counter2]
+            # pearson_r = pearson_r_clfr[]
             if pearson_r < 0:
                 array_sign_1.append("-")
                 ax.annotate(

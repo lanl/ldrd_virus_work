@@ -1375,6 +1375,19 @@ organism_dict = {
                 "Pomona bat hepatitis B virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1604875
                 "Sumatran orang-utan polyomavirus": "primate",
+                # https://www.genome.jp/virushostdb/1604874
+                "Bornean orang-utan polyomavirus": "primate",
+                # https://www.genome.jp/virushostdb/1843739
+                "Faeces associated gemycircularvirus 19": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1391031
+                "Faeces associated gemycircularvirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1868221
+                # https://doi.org/10.1016/j.virusres.2022.198764
+                "Porcine circovirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/273360
+                # https://doi.org/10.4269/ajtmh.1998.59.704 (deer)
+                # https://doi.org/10.7589/0090-3558-32.3.444 (deer)
+                "Potosi virus": "non_primate_mammals",
                 }
 
 
@@ -1462,7 +1475,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=480)
+                                                           n_records=485)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

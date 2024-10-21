@@ -29,6 +29,39 @@ from scipy.stats import pearsonr
 matplotlib.use("Agg")
 
 
+def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
+    """
+    converts feature importances to a pandas dataframe during cross-
+    validation and sorts based on feature importance ranking
+
+    Parameters:
+    -----------
+    importances: array
+        1-D array of feature importances
+    train_fold: pandas Index
+        training fold feature names for cross-fold
+
+    Returns:
+    --------
+    importance_df: pandas.DataFrame
+        Data frame containing sorted importance values and corresponding feature names
+    """
+
+    # check that importances and train_fold are both single columns and have the same shape
+    if importances.ndim != 1 or train_fold.ndim != 1:
+        raise ValueError("Importances and train features must be a single column.")
+    if importances.shape != train_fold.shape:
+        raise ValueError("Importances and train features must have same shape.")
+
+    importances_df = pd.DataFrame()
+    importances_df["Features"] = train_fold
+    importances_df["Importances"] = importances
+    importances_df.sort_values(by=["Importances"], ascending=False, inplace=True)
+    importances_df.reset_index(inplace=True)
+
+    return importances_df
+
+
 def train_clfr(
     train_data: pd.DataFrame,
     data_target: pd.Series,
@@ -61,23 +94,16 @@ def train_clfr(
         clfr.fit(train_fold, train_target)
 
         # index classifier importances
-        clfr_importances = pd.DataFrame()
-        clfr_importances["Features"] = X.iloc[train].columns
-        clfr_importances["Importances"] = clfr.feature_importances_
-        clfr_importances.sort_values(by=["Importances"], ascending=False, inplace=True)
-        clfr_importances.reset_index(inplace=True)
+        clfr_importances = importances_df(clfr.feature_importances_, train_fold.columns)
 
-        # aggregate kmer voting based on shap/RF features for each fold
         # get shap output for training dataset and rank
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(train_fold)
         positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
 
-        shap_importances = pd.DataFrame()
-        shap_importances["Features"] = X.iloc[train].columns
-        shap_importances["Importances"] = positive_shap_values.abs.mean(0).values
-        shap_importances.sort_values(by=["Importances"], ascending=False, inplace=True)
-        shap_importances.reset_index(inplace=True)
+        shap_importances = importances_df(
+            positive_shap_values.abs.mean(0).values, train_fold.columns
+        )
 
         # index feature counts dataframe
         for i in range(n_features):

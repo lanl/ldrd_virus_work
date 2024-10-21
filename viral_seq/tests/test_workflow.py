@@ -120,3 +120,28 @@ def test_label_surface_exposed():
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
     np.testing.assert_array_equal(not_exposed, not_exposed_exp)
     np.testing.assert_array_equal(found_kmers, found_kmers_exp)
+
+
+def test_importances_df():
+    rng = np.random.default_rng(seed=123)
+    importances = rng.uniform(-1, 1, 10)
+    train_columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    train_data = np.zeros([10, 10])
+    train_fold = pd.DataFrame(train_data, columns=train_columns)
+    important_features_exp = ["G", "J", "I", "F", "A", "H", "C", "D", "E", "B"]
+
+    importances_out = workflow.importances_df(importances, train_fold.columns)
+
+    assert importances_out.shape == (10, 3)
+    np.testing.assert_array_equal(
+        np.array(importances_out["Features"]), important_features_exp
+    )
+
+    with pytest.raises(
+        ValueError, match="Importances and train features must have same shape."
+    ):
+        workflow.importances_df(importances[:5], train_fold.columns)
+    with pytest.raises(
+        ValueError, match="Importances and train features must be a single column."
+    ):
+        workflow.importances_df(importances, train_fold)

@@ -243,7 +243,8 @@ def get_kmer_info(
 
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
     """
-    converts feature importances to a pandas dataframe during cross validation
+    converts feature importances to a pandas dataframe during cross-
+    validation and sorts based on feature importance ranking
 
     Parameters:
     -----------
@@ -259,12 +260,10 @@ def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFram
     """
 
     # check that importances and train_fold are both single columns and have the same shape
-    assert (
-        importances.ndim == train_fold.ndim == 1
-    ), "Importances and train features must be a single column."
-    assert (
-        importances.shape == train_fold.shape
-    ), "Importances and train features must have same shape."
+    if importances.ndim != 1 or train_fold.ndim != 1:
+        raise ValueError("Importances and train features must be a single column.")
+    if importances.shape != train_fold.shape:
+        raise ValueError("Importances and train features must have same shape.")
 
     importances_df = pd.DataFrame()
     importances_df["Features"] = train_fold

@@ -20,6 +20,14 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1089/vbz.2013.1359
+                "Anjozorobe virus": "non_primate_mammals",
+                # https://doi.org/10.1099/vir.0.81258-0
+                "Yunnan orbivirus": "no_mammals",
+                # https://doi.org/10.3390/v14091973
+                "Equine foamy virus": "non_primate_mammals",
+                # https://doi.org/10.1099/vir.0.81090-0
+                "Ectromelia virus": "non_primate_mammals",
                 # https://doi.org/10.1099%2Fvir.0.047928-0
                 "Eidolon helvum polyomavirus 1": "non_primate_mammals",
                 # https://doi.org/10.1007/s00705-017-3565-0
@@ -1319,7 +1327,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=260)
+                                                              n_records=265)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
@@ -1340,5 +1348,5 @@ def main(cache_path):
 if __name__ == "__main__":
     # change this path to the location of your local
     # cache:
-    local_cache_path = "/Users/awitmer/Documents/LANL/2024/DTRA/ldrd_virus_work_2/data_external/cache_viral"
+    local_cache_path = "/Users/awitmer/Documents/LANL/2024/DTRA/ldrd_virus_work/data_external/cache_viral"
     main(cache_path=local_cache_path)

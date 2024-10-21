@@ -120,3 +120,15 @@ def test_label_surface_exposed():
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
     np.testing.assert_array_equal(not_exposed, not_exposed_exp)
     np.testing.assert_array_equal(found_kmers, found_kmers_exp)
+
+
+def test_importances_df():
+    np.random.seed(123)
+    importances = np.random.uniform(-1, 1, 10)
+    train_columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    train_data = np.zeros([10, 10])
+    train_fold = pd.DataFrame(train_data, columns=train_columns)
+
+    importances_out = workflow.importances_df(importances, train_fold.columns)
+
+    assert importances_out.shape == (10, 3)

@@ -623,3 +623,15 @@ def test_get_kmer_info_error(
     data_in = workflow.kmer_data(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)
+
+
+def test_importances_df():
+    np.random.seed(123)
+    importances = np.random.uniform(-1, 1, 10)
+    train_columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    train_data = np.zeros([10, 10])
+    train_fold = pd.DataFrame(train_data, columns=train_columns)
+
+    importances_out = workflow.importances_df(importances, train_fold.columns)
+
+    assert importances_out.shape == (10, 3)

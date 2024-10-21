@@ -746,6 +746,7 @@ def test_importances_df():
     importances_out = workflow.importances_df(importances, train_fold.columns)
 
     assert importances_out.shape == (10, 3)
+
     np.testing.assert_array_equal(
         np.array(importances_out["Features"]), important_features_exp
     )

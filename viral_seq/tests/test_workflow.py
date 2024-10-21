@@ -743,7 +743,6 @@ def test_importances_df():
     train_data = np.zeros([10, 10])
     train_fold = pd.DataFrame(train_data, columns=train_columns)
     important_features_exp = ["G", "J", "I", "F", "A", "H", "C", "D", "E", "B"]
-
     importances_out = workflow.importances_df(importances, train_fold.columns)
 
     assert importances_out.shape == (10, 3)

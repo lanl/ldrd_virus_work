@@ -742,3 +742,15 @@ def test_print_pos_con(
 
         captured = capsys.readouterr()
         assert captured.out == exp_output
+
+
+def test_importances_df():
+    np.random.seed(123)
+    importances = np.random.uniform(-1, 1, 10)
+    train_columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    train_data = np.zeros([10, 10])
+    train_fold = pd.DataFrame(train_data, columns=train_columns)
+
+    importances_out = workflow.importances_df(importances, train_fold.columns)
+
+    assert importances_out.shape == (10, 3)

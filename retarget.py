@@ -1397,6 +1397,22 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/1219896
                 # https://doi.org/10.3201/eid1901.121078
                 "Raccoon polyomavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1978920
+                "Raccoon-associated polyomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052492
+                # https://ictv.global/report/chapter/hantaviridae/hantaviridae/mammantavirinae/orthohantavirus
+                # https://en.wikipedia.org/wiki/Prospect_Hill_orthohantavirus
+                # https://doi.org/10.1016/0035-9203(87)90275-6
+                # some serological evidence of infection in mammologists apparently...
+                "Orthohantavirus prospectense": "human",
+                # https://www.genome.jp/virushostdb/369584
+                "Rousettus aegyptiacus papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1335476
+                # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/psipapillomavirus
+                "Eidolon helvum papillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1335477
+                # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/psipapillomavirus
+                "Eidolon helvum papillomavirus 3": "non_primate_mammals",
                 }
 
 
@@ -1484,7 +1500,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=490)
+                                                           n_records=495)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

@@ -7,6 +7,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from numpy.testing import assert_array_equal
+from matplotlib.testing.compare import compare_images
 
 
 @image_comparison(
@@ -152,110 +153,13 @@ def test_plot_cv_roc(tmp_path):
     pred_prob = rng.uniform(0, 1, 10)
     true_class = rng.choice([0, 1], size=10)
     data_in = np.stack((pred_prob, true_class))
-    data_pred = np.array(
-        [
-            0.0,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            0.75,
-            1.0,
-        ]
-    )
 
-    mean_tpr = workflow.plot_cv_roc([data_in], "Test", [tmp_path])
-    np.testing.assert_array_equal(mean_tpr, data_pred)
+    workflow.plot_cv_roc([data_in], "Test", tmp_path)
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "ROC_cv_expected.png",
+            str(tmp_path / "ROC_Test.png"),
+            0.001,
+        )
+        is None
+    )

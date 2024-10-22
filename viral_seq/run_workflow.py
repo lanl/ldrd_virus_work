@@ -29,7 +29,7 @@ from scipy.stats import pearsonr
 matplotlib.use("Agg")
 
 
-def plot_cv_roc(clfr_preds: list, target_column: str, paths: list) -> np.ndarray:
+def plot_cv_roc(clfr_preds: list, target_column: str, path: Path):
     """
     Plot ROC curve from ml cross-validation predictions
 
@@ -40,14 +40,8 @@ def plot_cv_roc(clfr_preds: list, target_column: str, paths: list) -> np.ndarray
         probabilities and corresponding true label values
     target_column: str
         training column from dataset
-    paths: list
-        list of file paths
-
-    Returns
-    -------
-    mean_tpr: np.ndarray
-        mean true positive rate values
-
+    path: Path
+        file path for saving figure
     """
 
     tprs = []
@@ -103,10 +97,8 @@ def plot_cv_roc(clfr_preds: list, target_column: str, paths: list) -> np.ndarray
     )
     ax.legend(loc="lower right")
     fig.tight_layout()
-    fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
+    fig.savefig(str(path) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
     plt.close(fig)
-
-    return mean_tpr
 
 
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
@@ -1287,7 +1279,7 @@ if __name__ == "__main__":
 
         # this can be a separate function for making ROC curve
         # i.e. make_roc_plot(tprs, aucs, mean_fpr, target_column, paths)
-        mean_tpr = plot_cv_roc(clfr_preds, target_column, paths)
+        plot_cv_roc(clfr_preds, target_column, paths[-1])
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots

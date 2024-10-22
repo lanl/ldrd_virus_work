@@ -248,6 +248,87 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
+def plot_cv_roc(clfr_preds: list, target_column: str, paths: list) -> np.ndarray:
+    """
+    Plot ROC curve from ml cross-validation predictions
+
+    Parameters
+    ----------
+    clfr_preds: list
+        list of arrays containing cv classifier positive prediction
+        probabilities and corresponding true label values
+    target_column: str
+        training column from dataset
+    paths: list
+        list of file paths
+
+    Returns
+    -------
+    mean_tpr: np.ndarray
+        mean true positive rate values
+
+    """
+
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    for i, clfr_pred in enumerate(clfr_preds):
+        viz = RocCurveDisplay.from_predictions(
+            clfr_pred[1],
+            clfr_pred[0],
+            name=f"ROC fold {i + 1}",
+            alpha=0.3,
+            lw=1,
+            ax=ax,
+            plot_chance_level=(i == len(clfr_preds) - 1),
+        )
+        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+        aucs.append(viz.roc_auc)
+
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    ax.plot(
+        mean_fpr,
+        mean_tpr,
+        color="b",
+        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+        lw=2,
+        alpha=0.8,
+    )
+
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    ax.fill_between(
+        mean_fpr,
+        tprs_lower,
+        tprs_upper,
+        color="grey",
+        alpha=0.2,
+        label=r"$\pm$ 1 std. dev.",
+    )
+
+    ax.set(
+        xlabel="False Positive Rate",
+        ylabel="True Positive Rate",
+        title="Mean ROC curve with variability\n(Positive label '"
+        + str(target_column)
+        + "')",
+    )
+    ax.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
+    plt.close(fig)
+
+    return mean_tpr
+>>>>>>> dd39edd (ENH: Plot ROC curves from ML classifier cross-folds)
+
+
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
     """
     converts feature importances to a pandas dataframe during cross-
@@ -293,11 +374,6 @@ def train_clfr(
         n_estimators=10000, n_jobs=-1, random_state=random_state
     )
 
-    tprs = []
-    aucs = []
-    fig, ax = plt.subplots(figsize=(8, 8))
-    mean_fpr = np.linspace(0, 1, 100)
-
     counter = -1
     n_features = 10
     temp1 = np.zeros((n_folds, n_features))
@@ -307,10 +383,14 @@ def train_clfr(
     feature_count["Counts"] = 0
     pearson_r_clfr = []
     shap_values_clfr = []
+    clfr_preds = []
     for fold, (train, test) in enumerate(cv.split(X, y)):
         train_fold = X.iloc[train]
         train_target = y[train]
+        test_fold = X.iloc[test]
+        test_target = y[test]
         clfr.fit(train_fold, train_target)
+        clfr_out = np.zeros([2, len(test)])
 
         # index classifier importances
         clfr_importances = importances_df(clfr.feature_importances_, train_fold.columns)
@@ -342,21 +422,10 @@ def train_clfr(
         ]
         pearson_r_clfr.append(np.nan_to_num(pearson_out, nan=0))
 
-        # this can possibly be a separate MR for the ROC plot...
-        viz = RocCurveDisplay.from_estimator(
-            clfr,
-            X.iloc[test],
-            y[test],
-            name=f"ROC fold {fold + 1}",
-            alpha=0.3,
-            lw=1,
-            ax=ax,
-            plot_chance_level=(fold == n_folds - 1),
-        )
-        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-        interp_tpr[0] = 0.0
-        tprs.append(interp_tpr)
-        aucs.append(viz.roc_auc)
+        # aggregate classifier predictions for ROC plot
+        clfr_out[0] = clfr.predict_proba(test_fold)[:, 1]
+        clfr_out[1] = test_target
+        clfr_preds.append(clfr_out)
 
         counter += 1
         # still the previous method of finding the indices
@@ -377,13 +446,9 @@ def train_clfr(
         feature_count,
         shap_clfr_consensus,
         clfr_importances,
-        tprs,
-        aucs,
-        mean_fpr,
         temp1,
-        fig,
-        ax,
         train,
+        clfr_preds,
     )
 
 
@@ -1867,56 +1932,14 @@ if __name__ == "__main__":
             feature_count,
             shap_clfr_consensus,
             clfr_importances,
-            # pearson_r_clfr,
-            tprs,
-            aucs,
-            mean_fpr,
             temp1,
-            fig,
-            ax,
             train,
+            clfr_preds,
         ) = train_clfr(X, y, n_folds, target_column, random_state)
 
         # this can be a separate function for making ROC curve
         # i.e. make_roc_plot(tprs, aucs, mean_fpr, target_column, paths)
-        mean_tpr = np.mean(tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
-        std_auc = np.std(aucs)
-        ax.plot(
-            mean_fpr,
-            mean_tpr,
-            color="b",
-            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
-            lw=2,
-            alpha=0.8,
-        )
-
-        std_tpr = np.std(tprs, axis=0)
-        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-        ax.fill_between(
-            mean_fpr,
-            tprs_lower,
-            tprs_upper,
-            color="grey",
-            alpha=0.2,
-            label=r"$\pm$ 1 std. dev.",
-        )
-
-        ax.set(
-            xlabel="False Positive Rate",
-            ylabel="True Positive Rate",
-            title="Mean ROC curve with variability\n(Positive label '"
-            + str(target_column)
-            + "')",
-        )
-        ax.legend(loc="lower right")
-        fig.tight_layout()
-        fig.savefig(
-            str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300
-        )
-        plt.close(fig)
+        mean_tpr = plot_cv_roc(clfr_preds, target_column, paths)
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots

@@ -1413,6 +1413,19 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/1335477
                 # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/psipapillomavirus
                 "Eidolon helvum papillomavirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/50294
+                # https://ictv.global/report/chapter/herpesviridae/herpesviridae/iltovirus
+                # https://en.wikipedia.org/wiki/Pacheco%27s_disease
+                "Psittacid alphaherpesvirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1580497
+                "Psittacine adenovirus 3": "avian",
+                # https://www.genome.jp/virushostdb/2169709
+                # https://ictv.global/report/chapter/adenoviridae/adenoviridae/aviadenovirus
+                "Psittacine aviadenovirus B": "avian",
+                # https://www.genome.jp/virushostdb/1891773
+                "Betapolyomavirus ptedavyi": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2758132
+                "bat polyomavirus 2b": "non_primate_mammals",
                 }
 
 
@@ -1500,7 +1513,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=495)
+                                                           n_records=500)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

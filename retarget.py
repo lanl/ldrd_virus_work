@@ -20,6 +20,14 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://wwwn.cdc.gov/arbocat/VirusDetails.aspx?ID=400&SID=2
+                "Rochambeau virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/3052319
+                "Mammarenavirus merinoense": "non_primate_mammals",
+                # https://doi.org/10.1128/mbio.01484-14
+                "Ball python nidovirus 1": "no_mammals",
+                # http://dx.doi.org/10.13005/bbra/1509
+                "Jembrana disease virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2034827
                 "cardiovirus C1": "non_primate_mammals",
                 # https://doi.org/10.1016/j.cimid.2018.08.002
@@ -2033,7 +2041,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=270)
+                                                              n_records=275)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

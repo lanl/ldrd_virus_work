@@ -249,7 +249,8 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
-def plot_cv_roc(clfr_preds: list, target_column: str, paths: list) -> np.ndarray:
+
+def plot_cv_roc(clfr_preds: list, target_column: str, path: Path):
     """
     Plot ROC curve from ml cross-validation predictions
 
@@ -355,6 +356,41 @@ def feature_count_consensus(
         ] += 1
 
     return feature_count_out
+=======
+def plot_shap_consensus(
+    shap_clfr_consensus: np.ndarray,
+    train_data: pd.DataFrame,
+    target_column: str,
+    path: Path,
+):
+    """
+    plots the shap beeswarm plot from the consensus over multiple cv folds
+
+    Parameters:
+    -----------
+    shap_clfr_consensus: array
+        shap explainer values averaged across all cross folds
+    train_data: pd.DataFrame
+        training dataset
+    target_column: str
+        training column from dataset
+    path: Path
+        path to file for saving figure
+    """
+
+    max_features = 20
+    shap.summary_plot(
+        shap_clfr_consensus,
+        train_data,
+        max_display=max_features,
+        feature_names=train_data.columns,
+        show=False,
+    )
+    plt.title(f"Effect of Top {max_features} Features\n Random Forest")
+    plt.tight_layout()
+    plt.savefig(str(path) + "/" + "SHAP_" + str(target_column) + ".png")
+    plt.close()
+>>>>>>> 32edbfd (ENH: Plot shap consensus across multiple cv folds)
 
 
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
@@ -394,7 +430,7 @@ def train_clfr(
     train_data: pd.DataFrame,
     data_target: pd.Series,
     n_folds: int,
-    target_column: str,
+    # target_column: str,
     random_state: int,
 ):
     cv = StratifiedKFold(n_splits=n_folds)
@@ -410,14 +446,12 @@ def train_clfr(
     feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
     pearson_r_clfr = []
-    shap_values_clfr = []
-    clfr_preds = []
-    for fold, (train, test) in enumerate(cv.split(X, y)):
-        train_fold = X.iloc[train]
-        train_target = y[train]
-        test_fold = X.iloc[test]
-        test_target = y[test]
-
+    shap_values_clfr = np.full(
+        (n_folds, train_data.shape[0], train_data.shape[1]), np.nan
+    )
+    for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
+        train_fold = train_data.iloc[train]
+        train_target = data_target[train]
         clfr.fit(train_fold, train_target)
         clfr_out = np.zeros([2, len(test)])
 
@@ -440,7 +474,7 @@ def train_clfr(
         # aggregate the raw shap values to be used in the beeswarm plot
         # still unclear what to do  with the mismatch in train row length
         # i.e. 75 or 76 values depending on cv split
-        shap_values_clfr.append(positive_shap_values.values[:75])
+        shap_values_clfr[fold, train] = positive_shap_values.values
 
         # aggregate the pearson R coefficients for all kmer features
         pearson_out = pearsonr(positive_shap_values.values, positive_shap_values.data)[
@@ -466,7 +500,7 @@ def train_clfr(
     feature_count["Counts"] = feature_count["Counts"] / 2
 
     # average the shap feature consensus values across all training folds
-    shap_clfr_consensus = np.mean(np.array(shap_values_clfr), axis=0)
+    shap_clfr_consensus = np.nanmean(shap_values_clfr, axis=0)
 
     return (
         feature_count,
@@ -1960,8 +1994,7 @@ if __name__ == "__main__":
             clfr_importances,
             temp1,
             train,
-            clfr_preds,
-        ) = train_clfr(X, y, n_folds, target_column, random_state)
+        ) = train_clfr(X, y, n_folds, random_state)
 
         # this can be a separate function for making ROC curve
         # i.e. make_roc_plot(tprs, aucs, mean_fpr, target_column, paths)
@@ -2041,16 +2074,7 @@ if __name__ == "__main__":
         )
 
         ### Production of the SHAP plot
-        shap.summary_plot(
-            shap_clfr_consensus,
-            X[: len(shap_clfr_consensus)],
-            max_display=20,
-            feature_names=X.columns,
-            show=False,
-        )
-        plt.title("Effect of Top 20 Features\n Random Forest")
-        plt.tight_layout()
-        plt.savefig(str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png")
+        plot_shap_consensus(shap_clfr_consensus, X, target_column, paths[-1])
 
         top_feature_count = feature_count[:10]
         top_counts = np.flip(top_feature_count["Counts"].values)

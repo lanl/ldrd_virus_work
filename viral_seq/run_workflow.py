@@ -31,6 +31,62 @@ from scipy.stats import pearsonr
 matplotlib.use("Agg")
 
 
+def feature_signs(
+    is_exposed: list,
+    not_exposed: list,
+    found_kmers: list,
+    positive_shap_values: Any,
+) -> tuple:
+    """
+    Determine the sign character of the surface exposure status and response effect of the kmer
+    based on the pearson correlation coefficient of the shap feature importance values
+
+    Parameters:
+    -----------
+    is_exposed: list
+        list of kmers that are surface exposed
+    not_exposed: list
+        list of kmers that are not surface exposed
+    found_kmers: list
+        list of all important kmers from ml classifier
+    postive_shap_values: shap.Explainer
+        shap feature importance values
+
+    Returns:
+    --------
+    surface_exposed_sign: list
+        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
+    response_effect: list
+        list of +/- symbols denoting response effect from shap importance pearson-r correlation
+    """
+    response_effect = []
+    surface_exposed_sign = []
+    for feature in range(len(found_kmers)):
+        # add sign of surface exposure based on comparison between lists of exposure status
+        if (
+            not_exposed[feature] in found_kmers
+            and is_exposed[feature] not in found_kmers
+        ):
+            surface_exposed_sign.append("-")
+        elif is_exposed[feature] in found_kmers:
+            surface_exposed_sign.append("+")
+        else:
+            surface_exposed_sign.append("x")
+        # add sign of response effect based on pearson correllation coefficient
+        pearson_r = pearsonr(
+            positive_shap_values.values[:, feature],
+            positive_shap_values.data[:, feature],
+        )[0]
+        if pearson_r > 0:
+            response_effect.append("+")
+        elif pearson_r < 0:
+            response_effect.append("-")
+        else:
+            response_effect.append("x")
+
+    return surface_exposed_sign, response_effect
+
+
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> tuple:
@@ -72,22 +128,20 @@ def label_surface_exposed(
 
 
 def FIC_plot(
-    topN_kmers,
-    kmer_count,
-    n_folds,
-    target_column,
-    positive_shap_values,
-    found_kmers,
-    not_exposed,
-    is_exposed,
-    paths,
+    topN_kmers: list,
+    kmer_count: np.ndarray,
+    n_folds: int,
+    target_column: str,
+    exposure_status_sign: list,
+    response_effect_sign: list,
+    path: Path,
 ):
     """
     Create Feature Importance Consensus (FIC) plot from SHAP explainer values using
     important kmers found during ML classification. Include the following information
     for each kmer as labels on the plot:
         1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
-        2. the status of the kmer as surface exposed or not surface exposed on the known virus (+/-)
+        2. the status of the kmer as surface exposed or not surface exposed based on the known virus (+/-)
 
     Parameters:
     -----------
@@ -99,26 +153,22 @@ def FIC_plot(
         number of cv folds performed by classifier
     target_column: str
         name of column on which classifier was trained
-    positive_shap_values: shap.Explainer
-        SHAP explainer output
-    found_kmers: list
-        list of topN kmers
-    not_exposed: list
-        list of which topN kmers are known to be surface exposed
-    is_exposed: list
-        list of which topN kmers are known to not be surface exposed
-    paths: list
-        paths to save files
-
-    Returns:
-    --------
-    response_effect: list
-        list of characters (+/-) denoting the sign of the pearson correlation coefficient
-        between the array of the feature data and the array of the shap values
-    surface_exposed_sign: list
-        list of characters (+/-) denoting the surface exposure status of the viral protein
-        associated with the found kmer
+    exposure_status_sign: list
+        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
+    response_effect_sign: list
+        list of +/- symbols denoting response effect from shap importance pearson-r correlation
+    path: Path
+        path to save figure
     """
+
+    if target_column == "Is_Integrin":
+        target_name = "Integrin"
+    elif target_column == "Is_Sialic_Acid":
+        target_name = "Sialic Acid"
+    elif target_column == "Is_Both":
+        target_name = "Integrin and Sialic Acid"
+    else:
+        target_name = target_column
 
     fig, ax = plt.subplots(figsize=(8, 8))
     y_pos = np.arange(len(topN_kmers))
@@ -126,7 +176,7 @@ def FIC_plot(
     ax.set_xlim(0, 100)
     ax.set_yticks(y_pos, labels=topN_kmers)
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds} folds for {target_column}\n Value to right of bar indicates percentage of found proteins 'surface exposed'"
+        f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
     kmer_idx = -1
@@ -134,86 +184,50 @@ def FIC_plot(
     # `response_effect` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
     # For each PC-kmer in the FIC plot the metric as the sign of the (linear) Pearson correlation between the array of
     # feature data and the array of not averaged, not absolute-valued, SHAP values.
-    response_effect = []
-    surface_exposed_sign = []
     for p in ax.patches:
         kmer_idx += 1
         left, bottom, width, height = p.get_bbox().bounds
-        pearson_r = pearsonr(
-            positive_shap_values.values[:, kmer_idx],
-            positive_shap_values.data[:, kmer_idx],
-        )[0]
-        if pearson_r < 0:
-            response_effect.append("-")
-            ax.annotate(
-                response_effect[kmer_idx],
-                xy=(left + width / 4, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="r",
-                fontsize="xx-large",
-            )
-        elif pearson_r > 0:
-            response_effect.append("+")
-            ax.annotate(
-                response_effect[kmer_idx],
-                xy=(left + width / 4, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="g",
-                fontsize="xx-large",
-            )
+
+        if response_effect_sign[kmer_idx] == "+":
+            response_sign_color = "g"
+        elif response_effect_sign[kmer_idx] == "-":
+            response_sign_color = "r"
         else:
-            response_effect.append("0")
-            ax.annotate(
-                response_effect[kmer_idx],
-                xy=(left + width / 4, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="y",
-                fontsize="xx-large",
-            )
-        if (
-            not_exposed[kmer_idx] in found_kmers
-            and is_exposed[kmer_idx] not in found_kmers
-        ):
-            surface_exposed_sign.append("-")
-            ax.annotate(
-                surface_exposed_sign[kmer_idx],
-                xy=(left + 3 * width / 4, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="r",
-                fontsize="xx-large",
-            )
-        elif is_exposed[kmer_idx] in found_kmers:
-            surface_exposed_sign.append("+")
-            ax.annotate(
-                surface_exposed_sign[kmer_idx],
-                xy=(left + 3 * width / 4, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="g",
-                fontsize="xx-large",
-            )
+            response_sign_color = "y"
+
+        if exposure_status_sign[kmer_idx] == "+":
+            exposure_sign_color = "g"
+        elif exposure_status_sign[kmer_idx] == "-":
+            exposure_sign_color = "r"
         else:
-            surface_exposed_sign.append("x")
-            ax.annotate(
-                surface_exposed_sign[kmer_idx],
-                xy=(left + 3 * width / 4, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="y",
-                fontsize="xx-large",
-            )
+            exposure_sign_color = "y"
+
+        ax.annotate(
+            response_effect_sign[kmer_idx],
+            xy=(left + width / 4, bottom + height / 2),
+            ha="center",
+            va="center",
+            color=response_sign_color,
+            fontsize="xx-large",
+        )
+        ax.annotate(
+            exposure_status_sign[kmer_idx],
+            xy=(left + 3 * width / 4, bottom + height / 2),
+            ha="center",
+            va="center",
+            color=exposure_sign_color,
+            fontsize="xx-large",
+        )
 
         plus_symbol = Line2D(
-            [0], [0], marker="+", color="green", markersize=12, linestyle=""
+            [0], [0], marker="+", color="green", markersize=9, linestyle=""
         )
         minus_symbol = Line2D(
-            [0], [0], marker="_", color="red", markersize=12, linestyle=""
+            [0], [0], marker="_", color="red", markersize=9, linestyle=""
         )
-        Line2D([0], [0], marker="x", color="gold", markersize=12, linestyle="")
+        cross_symbol = Line2D(
+            [0], [0], marker="x", color="gold", markersize=9, linestyle=""
+        )
 
         plt.legend(
             handles=[
@@ -221,23 +235,22 @@ def FIC_plot(
                 minus_symbol,
                 plus_symbol,
                 minus_symbol,
+                cross_symbol,
             ],
             labels=[
                 "on left: Positive effect on response",
                 "on left: Negative effect on response",
                 "on right: Protein is surface-exposed",
                 "on right: Protein is not surface-exposed",
+                "on right: Protein does not bind to both\n receptor types",
             ],
             loc="lower right",
+            prop={"size": 9},
         )
 
         fig.tight_layout()
-        fig.savefig(
-            str(paths[-1]) + "/" + "FIC_" + str(target_column) + ".png", dpi=300
-        )
+        fig.savefig(str(path) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
         plt.close()
-
-    return response_effect, surface_exposed_sign
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -1697,15 +1710,18 @@ if __name__ == "__main__":
             max_display=len(array2),
         )
 
+        # build lists of feature exposure and response effect signs for FIC plotting
+        exposure_status_sign, response_effect_sign = feature_signs(
+            res1, res2, res3, positive_shap_values
+        )
+        # pdb.set_trace()
         # Production of the FIC plot
-        response_effect, surface_exposed_sign = FIC_plot(
+        FIC_plot(
             array2,
             array1,
             n_folds,
             target_column,
-            positive_shap_values,
-            res3,
-            res2,
-            res1,
-            paths,
+            exposure_status_sign,
+            response_effect_sign,
+            paths[-1],
         )

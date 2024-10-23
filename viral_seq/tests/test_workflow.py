@@ -7,11 +7,8 @@ import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import StratifiedKFold
-from sklearn.datasets import make_classification
 from matplotlib.testing.compare import compare_images
-import shap
+from collections import namedtuple
 
 
 def test_optimization_plotting(tmpdir):
@@ -258,7 +255,34 @@ def test_fic_plot(tmp_path):
         "kmer_PC_FECAEA",
     ]
     array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0])
-    target_column = "0"
+    target_column = "Is_Integrin"
+
+    response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
+    exposure_status_sign = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+
+    n_folds = 2
+
+    workflow.FIC_plot(
+        array2,
+        array1,
+        n_folds,
+        target_column,
+        exposure_status_sign,
+        response_effect_sign,
+        tmp_path,
+    )
+
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "FIC_expected.png",
+            str(tmp_path / "FIC_Is_Integrin.png"),
+            0.001,
+        )
+        is None
+    )
+
+
+def test_feature_sign():
     found_kmers = [
         "CDDEEC",
         "CCGDEA",
@@ -271,68 +295,26 @@ def test_fic_plot(tmp_path):
         "CCACAD",
         "FECAEA",
     ]
-
+    not_exposed_idx = [2]
+    exposed_idx = [1, 2]
     not_exposed = [
-        "CDDEEC",
-        "CCGDEA",
-        "",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
+        s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
-    is_exposed = [
-        "CDDEEC",
-        "",
-        "",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
-    ]
+    is_exposed = [s if i not in exposed_idx else "" for i, s in enumerate(found_kmers)]
 
-    X, y = make_classification(n_samples=15, n_features=10, random_state=0)
-    X = pd.DataFrame(X)
-    random_state = 0
-    n_folds = 2
-    clfr = RandomForestClassifier(
-        n_estimators=10000, n_jobs=-1, random_state=random_state
-    )
-    cv = StratifiedKFold(n_splits=n_folds)
-    for fold, (train, test) in enumerate(cv.split(X, y)):
-        clfr.fit(X.iloc[train], y[train])
+    rng = np.random.default_rng(seed=123)
+    syn_shap_values = rng.uniform(-1, 1, (10, 10))
+    syn_data = rng.choice([0, 1], size=[10, 10])
 
-    explainer = shap.Explainer(clfr, seed=random_state)
-    shap_values = explainer(X)
-    positive_shap_values = shap_values[:, :, 1]
+    shap_data = namedtuple("shap_data", ["data", "values"])
+    syn_shap_data = shap_data(data=syn_data, values=syn_shap_values)
 
-    response_effect, surface_exposed_sign = workflow.FIC_plot(
-        array2,
-        array1,
-        n_folds,
-        target_column,
-        positive_shap_values,
-        found_kmers,
-        not_exposed,
-        is_exposed,
-        paths=[tmp_path],
+    surface_exposed_out, response_effect_out = workflow.feature_signs(
+        is_exposed, not_exposed, found_kmers, syn_shap_data
     )
 
-    response_effect_exp = ["-", "-", "+", "+", "-", "+", "+", "-", "+", "+"]
+    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
 
-    img_out = compare_images(
-        files("viral_seq.tests.expected") / "FIC_expected.png",
-        str(tmp_path / "FIC_0.png"),
-        50,
-    )
-
-    assert img_out is None
-    assert_array_equal(response_effect, response_effect_exp)
-    assert_array_equal(surface_exposed_sign, surface_exposed_exp)
+    assert_array_equal(response_effect_out, response_effect_exp)
+    assert_array_equal(surface_exposed_out, surface_exposed_exp)

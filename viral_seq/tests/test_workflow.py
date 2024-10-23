@@ -771,6 +771,7 @@ def test_importances_df():
         workflow.importances_df(importances, train_fold)
 
 
+<<<<<<< HEAD
 def test_plot_cv_roc(tmp_path):
     rng = np.random.default_rng(seed=123)
     pred_prob = rng.uniform(0, 1, 10)
@@ -782,10 +783,26 @@ def test_plot_cv_roc(tmp_path):
         compare_images(
             files("viral_seq.tests.expected") / "ROC_cv_expected.png",
             str(tmp_path / "ROC_Test.png"),
+=======
+def test_plot_shap_consensus(tmp_path):
+    rng = np.random.default_rng(seed=123)
+    syn_shap_values = rng.uniform(-1, 1, (10, 10))
+    syn_data = rng.choice([0, 1], size=[10, 10])
+    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    syn_df = pd.DataFrame(syn_data, columns=syn_features)
+
+    np.random.seed(123)
+    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path)
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
+            str(tmp_path / "SHAP_Test.png"),
+>>>>>>> 32edbfd (ENH: Plot shap consensus across multiple cv folds)
             0.001,
         )
         is None
     )
+<<<<<<< HEAD
 
 
 def test_feature_count_consensus():
@@ -821,3 +838,5 @@ def test_feature_count_consensus():
 
     assert_frame_equal(feature_count_out, feature_count_out_exp)
     assert_frame_equal(feature_count, feature_count_exp)
+=======
+>>>>>>> 32edbfd (ENH: Plot shap consensus across multiple cv folds)

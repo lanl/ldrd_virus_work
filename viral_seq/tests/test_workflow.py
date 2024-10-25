@@ -8,7 +8,6 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal
 from matplotlib.testing.compare import compare_images
-from collections import namedtuple
 
 
 def test_optimization_plotting(tmpdir):
@@ -306,11 +305,8 @@ def test_feature_sign():
     syn_shap_values = rng.uniform(-1, 1, (10, 10))
     syn_data = rng.choice([0, 1], size=[10, 10])
 
-    shap_data = namedtuple("shap_data", ["data", "values"])
-    syn_shap_data = shap_data(data=syn_data, values=syn_shap_values)
-
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, not_exposed, found_kmers, syn_shap_data
+        is_exposed, not_exposed, found_kmers, syn_shap_values, syn_data
     )
 
     response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]

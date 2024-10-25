@@ -35,7 +35,8 @@ def feature_signs(
     is_exposed: list,
     not_exposed: list,
     found_kmers: list,
-    positive_shap_values: Any,
+    shap_values: np.ndarray,
+    shap_data: np.ndarray,
 ) -> tuple:
     """
     Determine the sign character of the surface exposure status and response effect of the kmer
@@ -49,8 +50,10 @@ def feature_signs(
         list of kmers that are not surface exposed
     found_kmers: list
         list of all important kmers from ml classifier
-    postive_shap_values: shap.Explainer
+    shap_values: np.ndarray
         shap feature importance values
+    shap_data: np.ndarray
+        shap expected values from dataset
 
     Returns:
     --------
@@ -61,28 +64,26 @@ def feature_signs(
     """
     response_effect = []
     surface_exposed_sign = []
-    for feature in range(len(found_kmers)):
+    for feature_idx in range(len(found_kmers)):
         # add sign of surface exposure based on comparison between lists of exposure status
         if (
-            not_exposed[feature] in found_kmers
-            and is_exposed[feature] not in found_kmers
+            not_exposed[feature_idx] in found_kmers
+            and is_exposed[feature_idx] not in found_kmers
         ):
             surface_exposed_sign.append("-")
-        elif is_exposed[feature] in found_kmers:
+        elif is_exposed[feature_idx] in found_kmers:
             surface_exposed_sign.append("+")
         else:
             surface_exposed_sign.append("x")
         # add sign of response effect based on pearson correllation coefficient
         pearson_r = pearsonr(
-            positive_shap_values.values[:, feature],
-            positive_shap_values.data[:, feature],
+            shap_values[:, feature_idx],
+            shap_data[:, feature_idx],
         )[0]
         if pearson_r > 0:
             response_effect.append("+")
-        elif pearson_r < 0:
+        elif pearson_r <= 0:
             response_effect.append("-")
-        else:
-            response_effect.append("x")
 
     return surface_exposed_sign, response_effect
 
@@ -137,9 +138,9 @@ def FIC_plot(
     path: Path,
 ):
     """
-    Create Feature Importance Consensus (FIC) plot from SHAP explainer values using
-    important kmers found during ML classification. Include the following information
-    for each kmer as labels on the plot:
+    Create Feature Importance Consensus (FIC) plot from SHAP explainer values and
+    native estimator feature importances using important kmers found during ML
+    classification. Include the following information for each kmer as labels on the plot:
         1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
         2. the status of the kmer as surface exposed or not surface exposed based on the known virus (+/-)
 
@@ -181,9 +182,6 @@ def FIC_plot(
     ax.set_xlabel("Classifier Consensus Percentage (%)")
     kmer_idx = -1
 
-    # `response_effect` populates +/- descriptors corresponding to the "sign of the effect on the response" from the SHAP plot.
-    # For each PC-kmer in the FIC plot the metric as the sign of the (linear) Pearson correlation between the array of
-    # feature data and the array of not averaged, not absolute-valued, SHAP values.
     for p in ax.patches:
         kmer_idx += 1
         left, bottom, width, height = p.get_bbox().bounds
@@ -192,8 +190,6 @@ def FIC_plot(
             response_sign_color = "g"
         elif response_effect_sign[kmer_idx] == "-":
             response_sign_color = "r"
-        else:
-            response_sign_color = "y"
 
         if exposure_status_sign[kmer_idx] == "+":
             exposure_sign_color = "g"
@@ -229,7 +225,7 @@ def FIC_plot(
             [0], [0], marker="x", color="gold", markersize=9, linestyle=""
         )
 
-        plt.legend(
+        ax.legend(
             handles=[
                 plus_symbol,
                 minus_symbol,
@@ -1712,9 +1708,9 @@ if __name__ == "__main__":
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
-            res1, res2, res3, positive_shap_values
+            res1, res2, res3, positive_shap_values.values, positive_shap_values.data
         )
-        # pdb.set_trace()
+
         # Production of the FIC plot
         FIC_plot(
             array2,

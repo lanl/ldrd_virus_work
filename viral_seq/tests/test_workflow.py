@@ -803,6 +803,12 @@ def test_feature_count_consensus():
     feature_count["Features"] = train_columns
     feature_count["Counts"] = 0
 
+    feature_count_out_exp = pd.DataFrame()
+    feature_count_out_exp["Features"] = train_columns
+    feature_count_out_exp["Counts"] = [1, 0, 1, 0, 1, 2, 2, 0, 2, 1]
+
+    feature_count_exp = feature_count.copy()
+
     clfr_importances_df.sort_values(by=["Importances"], ascending=False, inplace=True)
     clfr_importances_df.reset_index(inplace=True)
 
@@ -813,5 +819,5 @@ def test_feature_count_consensus():
         clfr_importances_df, shap_importances_df, feature_count, n_features=5
     )
 
-    assert feature_count_out.shape == (10, 2)
-    assert feature_count_out["Counts"].sum() == 10
+    assert_frame_equal(feature_count_out, feature_count_out_exp)
+    assert_frame_equal(feature_count, feature_count_exp)

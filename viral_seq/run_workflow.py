@@ -30,6 +30,7 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 
+
 matplotlib.use("Agg")
 
 
@@ -335,13 +336,18 @@ def feature_count_consensus(
     n_features: int
         number of top important features to consider from the ranked list of features
     """
+    feature_count_out = feature_count.copy()
     for i in range(n_features):
         clfr_feature = clfr_importances["Features"][i]
         shap_feature = shap_importances["Features"][i]
-        feature_count.loc[feature_count["Features"] == clfr_feature, "Counts"] += 1
-        feature_count.loc[feature_count["Features"] == shap_feature, "Counts"] += 1
+        feature_count_out.loc[
+            feature_count_out["Features"] == clfr_feature, "Counts"
+        ] += 1
+        feature_count_out.loc[
+            feature_count_out["Features"] == shap_feature, "Counts"
+        ] += 1
 
-    return feature_count
+    return feature_count_out
 
 
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:

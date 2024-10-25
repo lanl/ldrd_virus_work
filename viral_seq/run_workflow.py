@@ -320,6 +320,37 @@ def plot_cv_roc(clfr_preds: list, target_column: str, paths: list) -> np.ndarray
     plt.close(fig)
 
 
+def feature_count_consensus(
+    clfr_importances: pd.DataFrame,
+    shap_importances: pd.DataFrame,
+    feature_count: pd.DataFrame,
+    n_features: int,
+) -> pd.DataFrame:
+    """
+    updates the number of occurrences of a feature in the top N features based
+    on classifier and shap importance feature values from each training fold
+
+    Parameters:
+    -----------
+    clfr_importances: pd.DataFrame
+        ranked features from classifier feature importance values
+    shap_importances: pd.DataFrame
+        ranked features from shap feature importance values
+    feature_count: pd.DataFrame
+        data frame containing the training features and their number of occurrences
+        in the feature importance data structures across multiple cv folds
+    n_features: int
+        number of top important features to consider from the ranked list of features
+    """
+    for i in range(n_features):
+        clfr_feature = clfr_importances["Features"][i]
+        shap_feature = shap_importances["Features"][i]
+        feature_count.loc[feature_count["Features"] == clfr_feature, "Counts"] += 1
+        feature_count.loc[feature_count["Features"] == shap_feature, "Counts"] += 1
+
+    return feature_count
+
+
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
     """
     converts feature importances to a pandas dataframe during cross-
@@ -370,7 +401,7 @@ def train_clfr(
     temp1 = np.zeros((n_folds, n_features))
 
     feature_count = pd.DataFrame()
-    feature_count["Features"] = X.columns
+    feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
     pearson_r_clfr = []
     shap_values_clfr = []
@@ -380,6 +411,7 @@ def train_clfr(
         train_target = y[train]
         test_fold = X.iloc[test]
         test_target = y[test]
+
         clfr.fit(train_fold, train_target)
         clfr_out = np.zeros([2, len(test)])
 
@@ -395,12 +427,9 @@ def train_clfr(
             positive_shap_values.abs.mean(0).values, train_fold.columns
         )
 
-        # index feature counts dataframe
-        for i in range(n_features):
-            clfr_feature = clfr_importances["Features"][i]
-            shap_feature = shap_importances["Features"][i]
-            feature_count.loc[feature_count["Features"] == clfr_feature, "Counts"] += 1
-            feature_count.loc[feature_count["Features"] == shap_feature, "Counts"] += 1
+        feature_count = feature_count_consensus(
+            clfr_importances, shap_importances, feature_count, n_features
+        )
 
         # aggregate the raw shap values to be used in the beeswarm plot
         # still unclear what to do  with the mismatch in train row length

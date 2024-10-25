@@ -904,3 +904,32 @@ def test_plot_cv_roc(tmp_path):
         )
         is None
     )
+
+
+def test_feature_count_consensus():
+    rng = np.random.default_rng(seed=123)
+    clfr_importances = rng.uniform(-1, 1, 10)
+    shap_importances = rng.uniform(-1, 1, 10)
+    train_columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    clfr_importances_df = pd.DataFrame()
+    clfr_importances_df["Features"] = train_columns
+    clfr_importances_df["Importances"] = clfr_importances
+    shap_importances_df = pd.DataFrame()
+    shap_importances_df["Features"] = train_columns
+    shap_importances_df["Importances"] = shap_importances
+    feature_count = pd.DataFrame()
+    feature_count["Features"] = train_columns
+    feature_count["Counts"] = 0
+
+    clfr_importances_df.sort_values(by=["Importances"], ascending=False, inplace=True)
+    clfr_importances_df.reset_index(inplace=True)
+
+    shap_importances_df.sort_values(by=["Importances"], ascending=False, inplace=True)
+    shap_importances_df.reset_index(inplace=True)
+
+    feature_count_out = workflow.feature_count_consensus(
+        clfr_importances_df, shap_importances_df, feature_count, n_features=5
+    )
+
+    assert feature_count_out.shape == (10, 2)
+    assert feature_count_out["Counts"].sum() == 10

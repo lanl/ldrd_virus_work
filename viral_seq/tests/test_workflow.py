@@ -7,6 +7,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from numpy.testing import assert_array_equal
+from matplotlib.testing.compare import compare_images
 
 
 @image_comparison(
@@ -145,3 +146,20 @@ def test_importances_df():
         ValueError, match="Importances and train features must be a single column."
     ):
         workflow.importances_df(importances, train_fold)
+
+
+def test_plot_cv_roc(tmp_path):
+    rng = np.random.default_rng(seed=123)
+    pred_prob = rng.uniform(0, 1, 10)
+    true_class = rng.choice([0, 1], size=10)
+    data_in = np.stack((pred_prob, true_class))
+
+    workflow.plot_cv_roc([data_in], "Test", tmp_path)
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "ROC_cv_expected.png",
+            str(tmp_path / "ROC_Test.png"),
+            0.001,
+        )
+        is None
+    )

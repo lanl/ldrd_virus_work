@@ -1439,6 +1439,16 @@ organism_dict = {
                 "Pteropus associated gemycircularvirus 10": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1795994
                 "Pacific flying fox faeces associated gemycircularvirus-2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985397
+                "Pteropus associated gemycircularvirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985398
+                "Pteropus associated gemycircularvirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985399
+                "Pteropus associated gemycircularvirus 5": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985400
+                "Pteropus associated gemycircularvirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985401
+                "Pteropus associated gemycircularvirus 7": "non_primate_mammals",
                 }
 
 
@@ -1526,7 +1536,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=505)
+                                                           n_records=510)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

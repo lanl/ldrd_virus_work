@@ -1426,6 +1426,19 @@ organism_dict = {
                 "Betapolyomavirus ptedavyi": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2758132
                 "bat polyomavirus 2b": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1343901
+                # https://doi.org/10.1128/JVI.01277-14
+                "Pteropodid alphaherpesvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1873698
+                # https://ictv.global/report/chapter/poxviridae/poxviridae/pteropopoxvirus
+                # https://doi.org/10.1111/avj.13316
+                "Pteropox virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1795989
+                "Pacific flying fox faeces associated gemycircularvirus-10": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1985404
+                "Pteropus associated gemycircularvirus 10": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1795994
+                "Pacific flying fox faeces associated gemycircularvirus-2": "non_primate_mammals",
                 }
 
 
@@ -1513,7 +1526,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=500)
+                                                           n_records=505)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

@@ -1476,6 +1476,21 @@ organism_dict = {
                 # looks like the ticks can at least transmit to mice
                 # in the lab
                 "Orthonairovirus qalyubense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1391026
+                "Faeces associated gemycircularvirus 11": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2682608
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/rabovirus
+                "Rabovirus B1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2161803
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/sapelovirus
+                "Marmot sapelovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2682606
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/rabovirus
+                "Rabovirus D1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1520002
+                # https://doi.org/10.1016/j.meegid.2011.03.021
+                # https://ictv.global/report/chapter/adenoviridae/adenoviridae/siadenovirus
+                "Raptor adenovirus 1": "avian",
                 }
 
 
@@ -1563,7 +1578,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=520)
+                                                           n_records=525)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

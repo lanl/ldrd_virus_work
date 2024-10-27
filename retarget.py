@@ -1491,6 +1491,20 @@ organism_dict = {
                 # https://doi.org/10.1016/j.meegid.2011.03.021
                 # https://ictv.global/report/chapter/adenoviridae/adenoviridae/siadenovirus
                 "Raptor adenovirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1708653
+                "Gemycircularvirus gemy-ch-rat1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1679933
+                "Rattus norvegicus polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1919247
+                "Betapolyomavirus securanorvegicus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/345250
+                # https://doi.org/10.1080/03079450600597345
+                "Raven circovirus": "avian",
+                # https://www.genome.jp/virushostdb/512169
+                # https://en.wikipedia.org/wiki/Tulane_virus
+                # https://ictv.global/report/chapter/caliciviridae/caliciviridae/recovirus
+                # (I don't typically accept cell culture evidence)
+                "Tulane virus": "primate",
                 }
 
 
@@ -1578,7 +1592,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=525)
+                                                           n_records=530)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

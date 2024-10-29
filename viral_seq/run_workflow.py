@@ -119,6 +119,58 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
     return table
 
 
+def check_positive_controls(
+    positive_controls: Sequence[str],
+    kmers_list: list[str],
+    mapping_method: str,
+    input_data: str,
+    mode: str,
+) -> None:
+    """
+    checks how many of the kmers that are known to bind to a specific surface receptor (positive controls)
+    are found in a given list of kmers (train vs. top-N) and prints the counts of each
+
+    Parameters
+    ----------
+    positive_controls: list
+        A list of strings denoting known AA-kmers associated with surface protein binding
+    kmers_list: list
+        A list containing kmer feature strings from either the training dataset
+        or topN classifier rankings
+    mapping_method: str
+        preference for mapping AA-kmers to PC-kmers
+    input_data: str
+        name of input dataset for printing positive control count
+    mode: str
+        type of kmer to check for in dataset (AA vs. PC) to avoid double counting
+    """
+
+    if mode == "PC":
+        # map positive_controls to PC-kmers using desired mapping method
+        pc_pos_con = []
+        for p_con in positive_controls:
+            pc_kmer = ""
+            for each in p_con:
+                pc_kmer += get_features.aa_map(each, method=mapping_method)
+            pc_pos_con.append(pc_kmer)
+        positive_controls = pc_pos_con
+
+    # iterate through lists of positive controls and
+    # count number of positive controls found in kmer_list
+    kmers_list = [s for s in kmers_list if s.startswith(f"kmer_{mode}_")]
+    col_str = ",".join(kmers_list).replace(f"kmer_{mode}_", "")
+    pos_con_dict = {key: 0 for key in positive_controls}
+    for positive_control in positive_controls:
+        pos_con_dict[positive_control] += col_str.count(positive_control)
+
+    # print out the dictonary counts of positive
+    # controls found in the respective kmer list
+    print(
+        f"Count of {mode}-kmer positive controls found in {input_data} kmers:\n"
+        + json.dumps(pos_con_dict, indent=1)
+    )
+
+
 def validate_feature_table(file_name, idx, prefix):
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()
@@ -1061,7 +1113,7 @@ if __name__ == "__main__":
         # PHSRN (Pro-His-Ser-Arg-Asn)
         # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
 
-        list_of_positive_controls_for_AA_k_mers = [
+        pos_controls = [
             "RGD",
             "KGE",
             "LDV",
@@ -1139,7 +1191,6 @@ if __name__ == "__main__":
             interp_tpr[0] = 0.0
             tprs.append(interp_tpr)
             aucs.append(viz.roc_auc)
-
             counter += 1
             temp1[counter, :] = df["index"][:n_features].to_numpy()
 
@@ -1195,27 +1246,23 @@ if __name__ == "__main__":
         array1 = temp3[:, 1]
         array2 = [temp4[i][0] for i in range(len(temp4))]
 
-        ### Check how many AA- and PC- kmers contain a positive control from the lists
-        ### defined at the beginning of the DTRA workflow. Repeat this process for both
-        ### the entire feature list and only the top features present in array2. The
-        ### printed output will be used to manually produce a table for the weekly meeting.
+        # count of positive controls in train data
+        check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=list(X.iloc[train].columns),
+            mapping_method="shen_2007",
+            input_data="Train Data",
+            mode="PC",
+        )
 
-        z1, z2, z3, z4 = [], [], [], []
-        for item1 in list_of_positive_controls_for_AA_k_mers:
-            z1.append(
-                sum([item2.count(item1) for item2 in list(X.iloc[train].columns)])
-            )
-            z2.append(sum([item2.count(item1) for item2 in array2]))
-        print(z1)
-        print(z2)
-
-        for item1 in list_of_positive_controls_for_PC_k_mers:
-            z3.append(
-                sum([item2.count(item1) for item2 in list(X.iloc[train].columns)])
-            )
-            z4.append(sum([item2.count(item1) for item2 in array2]))
-        print(z3)
-        print(z4)
+        # count of positive controls in topN (array2)
+        check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=array2,
+            mapping_method="shen_2007",
+            input_data="Top N",
+            mode="PC",
+        )
 
         for (
             item

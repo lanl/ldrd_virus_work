@@ -121,3 +121,47 @@ def test_label_surface_exposed():
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
     np.testing.assert_array_equal(not_exposed, not_exposed_exp)
     np.testing.assert_array_equal(found_kmers, found_kmers_exp)
+
+
+@pytest.mark.parametrize(
+    "mode, expected",
+    [
+        (
+            "PC",
+            'Count of PC-kmer positive controls found in Test kmers:\n{\n "BBA": 3,\n "FBA": 1,\n "AFFA": 0,\n "AABB": 1,\n "AAC": 1,\n "BAFB": 1,\n "AAA": 1\n}\n',
+        ),
+        (
+            "AA",
+            'Count of AA-kmer positive controls found in Test kmers:\n{\n "CCA": 3,\n "DCA": 0,\n "GDDA": 0,\n "GGCC": 1,\n "AAF": 1,\n "CGDC": 1,\n "AAA": 1\n}\n',
+        ),
+    ],
+)  # , expected
+def test_positive_controls(mode, expected, capsys):  # , expected
+    syn_pos_controls = ["CCA", "DCA", "GDDA", "GGCC", "AAF", "CGDC", "AAA"]
+    # "BBA" "FBA" "AFFA" "AABB" "AAC" "BAFB"
+
+    syn_kmers = [
+        "kmer_PC_FBAAFF",
+        "kmer_PC_AACFAF",
+        "kmer_PC_BBACFF",
+        "kmer_PC_BAFBBBA",
+        "kmer_PC_CAABBA",
+        "kmer_PC_AAAA",
+        "kmer_AA_ECVGDE",
+        "kmer_AA_AAFDAE",
+        "kmer_AA_CCAFEE",
+        "kmer_AA_CGDCCCA",
+        "kmer_AA_FGGCCA",
+        "kmer_AA_AAAA",
+    ]
+
+    workflow.check_positive_controls(
+        positive_controls=syn_pos_controls,
+        kmers_list=syn_kmers,
+        mapping_method="shen_2007",
+        input_data="Test",
+        mode=mode,
+    )
+
+    captured = capsys.readouterr()
+    assert captured.out == expected

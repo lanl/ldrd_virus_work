@@ -262,27 +262,27 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
         # specific requests at
         # https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/67#note_307079
         if explicit_aa in "AG":
-            return "A"
+            return "0"
         elif explicit_aa in "C":
-            return "B"
+            return "1"
         elif explicit_aa in "STY":
-            return "D"
+            return "2"
         elif explicit_aa in "NQH":
-            return "E"
+            return "3"
         elif explicit_aa in "DE":
-            return "F"
+            return "4"
         elif explicit_aa in "KR":
-            return "G"
+            return "5"
         elif explicit_aa in "IVLM":
             # NOTE: Jurgen labeled this "F," but that's
             # presumably an accidental duplication?
-            return "H"
+            return "6"
         elif explicit_aa in "FW":
             # NOTE: Jurgen didn't specify a letter for this
             # category
-            return "I"
+            return "7"
         elif explicit_aa in "P":
-            return "P"
+            return "8"
         else:
             return "*"
     else:

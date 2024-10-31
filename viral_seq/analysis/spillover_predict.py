@@ -354,9 +354,9 @@ def build_table(
     cache: str = ".cache",
     genomic: bool = True,
     kmers: bool = True,
-    kmer_k: list[int] = [10],
+    kmer_k: list[int] | None = None,
     kmers_pc: bool = False,
-    kmer_k_pc: list[int] = [10],
+    kmer_k_pc: list[int] | None = None,
     gc: bool = True,
     ordered: bool = True,
     uni_select: bool = False,
@@ -365,6 +365,10 @@ def build_table(
     random_state: int = 123456789,
     target_column: str = "Human Host",
 ):
+    if kmer_k is None:
+        kmer_k = [10]
+    if kmer_k_pc is None:
+        kmer_k_pc = [10]
     features: dict[str, Any] = {}
     calculated_feature_rows = []
     # viral feature tables

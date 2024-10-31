@@ -304,13 +304,14 @@ def load_from_cache(
 
 def _populate_kmer_dict(kmer, records, features, kmer_type="AA", mapping_method=None):
     for this_k in kmer:
-        this_res = get_kmers(
+        this_res, kmer_maps = get_kmers(
             records, k=this_k, kmer_type=kmer_type, mapping_method=mapping_method
         )
         if this_res is None:
             return None
         else:
             features.update(this_res)
+    return kmer_maps
 
 
 def _grab_features(
@@ -318,6 +319,7 @@ def _grab_features(
 ):
     feat_genomic = None
     feat_gc = None
+    kmer_mappings = []
     if genomic:
         feat_genomic = get_genomic_features(records)
         if feat_genomic is None:
@@ -325,18 +327,21 @@ def _grab_features(
         else:
             features.update(feat_genomic)
     if kmers:
-        _populate_kmer_dict(kmer_k, records, features)
+        _ = _populate_kmer_dict(
+            kmer_k, records, features, mapping_method=mapping_method
+        )
     if kmers_pc:
-        _populate_kmer_dict(
+        kmer_maps = _populate_kmer_dict(
             kmer_k_pc, records, features, kmer_type="PC", mapping_method=mapping_method
         )
+        kmer_mappings.extend(kmer_maps)
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:
             return None
         else:
             features.update(feat_gc)
-    return features
+    return features, kmer_mappings
 
 
 def univariate_selection(X, y, uni_type, num_select, random_state=123456789):
@@ -385,6 +390,7 @@ def build_table(
     if kmer_k_pc is None:
         kmer_k_pc = [10]
     features: dict[str, Any] = {}
+    kmer_maps = []
     calculated_feature_rows = []
     # viral feature tables
     if df is not None:
@@ -409,7 +415,7 @@ def build_table(
         meta_data = list(df.columns)
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
-            this_result = _grab_features(
+            this_result, kmer_map = _grab_features(
                 features,
                 records,
                 genomic,
@@ -420,15 +426,20 @@ def build_table(
                 kmer_k_pc,
                 mapping_method,
             )
+            kmer_maps.extend(kmer_map)
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
-    # human gene feature tables
+        # human gene feature tables
+        kmer_maps_df = pd.DataFrame(kmer_maps)
+        save_files(
+            kmer_maps_df, f"kmer_maps_k{kmer_k[0]}_{mapping_method}.parquet.gzip"
+        )
     else:
         # build feature table from the entire cache
         records = load_from_cache(cache=cache, filter=False, verbose=False)
         for record in tqdm(records):
             features = {}
-            this_result = _grab_features(
+            this_result, kmer_map = _grab_features(
                 features,
                 [record],
                 genomic,

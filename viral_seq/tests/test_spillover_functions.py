@@ -529,6 +529,42 @@ def test_build_table_target_column(target_column):
     )
 
 
+def test_grab_features_kmer_maps():
+    records_dict: dict[str, list] = {}
+    accessions_dict: dict[str, str] = {}
+    row_dict: dict[str, pd.Series] = {}
+    accessions = []
+    this_cache = files("viral_seq.tests") / "cache"
+    df = pd.read_csv(csv_train)
+    df_in = df.iloc[:1]
+    for index, row in df_in.iterrows():
+        records_dict[row["Species"]] = []
+        row_dict[row["Species"]] = row
+        for accession in row["Accessions"].split():
+            accessions.append(accession)
+            accession_key = accession.split(".")[0]
+            accessions_dict[accession_key] = row["Species"]
+    # we do one call to load all records from cache
+    records_unordered = sp.load_from_cache(
+        accessions, cache=this_cache, filter=False, verbose=False
+    )
+    for record in records_unordered:
+        records_dict[accessions_dict[record.id.split(".")[0]]].append(record)
+    for species, records in records_dict.items():
+        features = row_dict[species].to_dict()
+        this_result, kmer_map = sp._grab_features(
+            features,
+            records,
+            genomic=True,
+            kmers=True,
+            kmer_k=[10],
+            gc=True,
+            kmers_pc=True,
+            kmer_k_pc=[10],
+        )
+    assert len(kmer_map) == 3408
+
+
 def test_get_best_features():
     X, y = make_classification(
         n_samples=300,

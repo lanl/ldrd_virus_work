@@ -1796,7 +1796,13 @@ if __name__ == "__main__":
         ax.legend(loc="lower right")
         fig.tight_layout()
         fig.savefig(
-            str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300
+            str(paths[-1])
+            + "/"
+            + "ROC_"
+            + str(target_column)
+            + f"_{mapping_method}"
+            + ".png",
+            dpi=300,
         )
         plt.close(fig)
 
@@ -1879,7 +1885,12 @@ if __name__ == "__main__":
         feature_importance.plot_shap_beeswarm(
             positive_shap_values,
             model_name="Random Forest",
-            fig_name=str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png",
+            fig_name=str(paths[-1])
+            + "/"
+            + "SHAP_"
+            + str(target_column)
+            + f"_{mapping_method}"
+            + ".png",
             max_display=len(array2),
         )
 

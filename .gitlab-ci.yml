@@ -1,60 +1,20 @@
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python/tags/
-image: python:3.10.8
-
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-# Pip's cache doesn't store the python packages
-# https://pip.pypa.io/en/stable/topics/caching/
-#
-# If you want to also cache the installed packages, you have to install
-# them in a virtualenv and cache it as well.
-cache:
-  paths:
-    - .cache/pip
-    - venv/
-
-before_script:
-  - python --version ; pip --version; pwd; ls -la  # For debugging
-  - python -m venv venv
-  - source venv/bin/activate
-  - pip install -r ci/requirements.txt
-  - pip install mypy==1.3.0 black==23.3.0 ruff==0.6.9 pytest==7.4.0
-
-stages:
-  - test
-  - run
-
-lint:
-  stage: test
+ci_test_linux:
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == 'merge_request_event'
-      when: always
-  allow_failure: false    
+    - when: always
+  image: $IMAGE
   script:
+    - python --version
+    - python -m venv venv
+    - source venv/bin/activate
+    - python -m pip install -U setuptools pip
+    - python -m pip install -r ci/requirements.txt
+    - python -m pip install -v .
+    - python -m pip install mypy==1.3.0 black==23.3.0 ruff==0.6.9 pytest==8.3.3
     - mypy -p viral_seq
     - ruff check viral_seq
     - black viral_seq --check
-
-test:
-  stage: test
-  rules: 
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == 'merge_request_event'
-      when: always
+    - cd /tmp && python -m pytest -m "not slow" --pyargs viral_seq
+  parallel:
+    matrix:
+      - IMAGE: ['python:3.10.8', 'python:3.11.9']
   allow_failure: false
-  script:
-    - pip install .
-    - pytest -m "not slow"
-
-run:
-  stage: run
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == 'merge_request_event'
-      when: on_success
-  allow_failure: false    
-  script:
-    - viral_seq --help
-

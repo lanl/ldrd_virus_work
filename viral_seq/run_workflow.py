@@ -42,6 +42,10 @@ from lightgbm import LGBMClassifier
 import os
 from tqdm import tqdm
 from sklearn.preprocessing import normalize
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.ensemble import ExtraTreesClassifier
 
 matplotlib.use("Agg")
 
@@ -376,6 +380,39 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
         plt.close(fig)
 
 
+def percent_surface_exposed(k_mers_PC, surface_exposed_status):
+    """
+    Determine the ratio of surface exposed to not surface exposed viral proteins
+    for the dataset of important kmers as decided by the ML classifier
+
+    Parameters
+    ----------
+    k_mers_PC: list
+        list of PC kmers that are found in the dataset of viral proteins
+    surface_exposed_status: list
+        corresponding 'Yes' or 'No' for 'is surface exposed' for each PC kmer
+
+    Returns
+    -------
+    surface_exposed_dict: dict
+        dictionary of kmers and associated ratio of surface exposed vs.
+        not surface exposed from dataset of known viral proteins
+    """
+
+    surface_exposed_dict = {}
+    all_kmers = sorted(zip(k_mers_PC, surface_exposed_status))
+    for kmer_status in all_kmers:
+        # check if kmer exists in dictionary already
+        if kmer_status[0] not in surface_exposed_dict:
+            surface_exposed_dict[kmer_status[0]] = [0, 0]
+        if kmer_status[1] == "Yes":
+            surface_exposed_dict[kmer_status[0]][0] += 1
+        elif kmer_status[1] == "No":
+            surface_exposed_dict[kmer_status[0]][1] += 1
+
+    return surface_exposed_dict
+
+
 def feature_count_consensus(
     clfr_importances: pd.DataFrame,
     shap_importances: pd.DataFrame,
@@ -403,10 +440,10 @@ def feature_count_consensus(
         clfr_feature = clfr_importances["Features"][i]
         shap_feature = shap_importances["Features"][i]
         feature_count_out.loc[
-            feature_count_out["Features"] == clfr_feature, "Counts"
+            feature_count_out["Features"] == clfr_feature, "Clfr"
         ] += 1
         feature_count_out.loc[
-            feature_count_out["Features"] == shap_feature, "Counts"
+            feature_count_out["Features"] == shap_feature, "SHAP"
         ] += 1
 
     return feature_count_out
@@ -490,7 +527,10 @@ def train_clfr(
     shap_values_all: list[float] = []
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
-    feature_count["Counts"] = 0
+    feature_count["Clfr"] = 0
+    feature_count["SHAP"] = 0
+    pearson_r_clfr = []
+    clfr_preds = {}
     shap_values_all = []
     shap_data_all = []
     for clfr_name, subdict in classifier_parameters.items():

@@ -252,5 +252,29 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
             return "G"
         else:
             return "*"
+    elif method == "jurgen_schmidt":
+        # NOTE: this is the amino acid mapping
+        # scheme requested by Jurgen Schmidt at LANL,
+        # based on his expert opinion
+        if explicit_aa in "AG":
+            return "0"
+        elif explicit_aa in "C":
+            return "1"
+        elif explicit_aa in "STY":
+            return "2"
+        elif explicit_aa in "NQH":
+            return "3"
+        elif explicit_aa in "DE":
+            return "4"
+        elif explicit_aa in "KR":
+            return "5"
+        elif explicit_aa in "IVLMJ":
+            return "6"
+        elif explicit_aa in "FW":
+            return "7"
+        elif explicit_aa in "P":
+            return "8"
+        else:
+            return "*"
     else:
         raise NotImplementedError(f"{method=} not supported")

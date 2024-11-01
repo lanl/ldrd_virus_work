@@ -86,6 +86,17 @@ def test_aa_map_wrong_input():
         ("shen_2007", "E", "F"),
         ("shen_2007", "K", "G"),
         ("shen_2007", "Z", "*"),
+        ("jurgen_schmidt", "A", "0"),
+        ("jurgen_schmidt", "S", "2"),
+        ("jurgen_schmidt", "F", "7"),
+        ("jurgen_schmidt", "C", "1"),
+        ("jurgen_schmidt", "P", "8"),
+        ("jurgen_schmidt", "M", "6"),
+        ("jurgen_schmidt", "Q", "3"),
+        ("jurgen_schmidt", "E", "4"),
+        ("jurgen_schmidt", "K", "5"),
+        ("jurgen_schmidt", "J", "6"),
+        ("jurgen_schmidt", "Z", "*"),
     ],
 )
 def test_aa_map(method, aa_in, aa_expected):

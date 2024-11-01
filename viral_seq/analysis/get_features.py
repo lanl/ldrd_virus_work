@@ -252,15 +252,10 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
             return "G"
         else:
             return "*"
-    elif method == "schein_2012":
-        # NOTE: these mappings appear to be inspired by
-        # this manuscript from Jurgen Schmidt's collaborators
-        # at UTMB: https://doi.org/10.1186/1471-2105-13-s13-s9
-        # However, as far as I can tell, that manuscript uses
-        # more sophisticated (eigenvector?) approaches to achieve the actual
-        # mappings, so these are mostly conformant with Jurgen's
-        # specific requests at
-        # https://gitlab.lanl.gov/treddy/ldrd_virus_work/-/issues/67#note_307079
+    elif method == "jurgen_schmidt":
+        # NOTE: this is the amino acid mapping
+        # scheme requested by Jurgen Schmidt at LANL,
+        # based on his expert opinion
         if explicit_aa in "AG":
             return "0"
         elif explicit_aa in "C":
@@ -273,13 +268,9 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
             return "4"
         elif explicit_aa in "KR":
             return "5"
-        elif explicit_aa in "IVLM":
-            # NOTE: Jurgen labeled this "F," but that's
-            # presumably an accidental duplication?
+        elif explicit_aa in "IVLMJ":
             return "6"
         elif explicit_aa in "FW":
-            # NOTE: Jurgen didn't specify a letter for this
-            # category
             return "7"
         elif explicit_aa in "P":
             return "8"

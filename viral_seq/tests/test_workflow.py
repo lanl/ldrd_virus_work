@@ -124,67 +124,116 @@ def test_label_surface_exposed():
 
 
 @pytest.mark.parametrize(
-    "mode, expected, expected_dict",
+    "syn_kmers, mapping_method, mode, expected_dict",
     [
         (
+            [
+                "kmer_PC_FBAAFF",
+                "kmer_PC_AACFAF",
+                "kmer_PC_BBACFF",
+                "kmer_PC_BAFBBBA",
+                "kmer_PC_CAABBA",
+                "kmer_PC_AAAA",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "shen_2007",
             "PC",
-            'Count of PC-kmer positive controls found in Test kmers:\n{\n "BBA": 3,\n "FBA": 1,\n "AFFA": 0,\n "AABB": 1,\n "AAC": 1,\n "BAFB": 1,\n "AAA": 1\n}\n',
             {
-                "BBA": {0: "kmer_PC_BBACFF", 1: "kmer_PC_BAFBBBA", 2: "kmer_PC_CAABBA"},
-                "FBA": {0: "kmer_PC_FBAAFF", 1: "empty", 2: "empty"},
-                "AFFA": {0: "empty", 1: "empty", 2: "empty"},
-                "AABB": {0: "kmer_PC_CAABBA", 1: "empty", 2: "empty"},
-                "AAC": {0: "kmer_PC_AACFAF", 1: "empty", 2: "empty"},
-                "BAFB": {0: "kmer_PC_BAFBBBA", 1: "empty", 2: "empty"},
-                "AAA": {0: "kmer_PC_AAAA", 1: "empty", 2: "empty"},
+                "BBA": {
+                    0: "kmer_PC_BBACFF",
+                    1: "kmer_PC_BAFBBBA",
+                    2: "kmer_PC_CAABBA",
+                    3: 3,
+                },
+                "FBA": {0: "kmer_PC_FBAAFF", 1: None, 2: None, 3: 1},
+                "AFFA": {0: None, 1: None, 2: None, 3: 0},
+                "AABB": {0: "kmer_PC_CAABBA", 1: None, 2: None, 3: 1},
+                "AAC": {0: "kmer_PC_AACFAF", 1: None, 2: None, 3: 1},
+                "BAFB": {0: "kmer_PC_BAFBBBA", 1: None, 2: None, 3: 1},
+                "AAA": {0: "kmer_PC_AAAA", 1: None, 2: None, 3: 1},
             },
         ),
         (
+            [
+                "kmer_PC_FBAAFF",
+                "kmer_PC_AACFAF",
+                "kmer_PC_BBACFF",
+                "kmer_PC_BAFBBBA",
+                "kmer_PC_CAABBA",
+                "kmer_PC_AAAA",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "shen_2007",
             "AA",
-            'Count of AA-kmer positive controls found in Test kmers:\n{\n "CCA": 3,\n "DCA": 0,\n "GDDA": 0,\n "GGCC": 1,\n "AAF": 1,\n "CGDC": 1,\n "AAA": 1\n}\n',
             {
-                "CCA": {0: "kmer_AA_CCAFEE", 1: "kmer_AA_CGDCCCA", 2: "kmer_AA_FGGCCA"},
-                "DCA": {0: "empty", 1: "empty", 2: "empty"},
-                "GDDA": {0: "empty", 1: "empty", 2: "empty"},
-                "GGCC": {0: "kmer_AA_FGGCCA", 1: "empty", 2: "empty"},
-                "AAF": {0: "kmer_AA_AAFDAE", 1: "empty", 2: "empty"},
-                "CGDC": {0: "kmer_AA_CGDCCCA", 1: "empty", 2: "empty"},
-                "AAA": {0: "kmer_AA_AAAA", 1: "empty", 2: "empty"},
+                "CCA": {
+                    0: "kmer_AA_CCAFEE",
+                    1: "kmer_AA_CGDCCCA",
+                    2: "kmer_AA_FGGCCA",
+                    3: 3,
+                },
+                "DCA": {0: None, 1: None, 2: None, 3: 0},
+                "GDDA": {0: None, 1: None, 2: None, 3: 0},
+                "GGCC": {0: "kmer_AA_FGGCCA", 1: None, 2: None, 3: 1},
+                "AAF": {0: "kmer_AA_AAFDAE", 1: None, 2: None, 3: 1},
+                "CGDC": {0: "kmer_AA_CGDCCCA", 1: None, 2: None, 3: 1},
+                "AAA": {0: "kmer_AA_AAAA", 1: None, 2: None, 3: 1},
+            },
+        ),
+        (
+            [
+                "kmer_PC_416044",
+                "kmer_PC_007404",
+                "kmer_PC_110744",
+                "kmer_PC_1041110",
+                "kmer_PC_700110",
+                "kmer_PC_0000",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "jurgen_schmidt",
+            "PC",
+            {
+                "110": {
+                    0: "kmer_PC_110744",
+                    1: "kmer_PC_1041110",
+                    2: "kmer_PC_700110",
+                    3: 3,
+                },
+                "410": {0: None, 1: None, 2: None, 3: 0},
+                "0440": {0: None, 1: None, 2: None, 3: 0},
+                "0011": {0: "kmer_PC_700110", 1: None, 2: None, 3: 1},
+                "007": {0: "kmer_PC_007404", 1: None, 2: None, 3: 1},
+                "1041": {0: "kmer_PC_1041110", 1: None, 2: None, 3: 1},
+                "000": {0: "kmer_PC_0000", 1: None, 2: None, 3: 1},
             },
         ),
     ],
 )
-def test_positive_controls(mode, expected, expected_dict, capsys, tmpdir):
+def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
     syn_pos_controls = ["CCA", "DCA", "GDDA", "GGCC", "AAF", "CGDC", "AAA"]
 
-    syn_kmers = [
-        "kmer_PC_FBAAFF",
-        "kmer_PC_AACFAF",
-        "kmer_PC_BBACFF",
-        "kmer_PC_BAFBBBA",
-        "kmer_PC_CAABBA",
-        "kmer_PC_AAAA",
-        "kmer_AA_ECVGDE",
-        "kmer_AA_AAFDAE",
-        "kmer_AA_CCAFEE",
-        "kmer_AA_CGDCCCA",
-        "kmer_AA_FGGCCA",
-        "kmer_AA_AAAA",
-    ]
-
-    workflow.check_positive_controls(
+    out_df = workflow.check_positive_controls(
         positive_controls=syn_pos_controls,
         kmers_list=syn_kmers,
-        mapping_method="shen_2007",
+        mapping_method=mapping_method,
         input_data="Test",
         mode=mode,
-        save_path=tmpdir,
     )
 
-    out_file = tmpdir.join(f"Test_{mode}_kmer_positive_controls.csv")
-    captured = capsys.readouterr()
-    out_df = pd.read_csv(out_file).fillna("empty")
-    out_dict = out_df.to_dict()
-
-    assert captured.out == expected
-    assert out_dict == expected_dict
+    expected_df = pd.DataFrame.from_dict(expected_dict).replace({np.nan: None})
+    assert_frame_equal(out_df, expected_df)

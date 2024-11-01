@@ -126,8 +126,7 @@ def check_positive_controls(
     mapping_method: str,
     input_data: str,
     mode: str,
-    save_path: Path,
-) -> None:
+) -> pd.DataFrame:
     """
     checks how many of the kmers that are known to bind to a specific surface receptor (positive controls)
     are found in a given list of kmers (train vs. top-N) and prints the counts of each
@@ -145,8 +144,12 @@ def check_positive_controls(
         name of input dataset for printing positive control count
     mode: str
         type of kmer to check for in dataset (AA vs. PC) to avoid double counting
-    save_path: Path
-        path to save positive control csv files
+
+    Returns:
+    --------
+    kmers_out: pd.DataFrame
+        Dataframe containing the names of kmer features found in the dataset that contain
+        each of the positive control sequences, and the counts for each
     """
 
     if mode == "PC":
@@ -172,27 +175,12 @@ def check_positive_controls(
             f"kmer_{mode}_" + s for s in kmers_info if positive_control in s
         ]
 
-    # check that the dictionary of postive control containing kmers is not empty
-    # and save the dictionary to csv file containing instances of PC kmers
-    if any(pos_con_kmers.values()):
-        kmers_out = pd.DataFrame(
-            {
-                k: v + [None] * (max(map(len, pos_con_kmers.values())) - len(v))
-                for k, v in pos_con_kmers.items()
-            }
-        )
-        kmers_out.to_csv(
-            os.path.join(save_path, f"{input_data}_{mode}_kmer_positive_controls.csv"),
-            na_rep="",
-            index=False,
-        )
+    kmers_out = pd.DataFrame.from_dict(pos_con_kmers, orient="index").transpose()
+    new_row = kmers_out.count().astype(int).to_frame().T
+    kmers_out = pd.concat([kmers_out, new_row], ignore_index=True)
 
-    # print out the dictonary counts of positive
-    # controls found in the respective kmer list
-    print(
-        f"Count of {mode}-kmer positive controls found in {input_data} kmers:\n"
-        + json.dumps(pos_con_dict, indent=1)
-    )
+
+    return kmers_out
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -551,53 +539,48 @@ def build_tables(feature_checkpoint=0, debug=False):
                     validate_feature_table(this_outfile, idx, prefix)
 
     elif workflow == "DTRA":
-        if feature_checkpoint > 0:
-            for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-                with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                    csv_conversion(file).to_csv(temp_file)
-                    file = temp_file.name
-                if i == 0:
-                    prefix = "Train"
-                    debug = False
-                    this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                    feature_checkpoint = 10
-                    this_checkpoint = feature_checkpoint
+        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+                csv_conversion(file).to_csv(temp_file)
+                file = temp_file.name
+            if i == 0:
+                prefix = "Train"
+                debug = False
+                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+                feature_checkpoint = 10
+                this_checkpoint = feature_checkpoint
 
-                    for k in range(6, 11):
-                        this_checkpoint -= 2
-                        this_outfile = (
-                            folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
+                for k in range(6, 11):
+                    this_checkpoint -= 2
+                    this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
+                    if feature_checkpoint >= this_checkpoint:
+                        print(
+                            "Building table for Train",
+                            "which includes kmers and pc kmers with k={}.".format(k),
                         )
-                        if feature_checkpoint >= this_checkpoint:
-                            print(
-                                "Building table for Train",
-                                "which includes kmers and pc kmers with k={}.".format(
-                                    k
-                                ),
-                            )
-                            print(
-                                "To restart at this point use --features",
-                                this_checkpoint,
-                            )
-                            cli.calculate_table(
-                                [
-                                    "--file",
-                                    file,
-                                    "--cache",
-                                    cache_viral,
-                                    "--outfile",
-                                    this_outfile,
-                                    "--features-kmers",
-                                    "--kmer-k",
-                                    str(k),
-                                    "--features-kmers-pc",
-                                    "--kmer-k-pc",
-                                    str(k),
-                                    "--target-column",
-                                    target_column,
-                                ],
-                                standalone_mode=False,
-                            )
+                        print(
+                            "To restart at this point use --features",
+                            this_checkpoint,
+                        )
+                        cli.calculate_table(
+                            [
+                                "--file",
+                                file,
+                                "--cache",
+                                cache_viral,
+                                "--outfile",
+                                this_outfile,
+                                "--features-kmers",
+                                "--kmer-k",
+                                str(k),
+                                "--features-kmers-pc",
+                                "--kmer-k-pc",
+                                str(k),
+                                "--target-column",
+                                target_column,
+                            ],
+                            standalone_mode=False,
+                        )
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
@@ -1059,8 +1042,12 @@ if __name__ == "__main__":
             ) = classifier.train_and_predict(
                 val["model"],
                 X_train,
-                extract_cookie,
-                debug=debug,
+                y_train,
+                X_test,
+                name=name,
+                model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
+                params_predict=val["predict"],
+                params_optimized=best_params[name],
             )
             this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
             print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
@@ -1111,22 +1098,65 @@ if __name__ == "__main__":
             print(f"Plotting feature importances for {name}")
             # built-in importances
             (
-                ranked_feature_names,
-                ranked_feature_counts,
-                num_input_models,
-            ) = feature_importance.feature_importance_consensus(
-                pos_class_feat_imps=feature_importances,
-                feature_names=X_train.columns,
+                sorted_feature_importances,
+                sorted_feature_names,
+            ) = feature_importance.sort_features(
+                clf.feature_importances_, X_train.columns
+            )
+            feature_importance.plot_feat_import(
+                sorted_feature_importances,
+                sorted_feature_names,
+                top_feat_count=10,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+                ),
+            )
+            feature_importances.append(clf.feature_importances_)
+            # SHAP importances
+            print("Calculating & Plotting SHAP values...")
+            time_start = perf_counter()
+            explainer = shap.Explainer(clf, seed=random_state)
+            shap_values = explainer(X_train)
+            print("Finished SHAP calculation in", perf_counter() - time_start)
+            positive_shap_values = feature_importance.get_positive_shap_values(
+                shap_values
+            )
+            feature_importance.plot_shap_meanabs(
+                positive_shap_values,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
+                ),
                 top_feat_count=10,
             )
-            feature_importance.plot_feat_import_consensus(
-                ranked_feature_names=ranked_feature_names,
-                ranked_feature_counts=ranked_feature_counts,
-                num_input_models=num_input_models,
-                top_feat_count=10,
-                fig_name=feature_imp_consensus_plot_figure,
-                fig_source=feature_imp_consensus_plot_source,
+            feature_importance.plot_shap_beeswarm(
+                positive_shap_values,
+                model_name=name,
+                fig_name=str(
+                    plots_path
+                    / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
+                ),
+                max_display=10,
             )
+            feature_importances.append(positive_shap_values)
+        (
+            ranked_feature_names,
+            ranked_feature_counts,
+            num_input_models,
+        ) = feature_importance.feature_importance_consensus(
+            pos_class_feat_imps=feature_importances,
+            feature_names=X_train.columns,
+            top_feat_count=10,
+        )
+        feature_importance.plot_feat_import_consensus(
+            ranked_feature_names=ranked_feature_names,
+            ranked_feature_counts=ranked_feature_counts,
+            num_input_models=num_input_models,
+            top_feat_count=10,
+            fig_name=feature_imp_consensus_plot_figure,
+            fig_source=feature_imp_consensus_plot_source,
+        )
 
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
@@ -1276,24 +1306,76 @@ if __name__ == "__main__":
         array1 = temp3[:, 1]
         array2 = [temp4[i][0] for i in range(len(temp4))]
 
-        # count of positive controls in train data
-        check_positive_controls(
+        # count of PC positive controls in train data
+        pos_con_train_PC = check_positive_controls(
             positive_controls=pos_controls,
             kmers_list=list(X.iloc[train].columns),
             mapping_method="shen_2007",
             input_data="Train_Data",
             mode="PC",
-            save_path=paths[-1],
+        )
+        print(
+            "Count of Positive Control PC k-kmers in Train Dataset:\n",
+            pos_con_train_PC,
+        )
+        pos_con_train_PC.to_csv(
+            os.path.join("train_data_PC_kmer_positive_controls.csv"),
+            na_rep="",
+            index=False,
         )
 
-        # count of positive controls in topN (array2)
-        check_positive_controls(
+        # count of PC positive controls in topN (array2)
+        pos_con_topN_PC = check_positive_controls(
             positive_controls=pos_controls,
             kmers_list=array2,
             mapping_method="shen_2007",
             input_data="Top_N",
             mode="PC",
-            save_path=paths[-1],
+        )
+        print(
+            "Count of Positive Control PC k-kmers in topN:\n",
+            pos_con_topN_PC,
+        )
+        pos_con_topN_PC.to_csv(
+            os.path.join("topN_PC_kmer_positive_controls.csv"),
+            na_rep="",
+            index=False,
+        )
+
+        # count of AA positive controls in train data
+        pos_con_train_AA = check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=list(X.iloc[train].columns),
+            mapping_method="shen_2007",
+            input_data="Train_Data",
+            mode="AA",
+        )
+        print(
+            "Count of Positive Control AA k-kmers in Train Dataset:\n",
+            pos_con_train_AA,
+        )
+        pos_con_train_AA.to_csv(
+            os.path.join("train_data_AA_kmer_positive_controls.csv"),
+            na_rep="",
+            index=False,
+        )
+
+        # count of AA positive controls in topN (array2)
+        pos_con_topN_AA = check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=array2,
+            mapping_method="shen_2007",
+            input_data="Top_N",
+            mode="AA",
+        )
+        print(
+            "Count of Positive Control AA k-kmers in TopN:\n",
+            pos_con_topN_AA,
+        )
+        pos_con_train_AA.to_csv(
+            os.path.join("topN_AA_kmer_positive_controls.csv"),
+            na_rep="",
+            index=False,
         )
 
         for (

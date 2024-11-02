@@ -16,5 +16,5 @@ ci_test_linux:
     - cd /tmp && python -m pytest -m "not slow" --pyargs viral_seq
   parallel:
     matrix:
-      - IMAGE: ['python:3.10.8', 'python:3.11.9']
+      - IMAGE: ['python:3.10.8', 'python:3.11.9', 'python:3.12.6']
   allow_failure: false

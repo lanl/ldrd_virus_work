@@ -1517,6 +1517,18 @@ organism_dict = {
                 # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/rhopapillomavirus
                 # https://www.genome.jp/virushostdb/2848316
                 "Trichechus manatus latirostris papillomavirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1972687
+                # https://doi.org/10.4269/ajtmh.16-0403
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/almendravirus
+                "Almendravirus chico": "no_mammals",
+                # https://www.genome.jp/virushostdb/1538455
+                "Rio Preto da Eva virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/3052131
+                "Circovirus rongeur": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052126
+                "Circovirus kiore": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052130
+                "Circovirus roditore": "non_primate_mammals",
                 }
 
 
@@ -1604,7 +1616,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=535)
+                                                           n_records=540)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

@@ -20,6 +20,28 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/10398
+                "Ovine gammaherpesvirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1159904
+                "Night heron coronavirus HKU19": "avian",
+                # https://www.genome.jp/virushostdb/2560317
+                "avian paramyxovirus 7": "avian",
+                # https://www.genome.jp/virushostdb/35258
+                "Lambdapapillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1159902
+                "Common moorhen coronavirus HKU21": "avian",
+                # https://www.genome.jp/virushostdb/3052315
+                "Mammarenavirus lunaense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/380433
+                "Kern Canyon virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/32615
+                "Puma lentivirus 14": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1400425
+                "Bowe virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2886894
+                "Amapari virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/80939
+                "Kairi virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/106331
                 "callitrichine gammaherpesvirus 3": "primate",
                 # https://doi.org/10.1016/j.virol.2003.09.021
@@ -2129,7 +2151,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=325)
+                                                              n_records=340)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

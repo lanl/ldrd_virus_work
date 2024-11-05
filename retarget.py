@@ -1539,6 +1539,36 @@ organism_dict = {
                 "Bamboo rat circovirus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2560714
                 "Rodent associated cyclovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2560715
+                "Rodent associated cyclovirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1788315
+                "Rat bocavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2171381
+                "Murine bocavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2316143
+                "Mouse kidney parvovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2171377
+                "Murine adeno-associated virus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2171378
+                "Murine adeno-associated virus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2847266
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/rohelivirus
+                "rohelivirus A1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1902501
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/rosavirus
+                "Rosavirus B": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1902502
+                "Rosavirus C": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1929964
+                "Rotavirus J": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1508710
+                "Roundleaf bat hepatitis B virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/11886
+                "Rous sarcoma virus": "avian",
+                # https://www.genome.jp/virushostdb/1904411
+                "Rousettus aegyptiacus polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1892416
+                "Rousettus bat coronavirus": "non_primate_mammals",
                 }
 
 
@@ -1626,7 +1656,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=545)
+                                                           n_records=559)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

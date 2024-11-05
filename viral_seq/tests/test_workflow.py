@@ -124,21 +124,38 @@ def test_label_surface_exposed():
 
 
 @pytest.mark.parametrize(
-    "mode, expected",
+    "mode, expected, expected_dict",
     [
         (
             "PC",
             'Count of PC-kmer positive controls found in Test kmers:\n{\n "BBA": 3,\n "FBA": 1,\n "AFFA": 0,\n "AABB": 1,\n "AAC": 1,\n "BAFB": 1,\n "AAA": 1\n}\n',
+            {
+                "BBA": {0: "kmer_PC_BBACFF", 1: "kmer_PC_BAFBBBA", 2: "kmer_PC_CAABBA"},
+                "FBA": {0: "kmer_PC_FBAAFF", 1: "empty", 2: "empty"},
+                "AFFA": {0: "empty", 1: "empty", 2: "empty"},
+                "AABB": {0: "kmer_PC_CAABBA", 1: "empty", 2: "empty"},
+                "AAC": {0: "kmer_PC_AACFAF", 1: "empty", 2: "empty"},
+                "BAFB": {0: "kmer_PC_BAFBBBA", 1: "empty", 2: "empty"},
+                "AAA": {0: "kmer_PC_AAAA", 1: "empty", 2: "empty"},
+            },
         ),
         (
             "AA",
             'Count of AA-kmer positive controls found in Test kmers:\n{\n "CCA": 3,\n "DCA": 0,\n "GDDA": 0,\n "GGCC": 1,\n "AAF": 1,\n "CGDC": 1,\n "AAA": 1\n}\n',
+            {
+                "CCA": {0: "kmer_AA_CCAFEE", 1: "kmer_AA_CGDCCCA", 2: "kmer_AA_FGGCCA"},
+                "DCA": {0: "empty", 1: "empty", 2: "empty"},
+                "GDDA": {0: "empty", 1: "empty", 2: "empty"},
+                "GGCC": {0: "kmer_AA_FGGCCA", 1: "empty", 2: "empty"},
+                "AAF": {0: "kmer_AA_AAFDAE", 1: "empty", 2: "empty"},
+                "CGDC": {0: "kmer_AA_CGDCCCA", 1: "empty", 2: "empty"},
+                "AAA": {0: "kmer_AA_AAAA", 1: "empty", 2: "empty"},
+            },
         ),
     ],
-)  # , expected
-def test_positive_controls(mode, expected, capsys):  # , expected
+)
+def test_positive_controls(mode, expected, expected_dict, capsys, tmpdir):
     syn_pos_controls = ["CCA", "DCA", "GDDA", "GGCC", "AAF", "CGDC", "AAA"]
-    # "BBA" "FBA" "AFFA" "AABB" "AAC" "BAFB"
 
     syn_kmers = [
         "kmer_PC_FBAAFF",
@@ -161,7 +178,13 @@ def test_positive_controls(mode, expected, capsys):  # , expected
         mapping_method="shen_2007",
         input_data="Test",
         mode=mode,
+        save_path=tmpdir,
     )
 
+    out_file = tmpdir.join(f"Test_{mode}_kmer_positive_controls.csv")
     captured = capsys.readouterr()
+    out_df = pd.read_csv(out_file).fillna("empty")
+    out_dict = out_df.to_dict()
+
     assert captured.out == expected
+    assert out_dict == expected_dict

@@ -26,6 +26,7 @@ import tarfile
 import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
+import os
 
 matplotlib.use("Agg")
 
@@ -125,6 +126,7 @@ def check_positive_controls(
     mapping_method: str,
     input_data: str,
     mode: str,
+    save_path: Path,
 ) -> None:
     """
     checks how many of the kmers that are known to bind to a specific surface receptor (positive controls)
@@ -143,6 +145,8 @@ def check_positive_controls(
         name of input dataset for printing positive control count
     mode: str
         type of kmer to check for in dataset (AA vs. PC) to avoid double counting
+    save_path: Path
+        path to save positive control csv files
     """
 
     if mode == "PC":
@@ -158,10 +162,30 @@ def check_positive_controls(
     # iterate through lists of positive controls and
     # count number of positive controls found in kmer_list
     kmers_list = [s for s in kmers_list if s.startswith(f"kmer_{mode}_")]
+    kmers_info = [s.replace(f"kmer_{mode}_", "") for s in kmers_list]
     col_str = ",".join(kmers_list).replace(f"kmer_{mode}_", "")
     pos_con_dict = {key: 0 for key in positive_controls}
+    pos_con_kmers = {key: [Any] for key in positive_controls}
     for positive_control in positive_controls:
         pos_con_dict[positive_control] += col_str.count(positive_control)
+        pos_con_kmers[positive_control] = [
+            f"kmer_{mode}_" + s for s in kmers_info if positive_control in s
+        ]
+
+    # check that the dictionary of postive control containing kmers is not empty
+    # and save the dictionary to csv file containing instances of PC kmers
+    if any(pos_con_kmers.values()):
+        kmers_out = pd.DataFrame(
+            {
+                k: v + [None] * (max(map(len, pos_con_kmers.values())) - len(v))
+                for k, v in pos_con_kmers.items()
+            }
+        )
+        kmers_out.to_csv(
+            os.path.join(save_path, f"{input_data}_{mode}_kmer_positive_controls.csv"),
+            na_rep="",
+            index=False,
+        )
 
     # print out the dictonary counts of positive
     # controls found in the respective kmer list
@@ -527,47 +551,53 @@ def build_tables(feature_checkpoint=0, debug=False):
                     validate_feature_table(this_outfile, idx, prefix)
 
     elif workflow == "DTRA":
-        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                csv_conversion(file).to_csv(temp_file)
-                file = temp_file.name
-            if i == 0:
-                prefix = "Train"
-                debug = False
-                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                feature_checkpoint = 10
-                this_checkpoint = feature_checkpoint
+        if feature_checkpoint > 0:
+            for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+                    csv_conversion(file).to_csv(temp_file)
+                    file = temp_file.name
+                if i == 0:
+                    prefix = "Train"
+                    debug = False
+                    this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+                    feature_checkpoint = 10
+                    this_checkpoint = feature_checkpoint
 
-                for k in range(6, 11):
-                    this_checkpoint -= 2
-                    this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
-                    if feature_checkpoint >= this_checkpoint:
-                        print(
-                            "Building table for Train",
-                            "which includes kmers and pc kmers with k={}.".format(k),
+                    for k in range(6, 11):
+                        this_checkpoint -= 2
+                        this_outfile = (
+                            folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                         )
-                        print(
-                            "To restart at this point use --features", this_checkpoint
-                        )
-                        cli.calculate_table(
-                            [
-                                "--file",
-                                file,
-                                "--cache",
-                                cache_viral,
-                                "--outfile",
-                                this_outfile,
-                                "--features-kmers",
-                                "--kmer-k",
-                                str(k),
-                                "--features-kmers-pc",
-                                "--kmer-k-pc",
-                                str(k),
-                                "--target-column",
-                                target_column,
-                            ],
-                            standalone_mode=False,
-                        )
+                        if feature_checkpoint >= this_checkpoint:
+                            print(
+                                "Building table for Train",
+                                "which includes kmers and pc kmers with k={}.".format(
+                                    k
+                                ),
+                            )
+                            print(
+                                "To restart at this point use --features",
+                                this_checkpoint,
+                            )
+                            cli.calculate_table(
+                                [
+                                    "--file",
+                                    file,
+                                    "--cache",
+                                    cache_viral,
+                                    "--outfile",
+                                    this_outfile,
+                                    "--features-kmers",
+                                    "--kmer-k",
+                                    str(k),
+                                    "--features-kmers-pc",
+                                    "--kmer-k-pc",
+                                    str(k),
+                                    "--target-column",
+                                    target_column,
+                                ],
+                                standalone_mode=False,
+                            )
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
@@ -1251,8 +1281,9 @@ if __name__ == "__main__":
             positive_controls=pos_controls,
             kmers_list=list(X.iloc[train].columns),
             mapping_method="shen_2007",
-            input_data="Train Data",
+            input_data="Train_Data",
             mode="PC",
+            save_path=paths[-1],
         )
 
         # count of positive controls in topN (array2)
@@ -1260,8 +1291,9 @@ if __name__ == "__main__":
             positive_controls=pos_controls,
             kmers_list=array2,
             mapping_method="shen_2007",
-            input_data="Top N",
+            input_data="Top_N",
             mode="PC",
+            save_path=paths[-1],
         )
 
         for (

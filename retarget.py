@@ -20,6 +20,35 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/1144382
+                # aka TtPV6
+                "Tursiops truncatus papillomavirus 6": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/11970
+                "Woolly monkey sarcoma virus": "primate",
+                # https://www.genome.jp/virushostdb/59380
+                # only infects rice plants
+                "rice transitory yellowing virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/11977
+                "Rabbit hemorrhagic disease virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052324
+                # aka Pirital virus (PIRV)
+                "Mammarenavirus piritalense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1548718
+                "Parrot bornavirus 4": "avian",
+                # https://www.genome.jp/virushostdb/10381
+                "Saimiriine gammaherpesvirus 2": "primate",
+                # https://www.genome.jp/virushostdb/3052631
+                "Phasivirus phasiense": "no_mammals",
+                # https://www.genome.jp/virushostdb/11855
+                "Mason-Pfizer monkey virus": "primate",
+                # https://www.genome.jp/virushostdb/3052329
+                "Mammarenavirus tamiamiense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1987142
+                "Rodent hepatovirus KEF121Sigmas2012": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/318558
+                "Tupaia virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1978536
+                "Ledantevirus nishimuro": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/10398
                 "Ovine gammaherpesvirus 2": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1159904
@@ -1448,7 +1477,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=340)
+                                                              n_records=357)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

@@ -3690,6 +3690,21 @@ organism_dict = {
     "Pebjah virus": "primate",
     # https://www.genome.jp/virushostdb/471728
     "Seal picornavirus type 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/38143
+    "Simian hemorrhagic fever virus": "primate",
+    # https://www.genome.jp/virushostdb/666363
+    "Drosophila melanogaster sigmavirus AP30": "no_mammals",
+    # https://www.genome.jp/virushostdb/279896
+    "Maize mosaic nucleorhabdovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/200401
+    # https://doi.org/10.1016/j.virol.2013.10.024 claims in Aves, can't find direct evidence
+    "Hart Park virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1936072
+    "Kibale red colobus virus 2": "primate",
+    # https://www.genome.jp/virushostdb/1620895
+    # https://doi.org/10.1177/1176934317713484 source from above used for hamsters; only cell culture
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_034543.1 isolated from mosquito
+    "Ord River virus": "no_mammals",
 }
 
 

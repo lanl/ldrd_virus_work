@@ -14,6 +14,7 @@ from optuna.samplers import TPESampler
 import pickle
 from lightgbm import LGBMClassifier
 from matplotlib import pyplot as plt
+from xgboost import XGBClassifier
 
 
 def get_model_arguments(
@@ -80,6 +81,27 @@ def get_model_arguments(
         },
         "predict": {
             "verbose": 1,
+            "n_jobs": n_jobs,
+            "random_state": random_state,
+        },
+    }
+    model_arguments["XGBClassifer Boost Seed:" + str(random_state)] = {
+        "model": XGBClassifier,
+        "suffix": "xgb_" + str(random_state),
+        "group": "XGBClassifer_Boost",
+        "optimize": {
+            "num_samples": 350,
+            "n_jobs_cv": 1,
+            "config": {
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "reg_alpha": tune.loguniform(0.001, 1000),
+                "learning_rate": tune.uniform(0.1, 0.5),
+                "min_child_weight": tune.loguniform(0.001, 120.0),
+                "n_estimators": tune.randint(1, 4000),
+                "subsample": tune.uniform(0.5, 1.0),
+            },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/xgboost-tuning.html#xgboost-tunable-hyperparameters
+        },
+        "predict": {
             "n_jobs": n_jobs,
             "random_state": random_state,
         },

@@ -1637,6 +1637,76 @@ organism_dict = {
     # https://doi.org/10.1177/1176934317713484 source from above used for hamsters; only cell culture
     # https://www.ncbi.nlm.nih.gov/nuccore/NC_034543.1 isolated from mosquito
     "Ord River virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052234
+    "Hepacivirus otomopis": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/336959
+    "Chicken astrovirus": "avian",
+    # https://www.genome.jp/virushostdb/28295
+    # https://doi.org/10.1128/jcm.26.11.2235-2239.1988 only cell culture for primate
+    "Porcine epidemic diarrhea virus": "non_primate_mammals",
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_038543
+    # https://doi.org/10.1371/journal.pone.0015113 only cell culture for primates
+    "Chipmunk parvovirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1972612
+    # https://doi.org/10.1007/s00705-018-4003-7
+    "Hapavirus flanders": "avian",
+    # https://www.genome.jp/virushostdb/3052226
+    "Hepacivirus bovis": "non_primate_mammals",
+    # Alternate name Avian paramyxovirus 2
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_039230.1/
+    # https://doi.org/10.1016/j.virusres.2008.05.012 only cell culture for humans, etc
+    "Avian metaavulavirus 2": "avian",
+    # https://www.genome.jp/virushostdb/1755590
+    "Kunsagivirus A": "avian",
+    # https://www.genome.jp/virushostdb/47001
+    "Equine rhinitis B virus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1511784
+    "Pasivirus A1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/871700
+    "Oscivirus A1": "avian",
+    # https://www.genome.jp/virushostdb/3052238
+    "Hepacivirus rhabdomysis": "non_primate_mammals",
+    # https://doi.org/10.1099/vir.0.18731-0
+    "Murid gammaherpesvirus 4": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/205895
+    "Cypovirus 1": "no_mammals",
+    # https://www.genome.jp/virushostdb/519497
+    "Southern rice black-streaked dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/318834
+    "Berrimah virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1272946
+    "La Joya virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1307119
+    "Theiler's disease-associated virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1170234
+    "Feline morbillivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/11048
+    "Lactate dehydrogenase-elevating virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/11636
+    "Reticuloendotheliosis virus": "avian",
+    # https://www.genome.jp/virushostdb/10995
+    "Infectious bursal disease virus": "avian",
+    # https://www.genome.jp/virushostdb/2885846
+    "Alces alces papillomavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1965066
+    "Porcine reproductive and respiratory syndrome virus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1157337
+    "Piscine orthoreovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1965067
+    "Porcine reproductive and respiratory syndrome virus 2": "non_primate_mammals",
+    # Alternate name Aquareovirus ctenopharyngodontis
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_005166.1/
+    # https://www.genome.jp/virushostdb/185782
+    "Aquareovirus C": "no_mammals",
+    # https://www.genome.jp/virushostdb/1416021
+    "Feline sakobuvirus A": "non_primate_mammals",
+    # Alternate name maize Iranian mosaic virus
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_036390.1
+    # https://www.genome.jp/virushostdb/348823
+    "Maize Iranian mosaic nucleorhabdovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1272958
+    # https://doi.org/10.3389/fmicb.2019.00856 antibodies in water buffalo
+    "Sweetwater Branch virus": "no_mammals",
 }
 
 
@@ -1714,6 +1784,7 @@ def retarget(df, cache_path, n_records=None):
                         host_found = True
             if not host_found:
                 raise ValueError(
+                    f"At idx {idx}\n"
                     f"No human host confirmed for {accession=} {organism=}\n"
                     f"{metadata_missing_host=}"
                 )
@@ -1724,7 +1795,7 @@ def retarget(df, cache_path, n_records=None):
 def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(
-        df=df_train.iloc[::-1], cache_path=cache_path, n_records=20
+        df=df_train.iloc[::-1], cache_path=cache_path, n_records=100
     )
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(

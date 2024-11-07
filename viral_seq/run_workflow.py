@@ -900,169 +900,39 @@ if __name__ == "__main__":
             extract_cookie,
             debug=debug,
         )
-        X_test, y_test = get_test_features(
-        table_loc_test,
-        table_loc_test_saved,
-        test_file,
-        X_train,
-        extract_cookie,
-        debug=debug,
-        )
-
-    best_params: Dict[str, Any] = {}
-    best_params_group: Dict[str, Any] = {}
-    plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
-    model_arguments: Dict[str, Any] = {}
-    rng = np.random.default_rng(random_state)
-    # sklearn only accepts random_state in the range [0, 4294967295]; uint32
-    random_states = rng.integers(np.iinfo(np.uint32).max, dtype=np.uint32, size=copies)
-    for rs in random_states:
-        model_arguments.update(
-            classifier.get_model_arguments(
-                n_jobs,
-                rs,
-                num_samples=X_train.shape[0],
-                num_features=X_train.shape[1],
-            )
-        )
-    # optimize first if requested
-    for name, val in model_arguments.items():
-        params = val["optimize"]
-        if optimize == "none":
-            best_params[name] = {}
-        elif val["group"] in best_params_group:
-            best_params[name] = best_params_group[val["group"]]
-        elif optimize == "pre-optimized":
-            print("Using hyperparameters pre-caclulated for", val["group"])
-            this_filename = "params_" + val["group"] + ".json"
-            with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
-                res = json.load(f)
-            best_params[name] = res["params"]
-        else:
-            print("===", name, "===")
-            t_start = perf_counter()
-            res = optimize_model(
-                model=val["model"],
-                X_train=X_train,
-                y_train=y_train,
-                optimize=optimize,
-                debug=debug,
-                random_state=random_state,
-                name=name,
-                n_jobs=n_jobs,
-                outfile=str(hyperparams_path / ("params_" + val["suffix"] + ".json")),
-                **params,
-            )
-            print(
-                "Hyperparameter optimization of",
-                name,
-                "took",
-                perf_counter() - t_start,
-                "s",
-            )
-            best_params[name] = res["params"]
-            if not check_optimization:
-                print(
-                    f"All other copies of {val['group']} will use the same parameters."
-                )
-                best_params_group[val["group"]] = res["params"]
-            plotting_data[val["group"]][name] = res["targets"]
-    if optimize == "yes" or optimize == "skip":
-        for group, this_data in plotting_data.items():
-            optimization_plots(this_data, group, plots_path)
-    # train and predict on all models
-    predictions: Dict[str, Dict[str, Any]] = defaultdict(dict)
-    models_fitted = {}
-    for name, val in model_arguments.items():
-        (
-            models_fitted[name],
-            predictions[val["group"]][name],
-        ) = classifier.train_and_predict(
-            val["model"],
-            X_train,
-            y_train,
-            X_test,
-            name=name,
-            model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
-            params_predict=val["predict"],
-            params_optimized=best_params[name],
-        )
-        this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
-        print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
-    # ROC curve plotting
-    comp_names: list[str] = []
-    comp_fprs: list[Any] = []
-    comp_tprs: list[Any] = []
-    comp_tpr_stds: list[Any] = []
-    for group in predictions:
-        fpr, tpr, tpr_std = classifier.get_roc_curve(y_test, predictions[group])
-        this_title = (
-            f"ROC Curve\nAveraged over {copies} seeds" if copies > 1 else "ROC Curve"
-        )
-        classifier.plot_roc_curve(
-            group,
-            fpr,
-            tpr,
-            tpr_std,
-            filename=str(plots_path / f"{group}_roc_plot.png"),
-            title=this_title,
-        )
-        comp_names.append(group)
-        comp_fprs.append(fpr)
-        comp_tprs.append(tpr)
-        # output all predictions to .csv
-        predictions[group]["Species"] = pd.read_csv(test_file)["Species"]
-        pd.DataFrame(predictions[group]).to_csv(
-            str(predictions_path / (group + "_predictions.csv"))
-        )
-    this_title = (
-        f"ROC Curve\nEach model averaged over {copies} seeds"
-        if copies > 1
-        else "ROC Curve"
-    )
-    classifier.plot_roc_curve_comparison(
-        comp_names,
-        comp_fprs,
-        comp_tprs,
-        filename=str(plots_path / "roc_plot_comparison.png"),
-        title=this_title,
-    )
-    # check feature importance and consensus
-    feature_importances = []
-    np.random.seed(random_state)  # used by `shap.summary_plot`
-    for name, clf in models_fitted.items():
-        print(f"Plotting feature importances for {name}")
-        # built-in importances
-        optimization_plots(
-            plotting_data, optimization_plot_source, optimization_plot_figure
-        )
-
-    if workflow == "DR":
-        # train and predict on all models
-        predictions = {}
-        predictions["Species"] = pd.read_csv(test_file)["Species"]
-        models_fitted = {}
-        for name, val in model_arguments.items():
-            models_fitted[name], predictions[name] = classifier.train_and_predict(
-                val["model"],        
-                X_train,
-                extract_cookie,
-                debug=debug,
-            )
         best_params: Dict[str, Any] = {}
-        plotting_data: Dict[str, Any] = {}
+        best_params_group: Dict[str, Any] = {}
+        plotting_data: Dict[str, Dict[str, Any]] = defaultdict(dict)
         model_arguments: Dict[str, Any] = {}
-        model_arguments = classifier.get_model_arguments(
-            n_jobs,
-            random_state,
-            num_samples=X_train.shape[0],
-            num_features=X_train.shape[1],
+        rng = np.random.default_rng(random_state)
+        # sklearn only accepts random_state in the range [0, 4294967295]; uint32
+        random_states = rng.integers(
+            np.iinfo(np.uint32).max, dtype=np.uint32, size=copies
         )
+        for rs in random_states:
+            model_arguments.update(
+                classifier.get_model_arguments(
+                    n_jobs,
+                    rs,
+                    num_samples=X_train.shape[0],
+                    num_features=X_train.shape[1],
+                )
+            )
         # optimize first if requested
         for name, val in model_arguments.items():
             params = val["optimize"]
             if optimize == "none":
                 best_params[name] = {}
+            elif val["group"] in best_params_group:
+                best_params[name] = best_params_group[val["group"]]
+            elif optimize == "pre-optimized":
+                print("Using hyperparameters pre-caclulated for", val["group"])
+                this_filename = "params_" + val["group"] + ".json"
+                with open(
+                    str(hyperparams_stored_path.joinpath(this_filename)), "r"
+                ) as f:
+                    res = json.load(f)
+                best_params[name] = res["params"]
             else:
                 print("===", name, "===")
                 t_start = perf_counter()
@@ -1088,97 +958,122 @@ if __name__ == "__main__":
                     "s",
                 )
                 best_params[name] = res["params"]
-                plotting_data[name] = res["targets"]
-    if optimize == "yes" or optimize == "skip":
-        optimization_plots(
-            plotting_data, optimization_plot_source, optimization_plot_figure
+                if not check_optimization:
+                    print(
+                        f"All other copies of {val['group']} will use the same parameters."
+                    )
+                    best_params_group[val["group"]] = res["params"]
+                plotting_data[val["group"]][name] = res["targets"]
+        if optimize == "yes" or optimize == "skip":
+            for group, this_data in plotting_data.items():
+                optimization_plots(this_data, group, plots_path)
+        # train and predict on all models
+        predictions: Dict[str, Dict[str, Any]] = defaultdict(dict)
+        models_fitted = {}
+        for name, val in model_arguments.items():
+            (
+                models_fitted[name],
+                predictions[val["group"]][name],
+            ) = classifier.train_and_predict(
+                val["model"],
+                X_train,
+                y_train,
+                X_test,
+                name=name,
+                model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
+                params_predict=val["predict"],
+                params_optimized=best_params[name],
+            )
+            this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
+            print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
+        # ROC curve plotting
+        comp_names: list[str] = []
+        comp_fprs: list[Any] = []
+        comp_tprs: list[Any] = []
+        comp_tpr_stds: list[Any] = []
+        for group in predictions:
+            fpr, tpr, tpr_std = classifier.get_roc_curve(y_test, predictions[group])
+            this_title = (
+                f"ROC Curve\nAveraged over {copies} seeds"
+                if copies > 1
+                else "ROC Curve"
+            )
+            classifier.plot_roc_curve(
+                group,
+                fpr,
+                tpr,
+                tpr_std,
+                filename=str(plots_path / f"{group}_roc_plot.png"),
+                title=this_title,
+            )
+            comp_names.append(group)
+            comp_fprs.append(fpr)
+            comp_tprs.append(tpr)
+            # output all predictions to .csv
+            predictions[group]["Species"] = pd.read_csv(test_file)["Species"]
+            pd.DataFrame(predictions[group]).to_csv(
+                str(predictions_path / (group + "_predictions.csv"))
+            )
+        this_title = (
+            f"ROC Curve\nEach model averaged over {copies} seeds"
+            if copies > 1
+            else "ROC Curve"
+        )
+        classifier.plot_roc_curve_comparison(
+            comp_names,
+            comp_fprs,
+            comp_tprs,
+            filename=str(plots_path / "roc_plot_comparison.png"),
+            title=this_title,
         )
 
-        if workflow == "DR":
-            # train and predict on all models
-            predictions = {}
-            predictions["Species"] = pd.read_csv(test_file)["Species"]
-            models_fitted = {}
-            for name, val in model_arguments.items():
-                models_fitted[name], predictions[name] = classifier.train_and_predict(
-                    val["model"],
-                    X_train,
-                    y_train,
-                    X_test,
-                    name=name,
-                    model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
-                    params_predict=val["predict"],
-                    params_optimized=best_params[name],
-                )
-                this_auc = roc_auc_score(y_test, predictions[name])
-                print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
-            pd.DataFrame(predictions).to_csv(predictions_loc)
-            # check feature importance and consensus
-            feature_importances = []
-            np.random.seed(random_state)  # used by `shap.summary_plot`
-            for name, clf in models_fitted.items():
-                print(f"Plotting feature importances for {name}")
-                # built-in importances
-                (
-                    sorted_feature_importances,
-                    sorted_feature_names,
-                ) = feature_importance.sort_features(
-                    clf.feature_importances_, X_train.columns
-                )
-                feature_importance.plot_feat_import(
-                    sorted_feature_importances,
-                    sorted_feature_names,
-                    top_feat_count=10,
-                    model_name=name,
-                    fig_name_stem=str(
-                        plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
-                    ),
-                )
-                feature_importances.append(clf.feature_importances_)
-                # SHAP importances
-                print("Calculating & Plotting SHAP values...")
-                time_start = perf_counter()
-                explainer = shap.Explainer(clf, seed=random_state)
-                shap_values = explainer(X_train)
-                print("Finished SHAP calculation in", perf_counter() - time_start)
-                positive_shap_values = feature_importance.get_positive_shap_values(
-                    shap_values
-                )
-                feature_importance.plot_shap_meanabs(
-                    positive_shap_values,
-                    model_name=name,
-                    fig_name_stem=str(
-                        plots_path
-                        / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
-                    ),
-                    top_feat_count=10,
-                )
-                feature_importance.plot_shap_beeswarm(
-                    positive_shap_values,
-                    model_name=name,
-                    fig_name=str(
-                        plots_path
-                        / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
-                    ),
-                    max_display=10,
-                )
-                feature_importances.append(positive_shap_values)
+        # check feature importance and consensus
+        feature_importances = []
+        np.random.seed(random_state)  # used by `shap.summary_plot`
+        for name, clf in models_fitted.items():
+            print(f"Plotting feature importances for {name}")
+            # built-in importances
             (
-                ranked_feature_names,
-                ranked_feature_counts,
-                num_input_models,
-            ) = feature_importance.feature_importance_consensus(
-                pos_class_feat_imps=feature_importances,
-                feature_names=X_train.columns,
+                sorted_feature_importances,
+                sorted_feature_names,
+            ) = feature_importance.sort_features(
+                clf.feature_importances_, X_train.columns
+            )
+            feature_importance.plot_feat_import(
+                sorted_feature_importances,
+                sorted_feature_names,
+                top_feat_count=10,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+                ),
+            )
+            feature_importances.append(clf.feature_importances_)
+            # SHAP importances
+            print("Calculating & Plotting SHAP values...")
+            time_start = perf_counter()
+            explainer = shap.Explainer(clf, seed=random_state)
+            shap_values = explainer(X_train)
+            print("Finished SHAP calculation in", perf_counter() - time_start)
+            positive_shap_values = feature_importance.get_positive_shap_values(
+                shap_values
+            )
+            feature_importance.plot_shap_meanabs(
+                positive_shap_values,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
+                ),
                 top_feat_count=10,
             )
-            feature_importance.plot_feat_import_consensus(
-                ranked_feature_names=ranked_feature_names,
-                ranked_feature_counts=ranked_feature_counts,
-                num_input_models=num_input_models,
-                top_feat_count=10,
-                fig_name=feature_imp_consensus_plot_figure,
-                fig_source=feature_imp_consensus_plot_source,
+            feature_importance.plot_shap_beeswarm(
+                positive_shap_values,
+                model_name=name,
+                fig_name=str(
+                    plots_path
+                    / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
+                ),
+                max_display=10,
             )
             feature_importances.append(positive_shap_values)
         (

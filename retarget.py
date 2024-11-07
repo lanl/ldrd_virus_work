@@ -20,6 +20,34 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/3052605
+                "Pegivirus carolliae": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/490110
+                "Curionopolis virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/10331
+                "Equid alphaherpesvirus 4": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1972564
+                "American bat vesiculovirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1633187
+                "Laibin virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1552846
+                "Alajuela virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/11673
+                "Feline immunodeficiency virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/40053
+                "Corriparta virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/12657
+                "Equid gammaherpesvirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/70793
+                "Turkey astrovirus": "avian",
+                # https://www.genome.jp/virushostdb/490111
+                # VHDB references cite isolation from Culicoides midges 
+                # and subsequent cell culture study in mice
+                "Itacaiunas virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2847081
+                "Fugong virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/144752
+                "Mammarenavirus allpahuayoense": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1637496
                 "Rotavirus I": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/80341
@@ -1975,7 +2003,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=374)
+                                                              n_records=391)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

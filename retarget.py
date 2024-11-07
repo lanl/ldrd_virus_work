@@ -1605,6 +1605,22 @@ organism_dict = {
                 "Nile warbler virus": "avian",
                 # https://www.genome.jp/virushostdb/943083
                 "California sea lion adenovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1416741
+                # https://ictv.global/report/chapter/poxviridae/poxviridae/mustelpoxvirus
+                "Sea otter poxvirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/881945
+                # https://ictv.global/report/chapter/polyomaviridae/polyomaviridae/gammapolyomavirus
+                "Canary polyomavirus": "avian",
+                # https://www.genome.jp/virushostdb/45768
+                "Serra do Navio virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1985407
+                # isolated from sewage, no useful host info
+                # that I can find...
+                # label conservatively then
+                "Sewage derived gemycircularvirus 1": "no_mammals",
+                # https://www.genome.jp/virushostdb/1985408
+                # similar analysis to case above
+                "Sewage derived gemycircularvirus 2": "no_mammals",
                 }
 
 
@@ -1692,7 +1708,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=573)
+                                                           n_records=578)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

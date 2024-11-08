@@ -234,6 +234,7 @@ def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
         input_data="Test",
         mode=mode,
     )
-
-    expected_df = pd.DataFrame.from_dict(expected_dict).replace({np.nan: None})
+    expected_df = (
+        pd.DataFrame.from_dict(expected_dict).replace({np.nan: None}).convert_dtypes()
+    )
     assert_frame_equal(out_df, expected_df)

@@ -502,6 +502,7 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
     )
     table["Is_Both"] = np.where(table["Is_Integrin"] == "both", True, False)
     table["Is_Sialic_Acid"] = pd.Series(dtype="bool")
+    table["Is_IgSF"] = pd.Series(dtype="bool")
     table = table[
         [
             "Species",
@@ -510,10 +511,20 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
             "Is_Integrin",
             "Is_Sialic_Acid",
             "Is_Both",
+            "Is_IgSF",
         ]
     ]
-    table["Is_Sialic_Acid"] = np.where(table["Is_Integrin"] == "integrin", False, True)
-    table["Is_Integrin"] = np.where(table["Is_Integrin"] == "sialic_acid", False, True)
+
+    table["Is_Sialic_Acid"] = np.where(
+        np.isin(table["Is_Integrin"], ["integrin", "IgSF"]), False, True
+    )
+    table["Is_IgSF"] = np.where(
+        np.isin(table["Is_Integrin"], ["integrin", "sialic_acid", "both"]), False, True
+    )
+    table["Is_Integrin"] = np.where(
+        np.isin(table["Is_Integrin"], ["sialic_acid", "IgSF"]), False, True
+    )
+
     return table
 
 
@@ -1289,7 +1300,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Is_Integrin", "Is_Sialic_Acid", "Is_Both", "Human Host"],
+        choices=["Is_Integrin", "Is_Sialic_Acid", "Is_IgSF", "Is_Both", "Human Host"],
         default="Human Host",
         help="Target column to be used for binary clasification.",
     )

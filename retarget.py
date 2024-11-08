@@ -1707,6 +1707,19 @@ organism_dict = {
     # https://www.genome.jp/virushostdb/1272958
     # https://doi.org/10.3389/fmicb.2019.00856 antibodies in water buffalo
     "Sweetwater Branch virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/994485
+    "Scophthalmus maximus reovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052762
+    "Tenuivirus oryzabrevis": "no_mammals",
+    # https://www.genome.jp/virushostdb/1605403
+    "Non-primate hepacivirus NZP1": "non_primate_mammals",
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_038292
+    "Kibale red-tailed guenon virus 1": "primate",
+    # https://www.genome.jp/virushostdb/380160
+    # https://doi.org/10.1016/j.virusres.2022.198739 in cattle, PCR
+    "Obodhiang virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/10353
+    "Saimiriine alphaherpesvirus 1": "primate",
 }
 
 

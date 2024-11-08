@@ -18,7 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence
+from typing import Dict, Any, Sequence, List
 import matplotlib
 import matplotlib.pyplot as plt
 from time import perf_counter
@@ -26,7 +26,6 @@ import tarfile
 import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
-import os
 
 matplotlib.use("Agg")
 
@@ -147,7 +146,7 @@ def check_positive_controls(
 
     Returns:
     --------
-    kmers_out: pd.DataFrame
+    kmers_df: pd.DataFrame
         Dataframe containing the names of kmer features found in the dataset that contain
         each of the positive control sequences, and the counts for each
     """
@@ -162,25 +161,27 @@ def check_positive_controls(
             pc_pos_con.append(pc_kmer)
         positive_controls = pc_pos_con
 
-    # iterate through lists of positive controls and
-    # count number of positive controls found in kmer_list
+    # grab only kmers in kmers_list with the relevant prefix to mode
     kmers_list = [s for s in kmers_list if s.startswith(f"kmer_{mode}_")]
-    kmers_info = [s.replace(f"kmer_{mode}_", "") for s in kmers_list]
-    col_str = ",".join(kmers_list).replace(f"kmer_{mode}_", "")
-    pos_con_dict = {key: 0 for key in positive_controls}
-    pos_con_kmers = {key: [Any] for key in positive_controls}
-    for positive_control in positive_controls:
-        pos_con_dict[positive_control] += col_str.count(positive_control)
-        pos_con_kmers[positive_control] = [
-            f"kmer_{mode}_" + s for s in kmers_info if positive_control in s
-        ]
 
-    kmers_out = pd.DataFrame.from_dict(pos_con_kmers, orient="index").transpose()
-    new_row = kmers_out.count().astype(int).to_frame().T
-    kmers_out = pd.concat([kmers_out, new_row], ignore_index=True)
+    # iterate through lists of positive controls and count number
+    # of positive controls found in kmer_list/add kmers to dictionary
+    kmer_counts: dict[str, int] = {key: 0 for key in positive_controls}
+    kmers_out: dict[str, List[str]] = {key: [] for key in positive_controls}
+    for kmer_feat in kmers_list:
+        kmer_str = kmer_feat[8:]
+        for positive_control in positive_controls:
+            if positive_control in kmer_str:
+                kmer_counts[positive_control] += 1
+                kmers_out[positive_control].append(kmer_feat)
 
+    kmers_out_df = pd.DataFrame.from_dict(kmers_out, orient="index").transpose()
+    kmer_counts_df = pd.DataFrame.from_dict(kmer_counts, orient="index").transpose()
+    kmers_df = pd.concat(
+        [kmers_out_df, kmer_counts_df], ignore_index=True
+    ).convert_dtypes()
 
-    return kmers_out
+    return kmers_df
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -1316,10 +1317,10 @@ if __name__ == "__main__":
         )
         print(
             "Count of Positive Control PC k-kmers in Train Dataset:\n",
-            pos_con_train_PC,
+            pos_con_train_PC.tail(1).to_string(index=False),
         )
         pos_con_train_PC.to_csv(
-            os.path.join("train_data_PC_kmer_positive_controls.csv"),
+            "train_data_PC_kmer_positive_controls.csv",
             na_rep="",
             index=False,
         )
@@ -1334,10 +1335,10 @@ if __name__ == "__main__":
         )
         print(
             "Count of Positive Control PC k-kmers in topN:\n",
-            pos_con_topN_PC,
+            pos_con_topN_PC.tail(1).to_string(index=False),
         )
         pos_con_topN_PC.to_csv(
-            os.path.join("topN_PC_kmer_positive_controls.csv"),
+            "topN_PC_kmer_positive_controls.csv",
             na_rep="",
             index=False,
         )
@@ -1352,10 +1353,10 @@ if __name__ == "__main__":
         )
         print(
             "Count of Positive Control AA k-kmers in Train Dataset:\n",
-            pos_con_train_AA,
+            pos_con_train_AA.tail(1).to_string(index=False),
         )
         pos_con_train_AA.to_csv(
-            os.path.join("train_data_AA_kmer_positive_controls.csv"),
+            "train_data_AA_kmer_positive_controls.csv",
             na_rep="",
             index=False,
         )
@@ -1370,10 +1371,10 @@ if __name__ == "__main__":
         )
         print(
             "Count of Positive Control AA k-kmers in TopN:\n",
-            pos_con_topN_AA,
+            pos_con_topN_AA.tail(1).to_string(index=False),
         )
         pos_con_train_AA.to_csv(
-            os.path.join("topN_AA_kmer_positive_controls.csv"),
+            "topN_AA_kmer_positive_controls.csv",
             na_rep="",
             index=False,
         )

@@ -1621,6 +1621,23 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/1985408
                 # similar analysis to case above
                 "Sewage derived gemycircularvirus 2": "no_mammals",
+                # https://www.genome.jp/virushostdb/1519401
+                "Sewage-associated gemycircularvirus 6": "no_mammals",
+                # https://www.genome.jp/virushostdb/1519405
+                "Sewage-associated gemycircularvirus-7b": "no_mammals",
+                # https://www.genome.jp/virushostdb/1519404
+                "Sewage-associated gemycircularvirus 9": "no_mammals",
+                # https://www.genome.jp/virushostdb/1519400
+                # as above, remember that sewage could mean
+                # replication in another organism that infects
+                # animals, rather than direct infection...
+                "Sewage-associated gemycircularvirus 5": "no_mammals",
+                # https://www.genome.jp/virushostdb/1843761
+                # the chicken host in the link above isn't
+                # convincing to me, and most of the isolations
+                # of these types of viruses so far could be
+                # from gut microorganisms rather than the host proper
+                "Sewage associated gemycircularvirus 3": "no_mammals",
                 }
 
 
@@ -1708,7 +1725,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=578)
+                                                           n_records=583)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

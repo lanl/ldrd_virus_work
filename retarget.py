@@ -1720,6 +1720,33 @@ organism_dict = {
     "Obodhiang virus": "non_primate_mammals",
     # https://www.genome.jp/virushostdb/10353
     "Saimiriine alphaherpesvirus 1": "primate",
+    # https://www.genome.jp/virushostdb/471285
+    "Lettuce yellow mottle virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/2847088
+    "GB virus-D": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/40061
+    # https://doi.org/10.1111/j.1751-0813.1999.tb12126.x also seems to be in kangaroos, other marsupials
+    "Wallal virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1479613
+    "Puerto Almendras virus": "no_mammals",
+    # https://doi.org/10.1007/s11262-012-0819-5
+    # isolated from sandflies, it's assumed to infect mammals due to the family, but no direct evidence
+    "Vesiculovirus bogdanovac": "no_mammals",
+    # https://www.genome.jp/virushostdb/311228
+    "Mycoreovirus 1": "no_mammals",
+    # https://www.genome.jp/virushostdb/32612
+    "Lettuce necrotic yellows virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/2682610
+    "Zambian malbrouck virus 1": "primate",
+    # https://doi.org/10.1099/vir.0.058172-0
+    "Carp picornavirus 1": "no_mammals",
+    # https://doi.org/10.1371/journal.pone.0097730
+    "Enterovirus E": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/31612
+    "Adelaide River virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/318836
+    # https://doi.org/10.1016/j.virol.2012.01.004 probably in cattle, serological evidence only
+    "Kotonkan virus": "no_mammals",
 }
 
 

@@ -20,6 +20,34 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1016/j.vetmic.2013.09.031
+                "Equine infectious anemia virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/179241
+                "Murine polyomavirus strain BG": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1308859
+                "Drosophila affinis sigmavirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1631554
+                "Bovine nidovirus TCH5": "non_primate_mammals",
+                # https://doi.org/10.1016/j.micpath.2023.106222
+                "Respirovirus suis": "non_primate_mammals",
+                # https://doi.org/10.1038/s41598-022-26103-3
+                "Avian hepatitis E virus": "avian",
+                # https://doi.org/10.1038/308291a0
+                # aka Mastomys natalensis papillomavirus
+                "Iotapapillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/40537
+                "Epsilonpapillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052612
+                "Pegivirus scotophili": "non_primate_mammals",
+                # https://doi.org/10.1038/s41598-018-31193-z
+                "Achimota virus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1001080
+                "Rockport virus": "non_primate_mammals",
+                # https://doi.org/10.3201/eid0807.010281
+                # aka bear valley virus
+                "Mammarenavirus bearense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/129956
+                "Murine mastadenovirus A": "non_primate_mammals",
                 # https://doi.org/10.1128/jvi.02364-10
                 "Bat picornavirus BatPV/V1/13 Hun": "non_primate_mammals",
                 # https://doi.org/10.1007/s00705-016-3188-x
@@ -2070,7 +2098,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=408)
+                                                              n_records=428)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

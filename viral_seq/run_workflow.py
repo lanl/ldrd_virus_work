@@ -1184,23 +1184,6 @@ if __name__ == "__main__":
             "PHSRN",
             "SVVYGLR",
         ]
-        list_of_positive_controls_for_PC_k_mers = [
-            "GAF",
-            "CFA",
-            "FAFA",
-            "GFFA",
-            "DAGG",
-            "CEDGE",
-            "DAADACG",
-        ]
-
-        # 'GAF' corresponds to both RGD and KGE
-        # 'CFA' corresponds to LDV
-        # 'FAFA' corresponds to DGEA
-        # 'GFFA' corresponds to REDV
-        # 'DAGG' corresponds to YGRK
-        # 'CEDGE' corresponds to PHSRN
-        # 'DAADACG' corresponds to SVVYGLR
 
         ### Create empty lists for eventual post-processing of data output
 
@@ -1316,7 +1299,7 @@ if __name__ == "__main__":
             mode="PC",
         )
         print(
-            "Count of Positive Control PC k-kmers in Train Dataset:\n",
+            "Count of Positive Control PC k-mers in Train Dataset:\n",
             pos_con_train_PC.tail(1).to_string(index=False),
         )
         pos_con_train_PC.to_csv(
@@ -1334,7 +1317,7 @@ if __name__ == "__main__":
             mode="PC",
         )
         print(
-            "Count of Positive Control PC k-kmers in topN:\n",
+            "Count of Positive Control PC k-mers in topN:\n",
             pos_con_topN_PC.tail(1).to_string(index=False),
         )
         pos_con_topN_PC.to_csv(
@@ -1352,7 +1335,7 @@ if __name__ == "__main__":
             mode="AA",
         )
         print(
-            "Count of Positive Control AA k-kmers in Train Dataset:\n",
+            "Count of Positive Control AA k-mers in Train Dataset:\n",
             pos_con_train_AA.tail(1).to_string(index=False),
         )
         pos_con_train_AA.to_csv(
@@ -1370,7 +1353,7 @@ if __name__ == "__main__":
             mode="AA",
         )
         print(
-            "Count of Positive Control AA k-kmers in TopN:\n",
+            "Count of Positive Control AA k-mers in TopN:\n",
             pos_con_topN_AA.tail(1).to_string(index=False),
         )
         pos_con_train_AA.to_csv(

@@ -1747,6 +1747,31 @@ organism_dict = {
     # https://www.genome.jp/virushostdb/318836
     # https://doi.org/10.1016/j.virol.2012.01.004 probably in cattle, serological evidence only
     "Kotonkan virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/694001
+    "Miniopterus bat coronavirus HKU8": "non_primate_mammals",
+    # https://doi.org/10.1038/293543a0
+    "Moloney murine leukemia virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1641896
+    "Falcovirus A1": "avian",
+    # https://www.genome.jp/virushostdb/1231903
+    # https://doi.org/10.1128/jvi.01856-14 its limited host range is known/notable
+    "Eilat virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1272943
+    "Joinjakaka virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1330070
+    "Melegrivirus A": "avian",
+    # https://www.genome.jp/virushostdb/1354498
+    "Guereza hepacivirus": "primate",
+    # https://www.genome.jp/virushostdb/185954
+    "Mal de Rio Cuarto virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1158189
+    "Chaco virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/11978
+    "Feline calicivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/75888
+    "Baboon orthoreovirus": "primate",
+    # https://doi.org/10.1007/s00705-005-0652-4
+    "Tenuivirus persotritici": "no_mammals",
 }
 
 

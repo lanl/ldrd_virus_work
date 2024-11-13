@@ -20,6 +20,40 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1016/j.onehlt.2021.100273
+                "Mammarenavirus wenzhouense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1611837
+                "Chinook salmon bafinivirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1664810
+                "Ferak virus": "no_mammals",
+                # https://doi.org/10.3390/v16030340
+                "Mammarenavirus oliverosense": "non_primate_mammals",
+                # https://doi.org/10.1016/j.virusres.2011.05.023
+                "Murine adenovirus 2": "non_primate_mammals",
+                # https://doi.org/10.1099/vir.0.053157-0
+                "Sebokele virus 1": "non_primate_mammals",
+                # https://doi.org/10.1128/jcm.02416-08
+                "Cervid alphaherpesvirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/38804
+                # https://doi.org/10.1128/jvi.77.24.13335-13347.2003
+                "Yaba monkey tumor virus": "human",
+                # https://doi.org/10.1016/j.meegid.2015.11.012
+                "rabbit kobuvirus": "non_primate_mammals",
+                # https://doi.org/10.1016/j.virol.2014.12.011
+                # aka gairo virus
+                "Mammarenavirus gairoense": "non_primate_mammals",
+                # https://doi.org/10.1099/0022-1317-42-2-241
+                "Drosophila X virus": "no_mammals",
+                # https://doi.org/10.1128/jvi.01394-12
+                "Miniopterus schreibersii picornavirus 1": "non_primate_mammals",
+                # https://doi.org/10.1007/s00705-014-2113-4
+                # found in fecal sample of bird known to eat mice
+                # "host speacies not clear...most likely rodent born"
+                "Mosavirus A2": "unknown",
+                # https://www.genome.jp/virushostdb/10623
+                # aka Shope papillomavirus (SPV)
+                # aka cottontail rabbit papillomavirus (CRPV)
+                "Kappapapillomavirus 2": "non_primate_mammals",
                 # https://doi.org/10.1016/j.vetmic.2013.09.031
                 "Equine infectious anemia virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/179241
@@ -2098,7 +2132,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=428)
+                                                              n_records=448)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

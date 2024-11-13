@@ -123,12 +123,11 @@ def check_positive_controls(
     positive_controls: Sequence[str],
     kmers_list: list[str],
     mapping_method: str,
-    input_data: str,
     mode: str,
 ) -> pd.DataFrame:
     """
-    checks how many of the kmers that are known to bind to a specific surface receptor (positive controls)
-    are found in a given list of kmers (train vs. top-N) and prints the counts of each
+    checks how many of the kmers that are known to bind to a specific surface
+    receptor (positive controls) are found in a given list of kmers (train vs. top-N)
 
     Parameters
     ----------
@@ -139,8 +138,6 @@ def check_positive_controls(
         or topN classifier rankings
     mapping_method: str
         preference for mapping AA-kmers to PC-kmers
-    input_data: str
-        name of input dataset for printing positive control count
     mode: str
         type of kmer to check for in dataset (AA vs. PC) to avoid double counting
 
@@ -161,19 +158,17 @@ def check_positive_controls(
             pc_pos_con.append(pc_kmer)
         positive_controls = pc_pos_con
 
-    # grab only kmers in kmers_list with the relevant prefix to mode
-    kmers_list = [s for s in kmers_list if s.startswith(f"kmer_{mode}_")]
-
     # iterate through lists of positive controls and count number
     # of positive controls found in kmer_list/add kmers to dictionary
     kmer_counts: dict[str, int] = {key: 0 for key in positive_controls}
     kmers_out: dict[str, List[str]] = {key: [] for key in positive_controls}
     for kmer_feat in kmers_list:
-        kmer_str = kmer_feat[8:]
-        for positive_control in positive_controls:
-            if positive_control in kmer_str:
-                kmer_counts[positive_control] += 1
-                kmers_out[positive_control].append(kmer_feat)
+        if kmer_feat.startswith(f"kmer_{mode}_"):
+            kmer_str = kmer_feat[8:]
+            for positive_control in positive_controls:
+                if positive_control in kmer_str:
+                    kmer_counts[positive_control] += 1
+                    kmers_out[positive_control].append(kmer_feat)
 
     kmers_out_df = pd.DataFrame.from_dict(kmers_out, orient="index").transpose()
     kmer_counts_df = pd.DataFrame.from_dict(kmer_counts, orient="index").transpose()
@@ -1295,7 +1290,6 @@ if __name__ == "__main__":
             positive_controls=pos_controls,
             kmers_list=list(X.iloc[train].columns),
             mapping_method="shen_2007",
-            input_data="Train_Data",
             mode="PC",
         )
         print(
@@ -1313,7 +1307,6 @@ if __name__ == "__main__":
             positive_controls=pos_controls,
             kmers_list=array2,
             mapping_method="shen_2007",
-            input_data="Top_N",
             mode="PC",
         )
         print(
@@ -1331,7 +1324,6 @@ if __name__ == "__main__":
             positive_controls=pos_controls,
             kmers_list=list(X.iloc[train].columns),
             mapping_method="shen_2007",
-            input_data="Train_Data",
             mode="AA",
         )
         print(
@@ -1349,7 +1341,6 @@ if __name__ == "__main__":
             positive_controls=pos_controls,
             kmers_list=array2,
             mapping_method="shen_2007",
-            input_data="Top_N",
             mode="AA",
         )
         print(
@@ -1541,7 +1532,9 @@ if __name__ == "__main__":
         ax.barh(y_pos, (array1 / n_folds) * 100, color="k")
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
-        ax.set_title(f"Feature importance consensus amongst {n_folds} folds")
+        ax.set_title(
+            f"Feature importance consensus amongst {n_folds} folds for\n {target_column}"
+        )
         ax.set_xlabel("Percentage (%)")
         counter2 = -1
 

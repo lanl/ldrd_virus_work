@@ -231,7 +231,6 @@ def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
         positive_controls=syn_pos_controls,
         kmers_list=syn_kmers,
         mapping_method=mapping_method,
-        input_data="Test",
         mode=mode,
     )
     expected_df = (

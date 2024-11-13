@@ -121,3 +121,119 @@ def test_label_surface_exposed():
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
     np.testing.assert_array_equal(not_exposed, not_exposed_exp)
     np.testing.assert_array_equal(found_kmers, found_kmers_exp)
+
+
+@pytest.mark.parametrize(
+    "syn_kmers, mapping_method, mode, expected_dict",
+    [
+        (
+            [
+                "kmer_PC_FBAAFF",
+                "kmer_PC_AACFAF",
+                "kmer_PC_BBACFF",
+                "kmer_PC_BAFBBBA",
+                "kmer_PC_CAABBA",
+                "kmer_PC_AAAA",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "shen_2007",
+            "PC",
+            {
+                "BBA": {
+                    0: "kmer_PC_BBACFF",
+                    1: "kmer_PC_BAFBBBA",
+                    2: "kmer_PC_CAABBA",
+                    3: 3,
+                },
+                "FBA": {0: "kmer_PC_FBAAFF", 1: None, 2: None, 3: 1},
+                "AFFA": {0: None, 1: None, 2: None, 3: 0},
+                "AABB": {0: "kmer_PC_CAABBA", 1: None, 2: None, 3: 1},
+                "AAC": {0: "kmer_PC_AACFAF", 1: None, 2: None, 3: 1},
+                "BAFB": {0: "kmer_PC_BAFBBBA", 1: None, 2: None, 3: 1},
+                "AAA": {0: "kmer_PC_AAAA", 1: None, 2: None, 3: 1},
+            },
+        ),
+        (
+            [
+                "kmer_PC_FBAAFF",
+                "kmer_PC_AACFAF",
+                "kmer_PC_BBACFF",
+                "kmer_PC_BAFBBBA",
+                "kmer_PC_CAABBA",
+                "kmer_PC_AAAA",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "shen_2007",
+            "AA",
+            {
+                "CCA": {
+                    0: "kmer_AA_CCAFEE",
+                    1: "kmer_AA_CGDCCCA",
+                    2: "kmer_AA_FGGCCA",
+                    3: 3,
+                },
+                "DCA": {0: None, 1: None, 2: None, 3: 0},
+                "GDDA": {0: None, 1: None, 2: None, 3: 0},
+                "GGCC": {0: "kmer_AA_FGGCCA", 1: None, 2: None, 3: 1},
+                "AAF": {0: "kmer_AA_AAFDAE", 1: None, 2: None, 3: 1},
+                "CGDC": {0: "kmer_AA_CGDCCCA", 1: None, 2: None, 3: 1},
+                "AAA": {0: "kmer_AA_AAAA", 1: None, 2: None, 3: 1},
+            },
+        ),
+        (
+            [
+                "kmer_PC_416044",
+                "kmer_PC_007404",
+                "kmer_PC_110744",
+                "kmer_PC_1041110",
+                "kmer_PC_700110",
+                "kmer_PC_0000",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "jurgen_schmidt",
+            "PC",
+            {
+                "110": {
+                    0: "kmer_PC_110744",
+                    1: "kmer_PC_1041110",
+                    2: "kmer_PC_700110",
+                    3: 3,
+                },
+                "410": {0: None, 1: None, 2: None, 3: 0},
+                "0440": {0: None, 1: None, 2: None, 3: 0},
+                "0011": {0: "kmer_PC_700110", 1: None, 2: None, 3: 1},
+                "007": {0: "kmer_PC_007404", 1: None, 2: None, 3: 1},
+                "1041": {0: "kmer_PC_1041110", 1: None, 2: None, 3: 1},
+                "000": {0: "kmer_PC_0000", 1: None, 2: None, 3: 1},
+            },
+        ),
+    ],
+)
+def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
+    syn_pos_controls = ["CCA", "DCA", "GDDA", "GGCC", "AAF", "CGDC", "AAA"]
+
+    out_df = workflow.check_positive_controls(
+        positive_controls=syn_pos_controls,
+        kmers_list=syn_kmers,
+        mapping_method=mapping_method,
+        mode=mode,
+    )
+    expected_df = (
+        pd.DataFrame.from_dict(expected_dict).replace({np.nan: None}).convert_dtypes()
+    )
+    assert_frame_equal(out_df, expected_df)

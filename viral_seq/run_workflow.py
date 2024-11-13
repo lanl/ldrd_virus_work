@@ -18,7 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence
+from typing import Dict, Any, Sequence, List
 import matplotlib
 import matplotlib.pyplot as plt
 from time import perf_counter
@@ -117,6 +117,66 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
     table["Is_Sialic_Acid"] = np.where(table["Is_Integrin"] == "integrin", False, True)
     table["Is_Integrin"] = np.where(table["Is_Integrin"] == "sialic_acid", False, True)
     return table
+
+
+def check_positive_controls(
+    positive_controls: Sequence[str],
+    kmers_list: list[str],
+    mapping_method: str,
+    mode: str,
+) -> pd.DataFrame:
+    """
+    checks how many of the kmers that are known to bind to a specific surface
+    receptor (positive controls) are found in a given list of kmers (train vs. top-N)
+
+    Parameters
+    ----------
+    positive_controls: list
+        A list of strings denoting known AA-kmers associated with surface protein binding
+    kmers_list: list
+        A list containing kmer feature strings from either the training dataset
+        or topN classifier rankings
+    mapping_method: str
+        preference for mapping AA-kmers to PC-kmers
+    mode: str
+        type of kmer to check for in dataset (AA vs. PC) to avoid double counting
+
+    Returns:
+    --------
+    kmers_df: pd.DataFrame
+        Dataframe containing the names of kmer features found in the dataset that contain
+        each of the positive control sequences, and the counts for each
+    """
+
+    if mode == "PC":
+        # map positive_controls to PC-kmers using desired mapping method
+        pc_pos_con = []
+        for p_con in positive_controls:
+            pc_kmer = ""
+            for each in p_con:
+                pc_kmer += get_features.aa_map(each, method=mapping_method)
+            pc_pos_con.append(pc_kmer)
+        positive_controls = pc_pos_con
+
+    # iterate through lists of positive controls and count number
+    # of positive controls found in kmer_list/add kmers to dictionary
+    kmer_counts: dict[str, int] = {key: 0 for key in positive_controls}
+    kmers_out: dict[str, List[str]] = {key: [] for key in positive_controls}
+    for kmer_feat in kmers_list:
+        if kmer_feat.startswith(f"kmer_{mode}_"):
+            kmer_str = kmer_feat[8:]
+            for positive_control in positive_controls:
+                if positive_control in kmer_str:
+                    kmer_counts[positive_control] += 1
+                    kmers_out[positive_control].append(kmer_feat)
+
+    kmers_out_df = pd.DataFrame.from_dict(kmers_out, orient="index").transpose()
+    kmer_counts_df = pd.DataFrame.from_dict(kmer_counts, orient="index").transpose()
+    kmers_df = pd.concat(
+        [kmers_out_df, kmer_counts_df], ignore_index=True
+    ).convert_dtypes()
+
+    return kmers_df
 
 
 def validate_feature_table(file_name, idx, prefix):
@@ -495,7 +555,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                             "which includes kmers and pc kmers with k={}.".format(k),
                         )
                         print(
-                            "To restart at this point use --features", this_checkpoint
+                            "To restart at this point use --features",
+                            this_checkpoint,
                         )
                         cli.calculate_table(
                             [
@@ -1026,7 +1087,6 @@ if __name__ == "__main__":
             filename=str(plots_path / "roc_plot_comparison.png"),
             title=this_title,
         )
-
         # check feature importance and consensus
         feature_importances = []
         np.random.seed(random_state)  # used by `shap.summary_plot`
@@ -1109,7 +1169,7 @@ if __name__ == "__main__":
         # PHSRN (Pro-His-Ser-Arg-Asn)
         # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
 
-        list_of_positive_controls_for_AA_k_mers = [
+        pos_controls = [
             "RGD",
             "KGE",
             "LDV",
@@ -1119,23 +1179,6 @@ if __name__ == "__main__":
             "PHSRN",
             "SVVYGLR",
         ]
-        list_of_positive_controls_for_PC_k_mers = [
-            "GAF",
-            "CFA",
-            "FAFA",
-            "GFFA",
-            "DAGG",
-            "CEDGE",
-            "DAADACG",
-        ]
-
-        # 'GAF' corresponds to both RGD and KGE
-        # 'CFA' corresponds to LDV
-        # 'FAFA' corresponds to DGEA
-        # 'GFFA' corresponds to REDV
-        # 'DAGG' corresponds to YGRK
-        # 'CEDGE' corresponds to PHSRN
-        # 'DAADACG' corresponds to SVVYGLR
 
         ### Create empty lists for eventual post-processing of data output
 
@@ -1187,7 +1230,6 @@ if __name__ == "__main__":
             interp_tpr[0] = 0.0
             tprs.append(interp_tpr)
             aucs.append(viz.roc_auc)
-
             counter += 1
             temp1[counter, :] = df["index"][:n_features].to_numpy()
 
@@ -1243,27 +1285,73 @@ if __name__ == "__main__":
         array1 = temp3[:, 1]
         array2 = [temp4[i][0] for i in range(len(temp4))]
 
-        ### Check how many AA- and PC- kmers contain a positive control from the lists
-        ### defined at the beginning of the DTRA workflow. Repeat this process for both
-        ### the entire feature list and only the top features present in array2. The
-        ### printed output will be used to manually produce a table for the weekly meeting.
+        # count of PC positive controls in train data
+        pos_con_train_PC = check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=list(X.iloc[train].columns),
+            mapping_method="shen_2007",
+            mode="PC",
+        )
+        print(
+            "Count of Positive Control PC k-mers in Train Dataset:\n",
+            pos_con_train_PC.tail(1).to_string(index=False),
+        )
+        pos_con_train_PC.to_csv(
+            "train_data_PC_kmer_positive_controls.csv",
+            na_rep="",
+            index=False,
+        )
 
-        z1, z2, z3, z4 = [], [], [], []
-        for item1 in list_of_positive_controls_for_AA_k_mers:
-            z1.append(
-                sum([item2.count(item1) for item2 in list(X.iloc[train].columns)])
-            )
-            z2.append(sum([item2.count(item1) for item2 in array2]))
-        print(z1)
-        print(z2)
+        # count of PC positive controls in topN (array2)
+        pos_con_topN_PC = check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=array2,
+            mapping_method="shen_2007",
+            mode="PC",
+        )
+        print(
+            "Count of Positive Control PC k-mers in topN:\n",
+            pos_con_topN_PC.tail(1).to_string(index=False),
+        )
+        pos_con_topN_PC.to_csv(
+            "topN_PC_kmer_positive_controls.csv",
+            na_rep="",
+            index=False,
+        )
 
-        for item1 in list_of_positive_controls_for_PC_k_mers:
-            z3.append(
-                sum([item2.count(item1) for item2 in list(X.iloc[train].columns)])
-            )
-            z4.append(sum([item2.count(item1) for item2 in array2]))
-        print(z3)
-        print(z4)
+        # count of AA positive controls in train data
+        pos_con_train_AA = check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=list(X.iloc[train].columns),
+            mapping_method="shen_2007",
+            mode="AA",
+        )
+        print(
+            "Count of Positive Control AA k-mers in Train Dataset:\n",
+            pos_con_train_AA.tail(1).to_string(index=False),
+        )
+        pos_con_train_AA.to_csv(
+            "train_data_AA_kmer_positive_controls.csv",
+            na_rep="",
+            index=False,
+        )
+
+        # count of AA positive controls in topN (array2)
+        pos_con_topN_AA = check_positive_controls(
+            positive_controls=pos_controls,
+            kmers_list=array2,
+            mapping_method="shen_2007",
+            mode="AA",
+        )
+        print(
+            "Count of Positive Control AA k-mers in TopN:\n",
+            pos_con_topN_AA.tail(1).to_string(index=False),
+        )
+        pos_con_train_AA.to_csv(
+            "topN_AA_kmer_positive_controls.csv",
+            na_rep="",
+            index=False,
+        )
 
         for (
             item
@@ -1445,7 +1533,7 @@ if __name__ == "__main__":
         ax.set_xlim(0, 100)
         ax.set_yticks(y_pos, labels=array2)
         ax.set_title(
-            f"Feature importance consensus amongst {n_folds} folds for \n{target_column}"
+            f"Feature importance consensus amongst {n_folds} folds for\n {target_column}"
         )
         ax.set_xlabel("Percentage (%)")
         counter2 = -1

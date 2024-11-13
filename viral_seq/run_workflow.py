@@ -46,6 +46,9 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.ensemble import ExtraTreesClassifier
+import pdb
+from matplotlib.lines import Line2D
+import matplotlib.patches as mpatches
 
 matplotlib.use("Agg")
 
@@ -380,6 +383,128 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
         plt.close(fig)
 
 
+def FIC_plot(
+    feature_count,
+    topN_kmers,
+    kmer_count,
+    n_folds,
+    target_column,
+    positive_shap_values,
+    found_kmers,
+    surface_exposed_dict,
+    not_exposed,
+    is_exposed,
+    paths,
+):
+    """
+    Create Feature Importance Consensus (FIC) plot from SHAP explainer values using
+    important kmers found during ML classification. Include the following information
+    for each kmer as labels on the plot:
+        1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
+        2. the status of the kmer as surface exposed or not surface exposed on the known virus (+/-)
+        3. the percent of found kmers that are surface exposed based on the dataset of viral proteins
+
+    Parameters:
+    -----------
+    topN_kmers: list
+        list of top_N kmers from ML classifiers
+    kmer_count: array
+        consensus number of classifer folds agreeing upon corresponding kmer in topN_kmers
+    n_folds: int
+        number of cv folds performed by classifier
+    target_column: str
+        name of column on which classifier was trained
+    positive_shap_values: shap.Explainer
+        SHAP explainer output
+    found_kmers: list
+        list of topN kmers
+    surface_exposed_dict: dict
+        dictionary containing found kmer and ratio of surface exposed
+        to not surface exposed viral proteins with given kmer
+    not_exposed: list
+        list of which topN kmers are known to be surface exposed
+    is_exposed: list
+        list of which topN kmers are known to not be surface exposed
+    paths: list
+        paths to save files
+
+    Returns:
+    --------
+    response_effect: list
+        list of characters (+/-) denoting the sign of the pearson correlation coefficient
+        between the array of the feature data and the array of the shap values
+    surface_exposed_sign: list
+        list of characters (+/-) denoting the surface exposure status of the viral protein
+        associated with the found kmer
+    """
+    target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
+    target_columns = target_column.split("_")
+    target_names = []
+    for target in target_columns:
+        target_names.append(target_column_mappings[target])
+    target_name = ", ".join(target_names)
+
+    top_feature_count = feature_count[-10:]
+    total_clfr_counts = n_folds * 2
+
+    # remove any rows where the pearson-r is negative
+    top_feature_count = top_feature_count[top_feature_count["Pearson R"] > 0]
+    top_counts_clfr = top_feature_count["Clfr"].values / total_clfr_counts * 100
+    top_counts_shap = top_feature_count["SHAP"].values / total_clfr_counts * 100
+    top_features = top_feature_count["Features"].values
+
+    # reorganize dataframe
+    df_plot = pd.DataFrame()
+    df_plot["Features"] = top_features
+    df_plot["Classifier Features"] = top_counts_clfr
+    df_plot["SHAP Features"] = top_counts_shap
+    fig, ax = plt.subplots(figsize=(8, 8))
+    df_plot.plot(
+        x="Features",
+        kind="barh",
+        stacked=True,
+        ax=ax,
+        color=["white", "black"],
+        edgecolor="black",
+    )
+
+    for i, row in df_plot.iterrows():
+        ratio = surface_exposed_dict[top_features[i][8:]]
+        percent = ratio[0] / np.sum(ratio) * 100
+        ax.text(
+            row[1:].sum() + 2,
+            i,
+            f"{percent:.2f}%",
+            va="center",
+            color="k",
+            fontsize="large",
+        )
+
+    clfr_patch = mpatches.Patch(
+        edgecolor="black", facecolor="white", label="Classifier Features"
+    )
+    shap_patch = mpatches.Patch(color="black", label="SHAP Features")
+    percent_patch = Line2D([0], [0], marker="", markersize=12, linestyle="")
+
+    ax.legend(
+        handles=[clfr_patch, shap_patch, percent_patch],
+        labels=[
+            "Classifier Features",
+            "SHAP Features",
+            "% value next to bar indicates\n percent of proteins containing kmer\n that are surface exposed",
+        ],
+        loc="best",
+    )
+    ax.set_xlabel(f"% ML models where ranked in top {len(top_feature_count)} features")
+    ax.set_title(
+        f"Feature importance consensus amongst {n_folds} folds\n of random forest classifier for {target_names}"
+    )
+    ax.set_xlim(0, 100)
+    fig.tight_layout()
+    fig.savefig(str(paths[-1]) + "/" + "FIC_" + str(target_names) + ".png", dpi=300)
+    plt.close()
+
+
 def percent_surface_exposed(k_mers_PC, surface_exposed_status):
     """
     Determine the ratio of surface exposed to not surface exposed viral proteins
@@ -601,8 +726,10 @@ def train_clfr(
     # sort feature counts and corresponding pearson coefficients by value and average
     # across two feature vectors i.e. classifier features and shap features counts
     feature_count["Pearson R"] = pearsonr(shap_values_clfr, shap_data_clfr)[0]
-    feature_count.sort_values(by=["Counts"], ascending=False, inplace=True)
-    feature_count["Counts"] = feature_count["Counts"] / (2 * len(classifier_parameters))
+    feature_count["Sum"] = feature_count[["Clfr", "SHAP"]].sum(
+        numeric_only=True, axis=1
+    )
+    feature_count.sort_values(by=["Sum"], ascending=True, inplace=True)
 
     return (
         feature_count,
@@ -641,156 +768,6 @@ def label_surface_exposed(
     is_exposed = [s if s in is_exposed else "" for s in kmers_topN]
 
     return is_exposed
-
-
-def FIC_plot(
-    feature_count: pd.DataFrame,
-    n_folds: int,
-    target_column: str,
-    exposure_status_sign: list,
-    response_effect_sign: list,
-    surface_exposed_dict: dict,
-    n_classifiers: int,
-    path: Path,
-):
-    """
-    Create Feature Importance Consensus (FIC) plot from SHAP explainer values and
-    native estimator feature importances using important kmers found during ML
-    classification. Include the following information for each kmer as labels on the plot:
-        1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
-        2. the status of the kmer as surface exposed or not surface exposed based on the known virus (+/-)
-        3. the percent abundance of kmers found in surface exposed proteins
-
-    Parameters:
-    -----------
-    feature_count: pd.DataFrame
-        data structure containing training features and corresponding metrics from cv
-    n_folds: int
-        number of cv folds performed by classifier
-    target_column: str
-        name of column on which classifier was trained
-    exposure_status_sign: list
-        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
-    response_effect_sign: list
-        list of +/- symbols denoting response effect from shap importance pearson-r correlation
-    surface_exposed_dict: dict
-        dictionary containing the topN kmers and their respective ratios of surface exposed to
-        not surface exposed viral proteins for plotting '% surface exposed'
-    n_classifiers: int
-        number of classifiers used for consensus
-    path: Path
-        path to save figure
-    """
-    target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
-    target_columns = target_column.split("_")
-    target_names = []
-    for target in target_columns:
-        target_names.append(target_column_mappings[target])
-    target_name = ", ".join(target_names)
-
-    max_features = 20
-
-    # barh plots values from bottom to top
-    top_feature_count = feature_count[:max_features]
-    top_counts = np.flip(np.array(top_feature_count["Counts"].values))
-    top_features = np.flip(np.array(top_feature_count["Features"].values))
-    response_effect_sign.reverse()
-    exposure_status_sign.reverse()
-
-    fig, ax = plt.subplots(figsize=(10, 10))
-    y_pos = np.arange(len(top_features))
-    bars: BarContainer = ax.barh(y_pos, (top_counts / n_folds) * 100, color="k")
-    ax.set_xlim(0, 100)
-    ax.set_yticks(y_pos, labels=top_features)
-    ax.set_title(
-        f"Feature importance consensus amongst {n_folds * n_classifiers} folds\n for {target_name} binding"
-    )
-    ax.set_xlabel("Classifier Consensus Percentage (%)")
-
-    for kmer_idx, p in enumerate(bars):
-        # calculate corresponding surface exposure %
-        kmer_name = top_features[kmer_idx]
-        percent_exposed = surface_exposed_dict[kmer_name]
-        percent_lbl = f"{percent_exposed:.2f}%"
-
-        left, bottom, width, height = p.get_bbox().bounds
-
-        if response_effect_sign[kmer_idx] == "+":
-            response_sign_color = "g"
-        elif response_effect_sign[kmer_idx] == "-":
-            response_sign_color = "r"
-
-        if exposure_status_sign[kmer_idx] == "+":
-            exposure_sign_color = "g"
-        elif exposure_status_sign[kmer_idx] == "-":
-            exposure_sign_color = "r"
-
-        ax.annotate(
-            response_effect_sign[kmer_idx],
-            xy=(left + width / 4, bottom + height / 2),
-            ha="center",
-            va="center",
-            color=response_sign_color,
-            fontsize="xx-large",
-        )
-        ax.annotate(
-            exposure_status_sign[kmer_idx],
-            xy=(left + 3 * width / 4, bottom + height / 2),
-            ha="center",
-            va="center",
-            color=exposure_sign_color,
-            fontsize="xx-large",
-        )
-        if width >= 90:
-            ax.annotate(
-                percent_lbl,
-                xy=(left + width - 5, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="white",
-                fontsize="large",
-            )
-        else:
-            ax.annotate(
-                percent_lbl,
-                xy=(left + width + 5, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="k",
-                fontsize="large",
-            )
-
-        plus_symbol = Line2D(
-            [0], [0], marker="+", color="green", markersize=9, linestyle=""
-        )
-        minus_symbol = Line2D(
-            [0], [0], marker="_", color="red", markersize=9, linestyle=""
-        )
-        blank_patch = mpatches.Patch(color="white")
-
-        ax.legend(
-            handles=[
-                plus_symbol,
-                minus_symbol,
-                plus_symbol,
-                minus_symbol,
-                blank_patch,
-            ],
-            labels=[
-                "on left: Positive effect on response",
-                "on left: Negative effect on response",
-                "on right: Protein is surface-exposed",
-                "on right: Protein is not surface-exposed",
-                "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
-            ],
-            loc="lower right",
-            prop={"size": 10},
-            bbox_to_anchor=(0.7, -0.25),
-        )
-
-        fig.tight_layout()
-        fig.savefig(str(path) + "/" + "FIC_" + "_".join(target_names) + ".png", dpi=300)
-        plt.close()
 
 
 def percent_surface_exposed(

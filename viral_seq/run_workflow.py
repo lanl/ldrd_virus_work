@@ -1678,6 +1678,7 @@ if __name__ == "__main__":
                 params_predict=val["predict"],
                 params_optimized=best_params[name],
             )
+
             this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
             print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
         # ROC curve plotting
@@ -1725,7 +1726,6 @@ if __name__ == "__main__":
         np.random.seed(random_state)  # used by `shap.summary_plot`
         for name, clf in models_fitted.items():
             print(f"Plotting feature importances for {name}")
-            # built-in importances
             (
                 sorted_feature_importances,
                 sorted_feature_names,

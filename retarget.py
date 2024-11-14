@@ -20,6 +20,45 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1128/mbio.01180-15
+                "Phopivirus": "non_primate_mammals",
+                # https://doi.org/10.1016/j.virusres.2017.09.002
+                "Equid gammaherpesvirus 5": "non_primate_mammals",
+                # https://doi.org/10.1016/j.cimid.2011.12.003 
+                "Visna-maedi virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/248059
+                "Abu Mina virus": "no_mammals",
+                # https://doi.org/10.1111/j.1863-2378.2008.01208.x
+                "Phnom Penh bat virus": "non_primate_mammals",
+                # https://doi.org/10.1128/jvi.01094-13
+                "Eel picornavirus 1": "no_mammals",
+                # https://doi.org/10.1038/s41598-023-45205-0
+                "Aquatic bird bornavirus 1": "avian",
+                # https://doi.org/10.1371/journal.pone.0043881
+                "Volepox virus": "non_primate_mammals",
+                # https://doi.org/10.3390/pathogens12121400
+                "Hepacivirus ratti": "non_primate_mammals",
+                # https://doi.org/10.1099/vir.0.81584-0
+                "Micromonas pusilla reovirus": "no_mammals",
+                # https://doi.org/10.1016/j.vetmic.2015.07.024
+                "Equine adenovirus 2": "non_primate_mammals",
+                # https://doi.org/10.1007/s13337-013-0165-9
+                "Bovine immunodeficiency virus": "non_primate_mammals",
+                # https://doi.org/10.1038/sj.onc.1209850
+                "Jaagsiekte sheep retrovirus": "non_primate_mammals",
+                # https://doi.org/10.1007/s12250-018-0019-0
+                # this article seems to suggest that the virus 
+                # infected monkeys in a laboratory setting, 
+                # but LLM query contradicts this assertion
+                "Barur virus": "non_primate_mammals",
+                # https://doi.org/10.1099/vir.0.066597-0
+                "Chicken picornavirus 3": "avian",
+                # https://www.genome.jp/virushostdb/62352
+                "Eyach virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/660955
+                "Nova virus": "non_primate_mammals",
+                # https://doi.org/10.1007/s00705-007-1069-z
+                "Main Drain virus": "non_primate_mammals",
                 # https://doi.org/10.1016/j.onehlt.2021.100273
                 "Mammarenavirus wenzhouense": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/1611837
@@ -2291,6 +2330,12 @@ organism_dict = {
                 "aichivirus E1": "non_primate_mammals",
                 # TODO: verify -- was missing from Adam's data...
                 "parechovirus C1": "non_primate_mammals",
+                # TODO: verify -- was missing from Adam's data...
+                "avisivirus C1": "avian",
+                # TODO: verify -- was missing from Adam's data...
+                "potamipivirus A1": "no_mammals",
+                # TODO: verify -- was missing from Adam's data...
+                "hepatovirus B1": "non_primate_mammals",
                 }
 
 
@@ -2374,7 +2419,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=448)
+                                                              n_records=468)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

@@ -271,7 +271,6 @@ def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
         elif explicit_aa in "IVLMJ":
             return "6"
         elif explicit_aa in "FW":
-
             return "7"
         elif explicit_aa in "P":
             return "8"

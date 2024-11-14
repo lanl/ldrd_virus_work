@@ -248,6 +248,72 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
+def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
+    """
+    merges IgSF training dataframes and receptor_training dataframe
+    and reconciles overlapping dataframe entries by aligning accession
+    and reassigning values to a new dataframe.
+
+    Parameters:
+    -----------
+    train_file: str
+        path to receptor_training.csv
+    igsf_file: str
+        path to igsf training data
+
+    Returns:
+    --------
+    reconciled_df: pd.DataFrame
+        merged dataframe with data from train_file and igsf_file and
+        reconciled overlapping entries
+    """
+    # load igsf and receptor datasets
+    igsf_data = pd.read_csv(str(data.joinpath(igsf_file)))
+    train_df = pd.read_csv(train_file)
+
+    # join datasets using merge-outer to preserve duplications
+    merged_df = pd.merge(
+        train_df, igsf_data, on="Accessions", how="outer", suffixes=("_left", "_right")
+    )
+
+    # make a new dataframe with the same indices as merged_df and same columns as train_df
+    reconciled_df = pd.DataFrame(index=merged_df.index, columns=train_df.columns)
+
+    # iterate through df rows and reconcile duplicated entries
+    for i, row in merged_df.iterrows():
+        # check if the rows for the left and right merge are empty
+        if type(row[0]) == float:
+            # if left side is empty, index right side into row of new df
+            reconciled_df.iloc[i][:4] = row.iloc[8:12]
+            reconciled_df.iloc[i]["Accessions"] = row.loc["Accessions"]
+            reconciled_df.iloc[i][5:] = row.iloc[12:]
+        elif type(row[-1]) == float:
+            # if right side is empty, index left side into row of new df
+            reconciled_df.iloc[i] = row.iloc[:8]
+            if reconciled_df.iloc[i]["Receptor_Type"] == "both":
+                reconciled_df.iloc[i]["Receptor_Type"] = "integrin_sialic_acid"
+        else:
+            # reconcile conflict between duplicate accessions
+            # check receptor types for left and right
+            receptor_type_left = row.loc["Receptor_Type_left"]
+            receptor_type_right = row.loc["Receptor_Type_right"]
+            if receptor_type_left == "both":
+                reconciled_df.iloc[i]["Receptor_Type"] = "all"
+            else:
+                reconciled_df.iloc[i][
+                    "Receptor_Type"
+                ] = f"{receptor_type_left}_{receptor_type_right}"
+            # add accession
+            reconciled_df.iloc[i]["Accessions"] = row.loc["Accessions"]
+            # add remaining data from left side of merged_df
+            reconciled_df.iloc[i][:2] = row.iloc[:2]
+            reconciled_df.iloc[i]["Whole_Genome"] = row.loc["Whole_Genome_left"]
+            reconciled_df.iloc[i][5:8] = row.iloc[5:8]
+
+    return reconciled_df
+>>>>>>> 213a61a (ENH: Add function to merge IgSF and receptor_training files)
+
+
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> list:
@@ -1685,6 +1751,12 @@ if __name__ == "__main__":
         # of given kmer lengths from command line option '--kmer-range'
         check_kmer_feature_lengths(list(X.columns), kmer_range)
 
+        train_file_merged = merge_tables(train_file, igsf_file="igsf_training.csv")
+
+        X = pl.read_parquet(table_loc_train_best).to_pandas()
+        tbl = csv_conversion(train_file)
+        y = tbl[target_column]
+        
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html

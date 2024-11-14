@@ -80,15 +80,13 @@ def test_csv_conversion():
             "Is_Integrin",
             "Is_Sialic_Acid",
             "Is_Both",
-            "Is_IgSF",
         ],
     )
 
-    assert postprocessed_df.shape == (129, 7)
+    assert postprocessed_df.shape == (94, 6)
     assert postprocessed_df.sum().Is_Integrin == 45
     assert postprocessed_df.sum().Is_Sialic_Acid == 53
     assert postprocessed_df.sum().Is_Both == 4
-    assert postprocessed_df.sum().Is_IgSF == 35
 
 
 @pytest.mark.parametrize(

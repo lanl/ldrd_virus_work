@@ -17,6 +17,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
+import datetime as dt
+import json
+from pathlib import Path
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
@@ -1775,7 +1778,7 @@ organism_dict = {
 }
 
 
-def retarget(df, cache_path, n_records=None):
+def retarget(df, cache_path, n_records=None, return_progress=False):
     """
     Parameters
     ----------
@@ -1848,6 +1851,8 @@ def retarget(df, cache_path, n_records=None):
                         y_primate[idx] = False
                         host_found = True
             if not host_found:
+                if return_progress:
+                    return idx
                 raise ValueError(
                     f"At idx {idx}\n"
                     f"No human host confirmed for {accession=} {organism=}\n"
@@ -1859,9 +1864,38 @@ def retarget(df, cache_path, n_records=None):
 
 def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
-    y_human_train, y_mammal_train, y_primate_train = retarget(
-        df=df_train.iloc[::-1], cache_path=cache_path, n_records=100
+    init_total_to_do = 268
+    tracking_file = Path("retarget_tracking.json")
+    tracking_data = {}
+    if tracking_file.is_file():
+        with open(tracking_file, "r") as f:
+            tracking_data = json.load(f)
+    today = dt.date.today()
+    if str(today) in tracking_data:
+        total_done = tracking_data[str(today)]
+    else:
+        total_done = retarget(
+            df=df_train.iloc[::-1],
+            cache_path=cache_path,
+            n_records=861,
+            return_progress=True,
+        )
+        tracking_data[str(today)] = total_done
+        with open(tracking_file, "w") as f:
+            json.dump(tracking_data, f)
+    total_to_do = init_total_to_do - total_done
+    days_left = np.busday_count(today, dt.date(2024, 11, 25))
+    day_rate = int(np.round(total_to_do / days_left))
+    print("===\n")
+    print(
+        f"At the start of today, there are {total_to_do} records left to complete.\nNeed to do {day_rate} per day for the remaining {days_left} days."
     )
+    print(f"Today's target is record {total_done + day_rate}.")
+    print("===\n")
+    y_human_train, y_mammal_train, y_primate_train = retarget(
+        df=df_train.iloc[::-1], cache_path=cache_path, n_records=total_done + day_rate
+    )
+
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(
         df=df_test, cache_path=cache_path, n_records=0

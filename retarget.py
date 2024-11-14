@@ -3843,6 +3843,56 @@ organism_dict = {
     "Baboon orthoreovirus": "primate",
     # https://doi.org/10.1007/s00705-005-0652-4
     "Tenuivirus persotritici": "no_mammals",
+    # https://www.genome.jp/virushostdb/1755588
+    "Sicinivirus A": "avian",
+    # https://doi.org/10.1371/journal.pone.0108379
+    "Warrego virus": "non_primate_mammals",
+    # https://doi.org/10.1128/jvi.74.9.4264-4272.2000
+    "Koala retrovirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/764599
+    "Coastal Plains virus": "non_primate_mammals",
+    # Alternate name avisivirus B1
+    # https://www.genome.jp/virushostdb/1534545
+    "Chicken picornavirus 2": "avian",
+    # https://www.genome.jp/virushostdb/1659220
+    "Kobuvirus cattle/Kagoshima-1-22-KoV/2014/JPN": "non_primate_mammals",
+    # detected in pool of insects, insect vector assumed to transmit to bats, but no further evidence
+    # https://doi.org/10.7554/eLife.05378
+    "Wuhan Louse Fly Virus 5": "no_mammals",
+    # https://doi.org/10.1016/j.virusres.2005.07.005
+    "Breda virus": "non_primate_mammals",
+    # https://doi.org/10.1099/vir.0.83605-0
+    "Miniopterus bat coronavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052236
+    # difficult to parse; but it seems tamarins were infected with a human GB hepatitis agent to sequence
+    # https://doi.org/10.1073/pnas.92.8.3401
+    # reference for the GB agent used
+    # https://doi.org/10.1093/infdis/142.5.767
+    "Hepacivirus platyrrhini": "human",
+    # https://www.genome.jp/virushostdb/1348439
+    "Niakha virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1384461
+    "Bat coronavirus CDPHE15/USA/2006": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1159905
+    "Porcine coronavirus HKU15": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/318843
+    # there is evidence for humans, but only positive neutralization test
+    # https://doi.org/10.1016/j.virep.2014.09.001
+    "Almpiwar virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/129953
+    "Bovine mastadenovirus A": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1987139
+    "Bat hepatovirus SMG18520Minmav2014": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/133704
+    "Porcine circovirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/2870363
+    "anativirus A1": "avian",
+    # https://www.genome.jp/virushostdb/77698
+    "Fiji disease virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/202910
+    "Bubaline alphaherpesvirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/358764
+    "Border disease virus": "non_primate_mammals",
 }
 
 

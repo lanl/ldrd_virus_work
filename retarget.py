@@ -17,6 +17,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from Bio import SeqIO
+import datetime as dt
+import json
+from pathlib import Path
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
@@ -3843,7 +3846,7 @@ organism_dict = {
 }
 
 
-def retarget(df, cache_path, n_records=None):
+def retarget(df, cache_path, n_records=None, return_progress=False):
     """
     Parameters
     ----------
@@ -3916,6 +3919,8 @@ def retarget(df, cache_path, n_records=None):
                         y_primate[idx] = False
                         host_found = True
             if not host_found:
+                if return_progress:
+                    return idx
                 raise ValueError(
                     f"At idx {idx}\n"
                     f"No human host confirmed for {accession=} {organism=}\n"

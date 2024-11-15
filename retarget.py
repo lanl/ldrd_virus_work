@@ -1825,6 +1825,22 @@ organism_dict = {
     "Bubaline alphaherpesvirus 1": "non_primate_mammals",
     # https://www.genome.jp/virushostdb/358764
     "Border disease virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1884879
+    "Parrot bornavirus 5": "avian",
+    # https://www.genome.jp/virushostdb/1620897
+    "Sripur virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/2847078
+    "Felis domesticus papillomavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052229
+    "Hepacivirus glareoli": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1965064
+    "African pouched rat arterivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/205908
+    "Cypovirus 14": "no_mammals",
+    # https://www.genome.jp/virushostdb/572288
+    "Bulbul coronavirus HKU11-934": "avian",
+    # https://doi.org/10.1007/s00705-013-1735-2
+    "Avian orthoavulavirus 12": "avian",
 }
 
 

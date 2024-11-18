@@ -20,6 +20,36 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/10366
+                "Murid betaherpesvirus 1": "non_primate_mammals",
+                # https://doi.org/10.1099/vir.0.051797-0
+                "Turkey avisivirus": "avian",
+                # https://www.genome.jp/virushostdb/1891770
+                # related to Murine pneumotropic virus?
+                # based on https://ictv.global/taxonomy/taxondetails?taxnode_id=20143115
+                "Betapolyomavirus secumuris": "non_primate_mammals",
+                # https://doi.org/10.1007/s11259-019-09746-y
+                "Canine mastadenovirus A": "non_primate_mammals",
+                # https://doi.org/10.1016/j.tim.2024.03.001
+                # https://www.genome.jp/virushostdb/3052764
+                # aka Rice hoja blanca tenuivirus
+                "Tenuivirus oryzalbae": "no_mammals",
+                # https://www.genome.jp/virushostdb/1987145
+                "Shrew hepatovirus KS121232Sorara2012": "non_primate_mammals",
+                # https://doi.org/10.3390/pathogens12121400
+                "Hepacivirus vittatae": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/798074
+                "Tuhoko virus 3": "non_primate_mammals",
+                # https://doi.org/10.4269/ajtmh.14-0606
+                "Keuraliba virus": "non_primate_mammals",
+                # https://doi.org/10.1128/jvi.00371-09
+                "Imjin virus": "non_primate_mammals",
+                # https://doi.org/10.3390/v9050102
+                "Mamastrovirus 13": "non_primate_mammals",
+                # https://doi.org/10.1016/j.vetmic.2012.02.020
+                "Marco virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/53182
+                "Feline foamy virus": "non_primate_mammals",
                 # https://doi.org/10.1128/mbio.01180-15
                 "Phopivirus": "non_primate_mammals",
                 # https://doi.org/10.1016/j.virusres.2017.09.002
@@ -2419,7 +2449,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=468)
+                                                              n_records=485)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

@@ -20,6 +20,35 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1038/s44298-024-00016-6
+                "Orthohantavirus montanoense": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/465447
+                "American grass carp reovirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/200402
+                "Kamese virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/47680
+                "Tree shrew adenovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/329639
+                "Canine minute virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1972566
+                "Vesiculovirus radi": "no_mammals",
+                # https://doi.org/10.1128/jvi.01121-10
+                "Rousettus bat coronavirus HKU9": "non_primate_mammals",
+                # https://doi.org/10.1128/jvi.01305-12
+                "Rousettus bat coronavirus HKU10": "non_primate_mammals",
+                # https://doi.org/10.7589/2017-03-067
+                "Avian metaavulavirus 8": "avian",
+                # https://doi.org/10.3389/fvets.2020.00419
+                "Nairobi sheep disease virus": "non_primate_mammals",
+                # https://doi.org/10.1099/jgv.0.001714
+                "bovine rhinitis B virus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/11290
+                "Infectious hematopoietic necrosis virus": "no_mammals",
+                # https://doi.org/10.1002/hep.29494
+                "Hepacivirus norvegici": "non_primate_mammals",
+                # https://doi.org/10.1128/jvi.01142-12
+                # aka bovine hungarovirus 1 
+                "hunnivirus A1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/10366
                 "Murid betaherpesvirus 1": "non_primate_mammals",
                 # https://doi.org/10.1099/vir.0.051797-0
@@ -2366,6 +2395,8 @@ organism_dict = {
                 "potamipivirus A1": "no_mammals",
                 # TODO: verify -- was missing from Adam's data...
                 "hepatovirus B1": "non_primate_mammals",
+                # TODO: verify -- was missing from Adam's data...
+                "avian paramyxovirus 8": "avian",
                 }
 
 
@@ -2449,7 +2480,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=485)
+                                                              n_records=502)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

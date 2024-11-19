@@ -860,3 +860,121 @@ def test_print_pos_con(
 
         captured = capsys.readouterr()
         assert captured.out == exp_output
+
+
+def test_match_kmers(tmpdir):
+    kmer_matches_mm1 = {
+        "0": {
+            0: "kmer_AA_MSLQGIH",
+            1: "kmer_AA_SLQGIHL",
+            2: "kmer_AA_LQGIHLS",
+            3: "kmer_AA_QGIHLSD",
+            4: "kmer_AA_GIHLSDL",
+            5: "kmer_AA_IHLSDLS",
+            6: "kmer_AA_HLSDLSY",
+            7: "kmer_AA_LSDLSYK",
+            8: "kmer_AA_SDLSYKH",
+            9: "kmer_AA_DLSYKHA",
+        },
+        "1": {
+            0: "kmer_PC_6263063",
+            1: "kmer_PC_2630636",
+            2: "kmer_PC_6306362",
+            3: "kmer_PC_3063624",
+            4: "kmer_PC_0636246",
+            5: "kmer_PC_6362462",
+            6: "kmer_PC_3624622",
+            7: "kmer_PC_6246225",
+            8: "kmer_PC_2462253",
+            9: "kmer_PC_4622530",
+        },
+    }
+    kmer_matches_mm2 = {
+        "0": {
+            0: "kmer_AA_MSLQGIH",
+            1: "kmer_AA_SLQGIHL",
+            2: "kmer_AA_LQGIHLS",
+            3: "kmer_AA_QGIHLSD",
+            4: "kmer_AA_GIHLSDL",
+            5: "kmer_AA_IHLSDLS",
+            6: "kmer_AA_HLSDLSY",
+            7: "kmer_AA_LSDLSYK",
+            8: "kmer_AA_SDLSYKH",
+            9: "kmer_AA_DLSYKHA",
+        },
+        "1": {
+            0: "kmer_PC_DDCEACA",
+            1: "kmer_PC_DCEACEA",
+            2: "kmer_PC_CEACECG",
+            3: "kmer_PC_EACECDC",
+            4: "kmer_PC_ACECDFD",
+            5: "kmer_PC_CECDFFG",
+            6: "kmer_PC_ECDFCDC",
+            7: "kmer_PC_CDFCDDA",
+            8: "kmer_PC_DFCDDGG",
+            9: "kmer_PC_FCDDGEE",
+        },
+    }
+
+    syn_topN = [
+        {
+            "0": {
+                0: "kmer_PC_DDCEACA",
+                1: "kmer_PC_DCEACEA",
+                2: "kmer_PC_CEACECG",
+                3: "kmer_PC_EACECDC",
+                4: "kmer_PC_ACECDFD",
+                5: "kmer_PC_CECDFFG",
+                6: "kmer_PC_ECDFCDC",
+                7: "kmer_PC_CDFCDDA",
+                8: "kmer_PC_DFCDDGG",
+                9: "kmer_PC_FCDDGEE",
+            }
+        },
+        {
+            "0": {
+                0: "kmer_PC_6263063",
+                1: "kmer_PC_2630636",
+                2: "kmer_PC_6306362",
+                3: "kmer_PC_3063624",
+                4: "kmer_PC_0636246",
+                5: "kmer_PC_6362462",
+                6: "kmer_PC_3624622",
+                7: "kmer_PC_6246225",
+                8: "kmer_PC_2462253",
+                9: "kmer_PC_4622530",
+            }
+        },
+    ]
+
+    kmer_matches_exp = {
+        ("kmer_PC_DDCEACA", "kmer_PC_6263063"): ["kmer_AA_MSLQGIH"],
+        ("kmer_PC_DCEACEA", "kmer_PC_2630636"): ["kmer_AA_SLQGIHL"],
+        ("kmer_PC_CEACECG", "kmer_PC_6306362"): ["kmer_AA_LQGIHLS"],
+        ("kmer_PC_EACECDC", "kmer_PC_3063624"): ["kmer_AA_QGIHLSD"],
+        ("kmer_PC_ACECDFD", "kmer_PC_0636246"): ["kmer_AA_GIHLSDL"],
+        ("kmer_PC_CECDFFG", "kmer_PC_6362462"): ["kmer_AA_IHLSDLS"],
+        ("kmer_PC_ECDFCDC", "kmer_PC_3624622"): ["kmer_AA_HLSDLSY"],
+        ("kmer_PC_CDFCDDA", "kmer_PC_6246225"): ["kmer_AA_LSDLSYK"],
+        ("kmer_PC_DFCDDGG", "kmer_PC_2462253"): ["kmer_AA_SDLSYKH"],
+        ("kmer_PC_FCDDGEE", "kmer_PC_4622530"): ["kmer_AA_DLSYKHA"],
+        ("kmer_PC_6263063", "kmer_PC_DDCEACA"): ["kmer_AA_MSLQGIH"],
+        ("kmer_PC_2630636", "kmer_PC_DCEACEA"): ["kmer_AA_SLQGIHL"],
+        ("kmer_PC_6306362", "kmer_PC_CEACECG"): ["kmer_AA_LQGIHLS"],
+        ("kmer_PC_3063624", "kmer_PC_EACECDC"): ["kmer_AA_QGIHLSD"],
+        ("kmer_PC_0636246", "kmer_PC_ACECDFD"): ["kmer_AA_GIHLSDL"],
+        ("kmer_PC_6362462", "kmer_PC_CECDFFG"): ["kmer_AA_IHLSDLS"],
+        ("kmer_PC_3624622", "kmer_PC_ECDFCDC"): ["kmer_AA_HLSDLSY"],
+        ("kmer_PC_6246225", "kmer_PC_CDFCDDA"): ["kmer_AA_LSDLSYK"],
+        ("kmer_PC_2462253", "kmer_PC_DFCDDGG"): ["kmer_AA_SDLSYKH"],
+        ("kmer_PC_4622530", "kmer_PC_FCDDGEE"): ["kmer_AA_DLSYKHA"],
+    }
+
+    syn_topN_df = [pd.DataFrame(l) for l in syn_topN]
+    pd.DataFrame(kmer_matches_mm1).to_parquet(f"{tmpdir}/kmer_maps_k7_mm1.parquet.gzip")
+    pd.DataFrame(kmer_matches_mm2).to_parquet(f"{tmpdir}/kmer_maps_k7_mm2.parquet.gzip")
+    mapping_methods = ["mm1", "mm2"]
+    kmer_matches_out = workflow.match_kmers(syn_topN_df, mapping_methods, tmpdir)
+    kmer_matches_out_df = pd.DataFrame(kmer_matches_out)
+    kmer_matches_exp_df = pd.DataFrame(kmer_matches_exp)
+    assert_frame_equal(kmer_matches_out_df, kmer_matches_exp_df)

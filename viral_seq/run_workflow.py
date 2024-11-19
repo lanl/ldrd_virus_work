@@ -248,6 +248,88 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
+def match_kmers(
+    topN_files: list, mapping_methods: list, save_dir: str = "kmer_maps"
+) -> dict:
+    """
+    check the mappings from AA to PC kmers for the topN classifer kmers using each
+    mapping method and return the overlapping instances of corresponding AA kmers
+
+    in order for this function to execute, you must run the full workflow using both
+    `--mapping-method` arguments to generate the required kmer mapping files
+
+    Parameters:
+    -----------
+    topN_files: list
+        list of pandas dataframes containing topN kmers found using each mapping scheme
+    mapping_methods: list
+        names of mapping methods to compare
+
+    Return:
+    -------
+    kmer_matches: dict
+        dictionary of PC kmer matches and their associated AA-kmer
+    """
+    topN_str_count = []
+    kmer_lists = []
+    for topN_file in topN_files:
+        topN_list = list(topN_file["0"])
+        kmer_lists.append(topN_list)
+
+        # find lengths of topN kmers strings
+        topN_str = [
+            s.replace("kmer_PC_", "").replace("kmer_AA_", "") for s in topN_list
+        ]
+        topN_str_count.extend([len(s) for s in topN_str])
+
+    topN_kmer_lengths = list(set(topN_str_count))
+
+    # load appropriate kmer-matching files
+    kmer_maps_list = []
+    for mm in mapping_methods:
+        for kmer_len in topN_kmer_lengths:
+            kmer_df = pl.read_parquet(
+                f"{save_dir}/kmer_maps_k{kmer_len}_{mm}.parquet.gzip"
+            ).to_pandas()
+            kmer_maps_list.append(kmer_df)
+    kmer_maps_df = pd.concat(kmer_maps_list, ignore_index=True)
+    # search for all of the corresponding AA kmers to every PC kmer in topN for each method
+    full_kmer_list: List[str] = []
+    matching_kmers: List[pd.DataFrame] = []
+    for kmer_list in kmer_lists:
+        for each_kmer in kmer_list:
+            full_kmer_list.append(each_kmer)
+            matching_kmers.append(kmer_maps_df[kmer_maps_df["1"] == each_kmer]["0"])
+
+    # make a new df holding all matching kmers with topN kmer as key
+    matching_kmers_df = pd.DataFrame(
+        np.nan, index=range(len(max(matching_kmers, key=len))), columns=["idx"]
+    )
+
+    for i, matching_kmer in enumerate(matching_kmers):
+        matching_kmer_series = pd.Series(matching_kmer.values).reindex(
+            matching_kmers_df.index
+        )
+        matching_kmers_df[full_kmer_list[i]] = matching_kmer_series
+
+    # drop the place holder column 'idx' from dataframe
+    matching_kmers_df.drop("idx", axis=1, inplace=True)
+    # find matching PC kmers from different mapping schemes
+    kmer_matches = {}
+    for kmer1 in matching_kmers_df.columns:
+        for kmer2 in matching_kmers_df.columns:
+            if kmer1 != kmer2:
+                kmer_match = matching_kmers_df[kmer1].dropna()[
+                    matching_kmers_df[kmer1]
+                    .dropna()
+                    .isin(matching_kmers_df[kmer2].dropna())
+                ]
+                if not kmer_match.empty:
+                    kmer_matches[(kmer1, kmer2)] = kmer_match
+
+    return kmer_matches
+
+
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> list:
@@ -1916,3 +1998,44 @@ if __name__ == "__main__":
             surface_exposed_dict,
             paths[-1],
         )
+
+        plt.close()
+
+        # save top N kmers
+        array2.reverse()
+        topN_kmers = pd.DataFrame(array2)
+        sp.save_files(
+            topN_kmers, f"topN_kmers_{target_column}_{mapping_method}.parquet.gzip"
+        )
+
+        # check to see if the necessary files are available
+        if (
+            not Path(
+                f"topN_kmers_{target_column}_jurgen_schmidt.parquet.gzip"
+            ).is_file()
+            and not Path(f"topN_kmers_{target_column}_shen_2007.parquet.gzip").is_file()
+        ):
+            raise FileNotFoundError(
+                "Must run workflow using both mapping methods before performing kmer mapping."
+            )
+        # if the necessary files exist, load them and perform kmer matching
+        else:
+            mapping_methods = ["shen_2007", "jurgen_schmidt"]
+            print(
+                f"Loading topN kmer files for {mapping_methods[0]} and {mapping_methods[1]} mapping schemes..."
+            )
+            topN_files = []
+            for mm in mapping_methods:
+                topN_file = pl.read_parquet(
+                    f"topN_kmers_{target_column}_{mm}.parquet.gzip"
+                ).to_pandas()
+                topN_files.append(topN_file)
+            kmer_matches = match_kmers(topN_files, mapping_methods)
+
+        if kmer_matches:
+            for (kmer1, kmer2), values in kmer_matches.items():
+                print(
+                    f"Matching AA kmers between PC kmers '{kmer1}' and '{kmer2}': {values}"
+                )
+        else:
+            print("No matching AA kmers fround in TopN.")

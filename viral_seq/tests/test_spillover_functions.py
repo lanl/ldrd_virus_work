@@ -561,6 +561,7 @@ def test_grab_features_kmer_maps():
             gc=True,
             kmers_pc=True,
             kmer_k_pc=[10],
+            mapping_method="shen_2007",
         )
     assert len(kmer_map) == 3408
 

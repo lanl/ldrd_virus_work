@@ -431,8 +431,10 @@ def build_table(
                 calculated_feature_rows.append(this_result)
         # human gene feature tables
         kmer_maps_df = pd.DataFrame(kmer_maps)
-        save_files(
-            kmer_maps_df, f"kmer_maps_k{kmer_k[0]}_{mapping_method}.parquet.gzip"
+        kmer_map_path = Path("kmer_maps")
+        kmer_map_path.mkdir(exist_ok=True)
+        kmer_maps_df.to_parquet(
+            f"{kmer_map_path}/kmer_maps_k{kmer_k[0]}_{mapping_method}.parquet.gzip"
         )
     else:
         # build feature table from the entire cache

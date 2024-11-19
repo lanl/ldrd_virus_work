@@ -140,6 +140,38 @@ def get_model_arguments(
             "random_state": random_state,
         },
     }
+    model_arguments["LGBMClassifer Dart Seed:" + str(random_state)] = {
+        "model": LGBMClassifier,
+        "suffix": "lgbm_dart_" + str(random_state),
+        "group": "LGBMClassifier_Dart",
+        "optimize": {
+            "num_samples": 2_000,
+            "n_jobs_cv": 1,
+            "config": {
+                "verbose": -1,
+                "force_col_wise": True,
+                "n_estimators": 500,
+                "n_jobs": 1,  # it's better to let ray handle parallelization
+                "boosting_type": "dart",
+                "num_leaves": tune.randint(10, 100),
+                "learning_rate": tune.loguniform(1e-3, 0.01),
+                "subsample": tune.uniform(0.1, 1.0),
+                "subsample_freq": tune.randint(0, 10),
+                "max_depth": tune.randint(15, 100),
+                "min_child_samples": tune.randint(10, 200),
+                "colsample_bytree": tune.uniform(0.1, 1.0),
+                "drop_rate": tune.uniform(0.0, 1.0),
+                "skip_drop": tune.uniform(0.0, 1.0),
+            },  # Boost space with Dart specific drop_rate, skip_drop
+        },
+        "predict": {
+            "boosting_type": "dart",
+            "verbose": -1,
+            "force_col_wise": True,
+            "n_jobs": n_jobs,
+            "random_state": random_state,
+        },
+    }
     return model_arguments
 
 

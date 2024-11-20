@@ -544,11 +544,11 @@ def build_tables(feature_checkpoint=0, debug=False):
                     prefix = "Train"
                     debug = False
                     this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                    feature_checkpoint = 10
+                    if feature_checkpoint > 5:
+                        feature_checkpoint = 5
                     this_checkpoint = feature_checkpoint
 
-                for k in range(6, 11):
-                    this_checkpoint -= 2
+                for k in range(11 - feature_checkpoint, 11):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
                         print(
@@ -578,36 +578,7 @@ def build_tables(feature_checkpoint=0, debug=False):
                             ],
                             standalone_mode=False,
                         )
-                        if feature_checkpoint >= this_checkpoint:
-                            print(
-                                "Building table for Train",
-                                "which includes kmers and pc kmers with k={}.".format(
-                                    k
-                                ),
-                            )
-                            print(
-                                "To restart at this point use --features",
-                                this_checkpoint,
-                            )
-                            cli.calculate_table(
-                                [
-                                    "--file",
-                                    file,
-                                    "--cache",
-                                    cache_viral,
-                                    "--outfile",
-                                    this_outfile,
-                                    "--features-kmers",
-                                    "--kmer-k",
-                                    str(k),
-                                    "--features-kmers-pc",
-                                    "--kmer-k-pc",
-                                    str(k),
-                                    "--target-column",
-                                    target_column,
-                                ],
-                                standalone_mode=False,
-                            )
+                        this_checkpoint -= 1
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):

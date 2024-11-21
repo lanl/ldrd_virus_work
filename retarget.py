@@ -20,6 +20,34 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/226613
+                "Reptilian orthoreovirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/40067
+                "Wad Medani virus": "no_mammals",
+                # https://doi.org/10.1099/jgv.0.001837
+                "Maraba virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1679172
+                "Chobar Gorge virus": "no_mammals",
+                # https://doi.org/10.3390/v14050905
+                "Chirohepevirus eptesici": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2303488
+                "Zegla virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1608075
+                "Shuangao Insect Virus 1": "no_mammals",
+                # https://doi.org/10.1128/jvi.06540-11
+                "White-eye coronavirus HKU16": "avian",
+                # https://www.genome.jp/virushostdb/10271
+                "Rabbit fibroma virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052473
+                "Orthohantavirus caobangense": "non_primate_mammals",
+                # https://doi.org/10.1016/j.virol.2006.02.041
+                "Pipistrellus bat coronavirus HKU5": "non_primate_mammals",
+                # https://doi.org/10.3390/v14102258
+                "Rice ragged stunt virus": "no_mammals",
+                # https://doi.org/10.1128/genomea.00779-14
+                "Loveridges garter snake virus 1": "no_mammals",
+                # https://www.genome.jp/virushostdb/129950
+                "Bovine mastadenovirus B": "non_primate_mammals",
                 # https://doi.org/10.1007/BF01317540
                 "Raccoonpox virus": "non_primate_mammals",
                 # https://doi.org/10.1099/vir.0.058412-0
@@ -2423,6 +2451,8 @@ organism_dict = {
                 "hepatovirus B1": "non_primate_mammals",
                 # TODO: verify -- was missing from Adam's data...
                 "avian paramyxovirus 8": "avian",
+                # TODO: verify -- was missing from Adam's data...
+                "Loveridge's garter snake virus 1": "no_mammals",
                 }
 
 
@@ -2506,7 +2536,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=519)
+                                                              n_records=536)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

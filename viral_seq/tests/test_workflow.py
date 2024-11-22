@@ -306,7 +306,7 @@ def test_feature_sign():
     syn_data = rng.choice([0, 1], size=[10, 10])
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, not_exposed, found_kmers, syn_shap_values, syn_data
+        is_exposed, not_exposed, syn_shap_values, syn_data
     )
 
     response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]

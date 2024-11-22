@@ -34,7 +34,6 @@ matplotlib.use("Agg")
 def feature_signs(
     is_exposed: list,
     not_exposed: list,
-    found_kmers: list,
     shap_values: np.ndarray,
     shap_data: np.ndarray,
 ) -> tuple:
@@ -48,8 +47,6 @@ def feature_signs(
         list of kmers that are surface exposed
     not_exposed: list
         list of kmers that are not surface exposed
-    found_kmers: list
-        list of all important kmers from ml classifier
     shap_values: np.ndarray
         shap feature importance values
     shap_data: np.ndarray
@@ -64,21 +61,18 @@ def feature_signs(
     """
     response_effect = []
     surface_exposed_sign = []
-    for feature_idx in range(len(found_kmers)):
-        # add sign of surface exposure based on comparison between lists of exposure status
-        if (
-            not_exposed[feature_idx] in found_kmers
-            and is_exposed[feature_idx] not in found_kmers
-        ):
-            surface_exposed_sign.append("-")
-        elif is_exposed[feature_idx] in found_kmers:
-            surface_exposed_sign.append("+")
-        else:
-            surface_exposed_sign.append("x")
+    # add sign of surface exposure based on comparison between lists of exposure status
+    for i in range(len(is_exposed)):
+        sign = "x"
+        if is_exposed[i]:
+            sign = "+"
+        elif not_exposed[i]:
+            sign = "-"
+        surface_exposed_sign.append(sign)
         # add sign of response effect based on pearson correllation coefficient
         pearson_r = pearsonr(
-            shap_values[:, feature_idx],
-            shap_data[:, feature_idx],
+            shap_values[:, i],
+            shap_data[:, i],
         )[0]
         if pearson_r > 0:
             response_effect.append("+")
@@ -1708,7 +1702,7 @@ if __name__ == "__main__":
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
-            res1, res2, res3, positive_shap_values.values, positive_shap_values.data
+            res1, res2, positive_shap_values.values, positive_shap_values.data
         )
 
         # Production of the FIC plot

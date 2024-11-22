@@ -268,7 +268,7 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
         reconciled overlapping entries
     """
     # load igsf and receptor datasets
-    igsf_data = pd.read_csv(str(data.joinpath(igsf_file)))
+    igsf_data = pd.read_csv(igsf_file)
     train_df = pd.read_csv(train_file)
 
     # join datasets using merge-outer to preserve duplications
@@ -282,16 +282,24 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
     # iterate through df rows and reconcile duplicated entries
     for i, row in merged_df.iterrows():
         # check if the rows for the left and right merge are empty
-        if type(row[0]) == float:
+        if type(row[0]) is float:
             # if left side is empty, index right side into row of new df
             reconciled_df.iloc[i][:4] = row.iloc[8:12]
             reconciled_df.iloc[i]["Accessions"] = row.loc["Accessions"]
+            if len(reconciled_df.iloc[i]["Accessions"].split()) > 1:
+                reconciled_df.iloc[i]["Accessions"] = reconciled_df.iloc[i][
+                    "Accessions"
+                ].split()[0]
             reconciled_df.iloc[i][5:] = row.iloc[12:]
-        elif type(row[-1]) == float:
+        elif type(row[-1]) is float:
             # if right side is empty, index left side into row of new df
             reconciled_df.iloc[i] = row.iloc[:8]
             if reconciled_df.iloc[i]["Receptor_Type"] == "both":
                 reconciled_df.iloc[i]["Receptor_Type"] = "integrin_sialic_acid"
+            if len(reconciled_df.iloc[i]["Accessions"].split()) > 1:
+                reconciled_df.iloc[i]["Accessions"] = reconciled_df.iloc[i][
+                    "Accessions"
+                ].split()[0]
         else:
             # reconcile conflict between duplicate accessions
             # check receptor types for left and right
@@ -305,13 +313,16 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
                 ] = f"{receptor_type_left}_{receptor_type_right}"
             # add accession
             reconciled_df.iloc[i]["Accessions"] = row.loc["Accessions"]
+            if len(reconciled_df.iloc[i]["Accessions"].split()) > 1:
+                reconciled_df.iloc[i]["Accessions"] = reconciled_df.iloc[i][
+                    "Accessions"
+                ].split()[0]
             # add remaining data from left side of merged_df
             reconciled_df.iloc[i][:2] = row.iloc[:2]
             reconciled_df.iloc[i]["Whole_Genome"] = row.loc["Whole_Genome_left"]
             reconciled_df.iloc[i][5:8] = row.iloc[5:8]
 
     return reconciled_df
->>>>>>> 213a61a (ENH: Add function to merge IgSF and receptor_training files)
 
 
 def label_surface_exposed(
@@ -534,6 +545,86 @@ def percent_surface_exposed(
     return percent_exposed_dict
 
 
+def convert_merged_tbl(input_tbl) -> pd.DataFrame:
+    """
+    Convert the original version of the input CSV table
+    (i.e., that is merged to main) to a new DataFrame stored in memory
+    (i.e., that is compatible with the ML workflow)
+
+    Parameters
+    ----------
+    input_csv : str
+        A string representing the name of the input table that will undergo conversion.
+        Default is `receptor_training.csv`.
+
+    Returns
+    -------
+    output_df : pd.DataFrame
+        A Pandas DataFrame representing the converted form of the input table
+        that accounts for the target column(s) of interest.
+
+    """
+    table = input_tbl.drop(
+        columns=["Citation_for_receptor", "Whole_Genome", "Mammal_Host", "Primate_Host"]
+    )
+    table = table.rename(
+        columns={
+            "Virus_Name": "Species",
+            "Human_Host": "Human Host",
+            "Receptor_Type": "Is_Integrin",
+        }
+    )
+
+    table["SA_IG"] = np.where(table["Is_Integrin"] == "sialic_acid_IgSF", True, False)
+    table["IN_IG"] = np.where(table["Is_Integrin"] == "integrin_IgSF", True, False)
+    table["IN_SA"] = np.where(
+        table["Is_Integrin"] == "integrin_sialic_acid", True, False
+    )
+    table["ALL"] = np.where(table["Is_Integrin"] == "all", True, False)
+    table["Is_Sialic_Acid"] = pd.Series(dtype="bool")
+    table["Is_IgSF"] = pd.Series(dtype="bool")
+    table = table[
+        [
+            "Species",
+            "Accessions",
+            "Human Host",
+            "Is_Integrin",
+            "Is_Sialic_Acid",
+            "SA_IG",
+            "IN_IG",
+            "IN_SA",
+            "ALL",
+            "Is_IgSF",
+        ]
+    ]
+
+    table["Is_Sialic_Acid"] = np.where(
+        np.isin(
+            table["Is_Integrin"],
+            ["sialic_acid", "integrin_sialic_acid", "sialic_acid_IgSF", "all"],
+        ),
+        True,
+        False,
+    )
+    table["Is_IgSF"] = np.where(
+        np.isin(
+            table["Is_Integrin"], ["IgSF", "integrin_IgSF", "sialic_acid_IgSF", "all"]
+        ),
+        True,
+        False,
+    )
+    table["Is_Integrin"] = np.where(
+        np.isin(
+            table["Is_Integrin"],
+            ["integrin", "integrin_sialic_acid", "integrin_IgSF", "all"],
+        ),
+        True,
+        False,
+    )
+
+    return table
+
+
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
     """
     Convert the original version of the input CSV table
@@ -568,7 +659,6 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
     )
     table["Is_Both"] = np.where(table["Is_Integrin"] == "both", True, False)
     table["Is_Sialic_Acid"] = pd.Series(dtype="bool")
-    table["Is_IgSF"] = pd.Series(dtype="bool")
     table = table[
         [
             "Species",
@@ -577,19 +667,11 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
             "Is_Integrin",
             "Is_Sialic_Acid",
             "Is_Both",
-            "Is_IgSF",
         ]
     ]
 
-    table["Is_Sialic_Acid"] = np.where(
-        np.isin(table["Is_Integrin"], ["integrin", "IgSF"]), False, True
-    )
-    table["Is_IgSF"] = np.where(
-        np.isin(table["Is_Integrin"], ["integrin", "sialic_acid", "both"]), False, True
-    )
-    table["Is_Integrin"] = np.where(
-        np.isin(table["Is_Integrin"], ["sialic_acid", "IgSF"]), False, True
-    )
+    table["Is_Sialic_Acid"] = np.where(table["Is_Integrin"] == "integrin", False, True)
+    table["Is_Integrin"] = np.where(table["Is_Integrin"] == "sialic_acid", False, True)
 
     return table
 
@@ -672,7 +754,7 @@ def validate_feature_table(file_name, idx, prefix):
         )
 
 
-def build_cache(cache_checkpoint=3, debug=False):
+def build_cache(cache_checkpoint=3, debug=False, data_file=None):
     """Download and store all data needed for the workflow"""
     if cache_checkpoint == "extract":
         with tarfile.open(cache_file, "r") as tar:
@@ -697,9 +779,14 @@ def build_cache(cache_checkpoint=3, debug=False):
     email = "arhall@lanl.gov"
 
     if cache_checkpoint > 2:
+        if data_file is not None:
+            print("Using Merged IgSF-Receptor Training File to build cache")
+            viral_files_in = [data_file]
+        else:
+            viral_files_in = viral_files
         print("Pulling viral sequence data to local cache...")
         try:
-            for file in viral_files:
+            for file in viral_files_in:
                 cli.pull_data(
                     [
                         "--email",
@@ -1010,23 +1097,28 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     validate_feature_table(this_outfile, idx, prefix)
 
     elif workflow == "DTRA":
-        if feature_checkpoint > 0:
-            for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-                with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+                if target_column == "Is_IgSF":
+                    igsf_path = str(data.joinpath("igsf_training.csv"))
+                    merged_tbl = merge_tables(train_file, igsf_path)
+                    convert_merged_tbl(merged_tbl).to_csv(temp_file)
+                    file = temp_file.name
+                else:
                     csv_conversion(file).to_csv(temp_file)
                     file = temp_file.name
-                if i == 0:
-                    prefix = "Train"
-                    debug = False
-                    this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+            if i == 0:
+                prefix = "Train"
+                debug = False
+                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
 
-                    min_kmer = int(kmer_range[0])
-                    max_kmer = int(kmer_range[-1])
+                min_kmer = int(kmer_range[0])
+                max_kmer = int(kmer_range[-1])
 
-                    kmer_range_length = max_kmer - min_kmer + 1
-                    if feature_checkpoint > kmer_range_length:
-                        feature_checkpoint = kmer_range_length
-                    this_checkpoint = feature_checkpoint
+                kmer_range_length = max_kmer - min_kmer + 1
+                if feature_checkpoint > kmer_range_length:
+                    feature_checkpoint = kmer_range_length
+                this_checkpoint = feature_checkpoint
 
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
@@ -1528,6 +1620,18 @@ if __name__ == "__main__":
         pos_controls["Is_Integrin"] + pos_controls["Is_Sialic_Acid"]
     )
 
+    if target_column == "Is_IgSF":
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            if target_column == "Is_IgSF":
+                igsf_path = str(data.joinpath("igsf_training.csv"))
+                merged_tbl = merge_tables(train_file, igsf_path)
+                convert_merged_tbl(merged_tbl).to_csv(temp_file)
+                file = temp_file.name
+        build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
+    else:
+        build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
+    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -1751,12 +1855,15 @@ if __name__ == "__main__":
         # of given kmer lengths from command line option '--kmer-range'
         check_kmer_feature_lengths(list(X.columns), kmer_range)
 
-        train_file_merged = merge_tables(train_file, igsf_file="igsf_training.csv")
-
+        if target_column == "Is_IgSF":
+            igsf_path = str(data.joinpath("igsf_training.csv"))
+            merged_tbl = merge_tables(train_file, igsf_path)
+            tbl = convert_merged_tbl(merged_tbl)
+        else:
+            tbl = csv_conversion(train_file)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        tbl = csv_conversion(train_file)
         y = tbl[target_column]
-        
+
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html

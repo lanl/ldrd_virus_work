@@ -743,3 +743,20 @@ def test_print_pos_con(
 
         captured = capsys.readouterr()
         assert captured.out == exp_output
+
+def test_merge_convert_tbl():
+    igsf_data = files("viral_seq.data") / "igsf_training.csv"
+    input_csv = files("viral_seq.data") / "receptor_training.csv"
+
+    merged_df = workflow.merge_tables(input_csv, igsf_data)
+    converted_df = workflow.convert_merged_tbl(merged_df)
+
+    assert merged_df.shape == (118, 8)
+    assert converted_df.shape == (118, 10)
+    assert converted_df.Is_Integrin.sum() == 45
+    assert converted_df.Is_Sialic_Acid.sum() == 53
+    assert converted_df.SA_IG.sum() == 4
+    assert converted_df.IN_IG.sum() == 5
+    assert converted_df.IN_SA.sum() == 2
+    assert converted_df.ALL.sum() == 2
+    assert converted_df.Is_IgSF.sum() == 35

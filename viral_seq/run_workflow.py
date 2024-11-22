@@ -535,19 +535,20 @@ def build_tables(feature_checkpoint=0, debug=False):
                     validate_feature_table(this_outfile, idx, prefix)
 
     elif workflow == "DTRA":
-        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                csv_conversion(file).to_csv(temp_file)
-                file = temp_file.name
-            if i == 0:
-                prefix = "Train"
-                debug = False
-                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                feature_checkpoint = 10
-                this_checkpoint = feature_checkpoint
+        if feature_checkpoint > 0:
+            for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+                    csv_conversion(file).to_csv(temp_file)
+                    file = temp_file.name
+                if i == 0:
+                    prefix = "Train"
+                    debug = False
+                    this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+                    if feature_checkpoint > 5:
+                        feature_checkpoint = 5
+                    this_checkpoint = feature_checkpoint
 
-                for k in range(6, 11):
-                    this_checkpoint -= 2
+                for k in range(11 - feature_checkpoint, 11):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
                         print(
@@ -577,6 +578,7 @@ def build_tables(feature_checkpoint=0, debug=False):
                             ],
                             standalone_mode=False,
                         )
+                        this_checkpoint -= 1
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):

@@ -20,6 +20,38 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/1155188
+                "Bovine rhinitis A virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/693998
+                "Rhinolophus bat coronavirus HKU2": "non_primate_mammals",
+                # https://doi.org/10.3390/v13060982
+                # aka Okahandja mammarenavirus aka Okahandja virus
+                "Mammarenavirus okahandjaense": "non_primate_mammals",
+                # https://doi.org/10.1186/s12985-018-1093-5
+                "Equid alphaherpesvirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/745716
+                "Coffee ringspot virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2560310
+                # aka avian paramyxovirus 11 
+                "Avian metaavulavirus 11": "avian",
+                "avian paramyxovirus 11": "avian",
+                # https://doi.org/10.1094/PHYTO.2002.92.11.1167
+                "Maize fine streak nucleorhabdovirus": "no_mammals",
+                # https://doi.org/10.1007/s007050050658
+                "Rabbit picobirnavirus": "non_primate_mammals", 
+                # https://doi.org/10.1016/0042-6822(85)90281-8
+                "Wound tumor virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/10497
+                "African swine fever virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/273810
+                "Eriocheir sinensis reovirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/884200
+                "Rotavirus D chicken/05V0049/DEU/2005": "avian",
+                # https://www.genome.jp/virushostdb/59816
+                "Yellowtail ascites virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1002918
+                "Simian sapelovirus 1": "non_primate_mammals",
+                "simian sapelovirus 1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/226613
                 "Reptilian orthoreovirus": "no_mammals",
                 # https://www.genome.jp/virushostdb/40067
@@ -2453,6 +2485,8 @@ organism_dict = {
                 "avian paramyxovirus 8": "avian",
                 # TODO: verify -- was missing from Adam's data...
                 "Loveridge's garter snake virus 1": "no_mammals",
+                # TODO: verify -- was missing from Adam's data...
+                "Maize fine streak virus": "no_mammals",
                 }
 
 
@@ -2536,7 +2570,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=536)
+                                                              n_records=553)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

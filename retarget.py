@@ -1662,6 +1662,16 @@ organism_dict = {
                 "Baboon adenovirus 3": "human",
                 # https://www.genome.jp/virushostdb/38432
                 "Simian adenovirus 13": "primate",
+                # https://www.genome.jp/virushostdb/1715778
+                "Simian adenovirus 16": "primate",
+                # https://www.genome.jp/virushostdb/909210
+                "Simian adenovirus 18": "primate",
+                # https://www.genome.jp/virushostdb/585059
+                "Simian adenovirus 20": "primate",
+                # https://www.genome.jp/virushostdb/1560346
+                "Simian adenovirus DM-2014": "primate",
+                # https://www.genome.jp/virushostdb/2848082
+                "simian adenovirus 55": "primate",
                 }
 
 
@@ -1749,7 +1759,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=593)
+                                                           n_records=598)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

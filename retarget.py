@@ -20,6 +20,33 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://www.genome.jp/virushostdb/64300
+                "Modoc virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/3052633
+                # aka Wutai Mosquito Phasivirus (https://doi.org/10.3390/insects10050135)
+                "Phasivirus wutaiense": "no_mammals",
+                # https://www.genome.jp/virushostdb/376849
+                "Lumpy skin disease virus NI-2490": "non_primate_mammals",
+                # https://doi.org/10.1007/BF01250066
+                "Parana virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1002359
+                "Drosophila ananassae sigmavirus": "no_mammals",
+                # https://www.genome.jp/virushostdb/74581 
+                "Rat parvovirus 1": "non_primate_mammals",
+                # https://doi.org/10.1126/science.6170110
+                "Moloney murine sarcoma virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2847812
+                "Keterah virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2870348
+                # aka mischivirus C1 (https://www.uniprot.org/taxonomy/2870348)
+                "African bat icavirus PREDICT-06105": "non_primate_mammals",
+                "mischivirus C1": "non_primate_mammals",
+                # https://doi.org/10.3389/fcimb.2017.00490
+                "Estero Real virus": "no_mammals",
+                # https://doi.org/10.1016/j.meegid.2017.01.019
+                "Wuhan Fly Virus 1": "no_mammals",
+                # https://www.genome.jp/virushostdb/1985698
+                "Varicosavirus lactucae": "no_mammals",
                 # https://www.genome.jp/virushostdb/1155188
                 "Bovine rhinitis A virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/693998
@@ -2570,7 +2597,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=553)
+                                                              n_records=570)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

@@ -36,4 +36,4 @@ tqdm==4.66.5
 types-pytz==2023.3.0.0
 types-tqdm==4.65.0.1
 tzdata==2023.3
-
+xgboost==2.1.2

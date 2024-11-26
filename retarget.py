@@ -20,6 +20,83 @@ from Bio import SeqIO
 
 # dictionary mapping to known host (always specify "human" if known)
 organism_dict = {
+                # https://doi.org/10.1128/jvi.02364-10
+                "Bat picornavirus": "non_primate_mammals",
+                # https://doi.org/10.3390/vetsci7020079
+                "Infectious bronchitis virus": "avian",
+                # https://doi.org/10.3201/eid2012.131742
+                # single study stating detection in pigs in korea
+                # same study as "Gouleako virus"
+                "Herbert virus strain F23/CI/2004": "non_primate_mammals",
+                # https://doi.org/10.1007/s12250-017-3973-z
+                "Hepatitis E virus rat/R63/DEU/2009": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/200403
+                "Mosqueiro virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/1637527
+                "Dromedary camel enterovirus 19CC": "non_primate_mammals",
+                # https://doi.org/10.1371/journal.pone.0260038
+                "Rat coronavirus Parker": "non_primate_mammals",
+                # https://doi.org/10.1016/j.virol.2006.02.027
+                "Newbury agent 1": "non_primate_mammals",
+                # https://doi.org/10.3201/eid2207.160024
+                # aka Porcine pegivirus
+                "Pegivirus suis": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/33724
+                "Nilaparvata lugens reovirus": "no_mammals",
+                # https://doi.org/10.3201/eid2012.131742
+                # single study stating detection in pigs in korea
+                "Gouleako virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/10564
+                "Deltapapillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/10317
+                "Cercopithecine alphaherpesvirus 2": "primate",
+                # https://www.genome.jp/virushostdb/10276
+                "Swinepox virus": "non_primate_mammals",
+                # https://doi.org/10.1007/s00705-003-0271-x
+                "Oita virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/376852
+                "Goatpox virus Pellor": "non_primate_mammals",
+                # https://doi.org/10.1016/j.virol.2012.08.008
+                "Kimberley virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/943342
+                "Eothenomys miletus hantavirus LX309": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/765147
+                "Kenkeme virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2870348
+                # aka "African bat icavirus PREDICT-06105" (https://www.uniprot.org/taxonomy/2870348)
+                "mischivirus C1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2560310
+                # aka "Avian metaavulavirus 11" 
+                "avian paramyxovirus 11": "avian",
+                # same accession as: "Maize fine streak nucleorhabdovirus":
+                # https://doi.org/10.1094/PHYTO.2002.92.11.1167
+                "Maize fine streak virus": "no_mammals",
+                # same accession as: "Simian sapelovirus 1"
+                # but spelled with a lowercase 's'
+                # https://www.genome.jp/virushostdb/1002918
+                "simian sapelovirus 1": "non_primate_mammals",
+                # same accession as "Loveridges garter snake virus 1"
+                # but with an apostrophe
+                # https://doi.org/10.1128/genomea.00779-14
+                "Loveridge's garter snake virus 1": "no_mammals",
+                # https://www.genome.jp/virushostdb/2560318
+                "avian paramyxovirus 8": "avian",
+                # https://www.genome.jp/virushostdb/1708572
+                "hepatovirus B1": "non_primate_mammals",
+                # https://doi.org/10.1128/jvi.01094-13
+                # aka Eel picornavirus 1
+                "potamipivirus A1": "no_mammals",
+                # https://www.genome.jp/virushostdb/1534546
+                # aka  Chicken picornavirus 3
+                "avisivirus C1": "avian",
+                # https://www.genome.jp/virushostdb/1294177
+                # aka Sebokele virus 1
+                "parechovirus C1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2773293
+                "rabovirus A1": "non_primate_mammals",
+                # https://doi.org/10.1128/jvi.01394-12
+                # aka Miniopterus schreibersii picornavirus 1
+                "mischivirus A1": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/64300
                 "Modoc virus": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/3052633
@@ -535,7 +612,6 @@ organism_dict = {
                 # https://doi.org/10.1016/j.bbrc.2004.09.154
                 "Equus caballus papillomavirus 1": "non_primate_mammals",
                 # https://doi.org/10.1111/j.1439-0426.1988.tb00562.x
-                # TODO: why did Adam have this commented out?
                 "Snakehead rhabdovirus": "no_mammals",
                 # https://doi.org/10.3389/fcimb.2017.00212
                 "avian paramyxovirus 4": "avian",
@@ -2597,7 +2673,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=570)
+                                                              n_records=592)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

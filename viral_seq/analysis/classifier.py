@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from typing import Union, Any, Optional
+from typing import Union, Any, Optional, NamedTuple
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
 from sklearn.metrics import get_scorer, roc_curve, auc
@@ -15,6 +15,14 @@ import pickle
 from lightgbm import LGBMClassifier
 from matplotlib import pyplot as plt
 from xgboost import XGBClassifier
+
+
+class CV_ROC_data(NamedTuple):
+    mean_tpr: np.ndarray
+    tpr_std: np.ndarray
+    tpr_folds: list[np.ndarray]
+    fpr_folds: Optional[list[np.ndarray]]
+    tpr_std_folds: Optional[list[np.ndarray]]
 
 
 def get_model_arguments(
@@ -345,14 +353,7 @@ def get_roc_curve(
 
 def get_roc_curve_cv(
     y_trues: list[npt.ArrayLike], predictions: list[list[npt.ArrayLike]]
-) -> tuple[
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    list[np.ndarray],
-    list[np.ndarray],
-    Optional[list[np.ndarray]],
-]:
+) -> CV_ROC_data:
     """Like `sklearn.metrics.roc_curve` designed to handle multiple copies of k-fold cross-validation data.
 
     Parameters:
@@ -360,24 +361,22 @@ def get_roc_curve_cv(
         predictions (list[list[npt.ArrayLike]]): Cross-validation predictions. len(predictions) is the number of copies. len(predictions[i]) is the number of folds.
 
     Returns:
-        mean_fpr (np.ndarray): This will always be np.linspace(0, 1, 100), provided for plotting convenience
         mean_tpr (np.ndarray): Average tpr across all folds, copies
         tpr_std (np.ndarray): Standard deviation of mean_tpr
-        mean_fpr_folds (list[nd.array]): len(mean_fpr_folds) is number of folds. If copies > 1, this is [np.linspace(0, 1, 100) for _ in range(folds)], else this is the fpr of each fold
-        mean_tpr_folds (list[nd.array]): len(mean_tpr_folds) is number of folds. If copies > 1, average tpr of each fold, else tpr of each fold
-        tpr_std_folds (Optional[list[np.ndarray]]): If copies > 1, standard deviation of each mean_tpr_folds, else None
+        tpr_folds (list[np.ndarray]): len(mean_tpr_folds) is number of folds. If copies > 1, average tpr of each fold, else tpr of each fold
+        fpr_folds (Optional[list[np.ndarray]]): If copies > 1 this is None, else this is the fpr of each fold
+        tpr_std_folds (Optional[list[np.ndarray]]): If copies > 1, standard deviation of each tpr_folds, else None
 
     """
 
     mean_fpr = np.linspace(0, 1, 100)
-    tprs: list = []
-    fprs: list = []
-    n_folds: int = len(predictions[0])
-    average_folds: bool = len(predictions) > 1
+    tprs = []
+    n_folds = len(predictions[0])
+    average_folds = len(predictions) > 1
     fpr_folds: list[list] = [[] for _ in range(n_folds)]
     tpr_folds: list[list] = [[] for _ in range(n_folds)]
-    mean_fpr_folds: list[np.ndarray] = [mean_fpr for _ in range(n_folds)]
-    mean_tpr_folds: list[np.ndarray] = []
+    ret_fpr_folds: Optional[list[np.ndarray]] = None if average_folds else []
+    ret_tpr_folds = []
     tpr_std_folds: Optional[list[np.ndarray]] = [] if average_folds else None
     for folds in predictions:
         for i, this_pred in enumerate(folds):
@@ -394,17 +393,23 @@ def get_roc_curve_cv(
             for j in range(len(tpr_folds[i])):
                 tpr_folds[i][j] = np.interp(mean_fpr, fpr_folds[i][j], tpr_folds[i][j])
                 tpr_folds[i][j][0] = 0.0
-            mean_tpr_folds.append(np.mean(tpr_folds[i], axis=0))
-            mean_tpr_folds[-1][-1] = 1.0
+            ret_tpr_folds.append(np.mean(tpr_folds[i], axis=0))
+            ret_tpr_folds[-1][-1] = 1.0
             tpr_std_folds.append(np.std(tpr_folds[i], axis=0))  # type: ignore
         else:
-            mean_tpr_folds.append(tpr_folds[i][0])
-            mean_fpr_folds[i] = fpr_folds[i][0]
+            ret_tpr_folds.append(tpr_folds[i][0])
+            ret_fpr_folds.append(fpr_folds[i][0])  # type: ignore
     # average all copies & folds together
     mean_tpr = np.mean(tprs, axis=0)
     mean_tpr[-1] = 1.0
     tpr_std = np.std(tprs, axis=0)
-    return mean_fpr, mean_tpr, tpr_std, mean_fpr_folds, mean_tpr_folds, tpr_std_folds
+    return CV_ROC_data(
+        mean_tpr=mean_tpr,
+        tpr_std=tpr_std,
+        tpr_folds=ret_tpr_folds,
+        fpr_folds=ret_fpr_folds,
+        tpr_std_folds=tpr_std_folds,
+    )
 
 
 def plot_roc_curve(
@@ -421,7 +426,7 @@ def plot_roc_curve(
 
 def plot_roc_curve_comparison(
     names: list[str],
-    fprs: list[np.ndarray],
+    fprs: Optional[list[np.ndarray]],
     tprs: list[np.ndarray],
     tpr_stds: Optional[list[np.ndarray]] = None,
     filename: str = "roc_plot_comparison.png",
@@ -429,6 +434,8 @@ def plot_roc_curve_comparison(
 ):
     """Can plot one or multiple roc curves. Will plot a plus/minus 1 standard deviation shaded region for curves if provided."""
     fig, ax = plt.subplots(figsize=(6, 6))
+    if fprs is None:
+        fprs = [np.linspace(0, 1, 100) for _ in range(len(tprs))]
     for i, name in enumerate(names):
         this_auc = auc(fprs[i], tprs[i])
         ax.plot(fprs[i], tprs[i], label=f"{name} (AUC = {this_auc:.2f})")

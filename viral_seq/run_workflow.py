@@ -810,31 +810,23 @@ if __name__ == "__main__":
     comp_fprs_cv: list[Any] = []
     comp_tprs_cv: list[Any] = []
     for group in predictions_cv:
-        (
-            mean_fpr_cv,
-            mean_tpr_cv,
-            tpr_std_cv,
-            fpr_folds,
-            tpr_folds,
-            tpr_std_folds,
-        ) = classifier.get_roc_curve_cv(test_folds, predictions_cv[group])
+        cv_roc_data = classifier.get_roc_curve_cv(test_folds, predictions_cv[group])
         this_title = (
             f"ROC Curve\nCross-validation on Training\nAveraged over {copies} seeds"
             if copies > 1
             else f"ROC Curve\nCross-validation on Training"
         )
-        these_names = [f"{group} fold {i}" for i in range(len(tpr_folds))]
+        these_names = [f"{group} fold {i}" for i in range(len(cv_roc_data.tpr_folds))]
         classifier.plot_roc_curve_comparison(
             these_names,
-            fpr_folds,
-            tpr_folds,
-            tpr_std_folds,
+            cv_roc_data.fpr_folds,
+            cv_roc_data.tpr_folds,
+            cv_roc_data.tpr_std_folds,
             filename=str(plots_path / f"{group}_roc_plot_cv.png"),
             title=this_title,
         )
         comp_names_cv.append(group)
-        comp_fprs_cv.append(mean_fpr_cv)
-        comp_tprs_cv.append(mean_tpr_cv)
+        comp_tprs_cv.append(cv_roc_data.mean_tpr)
     this_title = (
         f"ROC Curve\nCross-validation on Training\nAveraged over 5 folds and {copies} seeds"
         if copies > 1
@@ -842,7 +834,7 @@ if __name__ == "__main__":
     )
     classifier.plot_roc_curve_comparison(
         comp_names_cv,
-        comp_fprs_cv,
+        None,
         comp_tprs_cv,
         filename=str(plots_path / f"CV_roc_plot_comparison.png"),
         title=this_title,

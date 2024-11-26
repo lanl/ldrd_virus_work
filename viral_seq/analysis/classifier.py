@@ -208,8 +208,8 @@ def cross_validation(
 
 def cv_score(
     model,
-    X,
-    y,
+    X: pd.DataFrame,
+    y: npt.ArrayLike,
     n_splits: int = 5,
     scoring: str = "roc_auc",
     n_jobs_cv: int = 1,

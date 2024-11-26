@@ -10,7 +10,6 @@ from urllib.error import URLError
 import polars as pl
 import ast
 import numpy as np
-from numpy.testing import assert_allclose
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
@@ -795,11 +794,9 @@ if __name__ == "__main__":
             **these_params,
         )
         if len(test_folds):
-            assert_allclose(
-                np.hstack(these_test_folds),
-                np.hstack(test_folds),
-                err_msg="`classifier.cross_validation` is not returning identical test sets for each model/copy",
-            )
+            assert np.allclose(
+                np.hstack(these_test_folds), np.hstack(test_folds)
+            ), "`classifier.cross_validation` is not returning identical test sets for each model/copy"
         else:
             test_folds = these_test_folds
         predictions_cv[val["group"]].append(these_preds)

@@ -107,7 +107,12 @@ def feature_signs(
     return surface_exposed_sign, response_effect
 
 
-def get_kmer_info(topN_kmers: list, records: list, tbl: pd.DataFrame) -> tuple:
+def get_kmer_info(
+    topN_kmers: list,
+    records: list,
+    tbl: pd.DataFrame,
+    mapping_method: str = "shen_2007",
+) -> tuple:
     """
     for topN kmers from ml classifier output, gather information regarding
     the virus and viral protein in which the kmer is found from the dataset
@@ -120,6 +125,8 @@ def get_kmer_info(topN_kmers: list, records: list, tbl: pd.DataFrame) -> tuple:
         list of viral sequence records from cache
     tbl: pd.DataFrame
         training dataframe
+    mapping_method:
+        preferred mapping method for translating AA to PC kmers
 
     Returns:
     --------
@@ -134,6 +141,10 @@ def get_kmer_info(topN_kmers: list, records: list, tbl: pd.DataFrame) -> tuple:
     protein_name_PC = []
     k_mers_PC = []
     for item in topN_kmers:
+        if item[:8] == "kmer_PC_":
+            kmer_status = True
+        else:
+            kmer_status = False
         k_mer = item.replace("kmer_PC_", "").replace("kmer_AA_", "")
 
         for record in records:
@@ -153,13 +164,15 @@ def get_kmer_info(topN_kmers: list, records: list, tbl: pd.DataFrame) -> tuple:
                 this_seq_AA = str(this_seq_AA)
 
                 new_seq = ""
+                if kmer_status:
+                    for each in this_seq_AA:
+                        new_seq += get_features.aa_map(each, method=mapping_method)
+                    this_seq = new_seq
+                    this_seq = str(this_seq)
+                else:
+                    this_seq = this_seq_AA
 
-                for each in this_seq_AA:
-                    new_seq += get_features.aa_map(each, method="shen_2007")
-                this_seq_PC = new_seq
-                this_seq_PC = str(this_seq_PC)
-
-                kmer_idx = [m.start() for m in re.finditer(k_mer, this_seq_PC)]
+                kmer_idx = [m.start() for m in re.finditer(k_mer, this_seq)]
                 if kmer_idx:
                     acc_exist = tbl.Accessions.isin([record.id])
                     if sum(acc_exist):

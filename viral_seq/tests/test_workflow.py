@@ -8,6 +8,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
+from viral_seq.analysis import get_features
 
 
 def test_optimization_plotting(tmpdir):
@@ -435,19 +436,21 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
 
 
 @pytest.mark.parametrize(
-    "accession, exp",
+    "accession, exp, mapping_method",
     [
         (
             "NC_001563.2",
-            11,
+            4,
+            "shen_2007",
         ),
         (
-            "AC_000008.1",
+            "NC_001563.2",
             0,
+            "jurgen_schmidt",
         ),
     ],
 )
-def test_get_kmer_info(accession, exp):
+def test_get_kmer_info(accession, exp, mapping_method):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())
     records = sp.load_from_cache(
@@ -480,21 +483,42 @@ def test_get_kmer_info(accession, exp):
         },
     }
     tbl = pd.DataFrame(data_table)
-    topN_kmers = [
-        "kmer_PC_AFDAEF",
-        "kmer_PC_FCCGDA",
-        "kmer_PC_EGCCAC",
-        "kmer_PC_EADAAC",
-        "kmer_PC_DGDACD",
-        "kmer_PC_DGACFC",
-        "kmer_PC_DFDCCC",
-        "kmer_PC_FGACCA",
-        "kmer_PC_DFDCCA",
-        "kmer_PC_CECCAF",
+
+    kmers = [
+        "ADMAHD",
+        "DFFKSG",
+        "HKFLVP",
+        "NGTGGI",
+        "MRTAPT",
+        "SRGLDP",
+        "YDTIPI",
+        "DRGIFV",
+        "MDSIPG",
+        "FHIPGE",
+        "FMSHNI",
+        "IPKMNV",
+        "LIPDIT",
+        "FLAGVPT",
+        "FALMKV",
+        "LDIHMY",
+        "KFHFDT",
+        "HLTKTW",
+        "LIAPGT",
+        "DHIAQV",
     ]
-        
+
+    new_kmers = []
+    for i, topN_kmer in enumerate(kmers):
+        if i < len(kmers) / 2:
+            topN_kmer_PC = [
+                get_features.aa_map(s, method=mapping_method) for s in topN_kmer
+            ]
+            new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
+        if i >= len(kmers) / 2:
+            new_kmers.append("kmer_AA_" + topN_kmer)
+
     viruses_PC, kmers_PC, protein_name_PC = workflow.get_kmer_info(
-        topN_kmers, records, tbl
+        new_kmers, records, tbl, mapping_method
     )
 
     assert len(viruses_PC) == len(kmers_PC) == len(protein_name_PC) == exp

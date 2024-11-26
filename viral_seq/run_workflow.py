@@ -28,6 +28,7 @@ import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
+import matplotlib.patches as mpatches
 
 matplotlib.use("Agg")
 
@@ -130,6 +131,7 @@ def FIC_plot(
     target_column: str,
     exposure_status_sign: list,
     response_effect_sign: list,
+    surface_exposed_dict: dict,
     path: Path,
 ):
     """
@@ -153,6 +155,9 @@ def FIC_plot(
         list of +/- symbols denoting surface exposure status of kmer features in topN kmers
     response_effect_sign: list
         list of +/- symbols denoting response effect from shap importance pearson-r correlation
+    surface_exposed_dict: dict
+        dictionary containing the topN kmers and their respective ratios of surface exposed to
+        not surface exposed viral proteins for plotting '% surface exposed'
     path: Path
         path to save figure
     """
@@ -175,10 +180,21 @@ def FIC_plot(
         f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
-    kmer_idx = -1
 
-    for p in bars:
-        kmer_idx += 1
+    for kmer_idx, p in enumerate(ax.patches):
+        # calculate corresponding surface exposure %
+        kmer_name = topN_kmers[kmer_idx][8:]
+        if kmer_name in surface_exposed_dict:
+            if np.sum(surface_exposed_dict[kmer_name]) == 0:
+                percent_lbl = "0.00%"
+            else:
+                percent_exposed = (
+                    surface_exposed_dict[kmer_name][0]
+                    / np.sum(surface_exposed_dict[kmer_name])
+                    * 100
+                )
+                percent_lbl = f"{percent_exposed:.2f}%"
+
         left, bottom, width, height = p.get_bbox().bounds
 
         if response_effect_sign[kmer_idx] == "+":
@@ -209,6 +225,14 @@ def FIC_plot(
             color=exposure_sign_color,
             fontsize="xx-large",
         )
+        ax.annotate(
+            percent_lbl,
+            xy=(left + width + 8, bottom + height / 2),
+            ha="center",
+            va="center",
+            color="k",
+            fontsize="large",
+        )
 
         plus_symbol = Line2D(
             [0], [0], marker="+", color="green", markersize=9, linestyle=""
@@ -219,6 +243,7 @@ def FIC_plot(
         cross_symbol = Line2D(
             [0], [0], marker="x", color="gold", markersize=9, linestyle=""
         )
+        blank_patch = mpatches.Patch(color="white")
 
         ax.legend(
             handles=[
@@ -227,6 +252,7 @@ def FIC_plot(
                 plus_symbol,
                 minus_symbol,
                 cross_symbol,
+                blank_patch,
             ],
             labels=[
                 "on left: Positive effect on response",
@@ -234,6 +260,7 @@ def FIC_plot(
                 "on right: Protein is surface-exposed",
                 "on right: Protein is not surface-exposed",
                 "on right: Protein does not bind to both\n receptor types",
+                "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
             ],
             loc="lower right",
             prop={"size": 9},
@@ -1753,7 +1780,10 @@ if __name__ == "__main__":
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
-            res1, res2, positive_shap_values.values, positive_shap_values.data
+            is_exposed,
+            not_exposed,
+            positive_shap_values.values,
+            positive_shap_values.data,
         )
 
         # Production of the FIC plot
@@ -1764,5 +1794,6 @@ if __name__ == "__main__":
             target_column,
             exposure_status_sign,
             response_effect_sign,
+            surface_exposed_dict,
             paths[-1],
         )

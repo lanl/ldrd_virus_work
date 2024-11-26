@@ -257,13 +257,26 @@ def test_fic_plot(tmp_path):
         "kmer_PC_CCACAD",
         "kmer_PC_FECAEA",
     ]
+
     array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0])
     target_column = "Is_Integrin"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+    surface_exposed_dict = {
+        "CDDEEC": [15, 20],
+        "CCGDEA": [0, 30],
+        "CCCFCF": [0, 0],
+        "CCAAACD": [11, 41],
+        "CACDGA": [3, 20],
+        "CFCEDD": [12, 35],
+        "GCECFD": [10, 46],
+        "ECDGDE": [12, 0],
+        "CCACAD": [10, 48],
+        "FECAEA": [13, 78],
+    }
 
-    n_folds = 2
+    n_folds = 5
 
     workflow.FIC_plot(
         array2,
@@ -272,6 +285,7 @@ def test_fic_plot(tmp_path):
         target_column,
         exposure_status_sign,
         response_effect_sign,
+        surface_exposed_dict,
         tmp_path,
     )
 
@@ -329,112 +343,3 @@ def test_percent_surface_exposed():
     assert out_dict["CAACAAD"] == [1, 1]
     assert out_dict["FEAGAD"] == [3, 1]
     assert out_dict["GACADA"] == [0, 1]
-
-
-def test_fic_plot(tmp_path):
-    array2 = [
-        "kmer_PC_CDDEEC",
-        "kmer_PC_CCGDEA",
-        "kmer_PC_CCCFCF",
-        "kmer_PC_CCAAACD",
-        "kmer_PC_CACDGA",
-        "kmer_PC_CFCEDD",
-        "kmer_PC_GCECFD",
-        "kmer_PC_ECDGDE",
-        "kmer_PC_CCACAD",
-        "kmer_PC_FECAEA",
-    ]
-    array1 = np.array([11.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 3.0, 3.0])
-    target_column = "0"
-    found_kmers = [
-        "CDDEEC",
-        "CCGDEA",
-        "CCCFCF",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
-    ]
-    surface_exposed_dict = {
-        "AFDAEF": [14, 65],
-        "CACDGA": [21, 104],
-        "CCAAACD": [19, 82],
-        "CCACAD": [18, 89],
-        "CCCFCF": [23, 106],
-        "CCGDEA": [0, 11],
-        "CDDEEC": [5, 57],
-        "CECCAF": [4, 26],
-        "CFCEDD": [11, 41],
-        "DFDCCA": [3, 20],
-        "DFDCCC": [3, 11],
-        "DGACFC": [22, 120],
-        "DGDACD": [13, 78],
-        "EADAAC": [10, 48],
-        "ECDGDE": [18, 93],
-        "EGCCAC": [5, 58],
-        "FCCGDA": [19, 69],
-        "FECAEA": [11, 39],
-        "FGACCA": [10, 46],
-        "GCECFD": [12, 35],
-    }
-    not_exposed = [
-        "CDDEEC",
-        "CCGDEA",
-        "",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
-    ]
-    is_exposed = [
-        "CDDEEC",
-        "",
-        "",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
-    ]
-
-    X, y = make_classification(n_samples=15, n_features=10, random_state=0)
-    X = pd.DataFrame(X)
-    random_state = 0
-    n_folds = 2
-    clfr = RandomForestClassifier(
-        n_estimators=10000, n_jobs=-1, random_state=random_state
-    )
-    cv = StratifiedKFold(n_splits=n_folds)
-    for fold, (train, test) in enumerate(cv.split(X, y)):
-        clfr.fit(X.iloc[train], y[train])
-
-    explainer = shap.Explainer(clfr, seed=random_state)
-    shap_values = explainer(X)
-    positive_shap_values = shap_values[:, :, 1]
-
-    response_effect, surface_exposed_sign = workflow.FIC_plot(
-        array2,
-        array1,
-        n_folds,
-        target_column,
-        positive_shap_values,
-        found_kmers,
-        surface_exposed_dict,
-        not_exposed,
-        is_exposed,
-        paths=[tmp_path],
-    )
-
-    response_effect_exp = ["-", "-", "+", "+", "-", "+", "+", "-", "+", "+"]
-    surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
-
-    assert_array_equal(response_effect, response_effect_exp)
-    assert_array_equal(surface_exposed_sign, surface_exposed_exp)

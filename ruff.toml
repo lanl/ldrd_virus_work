@@ -1,4 +1,4 @@
 # Never enforce `E501` (line length violations). Handled by Black
 [lint]
+select = ["E", "F", "B006", "B008"]
 ignore = ["E501"]
-extend-select = ["B006", "B008"]

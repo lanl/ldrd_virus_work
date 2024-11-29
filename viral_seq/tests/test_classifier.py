@@ -201,3 +201,140 @@ def test_plot_roc_curve_comparison(tmpdir):
     with tmpdir.as_cwd():
         classifier.plot_roc_curve_comparison(["Test1", "Test2"], fprs, tprs, tpr_stds)
         assert compare_images(expected_plot, "roc_plot_comparison.png", 0.001) is None
+
+
+@pytest.mark.parametrize(
+    "random_state, y_tests, y_preds, scores",
+    [
+        (
+            123456,
+            [np.array([0, 1, 1, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])],
+            [
+                np.array([0.2, 0.6, 0.5, 0.6]),
+                np.array([0.4, 0.5, 0.3]),
+                np.array([0.3, 0.3, 0.3]),
+            ],
+            [0.625, 0.5, 0.5],
+        ),
+        (
+            159758,
+            [np.array([1, 1, 0, 0]), np.array([1, 0, 1]), np.array([1, 0, 0])],
+            [
+                np.array([0.8, 0.8, 0.2, 0.2]),
+                np.array([0.8, 0.4, 0.6]),
+                np.array([0.7, 0.1, 0.2]),
+            ],
+            [1.0, 1.0, 1.0],
+        ),
+        (
+            654987,
+            [np.array([1, 0, 1, 0]), np.array([0, 1, 1]), np.array([0, 0, 1])],
+            [
+                np.array([0.9, 0.1, 0.6, 0.5]),
+                np.array([0.1, 0.8, 0.9]),
+                np.array([0.3, 0.3, 1.0]),
+            ],
+            [1.0, 1.0, 1.0],
+        ),
+    ],
+)
+def test_cross_validation(random_state, y_tests, y_preds, scores):
+    X, y = make_classification(n_samples=10, n_features=10, random_state=random_state)
+    X = pd.DataFrame(X)
+    test_y_tests, test_y_preds, test_scores = classifier.cross_validation(
+        RandomForestClassifier,
+        X,
+        y,
+        n_splits=3,
+        n_estimators=10,
+        random_state=random_state,
+    )
+    assert_allclose(np.hstack(test_y_tests), np.hstack(y_tests))
+    assert_allclose(np.hstack(test_y_preds), np.hstack(y_preds))
+    assert_allclose(test_scores, scores)
+
+
+def test_get_roc_curve_cv():
+    rng = np.random.default_rng(456987)
+    folds = 3
+    copies = 1
+    # different folds sometimes have different numbers of samples
+    samples = rng.integers(5, 7, size=folds)
+    # `append` 1 to ensure tprs can be calculated
+    y_tests = [np.append(rng.integers(2, size=samples[i] - 1), 1) for i in range(folds)]
+    predictions = [
+        [rng.random(size=samples[i]) for i in range(folds)] for _ in range(copies)
+    ]
+    cv_roc_data = classifier.get_roc_curve_cv(y_tests, predictions)
+    exp_mean_tpr = np.ones(100)
+    exp_mean_tpr[0] = 0.0
+    exp_mean_tpr[1:-1] = 4.0 / 9.0
+    exp_tpr_std = np.zeros(100)
+    exp_tpr_std[1:-1] = 0.41573971
+    exp_fpr_folds = [
+        np.array([0.0, 1.0, 1.0]),
+        np.array([0.0, 0.0, 1.0, 1.0]),
+        np.array([0.0, 0.0, 0.0, 1.0]),
+    ]
+    exp_tpr_folds = [
+        np.array([0.0, 0.0, 1.0]),
+        np.array([0.0, 0.33333333, 0.33333333, 1.0]),
+        np.array([0.0, 0.25, 1.0, 1.0]),
+    ]
+    assert_allclose(cv_roc_data.mean_tpr, exp_mean_tpr)
+    assert_allclose(cv_roc_data.tpr_std, exp_tpr_std)
+    assert_allclose(np.hstack(cv_roc_data.fpr_folds), np.hstack(exp_fpr_folds))
+    assert_allclose(np.hstack(cv_roc_data.tpr_folds), np.hstack(exp_tpr_folds))
+    assert cv_roc_data.tpr_std_folds is None
+
+
+# using pytest parametrize seemed about as verbose as just making two tests
+def test_get_roc_curve_cv_copies():
+    rng = np.random.default_rng(13579)
+    folds = 3
+    copies = 5
+    # different folds sometimes have different numbers of samples
+    samples = rng.integers(5, 7, size=folds)
+    # `append` 1 to ensure tprs can be calculated
+    y_tests = [np.append(rng.integers(2, size=samples[i] - 1), 1) for i in range(folds)]
+    predictions = [
+        [rng.random(size=samples[i]) for i in range(folds)] for _ in range(copies)
+    ]
+    cv_roc_data = classifier.get_roc_curve_cv(y_tests, predictions)
+    exp_mean_tpr = np.ones(100)
+    exp_mean_tpr[0] = 0.0
+    exp_mean_tpr[1:25] = 1.0 / 3.0
+    exp_mean_tpr[25:50] = 0.4
+    exp_mean_tpr[50:-1] = 19.0 / 30.0
+    exp_tpr_std = np.zeros(100)
+    exp_tpr_std[1:25] = 0.40483193
+    exp_tpr_std[25:50] = 0.42622373
+    exp_tpr_std[50:-1] = 0.38586123
+    exp_fpr_folds = None
+    exp_tpr_folds = [[] for _ in range(folds)]
+    exp_tpr_folds[0] = np.ones(100)
+    exp_tpr_folds[0][0] = 0.0
+    exp_tpr_folds[0][1:50] = 0.3
+    exp_tpr_folds[0][50:-1] = 0.75
+    exp_tpr_folds[1] = np.ones(100)
+    exp_tpr_folds[1][0] = 0.0
+    exp_tpr_folds[1][1:25] = 0.4
+    exp_tpr_folds[1][25:-1] = 0.6
+    exp_tpr_folds[2] = np.ones(100)
+    exp_tpr_folds[2][0] = 0.0
+    exp_tpr_folds[2][1:50] = 0.3
+    exp_tpr_folds[2][50:-1] = 0.55
+    exp_tpr_std_folds = [[] for _ in range(folds)]
+    exp_tpr_std_folds[0] = np.zeros(100)
+    exp_tpr_std_folds[0][1:50] = 0.29154759
+    exp_tpr_std_folds[0][50:-1] = 0.2236068
+    exp_tpr_std_folds[1] = np.zeros(100)
+    exp_tpr_std_folds[1][1:-1] = 0.48989795
+    exp_tpr_std_folds[2] = np.zeros(100)
+    exp_tpr_std_folds[2][1:50] = 0.4
+    exp_tpr_std_folds[2][50:-1] = 0.36742346
+    assert_allclose(cv_roc_data.mean_tpr, exp_mean_tpr)
+    assert_allclose(cv_roc_data.tpr_std, exp_tpr_std)
+    assert cv_roc_data.fpr_folds is None
+    assert_allclose(cv_roc_data.tpr_folds, exp_tpr_folds)
+    assert_allclose(cv_roc_data.tpr_std_folds, exp_tpr_std_folds)

@@ -779,6 +779,63 @@ if __name__ == "__main__":
     if optimize == "yes" or optimize == "skip":
         for group, this_data in plotting_data.items():
             optimization_plots(this_data, group, plots_path)
+    # cross-validation
+    test_folds: list = []
+    predictions_cv = defaultdict(list)
+    for name, val in model_arguments.items():
+        these_params = {
+            k: v for k, v in best_params[name].items() if k not in val["predict"]
+        }
+        these_test_folds, these_preds, _ = classifier.cross_validation(
+            val["model"],
+            X_train,
+            y_train,
+            **val["predict"],
+            **these_params,
+        )
+        if len(test_folds):
+            assert np.allclose(
+                np.hstack(these_test_folds), np.hstack(test_folds)
+            ), "`classifier.cross_validation` is not returning identical test sets for each model/copy"
+        else:
+            test_folds = these_test_folds
+        predictions_cv[val["group"]].append(these_preds)
+    assert int(len(model_arguments) / copies) == len(
+        predictions_cv
+    ), f"Number of cross-validation predictions doesn't match number of model types: {len(predictions_cv)} != {int(len(model_arguments)/copies)}"
+    comp_names_cv: list[str] = []
+    comp_fprs_cv: list[Any] = []
+    comp_tprs_cv: list[Any] = []
+    for group in predictions_cv:
+        cv_roc_data = classifier.get_roc_curve_cv(test_folds, predictions_cv[group])
+        this_title = (
+            f"ROC Curve\nCross-validation on Training\nAveraged over {copies} seeds"
+            if copies > 1
+            else f"ROC Curve\nCross-validation on Training"
+        )
+        these_names = [f"{group} fold {i}" for i in range(len(cv_roc_data.tpr_folds))]
+        classifier.plot_roc_curve_comparison(
+            these_names,
+            cv_roc_data.fpr_folds,
+            cv_roc_data.tpr_folds,
+            cv_roc_data.tpr_std_folds,
+            filename=str(plots_path / f"{group}_roc_plot_cv.png"),
+            title=this_title,
+        )
+        comp_names_cv.append(group)
+        comp_tprs_cv.append(cv_roc_data.mean_tpr)
+    this_title = (
+        f"ROC Curve\nCross-validation on Training\nAveraged over 5 folds and {copies} seeds"
+        if copies > 1
+        else "ROC Curve\nCross-validation on Training\nAveraged over 5 folds"
+    )
+    classifier.plot_roc_curve_comparison(
+        comp_names_cv,
+        None,
+        comp_tprs_cv,
+        filename=str(plots_path / f"CV_roc_plot_comparison.png"),
+        title=this_title,
+    )
     # train and predict on all models
     predictions: Dict[str, Dict[str, Any]] = defaultdict(dict)
     models_fitted = {}

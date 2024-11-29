@@ -12,7 +12,7 @@ ci_lint:
     - python -m pip install -U setuptools pip
     - python -m pip install -r ci/requirements_low.txt
     - python -m pip install -v .
-    - python -m pip install black==23.3.0 ruff==0.6.9 
+    - python -m pip install black==23.3.0 ruff==0.8.1
     - ruff check viral_seq
     - black viral_seq --check
   allow_failure: false

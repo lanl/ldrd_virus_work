@@ -310,7 +310,6 @@ def test_get_roc_curve_cv_copies():
     exp_tpr_std[1:25] = 0.40483193
     exp_tpr_std[25:50] = 0.42622373
     exp_tpr_std[50:-1] = 0.38586123
-    exp_fpr_folds = None
     exp_tpr_folds = [[] for _ in range(folds)]
     exp_tpr_folds[0] = np.ones(100)
     exp_tpr_folds[0][0] = 0.0

@@ -1687,6 +1687,20 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2050019
                 # https://ictv.global/report/chapter/coronaviridae/coronaviridae/orthocoronavirinae
                 "Shrew coronavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2560769
+                # https://en.wikipedia.org/wiki/Sorex_araneus_polyomavirus_1
+                # https://doi.org/10.1016/j.isci.2021.103613
+                # https://doi.org/10.1099/jgv.0.000948
+                "Sorex araneus polyomavirus 1": "human",
+                # https://www.genome.jp/virushostdb/2560770
+                "Sorex coronatus polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2560771
+                "Sorex minutus polyomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/273354
+                "Sororoca virus": "no_mammals",
+                # https://www.genome.jp/virushostdb/2010246
+                # https://ictv.global/report/chapter/arenaviridae/arenaviridae/mammarenavirus
+                "Souris virus": "non_primate_mammals",
                 }
 
 
@@ -1774,7 +1788,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=603)
+                                                           n_records=608)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

@@ -811,7 +811,7 @@ if __name__ == "__main__":
         this_title = (
             f"ROC Curve\nCross-validation on Training\nAveraged over {copies} seeds"
             if copies > 1
-            else f"ROC Curve\nCross-validation on Training"
+            else "ROC Curve\nCross-validation on Training"
         )
         these_names = [f"{group} fold {i}" for i in range(len(cv_roc_data.tpr_folds))]
         classifier.plot_roc_curve_comparison(
@@ -833,7 +833,7 @@ if __name__ == "__main__":
         comp_names_cv,
         None,
         comp_tprs_cv,
-        filename=str(plots_path / f"CV_roc_plot_comparison.png"),
+        filename=str(plots_path / "CV_roc_plot_comparison.png"),
         title=this_title,
     )
     # train and predict on all models

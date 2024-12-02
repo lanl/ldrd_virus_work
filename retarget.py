@@ -1701,6 +1701,21 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2010246
                 # https://ictv.global/report/chapter/arenaviridae/arenaviridae/mammarenavirus
                 "Souris virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2560777
+                # https://ictv.global/report/chapter/orthoherpesviridae/orthoherpesviridae/mardivirus
+                "Spheniscid alphaherpesvirus 1": "avian",
+                # https://www.genome.jp/virushostdb/2170200
+                # https://doi.org/10.1128/iai.8.5.804-813.1973
+                # https://doi.org/10.1186/s12977-017-0379-9
+                # https://doi.org/10.1371/journal.pone.0184502
+                "Spider monkey simian foamy virus": "human",
+                # https://www.genome.jp/virushostdb/1592764
+                "Cyclovirus TsCyV-1_JP-NUBS-2014": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2773314
+                "red squirrel adenovirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2847092
+                # https://doi.org/10.3390/v10070373
+                "giant squirrel virus": "non_primate_mammals",
                 }
 
 
@@ -1788,7 +1803,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=608)
+                                                           n_records=613)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

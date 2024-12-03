@@ -27,6 +27,7 @@ import tarfile
 import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
+from matplotlib.container import BarContainer
 
 matplotlib.use("Agg")
 
@@ -167,7 +168,7 @@ def FIC_plot(
 
     fig, ax = plt.subplots(figsize=(8, 8))
     y_pos = np.arange(len(topN_kmers))
-    ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
+    bars: BarContainer = ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
     ax.set_xlim(0, 100)
     ax.set_yticks(y_pos, labels=topN_kmers)
     ax.set_title(
@@ -176,7 +177,7 @@ def FIC_plot(
     ax.set_xlabel("Classifier Consensus Percentage (%)")
     kmer_idx = -1
 
-    for p in ax.patches:
+    for p in bars:
         kmer_idx += 1
         left, bottom, width, height = p.get_bbox().bounds
 

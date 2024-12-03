@@ -1,6 +1,5 @@
 import pandas as pd
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.cli import cli
 from importlib.resources import files
 from pathlib import Path
 import tarfile
@@ -32,7 +31,6 @@ def get_bad_indexes(df, cache, train_accessions=None):
             duplicate_lst.append(index)
         records = sp.load_from_cache(accessions, cache=cache, filter=False)
         partial_bool = False
-        bad_cds_bool = False
         good_cds_bool = False
         for record in records:
             if "partial" in record.description:

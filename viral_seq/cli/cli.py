@@ -245,8 +245,9 @@ def pull_ensembl_transcripts(email, cache, file):
 @click.option(
     "--mapping-method",
     "-m",
+    type=click.Choice(["shen_2007", "jurgen_schmidt"]),
     default="shen_2007",
-    help="Preference of sheme for mapping AA-kmers to PC-kmers",
+    help="Preference of scheme for mapping AA-kmers to PC-kmers",
 )
 def calculate_table(
     cache,

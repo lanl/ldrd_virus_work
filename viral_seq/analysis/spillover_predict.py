@@ -294,9 +294,7 @@ def load_from_cache(
     return records
 
 
-def _populate_kmer_dict(
-    kmer, records, features, kmer_type="AA", mapping_method="shen_2007"
-):
+def _populate_kmer_dict(kmer, records, features, kmer_type="AA", mapping_method=None):
     for this_k in kmer:
         this_res = get_kmers(
             records, k=this_k, kmer_type=kmer_type, mapping_method=mapping_method
@@ -319,7 +317,7 @@ def _grab_features(
         else:
             features.update(feat_genomic)
     if kmers:
-        _populate_kmer_dict(kmer_k, records, features, mapping_method=mapping_method)
+        _populate_kmer_dict(kmer_k, records, features)
     if kmers_pc:
         _populate_kmer_dict(
             kmer_k_pc, records, features, kmer_type="PC", mapping_method=mapping_method

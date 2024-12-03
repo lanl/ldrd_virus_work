@@ -102,3 +102,10 @@ def test_aa_map_wrong_input():
 def test_aa_map(method, aa_in, aa_expected):
     actual = get_features.aa_map(aa_in, method=method)
     assert actual == aa_expected
+
+
+def test_get_kmers():
+    tests_dir = files("viral_seq") / "tests" / "NC_007620.1"
+    test_record = _append_recs(tests_dir)
+    with pytest.raises(ValueError, match="No mapping method required for AA-kmers."):
+        get_kmers([test_record], kmer_type="AA", mapping_method="shen_2007")

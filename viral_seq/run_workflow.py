@@ -171,7 +171,7 @@ def FIC_plot(
     else:
         target_name = target_column
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(10, 10))
     y_pos = np.arange(len(topN_kmers))
     bars: BarContainer = ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
     ax.set_xlim(0, 100)
@@ -185,15 +185,14 @@ def FIC_plot(
         # calculate corresponding surface exposure %
         kmer_name = topN_kmers[kmer_idx][8:]
         if kmer_name in surface_exposed_dict:
-            if np.sum(surface_exposed_dict[kmer_name]) == 0:
-                percent_lbl = "0.00%"
-            else:
-                percent_exposed = (
-                    surface_exposed_dict[kmer_name][0]
-                    / np.sum(surface_exposed_dict[kmer_name])
-                    * 100
-                )
-                percent_lbl = f"{percent_exposed:.2f}%"
+            surface_exposed_count = surface_exposed_dict[kmer_name][0]
+            total_count = np.sum(surface_exposed_dict[kmer_name])
+            percent_exposed = (
+                (surface_exposed_count / total_count) * 100.0
+                if total_count != 0.0
+                else 0.0
+            )
+            percent_lbl = f"{percent_exposed:.2f}%"
 
         left, bottom, width, height = p.get_bbox().bounds
 
@@ -225,14 +224,24 @@ def FIC_plot(
             color=exposure_sign_color,
             fontsize="xx-large",
         )
-        ax.annotate(
-            percent_lbl,
-            xy=(left + width + 8, bottom + height / 2),
-            ha="center",
-            va="center",
-            color="k",
-            fontsize="large",
-        )
+        if p._width >= 90:
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width - 5, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="white",
+                fontsize="large",
+            )
+        else:
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width + 5, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="k",
+                fontsize="large",
+            )
 
         plus_symbol = Line2D(
             [0], [0], marker="+", color="green", markersize=9, linestyle=""
@@ -263,7 +272,8 @@ def FIC_plot(
                 "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
             ],
             loc="lower right",
-            prop={"size": 9},
+            prop={"size": 10},
+            bbox_to_anchor=(0.7, -0.35),
         )
 
         fig.tight_layout()

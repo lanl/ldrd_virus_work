@@ -7,11 +7,6 @@ import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal
-from matplotlib.testing.compare import compare_images
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import StratifiedKFold
-from sklearn.datasets import make_classification
-import shap
 
 
 def test_optimization_plotting(tmpdir):
@@ -258,7 +253,7 @@ def test_fic_plot(tmp_path):
         "kmer_PC_FECAEA",
     ]
 
-    array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0])
+    array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.7, 1.8, 1.9, 2.0])
     target_column = "Is_Integrin"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
@@ -276,7 +271,7 @@ def test_fic_plot(tmp_path):
         "FECAEA": [13, 78],
     }
 
-    n_folds = 5
+    n_folds = 2
 
     workflow.FIC_plot(
         array2,

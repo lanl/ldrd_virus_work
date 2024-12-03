@@ -181,7 +181,7 @@ def FIC_plot(
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
-    for kmer_idx, p in enumerate(ax.patches):
+    for kmer_idx, p in enumerate(bars):
         # calculate corresponding surface exposure %
         kmer_name = topN_kmers[kmer_idx][8:]
         if kmer_name in surface_exposed_dict:
@@ -224,7 +224,7 @@ def FIC_plot(
             color=exposure_sign_color,
             fontsize="xx-large",
         )
-        if p._width >= 90:
+        if width >= 90:
             ax.annotate(
                 percent_lbl,
                 xy=(left + width - 5, bottom + height / 2),

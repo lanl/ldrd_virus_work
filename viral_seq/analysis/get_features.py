@@ -38,6 +38,8 @@ def get_similarity_features(
 def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
+    if kmer_type == "PC" and mapping_method is None:
+        raise ValueError("Please specify mapping method for PC-kmers.")
     kmers = defaultdict(int)
     for record in records:
         for feature in record.features:

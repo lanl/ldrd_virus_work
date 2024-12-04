@@ -109,3 +109,5 @@ def test_get_kmers():
     test_record = _append_recs(tests_dir)
     with pytest.raises(ValueError, match="No mapping method required for AA-kmers."):
         get_kmers([test_record], kmer_type="AA", mapping_method="shen_2007")
+    with pytest.raises(ValueError, match="Please specify mapping method for PC-kmers."):
+        get_kmers([test_record], kmer_type="PC", mapping_method=None)

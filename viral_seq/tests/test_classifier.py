@@ -103,13 +103,22 @@ def test_get_hyperparameters(config, score, best_params):
 
 
 @pytest.mark.parametrize(
-    "model, name, calibrate, expected_values",
+    "model, name, calibrate, rtol, expected_msg, expected_values",
     [
-        (RandomForestClassifier, "rfc", False, [0.4, 0.31, 0.26, 0.47, 0.64]),
+        (
+            RandomForestClassifier,
+            "rfc",
+            False,
+            1e-7,
+            "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nClassifier achieved ROC AUC = 1.00 on test data.\nSaving trained model to model.p\n",
+            [0.4, 0.31, 0.26, 0.47, 0.64],
+        ),
         (
             RandomForestClassifier,
             "rfc",
             True,
+            1e-5,  # tolerance lowered due to CalibratedClassifierCV instability across versions
+            "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nClassifier achieved ROC AUC = 1.00 on test data.\nCalibrating model with cross-validation\nClassifier achieved ROC AUC = 0.50 on test data after calibration with cross-validation.\nSaving trained model to model.p\n",
             [
                 0.4624745376650326,
                 0.3246510677646521,
@@ -120,7 +129,9 @@ def test_get_hyperparameters(config, score, best_params):
         ),
     ],
 )
-def test_train_and_predict(capsys, model, name, calibrate, expected_values, tmpdir):
+def test_train_and_predict(
+    capsys, model, name, calibrate, rtol, expected_msg, expected_values, tmpdir
+):
     X, y = make_classification(n_samples=15, n_features=10, random_state=0)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=5, random_state=0
@@ -141,18 +152,9 @@ def test_train_and_predict(capsys, model, name, calibrate, expected_values, tmpd
         )
         assert Path("model.p").is_file()
         captured = capsys.readouterr()
-        if calibrate:
-            assert (
-                captured.out
-                == "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nClassifier achieved ROC AUC = 1.00 on test data.\nCalibrating model with cross-validation\nClassifier achieved ROC AUC = 0.50 on test data after calibration with cross-validation.\nSaving trained model to model.p\n"
-            )
-        else:
-            assert (
-                captured.out
-                == "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nClassifier achieved ROC AUC = 1.00 on test data.\nSaving trained model to model.p\n"
-            )
+        assert captured.out == expected_msg
         df = pd.DataFrame(y_pred)
-        assert_allclose(df[0].values, expected_values)
+        assert_allclose(df[0].values, expected_values, rtol=rtol)
         check_is_fitted(clf)
 
 

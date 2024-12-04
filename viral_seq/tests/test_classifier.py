@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 import pandas as pd
-from pandas.testing import assert_frame_equal
 import pytest
 from ray import tune
 from pathlib import Path
@@ -369,6 +368,22 @@ def test_plot_calibration_curve(tmpdir):
     y_pred_calibrated = rng.random(size=10)
     with tmpdir.as_cwd():
         classifier.plot_calibration_curve(y_test, y_pred, y_pred_calibrated)
+        assert (
+            compare_images(expected_plot, "plot_calibration_curve.png", 0.001) is None
+        )
+
+
+def test_plot_calibration_curves(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_calibration_curves.png"
+    )
+    rng = np.random.default_rng(123)
+    predictions = {}
+    for i in range(5):
+        predictions[str(i)] = rng.random(size=10)
+    y_test = rng.integers(2, size=10)
+    with tmpdir.as_cwd():
+        classifier.plot_calibration_curves(y_test, predictions)
         assert (
             compare_images(expected_plot, "plot_calibration_curve.png", 0.001) is None
         )

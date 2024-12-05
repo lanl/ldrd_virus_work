@@ -888,9 +888,10 @@ if __name__ == "__main__":
         comp_fprs.append(fpr)
         comp_tprs.append(tpr)
         if copies > 1:
-            classifier.plot_calibration_curves(
+            y_proba_group = np.array(list(predictions[group].values())).mean(axis=0)
+            classifier.plot_calibration_curve(
                 y_test,
-                predictions[group],
+                y_proba_group,
                 title=f"Calibration Curve\n{group}\nAveraged over {copies} seeds",
                 filename=str(plots_path / f"{group}_calibration_curve.png"),
             )

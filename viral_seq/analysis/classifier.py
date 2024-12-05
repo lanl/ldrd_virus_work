@@ -540,18 +540,8 @@ def plot_roc_curve_comparison(
 
 
 def plot_calibration_curve(
-    y_test,
+    y_test: npt.ArrayLike,
     y_pred: npt.ArrayLike,
-    y_pred_calibrated: Optional[npt.ArrayLike] = None,
-    title: str = "Calibration Curve",
-    filename: str = "plot_calibration_curve.png",
-):
-    plot_calibration_curves(y_test, {"": y_pred}, y_pred_calibrated, title, filename)
-
-
-def plot_calibration_curves(
-    y_test,
-    predictions: dict[str, npt.ArrayLike],
     y_pred_calibrated: Optional[npt.ArrayLike] = None,
     title: str = "Calibration Curve",
     filename: str = "plot_calibration_curve.png",
@@ -559,33 +549,8 @@ def plot_calibration_curves(
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
 
-    prob_trues = []
-    prob_preds = []
-    std = None
-    for key in predictions:
-        prob_true, prob_pred = calibration_curve(y_test, predictions[key], n_bins=10)
-        prob_trues.append(prob_true)
-        prob_preds.append(prob_pred)
-    if len(prob_trues) > 1:
-        mean_prob_pred = np.linspace(0, 1, 10)
-        for i in range(len(prob_trues)):
-            prob_trues[i] = np.interp(mean_prob_pred, prob_preds[i], prob_trues[i])
-        mean_prob_true = np.mean(prob_trues, axis=0)
-        std = np.std(prob_trues, axis=0)
-        prob_true = mean_prob_true
-        prob_pred = mean_prob_pred
+    prob_true, prob_pred = calibration_curve(y_test, y_pred, n_bins=10)
     ax.plot(prob_pred, prob_true, label="Predictions on test", marker="s")
-    if std is not None:
-        upper = np.minimum(prob_true + std, 1)
-        lower = np.maximum(prob_true - std, 0)
-        ax.fill_between(
-            prob_pred,
-            lower,
-            upper,
-            label="Predictions on test \u00B11 std. dev.",
-            alpha=0.2,
-        )
-
     if y_pred_calibrated is not None:
         prob_true_calibrated, prob_pred_calibrated = calibration_curve(
             y_test, y_pred_calibrated, n_bins=10

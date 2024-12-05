@@ -373,19 +373,3 @@ def test_plot_calibration_curve(tmpdir):
         assert (
             compare_images(expected_plot, "plot_calibration_curve.png", 0.001) is None
         )
-
-
-def test_plot_calibration_curves(tmpdir):
-    expected_plot = files("viral_seq.tests.expected").joinpath(
-        "test_plot_calibration_curves.png"
-    )
-    rng = np.random.default_rng(123)
-    predictions = {}
-    for i in range(5):
-        predictions[str(i)] = rng.random(size=10)
-    y_test = rng.integers(2, size=10)
-    with tmpdir.as_cwd():
-        classifier.plot_calibration_curves(y_test, predictions)
-        assert (
-            compare_images(expected_plot, "plot_calibration_curve.png", 0.001) is None
-        )

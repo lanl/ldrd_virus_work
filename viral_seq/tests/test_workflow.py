@@ -440,11 +440,16 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
     [
         (
             "NC_001563.2",
-            4,
+            12,
             "shen_2007",
         ),
         (
             "NC_001563.2",
+            2,
+            "jurgen_schmidt",
+        ),
+        (
+            "AC_000008.1",
             0,
             "jurgen_schmidt",
         ),
@@ -495,7 +500,7 @@ def test_get_kmer_info(accession, exp, mapping_method):
         "DRGIFV",
         "MDSIPG",
         "FHIPGE",
-        "FMSHNI",
+        "LVFGGIT",
         "IPKMNV",
         "LIPDIT",
         "FLAGVPT",

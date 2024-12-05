@@ -259,7 +259,7 @@ def test_fic_plot(tmp_path):
     target_column = "Is_Integrin"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
-    exposure_status_sign = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+    exposure_status_sign = ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"]
     surface_exposed_dict = {
         "CDDEEC": 42.86,
         "CCGDEA": 0.00,

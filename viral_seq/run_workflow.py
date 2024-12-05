@@ -341,9 +341,6 @@ def FIC_plot(
         minus_symbol = Line2D(
             [0], [0], marker="_", color="red", markersize=9, linestyle=""
         )
-        cross_symbol = Line2D(
-            [0], [0], marker="x", color="gold", markersize=9, linestyle=""
-        )
         blank_patch = mpatches.Patch(color="white")
 
         ax.legend(
@@ -352,7 +349,6 @@ def FIC_plot(
                 minus_symbol,
                 plus_symbol,
                 minus_symbol,
-                cross_symbol,
                 blank_patch,
             ],
             labels=[
@@ -360,7 +356,6 @@ def FIC_plot(
                 "on left: Negative effect on response",
                 "on right: Protein is surface-exposed",
                 "on right: Protein is not surface-exposed",
-                "on right: Protein does not bind to both\n receptor types",
                 "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
             ],
             loc="lower right",

@@ -104,10 +104,30 @@ def test_aa_map(method, aa_in, aa_expected):
     assert actual == aa_expected
 
 
-def test_get_kmers():
+def test_error_get_kmers():
     tests_dir = files("viral_seq") / "tests" / "NC_007620.1"
     test_record = _append_recs(tests_dir)
     with pytest.raises(ValueError, match="No mapping method required for AA-kmers."):
         get_kmers([test_record], kmer_type="AA", mapping_method="shen_2007")
     with pytest.raises(ValueError, match="Please specify mapping method for PC-kmers."):
         get_kmers([test_record], kmer_type="PC", mapping_method=None)
+
+
+@pytest.mark.parametrize(
+    "accession, kmer_type, mapping_method, exp_kmer, exp_len",
+    [
+        ("NC_007620.1", "AA", None, "kmer_AA_MSSVFRAFEL", 4489),
+        ("NC_007620.1", "PC", "shen_2007", "kmer_PC_DDDACGACFC", 4489),
+        ("NC_007620.1", "PC", "jurgen_schmidt", "kmer_PC_6226750746", 4489),
+    ],
+)
+def test_get_kmers(accession, kmer_type, mapping_method, exp_kmer, exp_len):
+    tests_dir = files("viral_seq") / "tests" / accession
+    test_record = _append_recs(tests_dir)
+
+    kmers = get_kmers([test_record], kmer_type=kmer_type, mapping_method=mapping_method)
+    mapped_kmers = list(kmers.keys())
+    test_kmer = mapped_kmers[0]
+
+    assert test_kmer == exp_kmer
+    assert len(mapped_kmers) == exp_len

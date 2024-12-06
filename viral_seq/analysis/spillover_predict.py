@@ -294,16 +294,20 @@ def load_from_cache(
     return records
 
 
-def _populate_kmer_dict(kmer, records, features, kmer_type="AA"):
+def _populate_kmer_dict(kmer, records, features, kmer_type="AA", mapping_method=None):
     for this_k in kmer:
-        this_res = get_kmers(records, k=this_k, kmer_type=kmer_type)
+        this_res = get_kmers(
+            records, k=this_k, kmer_type=kmer_type, mapping_method=mapping_method
+        )
         if this_res is None:
             return None
         else:
             features.update(this_res)
 
 
-def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
+def _grab_features(
+    features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc, mapping_method
+):
     feat_genomic = None
     feat_gc = None
     if genomic:
@@ -315,7 +319,9 @@ def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer
     if kmers:
         _populate_kmer_dict(kmer_k, records, features)
     if kmers_pc:
-        _populate_kmer_dict(kmer_k_pc, records, features, kmer_type="PC")
+        _populate_kmer_dict(
+            kmer_k_pc, records, features, kmer_type="PC", mapping_method=mapping_method
+        )
     if gc:
         feat_gc = get_gc(records)
         if feat_gc is None:
@@ -364,6 +370,7 @@ def build_table(
     num_select: int = 1_000,
     random_state: int = 123456789,
     target_column: str = "Human Host",
+    mapping_method: str = "shen_2007",
 ):
     if kmer_k is None:
         kmer_k = [10]
@@ -395,7 +402,15 @@ def build_table(
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
             this_result = _grab_features(
-                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+                features,
+                records,
+                genomic,
+                kmers,
+                kmer_k,
+                gc,
+                kmers_pc,
+                kmer_k_pc,
+                mapping_method,
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
@@ -406,7 +421,15 @@ def build_table(
         for record in tqdm(records):
             features = {}
             this_result = _grab_features(
-                features, [record], genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+                features,
+                [record],
+                genomic,
+                kmers,
+                kmer_k,
+                gc,
+                kmers_pc,
+                kmer_k_pc,
+                mapping_method,
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)

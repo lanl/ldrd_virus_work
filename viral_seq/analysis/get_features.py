@@ -35,7 +35,11 @@ def get_similarity_features(
     return df_features.join(df_simfeats, rsuffix=suffix)
 
 
-def get_kmers(records, k=10, kmer_type="AA"):
+def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
+    if kmer_type == "AA" and mapping_method is not None:
+        raise ValueError("No mapping method required for AA-kmers.")
+    if kmer_type == "PC" and mapping_method is None:
+        raise ValueError("Please specify mapping method for PC-kmers.")
     kmers = defaultdict(int)
     for record in records:
         for feature in record.features:
@@ -48,7 +52,7 @@ def get_kmers(records, k=10, kmer_type="AA"):
                 if kmer_type == "PC":
                     new_seq = ""
                     for each in this_seq:
-                        new_seq += aa_map(each, method="shen_2007")
+                        new_seq += aa_map(each, method=mapping_method)
                     this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
@@ -210,7 +214,7 @@ def split_seq(seq: str, coding: bool = False):
 
 
 @cache
-def aa_map(explicit_aa: str, *, method: str = "shen_2007") -> str:
+def aa_map(explicit_aa: str, *, method: str) -> str:
     """
     Remap canonical single-character amino acid representations
     to other representation schemes.

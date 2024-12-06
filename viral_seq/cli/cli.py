@@ -242,6 +242,13 @@ def pull_ensembl_transcripts(email, cache, file):
     default="Human Host",
     help=("Target column to be used for binary classification."),
 )
+@click.option(
+    "--mapping-method",
+    "-m",
+    type=click.Choice(["shen_2007", "jurgen_schmidt"]),
+    default="shen_2007",
+    help="Preference of scheme for mapping AA-kmers to PC-kmers",
+)
 def calculate_table(
     cache,
     file,
@@ -260,6 +267,7 @@ def calculate_table(
     num_select,
     random_state,
     target_column,
+    mapping_method,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -314,6 +322,7 @@ def calculate_table(
         num_select=num_select,
         random_state=random_state,
         target_column=target_column,
+        mapping_method=mapping_method,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():

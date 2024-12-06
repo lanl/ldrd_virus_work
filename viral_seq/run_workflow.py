@@ -749,6 +749,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                                 str(k),
                                 "--target-column",
                                 target_column,
+                                "--mapping-method",
+                                mapping_method,
                             ],
                             standalone_mode=False,
                         )
@@ -1046,6 +1048,13 @@ if __name__ == "__main__":
         default="DR",
         help="Choice of machine learning workflow to be used.",
     )
+    parser.add_argument(
+        "-m",
+        "--mapping-method",
+        choices=["shen_2007", "jurgen_schmidt"],
+        default="shen_2007",
+        help="Preference of scheme for mapping AA-kmers to PC-kmers",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1061,6 +1070,7 @@ if __name__ == "__main__":
     test_file = args.test_file
     target_column = args.target_column
     workflow = args.workflow
+    mapping_method = args.mapping_method
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))
@@ -1465,7 +1475,7 @@ if __name__ == "__main__":
         pos_con_train_PC = check_positive_controls(
             positive_controls=pos_controls,
             kmers_list=list(X.iloc[train].columns),
-            mapping_method="shen_2007",
+            mapping_method=mapping_method,
             mode="PC",
         )
         print(
@@ -1473,7 +1483,7 @@ if __name__ == "__main__":
             pos_con_train_PC.tail(1).to_string(index=False),
         )
         pos_con_train_PC.to_csv(
-            "train_data_PC_kmer_positive_controls.csv",
+            f"train_data_PC_kmer_positive_controls_{mapping_method}.csv",
             na_rep="",
             index=False,
         )
@@ -1482,7 +1492,7 @@ if __name__ == "__main__":
         pos_con_topN_PC = check_positive_controls(
             positive_controls=pos_controls,
             kmers_list=array2,
-            mapping_method="shen_2007",
+            mapping_method=mapping_method,
             mode="PC",
         )
         print(
@@ -1490,7 +1500,7 @@ if __name__ == "__main__":
             pos_con_topN_PC.tail(1).to_string(index=False),
         )
         pos_con_topN_PC.to_csv(
-            "topN_PC_kmer_positive_controls.csv",
+            f"topN_PC_kmer_positive_controls_{mapping_method}.csv",
             na_rep="",
             index=False,
         )
@@ -1499,7 +1509,7 @@ if __name__ == "__main__":
         pos_con_train_AA = check_positive_controls(
             positive_controls=pos_controls,
             kmers_list=list(X.iloc[train].columns),
-            mapping_method="shen_2007",
+            mapping_method=mapping_method,
             mode="AA",
         )
         print(
@@ -1507,7 +1517,7 @@ if __name__ == "__main__":
             pos_con_train_AA.tail(1).to_string(index=False),
         )
         pos_con_train_AA.to_csv(
-            "train_data_AA_kmer_positive_controls.csv",
+            f"train_data_AA_kmer_positive_controls_{mapping_method}.csv",
             na_rep="",
             index=False,
         )
@@ -1516,7 +1526,7 @@ if __name__ == "__main__":
         pos_con_topN_AA = check_positive_controls(
             positive_controls=pos_controls,
             kmers_list=array2,
-            mapping_method="shen_2007",
+            mapping_method=mapping_method,
             mode="AA",
         )
         print(
@@ -1524,7 +1534,7 @@ if __name__ == "__main__":
             pos_con_topN_AA.tail(1).to_string(index=False),
         )
         pos_con_train_AA.to_csv(
-            "topN_AA_kmer_positive_controls.csv",
+            f"topN_AA_kmer_positive_controls_{mapping_method}.csv",
             na_rep="",
             index=False,
         )
@@ -1551,7 +1561,7 @@ if __name__ == "__main__":
                         new_seq = ""
 
                         for each in this_seq_AA:
-                            new_seq += get_features.aa_map(each, method="shen_2007")
+                            new_seq += get_features.aa_map(each, method=mapping_method)
                         this_seq_PC = new_seq
                         this_seq_PC = str(this_seq_PC)
 

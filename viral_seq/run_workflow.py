@@ -271,56 +271,58 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
     igsf_data = pd.read_csv(igsf_file)
     train_df = pd.read_csv(train_file)
 
-    # join datasets using merge-outer to preserve duplications
-    merged_df = pd.merge(
-        train_df, igsf_data, on="Accessions", how="outer", suffixes=("_left", "_right")
+    reconciled_df = pd.DataFrame(columns=train_df.columns)
+    new_df = pd.merge(
+        train_df,
+        igsf_data,
+        on="Accessions",
+        how="outer",
+        suffixes=("_train", "_igsf"),
+        indicator=True,
     )
+    # replace the "Accessions" column for igsf that was removed
+    # during merge and rename the "Accessions" colum for train
+    new_df["Accessions_igsf"] = new_df["Accessions"]
+    new_df.rename(columns={"Accessions": "Accessions_train"}, inplace=True)
 
-    # make a new dataframe with the same indices as merged_df and same columns as train_df
-    reconciled_df = pd.DataFrame(index=merged_df.index, columns=train_df.columns)
+    train_data_columns = list(train_df.columns)
 
-    # iterate through df rows and reconcile duplicated entries
-    for i, row in merged_df.iterrows():
-        # check if the rows for the left and right merge are empty
-        if type(row[0]) is float:
-            # if left side is empty, index right side into row of new df
-            reconciled_df.iloc[i][:4] = row.iloc[8:12]
-            reconciled_df.iloc[i]["Accessions"] = row.loc["Accessions"]
-            if len(reconciled_df.iloc[i]["Accessions"].split()) > 1:
-                reconciled_df.iloc[i]["Accessions"] = reconciled_df.iloc[i][
-                    "Accessions"
-                ].split()[0]
-            reconciled_df.iloc[i][5:] = row.iloc[12:]
-        elif type(row[-1]) is float:
-            # if right side is empty, index left side into row of new df
-            reconciled_df.iloc[i] = row.iloc[:8]
-            if reconciled_df.iloc[i]["Receptor_Type"] == "both":
-                reconciled_df.iloc[i]["Receptor_Type"] = "integrin_sialic_acid"
-            if len(reconciled_df.iloc[i]["Accessions"].split()) > 1:
-                reconciled_df.iloc[i]["Accessions"] = reconciled_df.iloc[i][
-                    "Accessions"
-                ].split()[0]
-        else:
-            # reconcile conflict between duplicate accessions
-            # check receptor types for left and right
-            receptor_type_left = row.loc["Receptor_Type_left"]
-            receptor_type_right = row.loc["Receptor_Type_right"]
-            if receptor_type_left == "both":
-                reconciled_df.iloc[i]["Receptor_Type"] = "all"
-            else:
-                reconciled_df.iloc[i][
-                    "Receptor_Type"
-                ] = f"{receptor_type_left}_{receptor_type_right}"
-            # add accession
-            reconciled_df.iloc[i]["Accessions"] = row.loc["Accessions"]
-            if len(reconciled_df.iloc[i]["Accessions"].split()) > 1:
-                reconciled_df.iloc[i]["Accessions"] = reconciled_df.iloc[i][
-                    "Accessions"
-                ].split()[0]
-            # add remaining data from left side of merged_df
-            reconciled_df.iloc[i][:2] = row.iloc[:2]
-            reconciled_df.iloc[i]["Whole_Genome"] = row.loc["Whole_Genome_left"]
-            reconciled_df.iloc[i][5:8] = row.iloc[5:8]
+    for col in train_data_columns:
+        # copy the left column to the new df if there is a duplicate entry
+        # and copy the right column if there is no left column
+        reconciled_df[col] = new_df.apply(
+            lambda row: row[f"{col}_train"]
+            if row["_merge"] in ["left_only", "both"]
+            else row[f"{col}_igsf"],
+            axis=1,
+        )
+        # combine "Receptor_Type" names if there is a duplication
+        if col == "Receptor_Type":
+            # change "both" receptor type name to "integrin_sialic_acid"
+            reconciled_df[col] = reconciled_df.apply(
+                lambda row: "integrin_sialic_acid" if row[col] == "both" else row[col],
+                axis=1,
+            )
+            new_df[f"{col}_train"] = reconciled_df[col]
+            reconciled_df[col] = new_df.apply(
+                lambda row: "all"
+                if row[f"{col}_train"] == "integrin_sialic_acid"
+                and row["_merge"] == "both"
+                else f"{row['Receptor_Type_train']}_{row['Receptor_Type_igsf']}"
+                if row["_merge"] == "both"
+                and row["Receptor_Type_train"] != row["Receptor_Type_igsf"]
+                else row[f"{col}_igsf"]
+                if row["_merge"] == "right_only"
+                else row[f"{col}_train"],
+                axis=1,
+            )
+    # fix repeated accessions
+    reconciled_df["Accessions"] = reconciled_df.apply(
+        lambda row: row["Accessions"]
+        if len(row["Accessions"].split()) == 1
+        else row["Accessions"].split()[0],
+        axis=1,
+    )
 
     return reconciled_df
 
@@ -1105,7 +1107,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     convert_merged_tbl(merged_tbl).to_csv(temp_file)
                     file = temp_file.name
                 else:
-                    csv_conversion(file).to_csv(temp_file)
+                    (file).to_csv(temp_file)
                     file = temp_file.name
             if i == 0:
                 prefix = "Train"

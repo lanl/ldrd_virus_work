@@ -1716,6 +1716,17 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2847092
                 # https://doi.org/10.3390/v10070373
                 "giant squirrel virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1391025
+                "Faeces associated gemycircularvirus 10": "avian",
+                # https://www.genome.jp/virushostdb/349370
+                "Starling circovirus": "avian",
+                # https://www.genome.jp/virushostdb/1606500
+                "Alphapolyomavirus sturnirae": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1491491
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/sunrhavirus
+                "Sunguru virus": "avian",
+                # https://www.genome.jp/virushostdb/459957
+                "Swan circovirus": "avian",
                 }
 
 
@@ -1803,7 +1814,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=613)
+                                                           n_records=618)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

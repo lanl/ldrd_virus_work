@@ -1782,6 +1782,24 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/1844928
                 # looks like tick host info only
                 "Avian-like circovirus": "unknown",
+                # https://www.genome.jp/virushostdb/3052128
+                # https://pubmed.ncbi.nlm.nih.gov/29567144/
+                # looks like ticks only so far...
+                "Circovirus pichong": "unknown",
+                # https://www.genome.jp/virushostdb/1268011
+                # https://ictv.global/report/chapter/hantaviridae/hantaviridae/mammantavirinae/orthohantavirus
+                # https://doi.org/10.1089/vbz.2019.2452
+                "Tigray virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1764085
+                # https://doi.org/10.1371/journal.pntd.0004519
+                # only sandfly seems to be confirmed as host
+                "Toros virus": "unknown",
+                # https://www.genome.jp/virushostdb/687385
+                # https://ictv.global/report_9th/ssDNA/Anelloviridae
+                "Torque teno canis virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/687383
+                # https://ictv.global/report_9th/ssDNA/Anelloviridae
+                "Torque teno douroucouli virus": "primate",
                 }
 
 
@@ -1869,7 +1887,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=633)
+                                                           n_records=638)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

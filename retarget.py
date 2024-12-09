@@ -1727,6 +1727,25 @@ organism_dict = {
                 "Sunguru virus": "avian",
                 # https://www.genome.jp/virushostdb/459957
                 "Swan circovirus": "avian",
+                # https://www.genome.jp/virushostdb/45270
+                # https://en.wikipedia.org/wiki/Tahyna_orthobunyavirus
+                # https://doi.org/10.3201/eid1502.080722
+                "Tahyna virus": "human",
+                # https://www.genome.jp/virushostdb/2557875
+                # https://doi.org/10.3390/v11030279
+                # https://ictv.global/report/chapter/hepadnaviridae/hepadnaviridae/orthohepadnavirus
+                "Tai Forest hepadnavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1117633
+                # https://ictv.global/report/chapter/paramyxoviridae/paramyxoviridae/jeilongvirus
+                # https://doi.org/10.1128/JVI.06356-11
+                "Tailam virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2026129
+                # https://ictv.global/report/chapter/rhabdoviridae/rhabdoviridae/lyssavirus
+                # https://doi.org/10.3390/v14071562
+                "Taiwan bat lyssavirus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1538456
+                # https://ictv.global/report/chapter/peribunyaviridae/peribunyaviridae/pacuvirus
+                "Tapirape virus": "non_primate_mammals",
                 }
 
 
@@ -1814,7 +1833,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=618)
+                                                           n_records=623)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

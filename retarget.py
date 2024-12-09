@@ -1746,6 +1746,25 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/1538456
                 # https://ictv.global/report/chapter/peribunyaviridae/peribunyaviridae/pacuvirus
                 "Tapirape virus": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1623310
+                # https://doi.org/10.1128/MRA.01248-18
+                # https://doi.org/10.1016/0035-9203(81)90414-4
+                "Tataguine virus": "human",
+                # https://www.genome.jp/virushostdb/292792
+                # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/taupapillomavirus
+                # https://doi.org/10.1590/1678-4685-GMB-2021-0388
+                # CPV infection is considered species-specific to dogs,
+                # but oral papillomatosis has been described in two
+                # members of the same Canidae family that the
+                # subspecies Canis lupus familiaris belongs to,
+                # namely the wolf and the coyote
+                "Canis familiaris papillomavirus 2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1226723
+                "Canis familiaris papillomavirus 13": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1336600
+                "Felis catus papillomavirus 3": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2259540
+                "Mustela putorius papillomavirus 1": "non_primate_mammals",
                 }
 
 
@@ -1833,7 +1852,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=623)
+                                                           n_records=628)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

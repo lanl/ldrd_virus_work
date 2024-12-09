@@ -1765,6 +1765,23 @@ organism_dict = {
                 "Felis catus papillomavirus 3": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2259540
                 "Mustela putorius papillomavirus 1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/273347
+                # https://en.wikipedia.org/wiki/Tensaw_orthobunyavirus
+                # https://doi.org/10.1007/s11262-009-0400-z
+                "Tensaw virus": "human",
+                # https://www.genome.jp/virushostdb/1508712
+                # cell culture evidence for human, but I don't typically
+                # accept that alone: https://doi.org/10.1073/pnas.1308049110
+                "Tent-making bat hepatitis B virus": "non_primate_mammals",
+                # https://ictv.global/report/chapter/picornaviridae/picornaviridae/teschovirus
+                # Domestic pigs and wild boars are the only known hosts.
+                "teschovirus B1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2773288
+                # https://ictv.global/report/chapter/papillomaviridae/papillomaviridae/thetapapillomavirus
+                "Psittacus erithacus papillomavirus 1": "avian",
+                # https://www.genome.jp/virushostdb/1844928
+                # looks like tick host info only
+                "Avian-like circovirus": "unknown",
                 }
 
 
@@ -1852,7 +1869,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=628)
+                                                           n_records=633)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

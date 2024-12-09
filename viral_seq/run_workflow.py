@@ -185,13 +185,7 @@ def FIC_plot(
         # calculate corresponding surface exposure %
         kmer_name = topN_kmers[kmer_idx][8:]
         if kmer_name in surface_exposed_dict:
-            surface_exposed_count = surface_exposed_dict[kmer_name][0]
-            total_count = np.sum(surface_exposed_dict[kmer_name])
-            percent_exposed = (
-                (surface_exposed_count / total_count) * 100.0
-                if total_count != 0.0
-                else 0.0
-            )
+            percent_exposed = surface_exposed_dict[kmer_name]
             percent_lbl = f"{percent_exposed:.2f}%"
 
         left, bottom, width, height = p.get_bbox().bounds
@@ -281,27 +275,29 @@ def FIC_plot(
         plt.close()
 
 
-def percent_surface_exposed(k_mers_PC, surface_exposed_status):
+def percent_surface_exposed(
+    k_mers_in: list[str], surface_exposed_status: list[str]
+) -> dict:
     """
-    Determine the ratio of surface exposed to not surface exposed viral proteins
-    for the dataset of important kmers as decided by the ML classifier
+    Determine the percentage of viral proteins containing
+    important kmers that are surface exposed
 
     Parameters
     ----------
-    k_mers_PC: list
-        list of PC kmers that are found in the dataset of viral proteins
+    k_mers_in: list
+        list of important kmers that are found in the dataset of viral proteins
     surface_exposed_status: list
-        corresponding 'Yes' or 'No' for 'is surface exposed' for each PC kmer
+        corresponding 'Yes' or 'No' for 'is surface exposed' for each kmer
 
     Returns
     -------
-    surface_exposed_dict: dict
-        dictionary of kmers and associated ratio of surface exposed vs.
-        not surface exposed from dataset of known viral proteins
+    percent_exposed_dict: dict
+        dictionary of kmers and associated percent of surface exposed proteins
+        within dataset of known viruses
     """
 
     surface_exposed_dict = {}
-    all_kmers = sorted(zip(k_mers_PC, surface_exposed_status))
+    all_kmers = sorted(zip(k_mers_in, surface_exposed_status))
     for kmer_status in all_kmers:
         # check if kmer exists in dictionary already
         if kmer_status[0] not in surface_exposed_dict:
@@ -311,7 +307,13 @@ def percent_surface_exposed(k_mers_PC, surface_exposed_status):
         elif kmer_status[1] == "No":
             surface_exposed_dict[kmer_status[0]][1] += 1
 
-    return surface_exposed_dict
+    # calculate final percentage values based on ratio of "Yes" and "No" counts
+    percent_exposed_dict = {
+        key: (0.0 if sum(value) == 0.0 else (value[0] / sum(value)) * 100)
+        for key, value in surface_exposed_dict.items()
+    }
+
+    return percent_exposed_dict
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:

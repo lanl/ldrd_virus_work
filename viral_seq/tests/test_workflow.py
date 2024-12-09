@@ -259,16 +259,16 @@ def test_fic_plot(tmp_path):
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
     surface_exposed_dict = {
-        "CDDEEC": [15, 20],
-        "CCGDEA": [0, 30],
-        "CCCFCF": [0, 0],
-        "CCAAACD": [11, 41],
-        "CACDGA": [3, 20],
-        "CFCEDD": [12, 35],
-        "GCECFD": [10, 46],
-        "ECDGDE": [12, 0],
-        "CCACAD": [10, 48],
-        "FECAEA": [13, 78],
+        "CDDEEC": 42.86,
+        "CCGDEA": 0.00,
+        "CCCFCF": 0.00,
+        "CCAAACD": 21.15,
+        "CACDGA": 13.04,
+        "CFCEDD": 25.53,
+        "GCECFD": 17.86,
+        "ECDGDE": 100.0,
+        "CCACAD": 17.24,
+        "FECAEA": 14.29,
     }
 
     n_folds = 2
@@ -329,12 +329,30 @@ def test_feature_sign():
     assert_array_equal(surface_exposed_out, surface_exposed_exp)
 
 
-def test_percent_surface_exposed():
-    syn_kmers = ["CAACAAD", "CAACAAD", "FEAGAD", "FEAGAD", "FEAGAD", "FEAGAD", "GACADA"]
-    syn_status = ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"]
-
+@pytest.mark.parametrize(
+    "syn_kmers, syn_status, percent_values",
+    (
+        [
+            ["CAACAAD", "CAACAAD", "FEAGAD", "FEAGAD", "FEAGAD", "FEAGAD", "GACADA"],
+            ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"],
+            [50.0, 75.0, 0.0],
+        ],
+        [
+            ["0122345", "0122345", "0122345", "0122345", "741065", "741065", "741065"],
+            ["Yes", "Yes", "Yes", "Yes", "No", "No", "No"],
+            [100.0, 0.0],
+        ],
+        [
+            ["RVDAQL", "RVDAQL", "RVDAQL", "TYVWRCP", "ILGNMCS", "ILGNMCS", "ILGNMCS"],
+            ["No", "No", "Yes", "No", "No", "Yes", "No"],
+            [33.33333333333333, 33.33333333333333, 0.0],
+        ],
+    ),
+)
+def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
     out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
 
-    assert out_dict["CAACAAD"] == [1, 1]
-    assert out_dict["FEAGAD"] == [3, 1]
-    assert out_dict["GACADA"] == [0, 1]
+    kmer_features = sorted(list(set(syn_kmers)))
+
+    for k, kmer_feature in enumerate(kmer_features):
+        assert out_dict[kmer_feature] == percent_values[k]

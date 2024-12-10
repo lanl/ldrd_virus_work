@@ -375,19 +375,20 @@ def test_feature_sign():
             [
                 "kmer_AA_RVDAQL",
                 "kmer_AA_RVDAQL",
+                "kmer_AA_ACGAGD",
+                "kmer_PC_ACGAGD",
                 "kmer_PC_0122345",
                 "kmer_PC_0122345",
                 "kmer_PC_741065",
                 "kmer_AA_ILGNMCS",
                 "kmer_AA_ILGNMCS",
             ],
-            ["No", "No", "Yes", "No", "No", "Yes", "No"],
-            [0.0, 50.0, 0.0, 50.0],
+            ["No", "No", "No", "No", "Yes", "No", "No", "Yes", "No"],
+            [0.0, 0.0, 0.0, 50.0, 0.0, 50.0],
         ],
     ),
 )
 def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
-    syn_kmers = [s.replace("kmer_PC_", "").replace("kmer_AA_", "") for s in syn_kmers]
     out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
 
     assert_allclose(list(out_dict.values()), percent_values)

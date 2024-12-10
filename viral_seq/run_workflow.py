@@ -279,11 +279,9 @@ def percent_surface_exposed(
     k_mers_in: list[str], surface_exposed_status: list[str]
 ) -> dict:
     """
-    Determine the percentage of viral proteins containing
-    important kmers that are surface exposed
-
-    TODO: modify function to error out when no prefix present after closing #93
-          i.e. add value error assertion
+    Determine the percentage of surface exposed proteins
+    based on the relative abundance of each kmer found in
+    surface-exposed vs. non-surface-exposed viral proteins
 
     Parameters
     ----------
@@ -295,9 +293,12 @@ def percent_surface_exposed(
     Returns
     -------
     percent_exposed_dict: dict
-        dictionary of kmers and associated percent of surface exposed proteins
-        within dataset of known viruses
+        dictionary of kmers and the percentage of surface exposed
+        proteins containing each kmer
     """
+
+    # TODO: modify function to error out when no prefix present after closing #93
+    # i.e. add value error assertion
 
     surface_exposed_dict = {}
     all_kmers = zip(k_mers_in, surface_exposed_status)
@@ -1766,6 +1767,8 @@ if __name__ == "__main__":
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
+        # TODO (#93): fix 'k_mers_PC' variable to reflect true contents of kmers
+        # list, which could contain mix of PC and AA kmers, not just PC kmers
         surface_exposed_dict = percent_surface_exposed(
             k_mers_PC, surface_exposed_status
         )

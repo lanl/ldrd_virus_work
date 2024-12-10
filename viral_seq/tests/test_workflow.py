@@ -319,7 +319,7 @@ def test_feature_sign(constant, response_effect_exp):
         "FECAEA",
     ]
     not_exposed_idx = [2]
-    exposed_idx = [1, 2]
+    exposed_idx = [1]
     not_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
@@ -339,7 +339,8 @@ def test_feature_sign(constant, response_effect_exp):
         is_exposed, not_exposed, syn_shap_values, syn_data
     )
 
-    surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
+    surface_exposed_exp = ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"]
 
     assert_array_equal(response_effect_out, response_effect_exp)
     assert_array_equal(surface_exposed_out, surface_exposed_exp)

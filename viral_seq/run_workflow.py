@@ -130,16 +130,16 @@ def get_kmer_info(
 
     Returns:
     --------
-    viruses_PC: list
-        list of virus names corresponding to sequences where PC kmers were identified
-    k_mers_PC: list
+    virus_names: list
+        list of virus names corresponding to sequences where kmers were identified
+    kmer_features: list
         list of kmers that were found in viral sequence
-    protein_name_PC: list
+    protein_names: list
         list of viral proteins associated with virues where kmers were identified in viral protein sequence
     """
-    viruses_PC = []
-    protein_name_PC = []
-    k_mers_PC = []
+    virus_names = []
+    protein_names = []
+    kmer_features = []
     for item in topN_kmers:
         if item[:8] == "kmer_PC_":
             kmer_status = True
@@ -170,13 +170,13 @@ def get_kmer_info(
                     if kmer_idx:
                         acc_exist = tbl.Accessions.isin([record.id])
                         if sum(acc_exist):
-                            viruses_PC.append(tbl.Species[np.nonzero(acc_exist)[0][0]])
-                            protein_name_PC.append(
+                            virus_names.append(tbl.Species[np.nonzero(acc_exist)[0][0]])
+                            protein_names.append(
                                 str(feature.qualifiers.get("product"))[2:-2]
                             )
-                            k_mers_PC.append(k_mer)
+                            kmer_features.append(k_mer)
 
-    return viruses_PC, k_mers_PC, protein_name_PC
+    return virus_names, kmer_features, protein_names
 
 
 def label_surface_exposed(
@@ -297,8 +297,6 @@ def FIC_plot(
             exposure_sign_color = "g"
         elif exposure_status_sign[kmer_idx] == "-":
             exposure_sign_color = "r"
-        else:
-            exposure_sign_color = "y"
 
         ax.annotate(
             response_effect_sign[kmer_idx],
@@ -360,7 +358,7 @@ def FIC_plot(
             ],
             loc="lower right",
             prop={"size": 10},
-            bbox_to_anchor=(0.7, -0.35),
+            bbox_to_anchor=(0.7, -0.25),
         )
 
         fig.tight_layout()
@@ -1728,9 +1726,9 @@ if __name__ == "__main__":
         )
 
         # gather relevant information for important kmers from classifier output
-        viruses_PC, k_mers_PC, protein_name_PC = get_kmer_info(array2, records, tbl)
+        virus_names, kmer_features, protein_names = get_kmer_info(array2, records, tbl)
 
-        # manually curated on the basis of output from `np.unique(protein_name_PC)`
+        # manually curated on the basis of output from `np.unique(protein_names)`
         surface_exposed = [
             "1B(VP2)",
             "1C(VP3)",
@@ -1753,9 +1751,9 @@ if __name__ == "__main__":
         ]
         # list comprehension
         surface_exposed_status = [
-            "Yes" if item in surface_exposed else "No" for item in protein_name_PC
+            "Yes" if item in surface_exposed else "No" for item in protein_names
         ]
-        # manually curated on the basis of links (DOIs and ViralZone urls) that I could find for a subset of items in `np.unique(protein_name_PC)`. The curation of references is currently incomplete.
+        # manually curated on the basis of links (DOIs and ViralZone urls) that I could find for a subset of items in `np.unique(protein_names)`. The curation of references is currently incomplete.
         references = [
             "membrane protein M",
             "1B(VP2)",
@@ -1836,26 +1834,26 @@ if __name__ == "__main__":
         # list comprehension
         citations = [
             refs_urls_dict[item] if item in references else "missing"
-            for item in protein_name_PC
+            for item in protein_names
         ]
 
-        temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
+        temp5 = list(set(zip(kmer_features, surface_exposed_status)))
 
         is_exposed, not_exposed, found_kmers = label_surface_exposed(temp5, array2)
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
-        # TODO (#93): fix 'k_mers_PC' variable to reflect true contents of kmers
+        # TODO (#93): fix 'kmer_features' variable to reflect true contents of kmers
         # list, which could contain mix of PC and AA kmers, not just PC kmers
         surface_exposed_dict = percent_surface_exposed(
-            k_mers_PC, surface_exposed_status
+            kmer_features, surface_exposed_status
         )
 
         ### Production of the annotated CSV file with information for each case of `target_column`
         df = pd.DataFrame(
             {
-                "Virus (corresponding to PC k-mer)": viruses_PC,
-                "Protein (corresponding to virus)": protein_name_PC,
+                "Virus (corresponding to PC k-mer)": virus_names,
+                "Protein (corresponding to virus)": protein_names,
                 "Status of protein (surface-exposed or not)": surface_exposed_status,
                 "Citation corresponding to protein status": citations,
             }

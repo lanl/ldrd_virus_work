@@ -333,26 +333,66 @@ def test_feature_sign():
     "syn_kmers, syn_status, percent_values",
     (
         [
-            ["CAACAAD", "CAACAAD", "FEAGAD", "FEAGAD", "FEAGAD", "FEAGAD", "GACADA"],
+            [
+                "kmer_PC_CAACAAD",
+                "kmer_PC_CAACAAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_GACADA",
+            ],
             ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"],
             [50.0, 75.0, 0.0],
         ],
         [
-            ["0122345", "0122345", "0122345", "0122345", "741065", "741065", "741065"],
+            [
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_741065",
+                "kmer_PC_741065",
+                "kmer_PC_741065",
+            ],
             ["Yes", "Yes", "Yes", "Yes", "No", "No", "No"],
             [100.0, 0.0],
         ],
         [
-            ["RVDAQL", "RVDAQL", "RVDAQL", "TYVWRCP", "ILGNMCS", "ILGNMCS", "ILGNMCS"],
+            [
+                "kmer_AA_RVDAQL",
+                "kmer_AA_RVDAQL",
+                "kmer_AA_RVDAQL",
+                "kmer_AA_TYVWRCP",
+                "kmer_AA_ILGNMCS",
+                "kmer_AA_ILGNMCS",
+                "kmer_AA_ILGNMCS",
+            ],
             ["No", "No", "Yes", "No", "No", "Yes", "No"],
             [33.33333333333333, 33.33333333333333, 0.0],
+        ],
+        [
+            [
+                "kmer_AA_RVDAQL",
+                "kmer_AA_RVDAQL",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_741065",
+                "kmer_AA_ILGNMCS",
+                "kmer_AA_ILGNMCS",
+            ],
+            ["No", "No", "Yes", "No", "No", "Yes", "No"],
+            [50.0, 0.0, 50.0, 0.0],
         ],
     ),
 )
 def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
+    # TODO: modify test to error out when no prefix present after closing #93
+    # i.e. replace line below with value error assertion
+    syn_kmers = [s.replace("kmer_PC_", "").replace("kmer_AA_", "") for s in syn_kmers]
     out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
 
     kmer_features = sorted(list(set(syn_kmers)))
-
+    
     for k, kmer_feature in enumerate(kmer_features):
         assert out_dict[kmer_feature] == percent_values[k]

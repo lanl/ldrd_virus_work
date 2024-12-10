@@ -28,6 +28,7 @@ import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
+import matplotlib.patches as mpatches
 
 matplotlib.use("Agg")
 
@@ -130,6 +131,7 @@ def FIC_plot(
     target_column: str,
     exposure_status_sign: list,
     response_effect_sign: list,
+    surface_exposed_dict: dict,
     path: Path,
 ):
     """
@@ -153,6 +155,9 @@ def FIC_plot(
         list of +/- symbols denoting surface exposure status of kmer features in topN kmers
     response_effect_sign: list
         list of +/- symbols denoting response effect from shap importance pearson-r correlation
+    surface_exposed_dict: dict
+        dictionary containing the topN kmers and their respective ratios of surface exposed to
+        not surface exposed viral proteins for plotting '% surface exposed'
     path: Path
         path to save figure
     """
@@ -166,7 +171,7 @@ def FIC_plot(
     else:
         target_name = target_column
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(10, 10))
     y_pos = np.arange(len(topN_kmers))
     bars: BarContainer = ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
     ax.set_xlim(0, 100)
@@ -175,10 +180,14 @@ def FIC_plot(
         f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
-    kmer_idx = -1
 
-    for p in bars:
-        kmer_idx += 1
+    for kmer_idx, p in enumerate(bars):
+        # calculate corresponding surface exposure %
+        kmer_name = topN_kmers[kmer_idx][8:]
+        if kmer_name in surface_exposed_dict:
+            percent_exposed = surface_exposed_dict[kmer_name]
+            percent_lbl = f"{percent_exposed:.2f}%"
+
         left, bottom, width, height = p.get_bbox().bounds
 
         if response_effect_sign[kmer_idx] == "+":
@@ -209,6 +218,24 @@ def FIC_plot(
             color=exposure_sign_color,
             fontsize="xx-large",
         )
+        if width >= 90:
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width - 5, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="white",
+                fontsize="large",
+            )
+        else:
+            ax.annotate(
+                percent_lbl,
+                xy=(left + width + 5, bottom + height / 2),
+                ha="center",
+                va="center",
+                color="k",
+                fontsize="large",
+            )
 
         plus_symbol = Line2D(
             [0], [0], marker="+", color="green", markersize=9, linestyle=""
@@ -219,6 +246,7 @@ def FIC_plot(
         cross_symbol = Line2D(
             [0], [0], marker="x", color="gold", markersize=9, linestyle=""
         )
+        blank_patch = mpatches.Patch(color="white")
 
         ax.legend(
             handles=[
@@ -227,6 +255,7 @@ def FIC_plot(
                 plus_symbol,
                 minus_symbol,
                 cross_symbol,
+                blank_patch,
             ],
             labels=[
                 "on left: Positive effect on response",
@@ -234,14 +263,61 @@ def FIC_plot(
                 "on right: Protein is surface-exposed",
                 "on right: Protein is not surface-exposed",
                 "on right: Protein does not bind to both\n receptor types",
+                "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
             ],
             loc="lower right",
-            prop={"size": 9},
+            prop={"size": 10},
+            bbox_to_anchor=(0.7, -0.35),
         )
 
         fig.tight_layout()
         fig.savefig(str(path) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
         plt.close()
+
+
+def percent_surface_exposed(
+    k_mers_in: list[str], surface_exposed_status: list[str]
+) -> dict:
+    """
+    Determine the percentage of surface exposed proteins
+    based on the relative abundance of each kmer found in
+    surface-exposed vs. non-surface-exposed viral proteins
+
+    Parameters
+    ----------
+    k_mers_in: list
+        list of important kmers that are found in the dataset of viral proteins
+    surface_exposed_status: list
+        corresponding 'Yes' or 'No' for 'is surface exposed' for each kmer
+
+    Returns
+    -------
+    percent_exposed_dict: dict
+        dictionary of kmers and the percentage of surface exposed
+        proteins containing each kmer
+    """
+
+    # TODO: modify function to error out when no prefix present after closing #93
+    # i.e. add value error assertion
+
+    surface_exposed_dict = {}
+    all_kmers = zip(k_mers_in, surface_exposed_status)
+    for kmer_status in all_kmers:
+        # check if kmer exists in dictionary already
+        if kmer_status[0] not in surface_exposed_dict:
+            surface_exposed_dict[kmer_status[0]] = [0, 0]
+        if kmer_status[1] == "Yes":
+            surface_exposed_dict[kmer_status[0]][0] += 1
+        elif kmer_status[1] == "No":
+            surface_exposed_dict[kmer_status[0]][1] += 1
+
+    # calculate final percentage values based on ratio of "Yes" and "No" counts
+    percent_exposed_dict = {
+        key: (0.0 if sum(value) == 0.0 else (value[0] / sum(value)) * 100)
+        for key, value in surface_exposed_dict.items()
+    }
+
+    return percent_exposed_dict
 
 
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
@@ -1686,7 +1762,16 @@ if __name__ == "__main__":
         ]
 
         temp5 = list(set(zip(k_mers_PC, surface_exposed_status)))
-        res1, res2, res3 = label_surface_exposed(temp5, array2)
+
+        is_exposed, not_exposed, found_kmers = label_surface_exposed(temp5, array2)
+
+        # search through all the important kmers found in the viral dataset
+        # and index the number of surface exposed vs. not for all proteins
+        # TODO (#93): fix 'k_mers_PC' variable to reflect true contents of kmers
+        # list, which could contain mix of PC and AA kmers, not just PC kmers
+        surface_exposed_dict = percent_surface_exposed(
+            k_mers_PC, surface_exposed_status
+        )
 
         ### Production of the annotated CSV file with information for each case of `target_column`
         df = pd.DataFrame(
@@ -1713,7 +1798,10 @@ if __name__ == "__main__":
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
-            res1, res2, positive_shap_values.values, positive_shap_values.data
+            is_exposed,
+            not_exposed,
+            positive_shap_values.values,
+            positive_shap_values.data,
         )
 
         # Production of the FIC plot
@@ -1724,5 +1812,6 @@ if __name__ == "__main__":
             target_column,
             exposure_status_sign,
             response_effect_sign,
+            surface_exposed_dict,
             paths[-1],
         )

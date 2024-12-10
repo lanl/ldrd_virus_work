@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 
 
 def test_optimization_plotting(tmpdir):
@@ -252,11 +252,24 @@ def test_fic_plot(tmp_path):
         "kmer_PC_CCACAD",
         "kmer_PC_FECAEA",
     ]
-    array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0])
+
+    array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.7, 1.8, 1.9, 2.0])
     target_column = "Is_Integrin"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+    surface_exposed_dict = {
+        "CDDEEC": 42.86,
+        "CCGDEA": 0.00,
+        "CCCFCF": 0.00,
+        "CCAAACD": 21.15,
+        "CACDGA": 13.04,
+        "CFCEDD": 25.53,
+        "GCECFD": 17.86,
+        "ECDGDE": 100.0,
+        "CCACAD": 17.24,
+        "FECAEA": 14.29,
+    }
 
     n_folds = 2
 
@@ -267,6 +280,7 @@ def test_fic_plot(tmp_path):
         target_column,
         exposure_status_sign,
         response_effect_sign,
+        surface_exposed_dict,
         tmp_path,
     )
 
@@ -313,3 +327,68 @@ def test_feature_sign():
 
     assert_array_equal(response_effect_out, response_effect_exp)
     assert_array_equal(surface_exposed_out, surface_exposed_exp)
+
+
+@pytest.mark.parametrize(
+    "syn_kmers, syn_status, percent_values",
+    (
+        [
+            [
+                "CAACAAD",
+                "CAACAAD",
+                "FEAGAD",
+                "FEAGAD",
+                "FEAGAD",
+                "FEAGAD",
+                "GACADA",
+            ],
+            ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"],
+            [50.0, 75.0, 0.0],
+        ],
+        [
+            [
+                "0122345",
+                "0122345",
+                "0122345",
+                "0122345",
+                "741065",
+                "741065",
+                "741065",
+            ],
+            ["Yes", "Yes", "Yes", "Yes", "No", "No", "No"],
+            [100.0, 0.0],
+        ],
+        [
+            [
+                "RVDAQL",
+                "RVDAQL",
+                "RVDAQL",
+                "TYVWRCP",
+                "ILGNMCS",
+                "ILGNMCS",
+                "ILGNMCS",
+            ],
+            ["No", "No", "Yes", "No", "No", "Yes", "No"],
+            [33.333333, 0.0, 33.333333],
+        ],
+        [
+            [
+                "kmer_AA_RVDAQL",
+                "kmer_AA_RVDAQL",
+                "kmer_AA_ACGAGD",
+                "kmer_PC_ACGAGD",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_741065",
+                "kmer_AA_ILGNMCS",
+                "kmer_AA_ILGNMCS",
+            ],
+            ["No", "No", "No", "No", "Yes", "No", "No", "Yes", "No"],
+            [0.0, 0.0, 0.0, 50.0, 0.0, 50.0],
+        ],
+    ),
+)
+def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
+    out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
+
+    assert_allclose(list(out_dict.values()), percent_values)

@@ -282,6 +282,9 @@ def percent_surface_exposed(
     Determine the percentage of viral proteins containing
     important kmers that are surface exposed
 
+    TODO: modify function to error out when no prefix present after closing #93
+          i.e. add value error assertion
+
     Parameters
     ----------
     k_mers_in: list
@@ -297,7 +300,7 @@ def percent_surface_exposed(
     """
 
     surface_exposed_dict = {}
-    all_kmers = sorted(zip(k_mers_in, surface_exposed_status))
+    all_kmers = zip(k_mers_in, surface_exposed_status)
     for kmer_status in all_kmers:
         # check if kmer exists in dictionary already
         if kmer_status[0] not in surface_exposed_dict:

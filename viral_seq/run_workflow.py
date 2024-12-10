@@ -573,7 +573,7 @@ if __name__ == "__main__":
         type=int,
         choices=range(39),
         default=38,
-        help="Specify feature table building checkpoint(0-16), typically 0 or 16: 0 skips building feature tables, 16 builds all feature tables.",
+        help="Specify feature table building checkpoint(0-38), typically 0 or 38: 0 skips building feature tables, 38 builds all feature tables.",
     )
     parser.add_argument(
         "-fs",

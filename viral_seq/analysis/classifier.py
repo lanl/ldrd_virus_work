@@ -556,9 +556,7 @@ def plot_roc_curve_comparison(
     ax.plot([0, 1], [0, 1], "r--")
     # EER line
     if eer_line:
-        ax.plot(
-            np.linspace(0, 1), np.linspace(0, 1)[::-1], "--", color="gray", alpha=0.5
-        )
+        ax.plot([0, 1], [1, 0], "--", color="grey", alpha=0.5)
 
     ax.set(
         xlim=[-0.05, 1.05],
@@ -567,7 +565,6 @@ def plot_roc_curve_comparison(
         ylabel="True Positive Rate",
         title=title,
     )
-
     ax.axis("square")
     ax.legend(loc="lower right")
 

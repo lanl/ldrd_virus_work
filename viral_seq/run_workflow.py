@@ -30,7 +30,6 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 
-
 matplotlib.use("Agg")
 
 
@@ -370,7 +369,7 @@ def train_rfc(
     mean_fpr = np.linspace(0, 1, 100)
 
     counter = -1
-    n_features = 5
+    n_features = 10
     topN = np.zeros((n_folds, n_features))
 
     fig, ax = plt.subplots(figsize=(8, 8))

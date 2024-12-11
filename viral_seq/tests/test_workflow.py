@@ -7,8 +7,8 @@ import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
-from numpy.testing import assert_array_equal
 from sklearn.utils.validation import check_is_fitted
+from sklearn.datasets import make_classification
 
 
 def test_optimization_plotting(tmpdir):
@@ -396,54 +396,52 @@ def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
     assert_allclose(list(out_dict.values()), percent_values)
 
 
-def test_train_rfc():
-    data_header = [
-        "kmer_AA_AACDEFG",
-        "kmer_AA_ADTWKST",
-        "kmer_PC_AELKTSR",
-        "kmer_AA_AACDEFG",
-        "kmer_AA_AACADAG",
-        "kmer_PC_BACCEFG",
-        "kmer_AA_BATGKGT",
-        "kmer_PC_GALKTSR",
-        "kmer_AA_GGCDEFG",
-        "kmer_PC_GCCAGGE",
-    ]
-    data_values = np.zeros((10, 10))
-    train_data = pd.DataFrame(data_values, columns=data_header)
-    data_target = pd.Series(
-        np.array((True, False, True, False, True, False, True, False, True, False)),
-        name="Test",
+def test_train_rfc(tmp_path):
+    X, y = make_classification(n_samples=15, n_features=10, random_state=0)
+    X = pd.DataFrame(X)
+
+    importances_exp = np.array(
+        [
+            0.27432437,
+            0.18421107,
+            0.13133805,
+            0.08842391,
+            0.06545018,
+            0.05828152,
+            0.05749451,
+            0.05430739,
+            0.04330573,
+            0.04286328,
+        ]
+    )
+    features_exp = np.array([8, 5, 7, 1, 9, 3, 0, 2, 4, 6])
+    topN_exp = np.array(
+        [
+            [6.0, 5.0, 0.0, 8.0, 9.0, 1.0, 2.0, 4.0, 3.0, 7.0],
+            [8.0, 5.0, 7.0, 1.0, 9.0, 3.0, 0.0, 2.0, 4.0, 6.0],
+        ]
     )
 
-    file_folder = files("viral_seq.tests.expected")
-    file_paths = [item for item in file_folder.iterdir()]
-    out_path = [file_paths[-1].parent]
-
-    clfr, topN, train, df = workflow.train_rfc(
-        train_data,
-        data_target,
-        n_folds=5,
+    out_path = [tmp_path]
+    trained_clfr, topN_features, train, df = workflow.train_rfc(
+        X,
+        y,
+        n_folds=2,
         paths=out_path,
         target_column="Test",
         random_state=0,
     )
 
-    topN_df = pd.DataFrame(topN)
-
-    topN_expected = pd.read_csv(
-        files("viral_seq.tests.expected") / ("test_train_rfc_expected_topN.csv"),
-        index_col=[0],
-    )
-    df_expected = pd.read_csv(
-        files("viral_seq.tests.expected") / ("test_train_rfc_expected_df.csv"),
-        index_col=[0],
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "roc_dtra_expected.png",
+            str(tmp_path / "ROC_Test.png"),
+            0.001,
+        )
+        is None
     )
 
-    topN_expected.columns = topN_expected.columns.astype(int)
-    expected_train_idx = np.array([0, 1, 2, 3, 4, 5, 6, 7])
-
-    assert_frame_equal(topN_df, topN_expected)
-    assert_frame_equal(df, df_expected)
-    assert_array_equal(train, expected_train_idx)
-    check_is_fitted(clfr)
+    assert_allclose(df["Importances"].values, importances_exp)
+    assert_allclose(df["Features"].values, features_exp)
+    assert_array_equal(topN_features, topN_exp)
+    check_is_fitted(trained_clfr)

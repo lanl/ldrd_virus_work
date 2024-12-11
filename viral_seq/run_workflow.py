@@ -1850,7 +1850,7 @@ if __name__ == "__main__":
             "membrane protein US30",
             "membrane protein V1",
             "hexon",
-            "hexon protein"
+            "hexon protein",
         ]
         # list comprehension
         surface_exposed_status = [

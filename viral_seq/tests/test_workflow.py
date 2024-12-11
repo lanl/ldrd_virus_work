@@ -970,7 +970,7 @@ def test_match_kmers(tmpdir):
         ("kmer_PC_4622530", "kmer_PC_FCDDGEE"): ["kmer_AA_DLSYKHA"],
     }
 
-    syn_topN_df = [pd.DataFrame(l) for l in syn_topN]
+    syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
     pd.DataFrame(kmer_matches_mm1).to_parquet(f"{tmpdir}/kmer_maps_k7_mm1.parquet.gzip")
     pd.DataFrame(kmer_matches_mm2).to_parquet(f"{tmpdir}/kmer_maps_k7_mm2.parquet.gzip")
     mapping_methods = ["mm1", "mm2"]

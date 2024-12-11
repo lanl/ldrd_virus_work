@@ -187,6 +187,9 @@ def FIC_plot(
         if kmer_name in surface_exposed_dict:
             percent_exposed = surface_exposed_dict[kmer_name]
             percent_lbl = f"{percent_exposed:.2f}%"
+        # TODO: Remove this statement after merge !91
+        else:
+            percent_lbl = "0.00%"
 
         left, bottom, width, height = p.get_bbox().bounds
 
@@ -794,11 +797,18 @@ def build_tables(feature_checkpoint=0, debug=False):
                     prefix = "Train"
                     debug = False
                     this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                    if feature_checkpoint > 5:
-                        feature_checkpoint = 5
+                    try:
+                        min_kmer, max_kmer = map(int, kmer_range.split("-"))
+                    except ValueError:
+                        raise argparse.ArgumentTypeError(
+                            "'--kmer-range' must be in format 'start-end'."
+                        )
+                    kmer_range_length = max_kmer - min_kmer + 1
+                    if feature_checkpoint > kmer_range_length:
+                        feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
 
-                for k in range(11 - feature_checkpoint, 11):
+                for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
                         print(
@@ -1131,6 +1141,13 @@ if __name__ == "__main__":
         default="shen_2007",
         help="Preference of scheme for mapping AA-kmers to PC-kmers",
     )
+    parser.add_argument(
+        "-k",
+        "--kmer-range",
+        type=str,
+        default="8-12",
+        help="Range of kmer lengths for building feature dataset (must be a string in the format 'start-end')",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1147,6 +1164,7 @@ if __name__ == "__main__":
     target_column = args.target_column
     workflow = args.workflow
     mapping_method = args.mapping_method
+    kmer_range = args.kmer_range
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))

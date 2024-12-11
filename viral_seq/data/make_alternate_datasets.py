@@ -5,19 +5,6 @@ from pathlib import Path
 import tarfile
 
 
-data = files("viral_seq.data")
-train_data = str(data.joinpath("Mollentze_Training.csv"))
-test_data = str(data.joinpath("Mollentze_Holdout.csv"))
-cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
-cache_extract_path = Path("data_external")
-cache_extract_path.mkdir(parents=True, exist_ok=True)
-cache_viral = Path("data_external/cache_viral")
-train_fixed_data = str(Path("Mollentze_Training_Fixed.csv"))
-test_fixed_data = str(Path("Mollentze_Holdout_Fixed.csv"))
-train_accessions: set[str] = set()
-email = "arhall@lanl.gov"
-
-
 def get_bad_indexes(df, cache, train_accessions=None):
     partial_lst = []
     duplicate_lst = []
@@ -52,6 +39,17 @@ def get_bad_indexes(df, cache, train_accessions=None):
 
 
 if __name__ == "__main__":
+    data = files("viral_seq.data")
+    train_data = str(data.joinpath("Mollentze_Training.csv"))
+    test_data = str(data.joinpath("Mollentze_Holdout.csv"))
+    cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
+    cache_extract_path = Path("data_external")
+    cache_extract_path.mkdir(parents=True, exist_ok=True)
+    cache_viral = Path("data_external/cache_viral")
+    train_fixed_data = Path("Mollentze_Training_Fixed.csv")
+    test_fixed_data = Path("Mollentze_Holdout_Fixed.csv")
+    train_accessions: set[str] = set()
+
     with tarfile.open(cache_file, "r") as tar:
         tar.extractall(cache_extract_path)
 

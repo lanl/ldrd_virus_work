@@ -128,6 +128,7 @@ def FIC_plot(
     topN_kmers: list,
     kmer_count: np.ndarray,
     n_folds: int,
+    n_seeds: int,
     target_column: str,
     exposure_status_sign: list,
     response_effect_sign: list,
@@ -149,6 +150,8 @@ def FIC_plot(
         consensus number of classifer folds agreeing upon corresponding kmer in topN_kmers
     n_folds: int
         number of cv folds performed by classifier
+    n_seeds: int
+        number of random seeds for averaging each cv fold
     target_column: str
         name of column on which classifier was trained
     exposure_status_sign: list
@@ -170,14 +173,16 @@ def FIC_plot(
         target_name = "Integrin and Sialic Acid"
     else:
         target_name = target_column
-
+    max_features = 10
     fig, ax = plt.subplots(figsize=(10, 10))
-    y_pos = np.arange(len(topN_kmers))
-    bars: BarContainer = ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
+    y_pos = np.arange(len(topN_kmers[-max_features:]))
+    bars: BarContainer = ax.barh(
+        y_pos, (kmer_count[-max_features:] / (n_folds * n_seeds)) * 100, color="k"
+    )
     ax.set_xlim(0, 100)
-    ax.set_yticks(y_pos, labels=topN_kmers)
+    ax.set_yticks(y_pos, labels=topN_kmers[-max_features:])
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
+        f"Feature importance consensus amongst {n_folds * n_seeds} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
@@ -324,6 +329,7 @@ def train_rfc(
     train_data: pd.DataFrame,
     data_target: pd.Series,
     n_folds: int,
+    n_seeds: int,
     paths: list,
     target_column: str,
     random_state: int,
@@ -340,6 +346,8 @@ def train_rfc(
         target classes for train data
     n_folds: int
         number of cross-validation training folds
+    n_seeds: int
+        number of random seeds over which to average each cross-fold
     paths: list
         list of file paths
     target_column: str
@@ -359,46 +367,66 @@ def train_rfc(
         dataframe containing the training dataset from cross-validation
     """
 
-    cv = StratifiedKFold(n_splits=n_folds)
-    clfr = RandomForestClassifier(
-        n_estimators=10000, n_jobs=-1, random_state=random_state
-    )
-
     tprs = []
     aucs = []
     mean_fpr = np.linspace(0, 1, 100)
 
-    counter = -1
     n_features = 10
-    topN = np.zeros((n_folds, n_features))
+    topN = np.zeros((n_seeds, n_folds, n_features))
 
     fig, ax = plt.subplots(figsize=(8, 8))
 
+    rng = np.random.default_rng(seed=123)
+    random_seeds = rng.integers(low=0, high=10000, size=n_seeds)
+    cv = StratifiedKFold(n_splits=n_folds)
+    clfr_preds = []
+    # for seed, random_seed in enumerate(random_seeds):
     for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
-        clfr.fit(train_data.iloc[train], data_target[train])
-        df = pd.DataFrame()
-        df["Features"] = train_data.iloc[train].columns
-        df["Importances"] = clfr.feature_importances_
-        df.sort_values(by=["Importances"], ascending=False, inplace=True)
-        df.reset_index(inplace=True)
-        viz = RocCurveDisplay.from_estimator(
-            clfr,
-            train_data.iloc[test],
-            data_target[test],
-            name=f"ROC fold {fold + 1}",
-            alpha=0.3,
-            lw=1,
-            ax=ax,
-            plot_chance_level=(fold == n_folds - 1),
-        )
+        train_fold = train_data.iloc[train]
+        train_target = data_target[train]
+        test_fold = train_data.iloc[test]
+        test_target = data_target[test]
+
+        fold_tpr = []
+        fold_auc = []
+        for seed, random_seed in enumerate(random_seeds):
+            clfr = RandomForestClassifier(
+                n_estimators=10000, n_jobs=-1, random_state=random_seed
+            )
+
+            clfr.fit(train_fold, train_target)
+            clfr_out = np.zeros([2, len(test_target)])
+
+            df = pd.DataFrame()
+            df["Features"] = train_fold.columns
+            df["Importances"] = clfr.feature_importances_
+            df.sort_values(by=["Importances"], ascending=False, inplace=True)
+            df.reset_index(inplace=True)
+
+            clfr_out[0] = clfr.predict_proba(test_fold)[:, 1]
+            clfr_out[1] = test_target
+            clfr_preds.append(clfr_out)
+
+            topN[seed, fold, :] = df["index"][:n_features].to_numpy()
+
+        # average roc curve over
+        for clfr_pred in clfr_preds:
+            viz = RocCurveDisplay.from_predictions(
+                clfr_pred[1],
+                clfr_pred[0],
+                name=f"ROC fold {fold + 1}",
+                alpha=0.3,
+                lw=1,
+                ax=ax,
+                plot_chance_level=(fold == n_folds - 1),
+            )
         interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
         interp_tpr[0] = 0.0
-        tprs.append(interp_tpr)
-        aucs.append(viz.roc_auc)
+        fold_tpr.append(interp_tpr)
+        fold_auc.append(viz.roc_auc)
 
-        counter += 1
-        topN[counter, :] = df["index"][:n_features].to_numpy()
-
+    tprs.append(np.mean(fold_tpr, axis=0))
+    aucs.append(fold_auc)
     mean_tpr = np.mean(tprs, axis=0)
     mean_tpr[-1] = 1.0
     mean_auc = auc(mean_fpr, mean_tpr)
@@ -1575,13 +1603,13 @@ if __name__ == "__main__":
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
         n_folds = 5
+        n_seeds = 5
         clfr, temp1, train, df = train_rfc(
-            X, y, n_folds, paths, target_column, random_state
+            X, y, n_folds, n_seeds, paths, target_column, random_state
         )
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots
-
         (uniq, freq) = np.unique(temp1.flatten(), return_counts=True)
         temp2 = np.column_stack((uniq, freq))
         temp3 = temp2[temp2[:, 1].argsort()]
@@ -1854,6 +1882,7 @@ if __name__ == "__main__":
             array2,
             array1,
             n_folds,
+            n_seeds,
             target_column,
             exposure_status_sign,
             response_effect_sign,

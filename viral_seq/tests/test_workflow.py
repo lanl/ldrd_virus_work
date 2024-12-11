@@ -274,11 +274,13 @@ def test_fic_plot(tmp_path):
     }
 
     n_folds = 2
+    n_seeds = 1
 
     workflow.FIC_plot(
         array2,
         array1,
         n_folds,
+        n_seeds,
         target_column,
         exposure_status_sign,
         response_effect_sign,
@@ -402,23 +404,23 @@ def test_train_rfc(tmp_path):
 
     importances_exp = np.array(
         [
-            0.27432437,
-            0.18421107,
-            0.13133805,
-            0.08842391,
-            0.06545018,
-            0.05828152,
-            0.05749451,
-            0.05430739,
-            0.04330573,
-            0.04286328,
+            0.2731257,
+            0.17911355,
+            0.1268746,
+            0.08858762,
+            0.0647115,
+            0.06183437,
+            0.05948478,
+            0.05914868,
+            0.04558468,
+            0.04153453,
         ]
     )
-    features_exp = np.array([8, 5, 7, 1, 9, 3, 0, 2, 4, 6])
+    features_exp = np.array([8, 5, 7, 1, 9, 3, 0, 2, 6, 4])
     topN_exp = np.array(
         [
-            [6.0, 5.0, 0.0, 8.0, 9.0, 1.0, 2.0, 4.0, 3.0, 7.0],
-            [8.0, 5.0, 7.0, 1.0, 9.0, 3.0, 0.0, 2.0, 4.0, 6.0],
+            [6.0, 5.0, 0.0, 8.0, 9.0, 4.0, 1.0, 3.0, 2.0, 7.0],
+            [8.0, 5.0, 7.0, 1.0, 9.0, 3.0, 0.0, 2.0, 6.0, 4.0],
         ]
     )
 
@@ -427,6 +429,7 @@ def test_train_rfc(tmp_path):
         X,
         y,
         n_folds=2,
+        n_seeds=1,
         paths=out_path,
         target_column="Test",
         random_state=0,
@@ -443,5 +446,5 @@ def test_train_rfc(tmp_path):
 
     assert_allclose(df["Importances"].values, importances_exp)
     assert_allclose(df["Features"].values, features_exp)
-    assert_array_equal(topN_features, topN_exp)
+    assert_array_equal(topN_features[0], topN_exp)
     check_is_fitted(trained_clfr)

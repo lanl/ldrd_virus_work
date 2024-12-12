@@ -36,6 +36,7 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
+import os
 
 matplotlib.use("Agg")
 
@@ -97,6 +98,29 @@ class kmer_data:
     def __init__(self, mapping_method: str, kmer_data: list[str]):
         self.mapping_method = mapping_method
         self.kmer_names = kmer_data
+
+
+def find_matching_kmers(target_column, mapping_methods=None):
+    # TODO: check logic for IoU comparison of matching kmers
+    # check to see if the necessary files are available and, if so, load them and perform kmer matching
+    try:
+        print(
+            f"Will try to load topN kmer files for {mapping_methods[0]} and {mapping_methods[1]} mapping schemes..."
+        )
+        topN_files = []
+        for mm in mapping_methods:
+            topN_file = pl.read_parquet(
+                f"topN_kmers_{target_column}_{mm}.parquet.gzip"
+            ).to_pandas()
+            topN_files.append(topN_file)
+        kmer_matches = match_kmers(topN_files, mapping_methods)
+        if kmer_matches:
+            for (kmer1, kmer2), values in kmer_matches.items():
+                return f"Matching AA kmers between PC kmers '{kmer1}' and '{kmer2}': {values}"
+        else:
+            return "No matching AA kmers found in TopN."
+    except FileNotFoundError:
+        return "Must run workflow using both mapping methods before performing kmer mapping."
 
 
 def feature_signs(
@@ -314,6 +338,10 @@ def match_kmers(
 
     # drop the place holder column 'idx' from dataframe
     matching_kmers_df.drop("idx", axis=1, inplace=True)
+
+    # save the df of matching PC and AA kmers for each mapping method
+    matching_kmers_df.to_csv("topN_PC_AA_kmer_mappings.csv", index=False)
+
     # find matching PC kmers from different mapping schemes
     kmer_matches = {}
     for kmer1 in matching_kmers_df.columns:
@@ -367,6 +395,7 @@ def FIC_plot(
     kmer_count: np.ndarray,
     n_folds: int,
     target_column: str,
+    mapping_method: str,
     exposure_status_sign: list,
     response_effect_sign: list,
     surface_exposed_dict: dict,
@@ -498,7 +527,10 @@ def FIC_plot(
         )
 
         fig.tight_layout()
-        fig.savefig(str(path) + "/" + "FIC_" + "_".join(target_names) + ".png", dpi=300)
+        fig.savefig(
+            os.path.join(str(path), f"FIC_{target_column}_{mapping_method}.png"),
+            dpi=300,
+        )
         plt.close()
 
 
@@ -1964,15 +1996,13 @@ if __name__ == "__main__":
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(X)
         positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
+        fig_name = os.path.join(
+            str(paths[-1]), f"SHAP_{str(target_column)}_{mapping_method}.png"
+        )
         feature_importance.plot_shap_beeswarm(
             positive_shap_values,
             model_name="Random Forest",
-            fig_name=str(paths[-1])
-            + "/"
-            + "SHAP_"
-            + str(target_column)
-            + f"_{mapping_method}"
-            + ".png",
+            fig_name=fig_name,
             max_display=len(array2),
         )
 
@@ -1993,13 +2023,12 @@ if __name__ == "__main__":
             array1,
             n_folds,
             target_column,
+            mapping_method,
             exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
             paths[-1],
         )
-
-        plt.close()
 
         # save top N kmers
         array2.reverse()
@@ -2008,34 +2037,8 @@ if __name__ == "__main__":
             topN_kmers, f"topN_kmers_{target_column}_{mapping_method}.parquet.gzip"
         )
 
-        # check to see if the necessary files are available
-        if (
-            not Path(
-                f"topN_kmers_{target_column}_jurgen_schmidt.parquet.gzip"
-            ).is_file()
-            and not Path(f"topN_kmers_{target_column}_shen_2007.parquet.gzip").is_file()
-        ):
-            raise FileNotFoundError(
-                "Must run workflow using both mapping methods before performing kmer mapping."
-            )
-        # if the necessary files exist, load them and perform kmer matching
-        else:
-            mapping_methods = ["shen_2007", "jurgen_schmidt"]
-            print(
-                f"Loading topN kmer files for {mapping_methods[0]} and {mapping_methods[1]} mapping schemes..."
-            )
-            topN_files = []
-            for mm in mapping_methods:
-                topN_file = pl.read_parquet(
-                    f"topN_kmers_{target_column}_{mm}.parquet.gzip"
-                ).to_pandas()
-                topN_files.append(topN_file)
-            kmer_matches = match_kmers(topN_files, mapping_methods)
-
-        if kmer_matches:
-            for (kmer1, kmer2), values in kmer_matches.items():
-                print(
-                    f"Matching AA kmers between PC kmers '{kmer1}' and '{kmer2}': {values}"
-                )
-        else:
-            print("No matching AA kmers fround in TopN.")
+        # perform IoU matching of AA analogues for topN kmers from each mapping method
+        matching_kmers = find_matching_kmers(
+            target_column, mapping_methods=["shen_2007", "jurgen_schmidt"]
+        )
+        print(matching_kmers)

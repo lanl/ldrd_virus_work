@@ -58,15 +58,14 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
                     kmer_AA_list = []
                     for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                         kmer_AA_list.append("kmer_AA_" + str(kmer))
-                    # iter over PC kmer sequence and add PC kmers to AA dict
+                    # iter over PC kmer sequence to add PC kmers to AA dict
+                    # and index value for building_cache
                     for i, kmer in enumerate(
                         Sequence(str(new_seq)).iter_kmers(k, overlap=True)
                     ):
                         new_kmer = "kmer_" + kmer_type + "_" + str(kmer)
                         kmer_PC_list.append((kmer_AA_list[i], new_kmer))
-                    # iter over PC kmer sequence and index value for building_cache
-                    for kmer in Sequence(str(new_seq)).iter_kmers(k, overlap=True):
-                        kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
+                        kmers[new_kmer] += 1
                 else:
                     for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                         kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1

@@ -397,6 +397,7 @@ def test_fic_plot(tmp_path):
 
     array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.7, 1.8, 1.9, 2.0])
     target_column = "IN"
+    mapping_method = "jurgen_schmidt"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
@@ -420,6 +421,7 @@ def test_fic_plot(tmp_path):
         array1,
         n_folds,
         target_column,
+        mapping_method,
         exposure_status_sign,
         response_effect_sign,
         surface_exposed_dict,
@@ -429,7 +431,7 @@ def test_fic_plot(tmp_path):
     assert (
         compare_images(
             files("viral_seq.tests.expected") / "FIC_expected.png",
-            str(tmp_path / "FIC_Integrin.png"),
+            str(tmp_path / f"FIC_{target_column}_{mapping_method}.png"),
             0.001,
         )
         is None
@@ -978,3 +980,13 @@ def test_match_kmers(tmpdir):
     kmer_matches_out_df = pd.DataFrame(kmer_matches_out)
     kmer_matches_exp_df = pd.DataFrame(kmer_matches_exp)
     assert_frame_equal(kmer_matches_out_df, kmer_matches_exp_df)
+
+
+def test_find_matching_kmers():
+    result = workflow.find_matching_kmers(
+        target_column="test", mapping_methods=["mm1", "mm2"]
+    )
+    assert (
+        result
+        == "Must run workflow using both mapping methods before performing kmer mapping."
+    )

@@ -1809,6 +1809,8 @@ organism_dict = {
                 "Torque teno felis virus 2": "non_primate_mammals",
                 # https://www.genome.jp/virushostdb/2065056
                 "Torque teno midi virus 15": "primate",
+                # https://www.genome.jp/virushostdb/687372
+                "Torque teno mini virus 4": "primate",
                 }
 
 
@@ -1896,7 +1898,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=658)
+                                                           n_records=663)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

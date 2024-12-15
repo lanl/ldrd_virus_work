@@ -1823,6 +1823,22 @@ organism_dict = {
                 # https://www.genome.jp/virushostdb/2012676
                 # https://doi.org/10.1093/ve/vex017
                 "Torque teno Leptonychotes weddellii virus-1": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/2012677
+                "Torque teno Leptonychotes weddellii virus-2": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/687386
+                # https://en.wikipedia.org/wiki/Iotatorquevirus
+                # https://ictv.global/report_9th/ssDNA/Anelloviridae
+                # https://en.wikipedia.org/wiki/Torque_teno_sus_virus
+                # https://doi.org/10.3390/microorganisms10020242
+                # zoonotic transmission pig -> ruminants, but I don't
+                # see evidence for primate infection
+                "Torque teno sus virus 1a": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/687387
+                "Torque teno sus virus 1b": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1968861
+                "Torque teno sus virus k2a": "non_primate_mammals",
+                # https://www.genome.jp/virushostdb/1239832
+                "Torque teno sus virus k2b": "non_primate_mammals",
                 }
 
 
@@ -1910,7 +1926,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=673)
+                                                           n_records=678)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

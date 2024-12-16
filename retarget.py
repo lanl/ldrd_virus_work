@@ -1853,6 +1853,17 @@ organism_dict = {
                 "Torque teno virus 18": "human",
                 # https://www.genome.jp/virushostdb/687341
                 "Torque teno virus 2": "primate",
+                # https://www.genome.jp/virushostdb/687361
+                # these "patent" TTV sequences are a bit suspicious?
+                # how confident are we in human infection?
+                # host-virus DB labels them as human though...
+                "Torque teno virus 22": "human",
+                # https://www.genome.jp/virushostdb/687362
+                "Torque teno virus 23": "primate",
+                # https://www.genome.jp/virushostdb/687364
+                # above indicates human but the genbank
+                # file indicates Japanese macaque
+                "Torque teno virus 25": "primate",
                 }
 
 
@@ -1940,7 +1951,7 @@ def main(cache_path):
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,
-                                                           n_records=693)
+                                                           n_records=698)
     np.savez("relabeled_data.npz",
              y_human_train=y_human_train,
              y_mammal_train=y_mammal_train,

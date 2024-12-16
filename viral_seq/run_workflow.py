@@ -33,6 +33,27 @@ import matplotlib.patches as mpatches
 matplotlib.use("Agg")
 
 
+def check_kmer_feature_lengths(kmer_features: list, kmer_range: str) -> None:
+    """
+    check that the lengths of features in the dataset 'X' are within
+    the range of values as specified by the command line flag '--kmer_range'
+
+    Parameters:
+    kmer_features: list
+        list of kmer features from the training dataset
+    kmer_range: str
+        string specifying the range of values to generate features with
+        the form `start-end`
+    """
+    kmer_features_lengths = [len(s[8:]) for s in kmer_features]
+    kmer_feature_range = list(set(kmer_features_lengths))
+    min_kmer, max_kmer = map(int, kmer_range.split("-"))
+    if not all(min_kmer <= x <= max_kmer for x in kmer_feature_range):
+        raise ValueError(
+            f"k-mer feature lengths not within desired range: {min_kmer}-{max_kmer}"
+        )
+
+
 def feature_signs(
     is_exposed: list,
     not_exposed: list,
@@ -1469,6 +1490,10 @@ if __name__ == "__main__":
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
         y = tbl[target_column]
+
+        # check that none of the features in tbl have kmers outside of the range
+        # of given kmer lengths from command line option '--kmer-range'
+        check_kmer_feature_lengths(list(X.columns), kmer_range)
 
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.

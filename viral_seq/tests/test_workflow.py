@@ -406,3 +406,21 @@ def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
     out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
 
     assert_allclose(list(out_dict.values()), percent_values)
+
+
+@pytest.mark.parametrize(
+    "kmer_features, kmer_range",
+    (
+        [
+            ["kmer_PC_0123456", "kmer_AA_VLYWG", "kmer_PC_CBBA", "kmer_PC_012345678"],
+            "10-10",
+        ],
+    ),
+)
+def test_check_kmer_feature_lengths(kmer_features, kmer_range):
+    min_kmer, max_kmer = map(int, kmer_range.split("-"))
+    with pytest.raises(
+        ValueError,
+        match=f"k-mer feature lengths not within desired range: {min_kmer}-{max_kmer}",
+    ):
+        workflow.check_kmer_feature_lengths(kmer_features, kmer_range)

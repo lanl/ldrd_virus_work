@@ -2590,6 +2590,585 @@ organism_dict = {
                 "Loveridge's garter snake virus 1": "no_mammals",
                 # TODO: verify -- was missing from Adam's data...
                 "Maize fine streak virus": "no_mammals",
+                    # https://www.genome.jp/virushostdb/38143
+    "Simian hemorrhagic fever virus": "primate",
+    # https://www.genome.jp/virushostdb/666363
+    "Drosophila melanogaster sigmavirus AP30": "no_mammals",
+    # https://www.genome.jp/virushostdb/279896
+    "Maize mosaic nucleorhabdovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/200401
+    # https://doi.org/10.1016/j.virol.2013.10.024 claims in Aves, can't find direct evidence
+    "Hart Park virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1936072
+    "Kibale red colobus virus 2": "primate",
+    # https://www.genome.jp/virushostdb/1620895
+    # https://doi.org/10.1177/1176934317713484 source from above used for hamsters; only cell culture
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_034543.1 isolated from mosquito
+    "Ord River virus": "no_mammals",
+        # https://www.genome.jp/virushostdb/3052234
+    "Hepacivirus otomopis": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/336959
+    "Chicken astrovirus": "avian",
+    # https://www.genome.jp/virushostdb/28295
+    # https://doi.org/10.1128/jcm.26.11.2235-2239.1988 only cell culture for primate
+    "Porcine epidemic diarrhea virus": "non_primate_mammals",
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_038543
+    # https://doi.org/10.1371/journal.pone.0015113 only cell culture for primates
+    "Chipmunk parvovirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1972612
+    # https://doi.org/10.1007/s00705-018-4003-7
+    "Hapavirus flanders": "avian",
+    # https://www.genome.jp/virushostdb/3052226
+    "Hepacivirus bovis": "non_primate_mammals",
+    # Alternate name Avian paramyxovirus 2
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_039230.1/
+    # https://doi.org/10.1016/j.virusres.2008.05.012 only cell culture for humans, etc
+    "Avian metaavulavirus 2": "avian",
+    "avian paramyxovirus 2": "avian",
+    # https://www.genome.jp/virushostdb/1755590
+    "Kunsagivirus A": "avian",
+    # https://www.genome.jp/virushostdb/47001
+    "Equine rhinitis B virus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1511784
+    "Pasivirus A1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/871700
+    "Oscivirus A1": "avian",
+    # https://www.genome.jp/virushostdb/3052238
+    "Hepacivirus rhabdomysis": "non_primate_mammals",
+    # https://doi.org/10.1099/vir.0.18731-0
+    "Murid gammaherpesvirus 4": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/205895
+    "Cypovirus 1": "no_mammals",
+    # https://www.genome.jp/virushostdb/519497
+    "Southern rice black-streaked dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/318834
+    "Berrimah virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1272946
+    "La Joya virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1307119
+    "Theiler's disease-associated virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1170234
+    "Feline morbillivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/11048
+    "Lactate dehydrogenase-elevating virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/11636
+    "Reticuloendotheliosis virus": "avian",
+    # https://www.genome.jp/virushostdb/10995
+    "Infectious bursal disease virus": "avian",
+    # https://www.genome.jp/virushostdb/2885846
+    "Alces alces papillomavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1965066
+    "Porcine reproductive and respiratory syndrome virus 1": "non_primate_mammals",
+    "porcine reproductive and respiratory syndrome virus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1157337
+    "Piscine orthoreovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1965067
+    "Porcine reproductive and respiratory syndrome virus 2": "non_primate_mammals",
+    # Alternate name Aquareovirus ctenopharyngodontis
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_005166.1/
+    # https://www.genome.jp/virushostdb/185782
+    "Aquareovirus C": "no_mammals",
+    "Aquareovirus ctenopharyngodontis": "no_mammals",
+    # https://www.genome.jp/virushostdb/1416021
+    "Feline sakobuvirus A": "non_primate_mammals",
+    # Alternate name maize Iranian mosaic virus
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_036390.1
+    # https://www.genome.jp/virushostdb/348823
+    "Maize Iranian mosaic nucleorhabdovirus": "no_mammals",
+    "maize Iranian mosaic virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1272958
+    # https://doi.org/10.3389/fmicb.2019.00856 antibodies in water buffalo
+    "Sweetwater Branch virus": "no_mammals",
+        # https://www.genome.jp/virushostdb/994485
+    "Scophthalmus maximus reovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052762
+    "Tenuivirus oryzabrevis": "no_mammals",
+    # https://www.genome.jp/virushostdb/1605403
+    "Non-primate hepacivirus NZP1": "non_primate_mammals",
+    # https://www.ncbi.nlm.nih.gov/nuccore/NC_038292
+    "Kibale red-tailed guenon virus 1": "primate",
+    # https://www.genome.jp/virushostdb/380160
+    # https://doi.org/10.1016/j.virusres.2022.198739 in cattle, PCR
+    "Obodhiang virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/10353
+    "Saimiriine alphaherpesvirus 1": "primate",
+      # https://www.genome.jp/virushostdb/471285
+    "Lettuce yellow mottle virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/2847088
+    "GB virus-D": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/40061
+    # https://doi.org/10.1111/j.1751-0813.1999.tb12126.x also seems to be in kangaroos, other marsupials
+    "Wallal virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1479613
+    "Puerto Almendras virus": "no_mammals",
+    # https://doi.org/10.1007/s11262-012-0819-5
+    # isolated from sandflies, it's assumed to infect mammals due to the family, but no direct evidence
+    "Vesiculovirus bogdanovac": "no_mammals",
+    # https://www.genome.jp/virushostdb/311228
+    "Mycoreovirus 1": "no_mammals",
+    # https://www.genome.jp/virushostdb/32612
+    "Lettuce necrotic yellows virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/2682610
+    "Zambian malbrouck virus 1": "primate",
+    # https://doi.org/10.1099/vir.0.058172-0
+    "Carp picornavirus 1": "no_mammals",
+    # https://doi.org/10.1371/journal.pone.0097730
+    "Enterovirus E": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/31612
+    "Adelaide River virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/318836
+    # https://doi.org/10.1016/j.virol.2012.01.004 probably in cattle, serological evidence only
+    "Kotonkan virus": "no_mammals",
+        # https://www.genome.jp/virushostdb/694001
+    "Miniopterus bat coronavirus HKU8": "non_primate_mammals",
+    # https://doi.org/10.1038/293543a0
+    "Moloney murine leukemia virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1641896
+    "Falcovirus A1": "avian",
+    # https://www.genome.jp/virushostdb/1231903
+    # https://doi.org/10.1128/jvi.01856-14 its limited host range is known/notable
+    "Eilat virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1272943
+    "Joinjakaka virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1330070
+    "Melegrivirus A": "avian",
+    # https://www.genome.jp/virushostdb/1354498
+    "Guereza hepacivirus": "primate",
+    # https://www.genome.jp/virushostdb/185954
+    "Mal de Rio Cuarto virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1158189
+    "Chaco virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/11978
+    "Feline calicivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/75888
+    "Baboon orthoreovirus": "primate",
+    # https://doi.org/10.1007/s00705-005-0652-4
+    "Tenuivirus persotritici": "no_mammals",
+        # https://www.genome.jp/virushostdb/1755588
+    "Sicinivirus A": "avian",
+    # https://doi.org/10.1371/journal.pone.0108379
+    "Warrego virus": "non_primate_mammals",
+    # https://doi.org/10.1128/jvi.74.9.4264-4272.2000
+    "Koala retrovirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/764599
+    "Coastal Plains virus": "non_primate_mammals",
+    # Alternate name avisivirus B1
+    # https://www.genome.jp/virushostdb/1534545
+    "Chicken picornavirus 2": "avian",
+    "avisivirus B1": "avian",
+    # https://www.genome.jp/virushostdb/1659220
+    "Kobuvirus cattle/Kagoshima-1-22-KoV/2014/JPN": "non_primate_mammals",
+    # detected in pool of insects, insect vector assumed to transmit to bats, but no further evidence
+    # https://doi.org/10.7554/eLife.05378
+    "Wuhan Louse Fly Virus 5": "no_mammals",
+    # https://doi.org/10.1016/j.virusres.2005.07.005
+    "Breda virus": "non_primate_mammals",
+    # https://doi.org/10.1099/vir.0.83605-0
+    "Miniopterus bat coronavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052236
+    # difficult to parse; but it seems tamarins were infected with a human GB hepatitis agent to sequence
+    # https://doi.org/10.1073/pnas.92.8.3401
+    # reference for the GB agent used
+    # https://doi.org/10.1093/infdis/142.5.767
+    "Hepacivirus platyrrhini": "human",
+    # https://www.genome.jp/virushostdb/1348439
+    "Niakha virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1384461
+    "Bat coronavirus CDPHE15/USA/2006": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1159905
+    "Porcine coronavirus HKU15": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/318843
+    # there is evidence for humans, but only positive neutralization test
+    # https://doi.org/10.1016/j.virep.2014.09.001
+    "Almpiwar virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/129953
+    "Bovine mastadenovirus A": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1987139
+    "Bat hepatovirus SMG18520Minmav2014": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/133704
+    "Porcine circovirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/2870363
+    "anativirus A1": "avian",
+    # https://www.genome.jp/virushostdb/77698
+    "Fiji disease virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/202910
+    "Bubaline alphaherpesvirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/358764
+    "Border disease virus": "non_primate_mammals",
+       # https://www.genome.jp/virushostdb/1884879
+    "Parrot bornavirus 5": "avian",
+    # https://www.genome.jp/virushostdb/1620897
+    "Sripur virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/2847078
+    "Felis domesticus papillomavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052229
+    "Hepacivirus glareoli": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1965064
+    "African pouched rat arterivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/205908
+    "Cypovirus 14": "no_mammals",
+    # https://www.genome.jp/virushostdb/572288
+    "Bulbul coronavirus HKU11-934": "avian",
+    # https://doi.org/10.1007/s00705-013-1735-2
+    "Avian orthoavulavirus 12": "avian",
+        # Alternate name avian paramyxovirus 10
+    # https://www.genome.jp/virushostdb/862945 primate evidence is cell culture only
+    "Avian paramyxovirus penguin/Falkland Islands/324/2007": "avian",
+    "avian paramyxovirus 10": "avian",
+    # https://doi.org/10.1371/journal.pone.0087593
+    "Fathead minnow picornavirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/10989
+    "Maize rough dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1664809
+    "Jonchet virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1406343
+    "Tai virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1550518
+    "Koolpinyah virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/402584
+    "Bovine viral diarrhea virus 3 Th/04_KhonKaen": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/572289
+    "Munia coronavirus HKU13-3514": "avian",
+    # https://doi.org/10.1186/s12985-017-0839-9
+    "Green River chinook virus": "no_mammals",
+        # https://www.genome.jp/virushostdb/1734441
+    "Rat arterivirus 1": "non_primate_mammals",
+    # VHDB has different accession for this name; maybe just different isolates
+    # Source of this accession:
+    # https://doi.org/10.1007/BF00284644
+    "Tenuivirus zeae": "no_mammals",
+    # https://www.genome.jp/virushostdb/205899
+    "Cypovirus 5": "no_mammals",
+    # https://www.genome.jp/virushostdb/3085316
+    "Bos taurus papillomavirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1150861
+    "Canine picodicistrovirus": "non_primate_mammals",
+    # https://doi.org/10.1186/1743-422X-10-228
+    # other isolates have been shown to infect humans in vitro:
+    # https://doi.org/10.1007/s11262-009-0377-7
+    "Porcine endogenous retrovirus": "non_primate_mammals",
+    # https://doi.org/10.1099/vir.0.055939-0
+    "Kolente virus": "non_primate_mammals",
+    # https://doi.org/10.1016/j.vetmic.2017.04.024
+    "Deltapapillomavirus 3": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1546177
+    "Mikumi yellow baboon virus 1": "primate",
+    # https://www.genome.jp/virushostdb/11307
+    "Sonchus yellow net nucleorhabdovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/55987
+    "Isavirus salaris": "no_mammals",
+        # https://www.genome.jp/virushostdb/1221391
+    "Cedar virus": "non_primate_mammals",
+    # https://doi.org/10.1128/jvi.75.3.1186-1194.2001
+    "Bovine gammaherpesvirus 4": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1272947
+    "Landjia virus": "avian",
+    # https://www.genome.jp/virushostdb/696863
+    "Sprivivirus cyprinus": "no_mammals",
+    # https://www.genome.jp/virushostdb/10986
+    "Rice gall dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/381543
+    "Salmon aquaparamyxovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/162013
+    # Serological evidence in humans:
+    # https://doi.org/10.1086/520817
+    "Tioman virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1608146
+    "Yongjia Tick Virus 2": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052609
+    "Pegivirus neotomae": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1272957
+    "Sena Madureira virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/173082
+    "Chum salmon reovirus CS": "no_mammals",
+    # https://www.genome.jp/virushostdb/79891
+    "Cervid alphaherpesvirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/10990
+    "Rice black streaked dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/118140
+    "Teschovirus A": "non_primate_mammals",
+       # https://www.genome.jp/virushostdb/1118369
+    "Wobbly possum disease virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1195087
+    "Sunshine Coast virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/39637
+    "Equid alphaherpesvirus 8": "non_primate_mammals",
+    # https://doi.org/10.1128/jvi.65.6.2910-2920.1991
+    "Equine arteritis virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/104581
+    "St Croix River virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/11096
+    "Classical swine fever virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1537975
+    # Serological evidence for humans
+    # https://doi.org/10.1128/jvi.02932-14
+    "Kumasi rhabdovirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052627
+    "Phasivirus baduense": "no_mammals",
+    # https://www.genome.jp/virushostdb/1987144
+    "Hedgehog hepatovirus Igel8Erieur2014": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/195060
+    "Potato yellow dwarf nucleorhabdovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/318849
+    "Fukuoka virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/10273
+    "Myxoma virus": "non_primate_mammals",
+    # https://doi.org/10.1038/ncomms1796
+    "Bat Paramyxovirus Epo_spe/AR1/DRC/2009": "non_primate_mammals",
+    # https://doi.org/10.1371/journal.ppat.1004664
+    "Le Dantec virus": "human",
+        # https://www.genome.jp/virushostdb/311229
+    "Mycoreovirus 3": "no_mammals",
+    # https://www.genome.jp/virushostdb/137443
+    "Macropodid alphaherpesvirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1775456
+    "Colocasia bobone disease-associated virus": "no_mammals",
+    # https://doi.org/10.1371/journal.ppat.1004664
+    "Carajas virus": "no_mammals",
+    # https://doi.org/10.3390/diseases11010021
+    "Yata virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/207343
+    "Bovine foamy virus": "non_primate_mammals",
+    # https://doi.org/10.1016/j.meegid.2015.11.012
+    "Rabbit picornavirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/380434
+    "Mount Elgon bat virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1474807
+    # closest phylogenetic relative, Langya henipavirus, infects humans:
+    # https://doi.org/10.1056/nejmc2202705
+    "Mojiang virus": "non_primate_mammals",
+    # https://doi.org/10.1016/s0378-1135(96)01231-x
+    "Bovine alphaherpesvirus 1": "non_primate_mammals",
+       # https://www.genome.jp/virushostdb/693999
+    "Scotophilus bat coronavirus 512": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/194965
+    # cell culture only for humans
+    "Aichivirus B": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1173138
+    "Influenza D virus (D/swine/Oklahoma/1334/2011)": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/40065
+    # some serological evidence for 'non_primate_mammals':
+    # https://doi.org/10.3390/v7052185
+    "Chenuda virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052559
+    "Orthorubulavirus mapueraense": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/2905917
+    # claim of human host not corroborated elsewhere
+    "Pichinde virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1972683
+    "Almendravirus arboretum": "no_mammals",
+       # https://www.genome.jp/virushostdb/10334
+    "Felid alphaherpesvirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/2908018
+    "Taro vein chlorosis virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/35243
+    "Ateline alphaherpesvirus 1": "primate",
+    # https://www.genome.jp/virushostdb/200404
+    "Mossuril virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/195059
+    "Datura yellow vein nucleorhabdovirus": "no_mammals",
+    # Alternate name Fikirini virus
+    # https://www.genome.jp/virushostdb/1408144
+    "Fikirini rhabdovirus": "non_primate_mammals",
+    "Fikirini virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052496
+    "Orthohantavirus sangassouense": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1972569
+    "Vesiculovirus perinet": "no_mammals",
+        # There is serological evidence in humans
+    # Additionally, a volunteer infected with symptoms:
+    # https://doi.org/10.1007/BF01246390
+    "Equine rhinitis A virus": "human",
+    # Alternate name avian paramyxovirus 9
+    # non-avian evidence cell culture only
+    # https://www.genome.jp/virushostdb/2560326
+    "Avian orthoavulavirus 9": "avian",
+    "avian paramyxovirus 9": "avian",
+    # https://www.genome.jp/virushostdb/3052448
+    "Orthobunyavirus teteense": "avian",
+    # UniProt evidence for human can't be corroborated
+    # https://www.genome.jp/virushostdb/340907
+    "Papiine alphaherpesvirus 2": "primate",
+    # Alternate naem avian paramyxovirus 13
+    # non-avian evidence cell culture only
+    # https://www.genome.jp/virushostdb/2560321
+    "Avian paramyxovirus goose/Shimane/67/2000": "avian",
+    "avian paramyxovirus 13": "avian",
+    # https://www.genome.jp/virushostdb/1987141
+    "Rodent hepatovirus CIV459Lopsik2004": "non_primate_mammals",
+      # https://www.genome.jp/virushostdb/1159908
+    "Wigeon coronavirus HKU20": "avian",
+    # https://www.genome.jp/virushostdb/889873
+    "Fathead minnow nidovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1985704
+    "Cytorhabdovirus gramineae": "no_mammals",
+    # https://www.genome.jp/virushostdb/1511807
+    # https://doi.org/10.1016/j.virol.2014.01.018
+    "Rosavirus A2": "human",
+    "rosavirus A2": "human",
+    # https://www.genome.jp/virushostdb/380442
+    # Paper claims isolated from human:
+    # https://doi.org/10.1016/S0769-2617(87)80041-2
+    "Nkolbisson virus": "human",
+    # https://www.genome.jp/virushostdb/1985699
+    "Cytorhabdovirus hordei": "no_mammals",
+    # isolated from wallabies
+    # https://doi.org/10.1371/journal.pone.0031911
+    "Eubenangee virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1679445
+    "Bruges virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1715288
+    "Canary bornavirus 1": "avian",
+    # https://www.genome.jp/virushostdb/55744
+    "Equid alphaherpesvirus 9": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/569195
+    "Porcine kobuvirus swine/S-1-HUN/2007/Hungary": "non_primate_mammals",
+        # https://www.genome.jp/virushostdb/134606
+    "Trichoplusia ni cypovirus 15": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052731
+    "Respirovirus muris": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/152177
+    "Dichorhavirus orchidaceae": "no_mammals",
+    # https://www.genome.jp/virushostdb/1272942
+    "Gray Lodge virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/237020
+    "Porcine torovirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/390157
+    "Senecavirus A": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/449133
+    "Epizootic hemorrhagic disease virus (serotype 1 / strain New Jersey)": "non_primate_mammals",
+    # evidence for macropods, but only serological survey
+    # https://www.genome.jp/virushostdb/1972623
+    "Hapavirus ngaingan": "no_mammals",
+    # evidence for mammals, but only cell study
+    # https://www.genome.jp/virushostdb/246280
+    "Liao ning virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/11303
+    "Bovine ephemeral fever virus": "non_primate_mammals",
+      # https://www.genome.jp/virushostdb/1985706
+    "Cytorhabdovirus fragariarugosus": "no_mammals",
+    # https://www.genome.jp/virushostdb/40050
+    "African horse sickness virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1382295
+    "Inachis io cypovirus 2": "no_mammals",
+    # Note: not RefSeq, and there appears to be RefSeq available (NC_001408)
+    # https://doi.org/10.3382/ps/pey231
+    "Avian leukosis virus": "avian",
+    # https://doi.org/10.3390/pathogens10091143
+    "Dabieshan virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1661395
+    "Ampivirus A1": "no_mammals",
+    # https://www.genome.jp/virushostdb/2907837
+    "Fer-de-lance virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1288358
+    "Tench rhabdovirus": "no_mammals",
+    # https://www.genome.jp/virushostdb/33706
+    "Caviid betaherpesvirus 2": "non_primate_mammals",
+        # https://www.genome.jp/virushostdb/2764087
+    "gallivirus A1": "avian",
+    # Alternate name parechovirus D or parechovirus D1
+    # https://www.genome.jp/virushostdb/1394142
+    "Ferret parechovirus": "non_primate_mammals",
+    "parechovirus D1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1239574
+    # https://doi.org/10.1099/vir.0.19267-0
+    "Mamastrovirus 10": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/47929
+    # mention of human cell evidence:
+    # https://doi.org/10.1002/ajpa.24604
+    "Macacine betaherpesvirus 3": "primate",
+    "macacine betaherpesvirus 3": "primate",
+    # https://www.genome.jp/virushostdb/33756
+    # https://doi.org/10.1099/0022-1317-77-8-1693
+    "European brown hare syndrome virus": "non_primate_mammals",
+    # Alternate name avian paramyxovirus 6
+    # https://www.genome.jp/virushostdb/2560316
+    "Avian metaavulavirus 6": "avian",
+    "avian paramyxovirus 6": "avian",
+    # https://www.genome.jp/virushostdb/1980915
+    # https://doi.org/10.1016/j.virusres.2004.06.004
+    "Novirhabdovirus hirame": "no_mammals",
+    # https://www.genome.jp/virushostdb/3052325
+    # Alternate name Mobala virus:
+    # https://doi.org/10.1371/journal.pone.0072290
+    "Mammarenavirus praomyidis": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/35244
+    "Bovine alphaherpesvirus 5": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1518603
+    "Arenaviridae sp. 13ZR68": "non_primate_mammals",
+    # https://doi.org/10.1128/jvi.00589-18
+    "Berne virus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/114429
+    "Bovine adenovirus 2": "non_primate_mammals",
+       # https://www.genome.jp/virushostdb/2593991
+    "Peste des petits ruminants virus": "non_primate_mammals",
+    "peste-des-petits-ruminants virus": "non_primate_mammals",
+    # Alternate names: pseudorabies virus, Aujeszky’s disease virus
+    # https://www.genome.jp/virushostdb/10345
+    # Infection of humans is controversial:
+    # https://doi.org/10.3390/pathogens9080633
+    "Suid alphaherpesvirus 1": "non_primate_mammals",
+    # Alternate name: Eggplant mottled dwarf virus
+    # https://www.genome.jp/virushostdb/488317
+    "Eggplant mottled dwarf nucleorhabdovirus": "no_mammals",
+    "Eggplant mottled dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1538452
+    "Feline astrovirus D1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/3052763
+    "Tenuivirus oryzaclavatae": "no_mammals",
+    # Alternate name: Dinovernavirus aedis
+    # https://www.genome.jp/virushostdb/341721
+    # https://doi.org/10.1016/j.virol.2005.08.028
+    "Aedes pseudoscutellaris reovirus": "no_mammals",
+    "Dinovernavirus aedis": "no_mammals",
+    # https://www.genome.jp/virushostdb/35252
+    "Alcelaphine gammaherpesvirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/798073
+    "Tuhoko virus 2": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/37131
+    "Dolphin morbillivirus": "non_primate_mammals",
+    # https://doi.org/10.1023/a:1008140707132
+    "Viral hemorrhagic septicemia virus Fil3": "no_mammals",
+    # https://www.genome.jp/virushostdb/2756242
+    "Aydin-like pestivirus": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/1006061
+    "Duck hepatitis A virus 1": "avian",
+      "Equine pegivirus 1": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/318845
+    "Parry Creek virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1972626
+    "Hapavirus wongabel": "non_primate_mammals",
+    # https://www.genome.jp/virushostdb/318844
+    # https://doi.org/10.1016/0378-1135(80)90029-2 antibodies in cattle
+    "Tibrogargan virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1272949
+    "Manitoba virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1965063
+    "DeBrazza's monkey arterivirus": "primate",
+    # https://www.genome.jp/virushostdb/998864
+    "Alfalfa dwarf virus": "no_mammals",
+    # https://www.genome.jp/virushostdb/1965068
+    "Simian hemorrhagic encephalitis virus": "primate",
+    # https://www.genome.jp/virushostdb/1885929
+    "Kibale red colobus virus 1": "primate",
+    # https://www.genome.jp/virushostdb/1823757
+    "Kafue kinda chacma baboon virus": "primate",
+    # https://www.genome.jp/virushostdb/1658615
+    "Pebjah virus": "primate",
+    # https://www.genome.jp/virushostdb/471728
+    "Seal picornavirus type 1": "non_primate_mammals",
+    # TODO: verify -- was missing from Aaron's data...
+    "avihepatovirus A1": "avian",
+    # TODO: verify -- was missing from Aaron's data...
+    "Orbivirus alphaequi": "non_primate_mammals",
+    # TODO: verify -- was missing from Aaron's data...
+    "Kobuvirus bejaponia": "non_primate_mammals",
+    # TODO: verify -- was missing from Aaron's data...
+    "Potato yellow dwarf virus": "no_mammals",
+    # TODO: verify -- was missing from Aaron's data...
+    "avian paramyxovirus 12": "avian",
+    # TODO: verify -- was missing from Aaron's data...
+    "limnipivirus B1": "no_mammals",
                 }
 
 
@@ -2673,7 +3252,7 @@ def main(cache_path):
     df_train = pd.read_csv("viral_seq/data/Mollentze_Training.csv")
     y_human_train, y_mammal_train, y_primate_train = retarget(df=df_train,
                                                               cache_path=cache_path,
-                                                              n_records=592)
+                                                              n_records=861)
     df_test = pd.read_csv("viral_seq/data/Mollentze_Holdout.csv")
     y_human_test, y_mammal_test, y_primate_test = retarget(df=df_test,
                                                            cache_path=cache_path,

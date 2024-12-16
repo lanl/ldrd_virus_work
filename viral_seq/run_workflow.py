@@ -80,6 +80,8 @@ def feature_signs(
             response_effect.append("+")
         elif pearson_r <= 0:
             response_effect.append("-")
+        else:
+            response_effect.append("-")
 
     return surface_exposed_sign, response_effect
 

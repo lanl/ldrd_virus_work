@@ -318,11 +318,16 @@ def test_feature_sign():
     syn_shap_values = rng.uniform(-1, 1, (10, 10))
     syn_data = rng.choice([0, 1], size=[10, 10])
 
+    # modify shap value and data arrays to
+    # account for nan pearson-r calculation case
+    syn_shap_values[-1, :] = 0.0
+    syn_data[-1, :] = 0
+
     surface_exposed_out, response_effect_out = workflow.feature_signs(
         is_exposed, not_exposed, syn_shap_values, syn_data
     )
 
-    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
+    response_effect_exp = ["-", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
 
     assert_array_equal(response_effect_out, response_effect_exp)

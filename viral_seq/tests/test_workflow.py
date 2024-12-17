@@ -11,6 +11,7 @@ from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from numpy.testing import assert_array_equal
 from matplotlib.testing.compare import compare_images
+from sklearn.metrics import roc_curve, auc
 
 
 def test_optimization_plotting(tmpdir):
@@ -480,11 +481,7 @@ def test_feature_sign(
     feature_count["Pearson R"] = pearson_values
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, not_exposed, found_kmers, feature_count
-    )
-
-    surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, syn_shap_values, syn_data
+        is_exposed, found_kmers, feature_count
     )
 
     assert_array_equal(response_effect_out, response_effect_exp)
@@ -884,11 +881,15 @@ def test_importances_df():
 
 def test_plot_cv_roc(tmp_path):
     rng = np.random.default_rng(seed=123)
-    pred_prob = rng.uniform(0, 1, 10)
+    syn_data = rng.uniform(0, 1, 10)
     true_class = rng.choice([0, 1], size=10)
-    data_in = np.stack((pred_prob, true_class))
+    syn_fpr, syn_tpr, _ = roc_curve(true_class, syn_data)
+    syn_roc_auc = auc(syn_fpr, syn_tpr)
 
-    workflow.plot_cv_roc([data_in], "Test", tmp_path)
+    clfr_preds = {}
+    clfr_preds[0] = {"fpr": syn_fpr, "tpr": syn_tpr, "auc": syn_roc_auc}
+
+    workflow.plot_cv_roc(clfr_preds, "Test", tmp_path)
     assert (
         compare_images(
             files("viral_seq.tests.expected") / "ROC_cv_expected.png",

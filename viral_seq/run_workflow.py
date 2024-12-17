@@ -13,7 +13,7 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, RocCurveDisplay, auc
+from sklearn.metrics import roc_auc_score, auc
 from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
@@ -29,6 +29,7 @@ from collections import defaultdict
 from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
+from sklearn.metrics import roc_curve
 
 matplotlib.use("Agg")
 
@@ -249,48 +250,58 @@ def plot_cv_roc(clfr_preds: list, target_column: str, path: Path):
 
     Parameters
     ----------
-    clfr_preds: list
-        list of arrays containing cv classifier positive prediction
-        probabilities and corresponding true label values
+    clfr_preds: dict
+        dict containing fpr, tpr and auc's for cv folds
     target_column: str
         training column from dataset
     path: Path
         file path for saving figure
     """
 
-    tprs = []
-    aucs = []
     mean_fpr = np.linspace(0, 1, 100)
     fig, ax = plt.subplots(figsize=(8, 8))
-    for i, clfr_pred in enumerate(clfr_preds):
-        viz = RocCurveDisplay.from_predictions(
-            clfr_pred[1],
-            clfr_pred[0],
-            name=f"ROC fold {i + 1}",
-            alpha=0.3,
-            lw=1,
-            ax=ax,
-            plot_chance_level=(i == len(clfr_preds) - 1),
-        )
-        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-        interp_tpr[0] = 0.0
-        tprs.append(interp_tpr)
-        aucs.append(viz.roc_auc)
 
-    mean_tpr = np.mean(tprs, axis=0)
-    mean_tpr[-1] = 1.0
-    mean_auc = auc(mean_fpr, mean_tpr)
-    std_auc = np.std(aucs)
+    # plot individual fold lines
+    for i, pred in enumerate(clfr_preds.values()):
+        ax.plot(pred["fpr"], pred["tpr"], label=f"Fold {i+1} (AUC = {pred['auc']:.2f})")
+
+    # calculate and plot mean and std lines
+    mean_tpr = np.mean(
+        [
+            np.interp(mean_fpr, fold_data["fpr"], fold_data["tpr"])
+            for fold_data in clfr_preds.values()
+        ],
+        axis=0,
+    )
+    mean_auc = np.mean([fold_data["auc"] for fold_data in clfr_preds.values()])
+    std_auc = np.std([fold_data["auc"] for fold_data in clfr_preds.values()])
+    std_tpr = np.std(
+        [
+            np.interp(mean_fpr, fold_data["fpr"], fold_data["tpr"])
+            for fold_data in clfr_preds.values()
+        ],
+        axis=0,
+    )
     ax.plot(
         mean_fpr,
         mean_tpr,
         color="b",
-        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+        label=f"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
         lw=2,
         alpha=0.8,
     )
 
-    std_tpr = np.std(tprs, axis=0)
+    # plot chance line
+    ax.plot(
+        [0, 1],
+        [0, 1],
+        color="black",
+        linestyle="--",
+        lw=2,
+        label="Chance level (AUC = 0.5)",
+    )
+
+    # plot upper and lower bounds of mean +/- std.
     tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
     tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
     ax.fill_between(
@@ -302,6 +313,7 @@ def plot_cv_roc(clfr_preds: list, target_column: str, path: Path):
         label=r"$\pm$ 1 std. dev.",
     )
 
+    # set ax titles
     ax.set(
         xlabel="False Positive Rate",
         ylabel="True Positive Rate",
@@ -441,14 +453,14 @@ def train_clfr(
 
     Returns:
     --------
-        feature_count: pd.DataFrame
-            data structure containing training features, corresponding
-            feature consensus counts and pearsonr values
-        shap_clfr_consensus: np.ndarray
-            consensus shap values averaged over multiple cross-folds
-        clfr_preds: list
-            list of classifier prediction probabilites and target class
-            values to be used in plotting the consensus ROC curve
+    feature_count: pd.DataFrame
+        data structure containing training features, corresponding
+        feature consensus counts and pearsonr values
+    shap_clfr_consensus: np.ndarray
+        consensus shap values averaged over multiple cross-folds
+    clfr_preds: dict
+        dict containing fpr, tpr and auc's for cv folds
+        for plotting the consensus ROC curve
     """
     cv = StratifiedKFold(n_splits=n_folds)
     clfr = RandomForestClassifier(
@@ -459,7 +471,7 @@ def train_clfr(
     feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
     pearson_r_clfr = []
-    clfr_preds = []
+    clfr_preds = {}
     shap_values_clfr = np.full(
         (n_folds, train_data.shape[0], train_data.shape[1]), np.nan
     )
@@ -472,12 +484,11 @@ def train_clfr(
 
         # train classifier
         clfr.fit(train_fold, train_target)
-        clfr_out = np.zeros([2, len(test)])
 
         # index classifier importances
         clfr_importances = importances_df(clfr.feature_importances_, train_fold.columns)
 
-        # get shap output for training dataset and rank
+        # calculate shap output for training dataset and rank
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(train_fold)
         positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
@@ -500,9 +511,10 @@ def train_clfr(
         pearson_r_clfr.append(np.nan_to_num(pearson_out, nan=0))
 
         # aggregate classifier predictions for ROC plot
-        clfr_out[0] = clfr.predict_proba(test_fold)[:, 1]
-        clfr_out[1] = test_target
-        clfr_preds.append(clfr_out)
+        test_score = clfr.predict_proba(test_fold)[:, 1]
+        fpr, tpr, _ = roc_curve(test_target, test_score)
+        roc_auc = auc(fpr, tpr)
+        clfr_preds[fold] = {"fpr": fpr, "tpr": tpr, "auc": roc_auc}
 
     # sort feature counts and corresponding pearson coefficients by value and average
     # across two feature vectors i.e. classifier features and shap features counts

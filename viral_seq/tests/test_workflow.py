@@ -266,24 +266,25 @@ def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
 
 
 def test_fic_plot(tmp_path):
-    array2 = [
-        "kmer_PC_CDDEEC",
-        "kmer_PC_CCGDEA",
-        "kmer_PC_CCCFCF",
-        "kmer_PC_CCAAACD",
-        "kmer_PC_CACDGA",
-        "kmer_PC_CFCEDD",
-        "kmer_PC_GCECFD",
-        "kmer_PC_ECDGDE",
-        "kmer_PC_CCACAD",
+    kmer_features = [
         "kmer_PC_FECAEA",
+        "kmer_PC_CCACAD",
+        "kmer_PC_ECDGDE",
+        "kmer_PC_GCECFD",
+        "kmer_PC_CFCEDD",
+        "kmer_PC_CACDGA",
+        "kmer_PC_CCAAACD",
+        "kmer_PC_CCCFCF",
+        "kmer_PC_CCGDEA",
+        "kmer_PC_CDDEEC",
     ]
 
-    array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.7, 1.8, 1.9, 2.0])
+    kmer_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     target_column = "Is_Integrin"
 
-    response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
-    exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
+    response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
+    exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "x", "-", "+"]
+
     surface_exposed_dict = {
         "kmer_PC_CDDEEC": 42.86,
         "kmer_PC_CCGDEA": 0.00,
@@ -298,10 +299,11 @@ def test_fic_plot(tmp_path):
     }
 
     n_folds = 2
-
+    df_in = pd.DataFrame()
+    df_in["Features"] = kmer_features
+    df_in["Counts"] = kmer_counts
     workflow.FIC_plot(
-        array2,
-        array1,
+        df_in,
         n_folds,
         target_column,
         exposure_status_sign,
@@ -321,27 +323,19 @@ def test_fic_plot(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "constant, not_exposed_idx, surface_exposed_exp",
+    "not_exposed_idx, surface_exposed_exp",
     [
         (
-            False,
             [1],
             ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
         ),
         (
-            False,
             list(range(10)),
             ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
-        ),
-        (
-            True,
-            [1],
-            ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
         ),
     ],
 )
 def test_feature_sign(
-    constant,
     not_exposed_idx,
     surface_exposed_exp,
 ):
@@ -362,15 +356,15 @@ def test_feature_sign(
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
 
-    rng = np.random.default_rng(seed=123)
-    syn_shap_values = rng.uniform(-1, 1, (10, 10))
-    syn_data = rng.choice([0, 1], size=[10, 10])
+    prefix_kmers = ["kmer_PC_" + kmer for kmer in found_kmers]
+    pearson_values = [0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5]
+    feature_count = pd.DataFrame()
+    feature_count["Features"] = prefix_kmers
+    feature_count["Pearson R"] = pearson_values
 
-    if constant:
-        # modify shap value and data arrays to
-        # account for nan pearson-r calculation case
-        syn_shap_values[:, -1] = 0.0
-        syn_data[:, -1] = 0
+    surface_exposed_out, response_effect_out = workflow.feature_signs(
+        is_exposed, not_exposed, found_kmers, feature_count
+    )
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
         is_exposed, syn_shap_values, syn_data
@@ -771,7 +765,6 @@ def test_importances_df():
         workflow.importances_df(importances, train_fold)
 
 
-<<<<<<< HEAD
 def test_plot_cv_roc(tmp_path):
     rng = np.random.default_rng(seed=123)
     pred_prob = rng.uniform(0, 1, 10)
@@ -783,7 +776,12 @@ def test_plot_cv_roc(tmp_path):
         compare_images(
             files("viral_seq.tests.expected") / "ROC_cv_expected.png",
             str(tmp_path / "ROC_Test.png"),
-=======
+            0.001,
+        )
+        is None
+    )
+
+
 def test_plot_shap_consensus(tmp_path):
     rng = np.random.default_rng(seed=123)
     syn_shap_values = rng.uniform(-1, 1, (10, 10))
@@ -797,12 +795,10 @@ def test_plot_shap_consensus(tmp_path):
         compare_images(
             files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
             str(tmp_path / "SHAP_Test.png"),
->>>>>>> 32edbfd (ENH: Plot shap consensus across multiple cv folds)
             0.001,
         )
         is None
     )
-<<<<<<< HEAD
 
 
 def test_feature_count_consensus():
@@ -838,5 +834,3 @@ def test_feature_count_consensus():
 
     assert_frame_equal(feature_count_out, feature_count_out_exp)
     assert_frame_equal(feature_count, feature_count_exp)
-=======
->>>>>>> 32edbfd (ENH: Plot shap consensus across multiple cv folds)

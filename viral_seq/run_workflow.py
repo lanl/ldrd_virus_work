@@ -78,8 +78,6 @@ def feature_signs(
         )[0]
         if pearson_r > 0:
             response_effect.append("+")
-        elif pearson_r <= 0:
-            response_effect.append("-")
         else:
             response_effect.append("-")
 

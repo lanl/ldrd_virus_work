@@ -42,13 +42,15 @@ def check_kmer_feature_lengths(kmer_features: list, kmer_range: str) -> None:
     kmer_features: list
         list of kmer features from the training dataset
     kmer_range: str
-        string specifying the range of values to generate features with
-        the form `start-end`
+        string specifying the range of values for which to generate features
     """
-    kmer_features_lengths = [len(s[8:]) for s in kmer_features]
-    kmer_feature_range = list(set(kmer_features_lengths))
-    min_kmer, max_kmer = map(int, kmer_range.split("-"))
-    if not all(min_kmer <= x <= max_kmer for x in kmer_feature_range):
+
+    kmer_range_list = kmer_range.split("-")
+    min_kmer = kmer_range_list[0]
+    max_kmer = kmer_range_list[-1]
+    shortest = len(min(kmer_features, key=len)) - 8
+    longest = len(max(kmer_features, key=len)) - 8
+    if (shortest < int(min_kmer)) or (longest > int(max_kmer)):
         raise ValueError(
             f"k-mer feature lengths not within desired range: {min_kmer}-{max_kmer}"
         )
@@ -698,7 +700,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False):
+def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -818,12 +820,10 @@ def build_tables(feature_checkpoint=0, debug=False):
                     prefix = "Train"
                     debug = False
                     this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                    try:
-                        min_kmer, max_kmer = map(int, kmer_range.split("-"))
-                    except ValueError:
-                        raise argparse.ArgumentTypeError(
-                            "'--kmer-range' must be in format 'start-end'."
-                        )
+
+                    min_kmer = int(kmer_range_list[0])
+                    max_kmer = int(kmer_range_list[-1])
+
                     kmer_range_length = max_kmer - min_kmer + 1
                     if feature_checkpoint > kmer_range_length:
                         feature_checkpoint = kmer_range_length
@@ -1187,6 +1187,10 @@ if __name__ == "__main__":
     mapping_method = args.mapping_method
     kmer_range = args.kmer_range
 
+    kmer_range_list = kmer_range.split("-")
+    if len(kmer_range_list) > 2:
+        raise ValueError("Too many values provided for '--kmer-range'")
+
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))
     test_file = str(data.joinpath(test_file))
@@ -1246,7 +1250,9 @@ if __name__ == "__main__":
         )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    build_tables(
+        feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
+    )
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,

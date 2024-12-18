@@ -568,7 +568,7 @@ def plot_calibration_curve(
         title=title,
     )
 
-    ax.legend(loc="lower right")
+    ax.legend(loc="upper left")
     fig.tight_layout()
     fig.savefig(filename, dpi=300)
     plt.close()

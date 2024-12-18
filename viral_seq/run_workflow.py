@@ -863,7 +863,7 @@ if __name__ == "__main__":
             params_optimized=best_params[name],
             calibrate=check_calibration,
             filename_calibration_curve=str(
-                plots_path / f"{name}_calibration_curve.png"
+                plots_path / f"{name.replace(' ', '_')}_calibration_curve.png"
             ),
         )
     # Statistics and plotting with test predictions

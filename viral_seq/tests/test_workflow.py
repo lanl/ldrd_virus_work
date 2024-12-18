@@ -294,7 +294,16 @@ def test_fic_plot(tmp_path):
     )
 
 
-def test_feature_sign():
+@pytest.mark.parametrize(
+    "constant, response_effect_exp",
+    [
+        (False, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
+        # case for constant input producing np.nan per
+        # issue 96
+        (True, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
+    ],
+)
+def test_feature_sign(constant, response_effect_exp):
     found_kmers = [
         "CDDEEC",
         "CCGDEA",
@@ -318,11 +327,16 @@ def test_feature_sign():
     syn_shap_values = rng.uniform(-1, 1, (10, 10))
     syn_data = rng.choice([0, 1], size=[10, 10])
 
+    if constant:
+        # modify shap value and data arrays to
+        # account for nan pearson-r calculation case
+        syn_shap_values[:, -1] = 0.0
+        syn_data[:, -1] = 0
+
     surface_exposed_out, response_effect_out = workflow.feature_signs(
         is_exposed, not_exposed, syn_shap_values, syn_data
     )
 
-    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
 
     assert_array_equal(response_effect_out, response_effect_exp)

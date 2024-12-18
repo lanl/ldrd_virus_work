@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 import pandas as pd
-from pandas.testing import assert_frame_equal
 import pytest
 from ray import tune
 from pathlib import Path
@@ -103,8 +102,36 @@ def test_get_hyperparameters(config, score, best_params):
         assert res["params"][key] == pytest.approx(best_params[key])
 
 
-@pytest.mark.parametrize("model, name", [(RandomForestClassifier, "rfc")])
-def test_train_and_predict(capsys, model, name, tmpdir):
+@pytest.mark.parametrize(
+    "model, name, calibrate, rtol, expected_msg, expected_values",
+    [
+        (
+            RandomForestClassifier,
+            "rfc",
+            False,
+            1e-7,
+            "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nClassifier achieved ROC AUC = 1.00 on test data.\nSaving trained model to model.p\n",
+            [0.4, 0.31, 0.26, 0.47, 0.64],
+        ),
+        (
+            RandomForestClassifier,
+            "rfc",
+            True,
+            1e-5,  # tolerance lowered due to CalibratedClassifierCV instability across versions
+            "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nClassifier achieved ROC AUC = 1.00 on test data.\nCalibrating model with cross-validation\nClassifier achieved ROC AUC = 0.50 on test data after calibration with cross-validation.\nSaving trained model to model.p\n",
+            [
+                0.4624745376650326,
+                0.3246510677646521,
+                0.485242552665174,
+                0.519451223839514,
+                0.5599988315132807,
+            ],
+        ),
+    ],
+)
+def test_train_and_predict(
+    capsys, model, name, calibrate, rtol, expected_msg, expected_values, tmpdir
+):
     X, y = make_classification(n_samples=15, n_features=10, random_state=0)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=5, random_state=0
@@ -117,23 +144,17 @@ def test_train_and_predict(capsys, model, name, tmpdir):
             X_train,
             y_train,
             X_test,
+            y_test,
             model_out="model.p",
             params_predict=params_predict,
             params_optimized=params_optimized,
+            calibrate=calibrate,
         )
         assert Path("model.p").is_file()
         captured = capsys.readouterr()
-        assert (
-            captured.out
-            == "Will train model and run prediction on test for Classifier using the following parameters:\n{'random_state': 0, 'verbose': 0}\nSaving trained model to model.p\n"
-        )
+        assert captured.out == expected_msg
         df = pd.DataFrame(y_pred)
-        y_expected = files("viral_seq.tests.expected") / (
-            f"test_train_and_predict_y_expected_{name}.csv"
-        )
-        df_expected = pd.read_csv(y_expected)
-        df_expected.columns = df_expected.columns.astype(int)
-        assert_frame_equal(df, df_expected)
+        assert_allclose(df[0].values, expected_values, rtol=rtol)
         check_is_fitted(clf)
 
 
@@ -337,3 +358,18 @@ def test_get_roc_curve_cv_copies():
     assert cv_roc_data.fpr_folds is None
     assert_allclose(cv_roc_data.tpr_folds, exp_tpr_folds)
     assert_allclose(cv_roc_data.tpr_std_folds, exp_tpr_std_folds)
+
+
+def test_plot_calibration_curve(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_calibration_curve.png"
+    )
+    rng = np.random.default_rng(123)
+    y_test = rng.integers(2, size=10)
+    y_pred = rng.random(size=10)
+    y_pred_calibrated = rng.random(size=10)
+    with tmpdir.as_cwd():
+        classifier.plot_calibration_curve(y_test, y_pred, y_pred_calibrated)
+        assert (
+            compare_images(expected_plot, "plot_calibration_curve.png", 0.001) is None
+        )

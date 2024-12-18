@@ -637,6 +637,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Run hyperparameter optimization for every copy to compare how optimization is affected by seed.",
     )
+    parser.add_argument(
+        "-cc",
+        "--check-calibration",
+        action="store_true",
+        help="Calibrate classifiers with `CalibratedClassiferCV`.",
+    )
+
     args = parser.parse_args()
     cache_checkpoint = args.cache
     debug = args.debug
@@ -647,6 +654,7 @@ if __name__ == "__main__":
     optimize = args.optimize
     copies = args.copies
     check_optimization = args.check_optimization
+    check_calibration = args.check_calibration
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath("Mollentze_Training.csv"))
@@ -848,14 +856,17 @@ if __name__ == "__main__":
             X_train,
             y_train,
             X_test,
+            y_test,
             name=name,
             model_out=str(model_path / ("model_" + val["suffix"] + ".p")),
             params_predict=val["predict"],
             params_optimized=best_params[name],
+            calibrate=check_calibration,
+            filename_calibration_curve=str(
+                plots_path / f"{name.replace(' ', '_')}_calibration_curve.png"
+            ),
         )
-        this_auc = roc_auc_score(y_test, predictions[val["group"]][name])
-        print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
-    # ROC curve plotting
+    # Statistics and plotting with test predictions
     comp_names: list[str] = []
     comp_fprs: list[Any] = []
     comp_tprs: list[Any] = []
@@ -876,6 +887,14 @@ if __name__ == "__main__":
         comp_names.append(group)
         comp_fprs.append(fpr)
         comp_tprs.append(tpr)
+        if copies > 1:
+            y_proba_group = np.array(list(predictions[group].values())).mean(axis=0)
+            classifier.plot_calibration_curve(
+                y_test,
+                y_proba_group,
+                title=f"Calibration Curve\n{group}\nAveraged over {copies} seeds",
+                filename=str(plots_path / f"{group}_calibration_curve.png"),
+            )
         # output all predictions to .csv
         predictions[group]["Species"] = pd.read_csv(test_file)["Species"]
         pd.DataFrame(predictions[group]).to_csv(
@@ -916,8 +935,7 @@ if __name__ == "__main__":
         # SHAP importances
         print("Calculating & Plotting SHAP values...")
         time_start = perf_counter()
-        explainer = shap.Explainer(clf, seed=random_state)
-        shap_values = explainer(X_train)
+        shap_values = feature_importance.get_shap_values(clf, X_train, random_state)
         print("Finished SHAP calculation in", perf_counter() - time_start)
         positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
         feature_importance.plot_shap_meanabs(

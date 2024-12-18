@@ -200,3 +200,27 @@ def plot_shap_beeswarm(
     plt.tight_layout()
     plt.savefig(fig_name, dpi=300)
     plt.close()
+
+
+def get_shap_values(clf, X_train: pd.DataFrame, random_state: int = 123456):
+    # handle CalibrateClassifierCV
+    if hasattr(clf, "calibrated_classifiers_"):
+        # this uses TreeExplainer on each fold and averages the result
+        # this is faster than using non-Tree methods on clf directly
+        # adapted from comment https://github.com/shap/shap/issues/899#issuecomment-726411688
+        shap_values_list = []
+        for calibrated_classifier in clf.calibrated_classifiers_:
+            explainer = shap.Explainer(
+                calibrated_classifier.estimator, seed=random_state
+            )
+            shap_values = explainer.shap_values(X_train)
+            shap_values_list.append(shap_values)
+        shap_values = shap.Explanation(
+            data=X_train.to_numpy(),
+            values=np.mean(shap_values_list, axis=0),
+            feature_names=X_train.columns,
+        )
+    else:
+        explainer = shap.Explainer(clf, seed=random_state)
+        shap_values = explainer(X_train)
+    return shap_values

@@ -4,7 +4,12 @@ import pandas as pd
 from typing import Union, Any, Optional, NamedTuple
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
-from sklearn.metrics import get_scorer, roc_curve, auc
+from sklearn.metrics import (
+    get_scorer,
+    roc_curve,
+    auc,
+    roc_auc_score,
+)
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 import ray
@@ -15,6 +20,7 @@ import pickle
 from lightgbm import LGBMClassifier
 from matplotlib import pyplot as plt
 from xgboost import XGBClassifier
+from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 
 
 class CV_ROC_data(NamedTuple):
@@ -319,10 +325,13 @@ def train_and_predict(
     X_train,
     y_train,
     X_test,
+    y_test,
     name="Classifier",
     model_out="",
     params_predict=None,
     params_optimized=None,
+    calibrate=True,
+    filename_calibration_curve="plot_calibration_curve.png",
 ):
     """Trains model with X_train, y_train, then predicts on X_test. We expect params_optimized come from an optimization procedure which may have parameters we want to adjust using params_predict.
 
@@ -331,10 +340,12 @@ def train_and_predict(
         X_train: any form model accepts for fitting
         y_train: any form model accepts for fitting
         X_test: any form model accepts for prediction
+        y_test: any form accepted by `sklearn.calibration.CalibrationDisplay.from_predictions`
         name: customizes print statement for clarity with multiple calls
         model_out: if not empty, fitted model is pickled to this filename
         params_predict: model parameters to use which supersede params_optimized
         params_optimized: model parameters to use if not overriden by params_predict
+        calibrate: whether or not to check calibration with `sklearn.calibration.CalibratedClassifierCV`
     Returns:
         fitted model and predictions on X_test
     """
@@ -353,11 +364,42 @@ def train_and_predict(
     print({**params_predict, **params_optimized})
     clf = model(**params_predict, **params_optimized)
     clf.fit(X_train, y_train)
+    y_pred = clf.predict_proba(X_test)[..., 1]
+    this_auc = roc_auc_score(y_test, y_pred)
+    print(f"{name} achieved ROC AUC = {this_auc:.2f} on test data.")
+    y_pred_calibrated = None
+    if calibrate:
+        print("Calibrating model with cross-validation")
+        clf_unfit = model(**params_predict, **params_optimized)
+        clf_calibrated = CalibratedClassifierCV(clf_unfit)
+        clf_calibrated.fit(X_train, y_train)
+        y_pred_calibrated = clf_calibrated.predict_proba(X_test)[..., 1]
+        this_auc_calibrated = roc_auc_score(y_test, y_pred_calibrated)
+        print(
+            f"{name} achieved ROC AUC = {this_auc_calibrated:.2f} on test data after calibration with cross-validation."
+        )
+    plot_calibration_curve(
+        y_test,
+        y_pred,
+        y_pred_calibrated,
+        title=f"Calibration Curve\n{name}",
+        filename=filename_calibration_curve,
+    )
+    if calibrate:
+        y_pred = y_pred_calibrated
+        clf = clf_calibrated
+        # we expected feature_importances_ here later
+        clf.feature_importances_ = np.mean(
+            [
+                clf.calibrated_classifiers_[i].estimator.feature_importances_
+                for i in range(len(clf.calibrated_classifiers_))
+            ],
+            axis=0,
+        )
     if model_out:
         with open(model_out, "wb") as f:
             print("Saving trained model to", model_out)
             pickle.dump(clf, f)
-    y_pred = clf.predict_proba(X_test)[..., 1]
     return clf, y_pred
 
 
@@ -493,5 +535,40 @@ def plot_roc_curve_comparison(
     ax.axis("square")
     ax.legend(loc="lower right")
 
+    fig.savefig(filename, dpi=300)
+    plt.close()
+
+
+def plot_calibration_curve(
+    y_test: npt.ArrayLike,
+    y_pred: npt.ArrayLike,
+    y_pred_calibrated: Optional[npt.ArrayLike] = None,
+    title: str = "Calibration Curve",
+    filename: str = "plot_calibration_curve.png",
+):
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
+
+    prob_true, prob_pred = calibration_curve(y_test, y_pred, n_bins=10)
+    ax.plot(prob_pred, prob_true, label="Predictions on test", marker="s")
+    if y_pred_calibrated is not None:
+        prob_true_calibrated, prob_pred_calibrated = calibration_curve(
+            y_test, y_pred_calibrated, n_bins=10
+        )
+        ax.plot(
+            prob_pred_calibrated,
+            prob_true_calibrated,
+            label="Predictions on test (calibrated with CV)",
+            marker="s",
+        )
+
+    ax.set(
+        ylabel="Fraction of positives (Positive class: 1)",
+        xlabel="Mean predicted probability (Positive class: 1)",
+        title=title,
+    )
+
+    ax.legend(loc="upper left")
+    fig.tight_layout()
     fig.savefig(filename, dpi=300)
     plt.close()

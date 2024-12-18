@@ -300,7 +300,7 @@ def test_fic_plot(tmp_path):
         (False, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
         # case for constant input producing np.nan per
         # issue 96
-        (True, ["-", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
+        (True, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
     ],
 )
 def test_feature_sign(constant, response_effect_exp):
@@ -330,8 +330,8 @@ def test_feature_sign(constant, response_effect_exp):
     if constant:
         # modify shap value and data arrays to
         # account for nan pearson-r calculation case
-        syn_shap_values[-1, :] = 0.0
-        syn_data[-1, :] = 0
+        syn_shap_values[:, -1] = 0.0
+        syn_data[:, -1] = 0
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
         is_exposed, not_exposed, syn_shap_values, syn_data

@@ -814,7 +814,7 @@ if __name__ == "__main__":
             [f"Fold {i}" for i in range(len(test_folds))],
             fprs,
             tprs,
-            filename=str(plots_path / f"{name}_eer_roc_plot.png"),
+            filename=str(plots_path / f"{name.replace(' ', '_')}_eer_roc_plot.png"),
             title=f"ROC Curve\n{name}\nCross Validation on Training",
             eer_data_list=eer_data_cv,
         )

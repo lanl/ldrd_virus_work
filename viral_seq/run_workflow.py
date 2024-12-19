@@ -33,7 +33,6 @@ import tarfile
 import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
-from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
 from sklearn.metrics import roc_curve
@@ -385,16 +384,12 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
 
 def FIC_plot(
     feature_count,
-    topN_kmers,
-    kmer_count,
     n_folds,
     target_column,
-    positive_shap_values,
-    found_kmers,
+    exposure_status_sign,
+    response_effect_sign,
     surface_exposed_dict,
-    not_exposed,
-    is_exposed,
-    paths,
+    path,
 ):
     """
     Create Feature Importance Consensus (FIC) plot from SHAP explainer values using
@@ -406,36 +401,21 @@ def FIC_plot(
 
     Parameters:
     -----------
-    topN_kmers: list
-        list of top_N kmers from ML classifiers
-    kmer_count: array
-        consensus number of classifer folds agreeing upon corresponding kmer in topN_kmers
+    feature_count: pd.DataFrame
+         data structure containing training features and corresponding metrics from cv
     n_folds: int
         number of cv folds performed by classifier
     target_column: str
         name of column on which classifier was trained
-    positive_shap_values: shap.Explainer
-        SHAP explainer output
-    found_kmers: list
-        list of topN kmers
+    exposure_status_sign: list
+        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
+    response_effect_sign: list
+        list of +/- symbols denoting response effect from shap importance pearson-r correlation
     surface_exposed_dict: dict
         dictionary containing found kmer and ratio of surface exposed
         to not surface exposed viral proteins with given kmer
-    not_exposed: list
-        list of which topN kmers are known to be surface exposed
-    is_exposed: list
-        list of which topN kmers are known to not be surface exposed
-    paths: list
+    path: list
         paths to save files
-
-    Returns:
-    --------
-    response_effect: list
-        list of characters (+/-) denoting the sign of the pearson correlation coefficient
-        between the array of the feature data and the array of the shap values
-    surface_exposed_sign: list
-        list of characters (+/-) denoting the surface exposure status of the viral protein
-        associated with the found kmer
     """
     target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
     target_columns = target_column.split("_")
@@ -444,11 +424,9 @@ def FIC_plot(
         target_names.append(target_column_mappings[target])
     target_name = ", ".join(target_names)
 
-    top_feature_count = feature_count[-10:]
+    top_feature_count = feature_count[-20:]
     total_clfr_counts = n_folds * 2
 
-    # remove any rows where the pearson-r is negative
-    top_feature_count = top_feature_count[top_feature_count["Pearson R"] > 0]
     top_counts_clfr = top_feature_count["Clfr"].values / total_clfr_counts * 100
     top_counts_shap = top_feature_count["SHAP"].values / total_clfr_counts * 100
     top_features = top_feature_count["Features"].values
@@ -469,31 +447,55 @@ def FIC_plot(
     )
 
     for i, row in df_plot.iterrows():
-        ratio = surface_exposed_dict[top_features[i][8:]]
-        percent = ratio[0] / np.sum(ratio) * 100
+        # TODO: fix percent lookup after merge of !91
+        percent = (
+            surface_exposed_dict[top_features[i][8:]]
+            if top_features[i][8:] in surface_exposed_dict.keys()
+            else 0.0
+        )
+        response_sign = response_effect_sign[i]
+        width = row[1:].sum()
+        if width >= 85:
+            position = width - 15
+            color = "w"
+        else:
+            position = width + 1
+            color = "k"
         ax.text(
-            row[1:].sum() + 2,
+            position,
             i,
-            f"{percent:.2f}%",
+            f"({response_sign}) {percent:.2f}%",
             va="center",
-            color="k",
-            fontsize="large",
+            color=color,
+            fontsize="medium",
         )
 
     clfr_patch = mpatches.Patch(
         edgecolor="black", facecolor="white", label="Classifier Features"
     )
     shap_patch = mpatches.Patch(color="black", label="SHAP Features")
-    percent_patch = Line2D([0], [0], marker="", markersize=12, linestyle="")
+    plus_symbol = Line2D([0], [0], marker="+", color="k", markersize=9, linestyle="")
+    minus_symbol = Line2D([0], [0], marker="_", color="k", markersize=9, linestyle="")
+    blank_patch = mpatches.Patch(color="white")
 
     ax.legend(
-        handles=[clfr_patch, shap_patch, percent_patch],
+        handles=[
+            clfr_patch,
+            shap_patch,
+            plus_symbol,
+            minus_symbol,
+            blank_patch,
+        ],
         labels=[
             "Classifier Features",
             "SHAP Features",
-            "% value next to bar indicates\n percent of proteins containing kmer\n that are surface exposed",
+            "on right: Positive effect on response",
+            "on right: Negative effect on response",
+            "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
         ],
-        loc="best",
+        loc="lower right",
+        prop={"size": 10},
+        bbox_to_anchor=(0.7, -0.35),
     )
     ax.set_xlabel(f"% ML models where ranked in top {len(top_feature_count)} features")
     ax.set_title(
@@ -501,7 +503,7 @@ def FIC_plot(
     )
     ax.set_xlim(0, 100)
     fig.tight_layout()
-    fig.savefig(str(paths[-1]) + "/" + "FIC_" + str(target_names) + ".png", dpi=300)
+    fig.savefig(os.path.join(path, f"FIC_{target_name}.png"), dpi=300)
     plt.close()
 
 
@@ -2108,7 +2110,7 @@ if __name__ == "__main__":
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
             X, y, classifier_parameters, n_folds, max_features, random_state
         )
-        top_features_array = feature_count["Features"].values[:20]
+        top_features_array = feature_count["Features"].values[-20:]
 
         # this can be a separate function for making ROC curve
         # i.e. make_roc_plot(tprs, aucs, mean_fpr, target_column, paths)

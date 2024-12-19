@@ -396,8 +396,8 @@ def test_fic_plot(tmp_path):
         "kmer_PC_CDDEEC",
     ]
 
-    kmer_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-    target_column = "IN"
+    shap_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    clfr_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
     exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "-", "-", "+"]
 
@@ -418,7 +418,8 @@ def test_fic_plot(tmp_path):
     n_classifiers = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
-    df_in["Counts"] = kmer_counts
+    df_in["Clfr"] = clfr_counts
+    df_in["SHAP"] = shap_counts
     workflow.FIC_plot(
         df_in,
         n_folds,
@@ -936,6 +937,25 @@ def test_plot_cv_roc(tmp_path, clfr_preds):
         )
 
 
+def test_plot_shap_consensus(tmp_path):
+    rng = np.random.default_rng(seed=123)
+    syn_shap_values = rng.uniform(-1, 1, (10, 10))
+    syn_data = rng.choice([0, 1], size=[10, 10])
+    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    syn_df = pd.DataFrame(syn_data, columns=syn_features)
+
+    np.random.seed(123)
+    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path)
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
+            str(tmp_path / "SHAP_Test.png"),
+            0.001,
+        )
+        is None
+    )
+
+
 def test_feature_count_consensus():
     rng = np.random.default_rng(seed=123)
     clfr_importances = rng.uniform(-1, 1, 10)
@@ -949,11 +969,13 @@ def test_feature_count_consensus():
     shap_importances_df["Importances"] = shap_importances
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_columns
-    feature_count["Counts"] = 0
+    feature_count["Clfr"] = 0
+    feature_count["SHAP"] = 0
 
     feature_count_out_exp = pd.DataFrame()
     feature_count_out_exp["Features"] = train_columns
-    feature_count_out_exp["Counts"] = [1, 0, 1, 0, 1, 2, 2, 0, 2, 1]
+    feature_count_out_exp["Clfr"] = [1, 0, 0, 0, 0, 1, 1, 0, 1, 1]
+    feature_count_out_exp["SHAP"] = [0, 0, 1, 0, 1, 1, 1, 0, 1, 0]
 
     feature_count_exp = feature_count.copy()
 

@@ -189,20 +189,26 @@ def test_get_roc_curve():
 
 
 @pytest.mark.parametrize(
-    "eer_test, expected_filename",
-    [(False, "test_plot_roc_curve.png"), (True, "test_plot_roc_curve_eer.png")],
+    "eer_data, expected_filename",
+    [
+        (None, "test_plot_roc_curve.png"),
+        (
+            classifier.EER_Data(
+                eer_threshold_index=4,
+                eer_threshold=0.15316563099288472,
+                eer_value=0.46799428536085275,
+            ),
+            "test_plot_roc_curve_eer.png",
+        ),
+    ],
 )
-def test_plot_roc_curve(eer_test, expected_filename, tmpdir):
+def test_plot_roc_curve(eer_data, expected_filename, tmpdir):
     rng = np.random.default_rng(951753)
     expected_plot = files("viral_seq.tests.expected").joinpath(expected_filename)
     # generate random input typical of fpr, tpr values
     # arrays of values increasing by random intervals from 0.0 to 1.0
     tpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
     fpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
-    eer_data = None
-    if eer_test:
-        threshold = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
-        eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
     with tmpdir.as_cwd():
         classifier.plot_roc_curve("Test", fpr, tpr, eer_data=eer_data)
         assert compare_images(expected_plot, "roc_plot.png", 0.001) is None

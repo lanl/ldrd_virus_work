@@ -11,7 +11,7 @@ import polars as pl
 import ast
 import numpy as np
 from glob import glob
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.metrics import roc_auc_score, roc_curve
 from pathlib import Path
 from warnings import warn
@@ -1044,6 +1044,17 @@ if __name__ == "__main__":
         if copies > 1
         else "ROC Curve\nEnsemble Models"
     )
+    models_for_ensembles = [(k, v) for k, v in models_fitted.items()]
+    clf_stack = StackingClassifier(models_for_ensembles)
+    clf_stack.fit(X_train, y_train)
+    y_proba_stack = clf_stack.predict_proba(X_test)[..., 1]
+    fpr_stack, tpr_stack, _ = roc_curve(y_test, y_proba_stack)
+    df_out = pd.DataFrame(y_proba_stack, columns=["StackingClassifier"])
+    df_out["Species"] = pd.read_csv(test_file)["Species"]
+    df_out.to_csv(str(predictions_path / "StackingClassifier_predictions.csv"))
+    comp_names_ensembles.append("StackingClassifier")
+    comp_fprs_ensembles.append(fpr_stack)
+    comp_tprs_ensembles.append(tpr_stack)
     classifier.plot_roc_curve_comparison(
         comp_names_ensembles,
         comp_fprs_ensembles,

@@ -425,12 +425,6 @@ def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
     assert_allclose(list(out_dict.values()), percent_values)
 
 
-class kmer_data:
-    def __init__(self, mapping_method: str, kmer_data: list):
-        self.mapping_method = mapping_method
-        self.kmer_names = kmer_data
-
-
 @pytest.mark.parametrize(
     "kmer_features, kmer_range, exp",
     (
@@ -542,7 +536,7 @@ def test_get_kmer_info(accession, exp, mapping_method):
             new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
         if i >= len(kmers) / 2:
             new_kmers.append("kmer_AA_" + topN_kmer)
-    data_in = kmer_data(mapping_method, new_kmers)
+    data_in = workflow.kmer_data(mapping_method, new_kmers)
 
     viruses_PC, kmers_PC, protein_name_PC = workflow.get_kmer_info(
         data_in, records, tbl, mapping_method
@@ -583,7 +577,6 @@ def test_get_kmer_info_error(accession, kmer, mapping_method, mismatch_method):
         },
     }
     tbl = pd.DataFrame(data_table)
-
-    data_in = kmer_data(mapping_method, kmer)
+    data_in = workflow.kmer_data(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)

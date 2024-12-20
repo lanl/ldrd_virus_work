@@ -18,7 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List, Type
+from typing import Dict, Any, Sequence, List
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -54,6 +54,14 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
         raise ValueError(
             f"k-mer feature lengths not within desired range: {min_kmer}-{max_kmer}"
         )
+
+
+# TODO: this class object serves as a placeholder for
+# a different class to be implemented in accordance with issue #97
+class kmer_data:
+    def __init__(self, mapping_method: str, kmer_data: list):
+        self.mapping_method = mapping_method
+        self.kmer_names = kmer_data
 
 
 def feature_signs(
@@ -109,7 +117,7 @@ def feature_signs(
 
 
 def get_kmer_info(
-    kmer_data: Type["kmer_data"],
+    kmer_data: kmer_data,
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
@@ -1731,15 +1739,11 @@ if __name__ == "__main__":
             index=False,
         )
 
-        # TODO: this class object serves as a placeholder for
-        # a different class to be implemented in accordance with issue #97
-        class kmer_data:
-            mapping_method = mapping_method
-            kmer_names = array2
+        kmer_info = kmer_data(mapping_method, array2)
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
-            kmer_data, records, tbl, mapping_method
+            kmer_info, records, tbl, mapping_method
         )
 
         # manually curated on the basis of output from `np.unique(protein_names)`

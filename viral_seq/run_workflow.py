@@ -88,10 +88,11 @@ def feature_signs(
     surface_exposed_sign = []
     # add sign of surface exposure based on comparison between lists of exposure status
     for i in range(len(is_exposed)):
-        sign = "x"
         if is_exposed[i]:
             sign = "+"
         elif not_exposed[i]:
+            sign = "-"
+        else:
             sign = "-"
         surface_exposed_sign.append(sign)
         # add sign of response effect based on pearson correllation coefficient

@@ -297,15 +297,34 @@ def test_fic_plot(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "constant, response_effect_exp",
+    "constant, not_exposed_idx, exposed_idx, response_effect_exp, surface_exposed_exp",
     [
-        (False, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
-        # case for constant input producing np.nan per
-        # issue 96
-        (True, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
+        (   
+            False,
+            [2],
+            [1],
+            ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
+            ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
+        ),
+        (   
+            False,
+            list(range(10)),
+            list(range(10)),
+            ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
+            ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ),
+        (   
+            True,
+            [2],
+            [1],
+            ['+', '-', '+', '+', '+', '+', '+', '-', '+', '-'],
+            ['+', '-', '+', '+', '+', '+', '+', '+', '+', '+'],
+        ),
     ],
 )
-def test_feature_sign(constant, response_effect_exp):
+def test_feature_sign(
+    constant, not_exposed_idx, exposed_idx, response_effect_exp, surface_exposed_exp
+):
     found_kmers = [
         "CDDEEC",
         "CCGDEA",
@@ -318,8 +337,6 @@ def test_feature_sign(constant, response_effect_exp):
         "CCACAD",
         "FECAEA",
     ]
-    not_exposed_idx = [2]
-    exposed_idx = [1]
     not_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
@@ -338,9 +355,6 @@ def test_feature_sign(constant, response_effect_exp):
     surface_exposed_out, response_effect_out = workflow.feature_signs(
         is_exposed, not_exposed, syn_shap_values, syn_data
     )
-
-    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
-    surface_exposed_exp = ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"]
 
     assert_array_equal(response_effect_out, response_effect_exp)
     assert_array_equal(surface_exposed_out, surface_exposed_exp)

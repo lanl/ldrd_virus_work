@@ -18,7 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List
+from typing import Dict, Any, Sequence, List, Type
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -108,7 +108,7 @@ def feature_signs(
 
 
 def get_kmer_info(
-    topN_kmers: list,
+    kmer_data: Type["kmer_data"],
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
@@ -119,8 +119,9 @@ def get_kmer_info(
 
     Parameters:
     -----------
-    topN_kmers: list
-        list of topN_kmers from output of ML classifier
+    kmer_data: object
+        class object containing the topN kmers from classifier training and
+        the mapping method string used to translate the kmers from AA to PC
     records: list
         list of viral sequence records from cache
     tbl: pd.DataFrame
@@ -140,6 +141,10 @@ def get_kmer_info(
     virus_names = []
     protein_names = []
     kmer_features = []
+    kmer_mm = kmer_data.mapping_method
+    topN_kmers = kmer_data.kmer_names
+    if kmer_mm != mapping_method:
+        raise ValueError("kmer mapping method does not match mapping method argument.")
     for item in topN_kmers:
         if item[:8] == "kmer_PC_":
             kmer_status = True
@@ -1725,8 +1730,16 @@ if __name__ == "__main__":
             index=False,
         )
 
+        # TODO: this class object serves as a placeholder for
+        # a different class to be implemented in accordance with issue #97
+        class kmer_data:
+            mapping_method = mapping_method
+            kmer_names = array2
+
         # gather relevant information for important kmers from classifier output
-        virus_names, kmer_features, protein_names = get_kmer_info(array2, records, tbl)
+        virus_names, kmer_features, protein_names = get_kmer_info(
+            kmer_data, records, tbl, mapping_method
+        )
 
         # manually curated on the basis of output from `np.unique(protein_names)`
         surface_exposed = [

@@ -451,26 +451,76 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
 
 
 @pytest.mark.parametrize(
-    "accession, exp, mapping_method",
+    "accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method",
     [
         (
             "NC_001563.2",
             12,
+            [
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+                "WNV",
+            ],
+            [
+                "AFDAEF",
+                "AFDAEF",
+                "AFDAEF",
+                "FCCGDA",
+                "FCCGDA",
+                "EADAAC",
+                "EADAAC",
+                "EADAAC",
+                "DGACFC",
+                "DGACFC",
+                "LVFGGIT",
+                "LVFGGIT",
+            ],
+            [
+                "polyprotein",
+                "envelope protein E",
+                "truncated polyprotein NS1 prime",
+                "polyprotein",
+                "nonstructural protein NS3",
+                "polyprotein",
+                "envelope protein E",
+                "truncated polyprotein NS1 prime",
+                "polyprotein",
+                "RNA-dependent RNA polymerase NS5",
+                "polyprotein",
+                "nonstructural protein NS2A",
+            ],
             "shen_2007",
         ),
         (
             "NC_001563.2",
             2,
+            ["WNV", "WNV"],
+            ["LVFGGIT", "LVFGGIT"],
+            ["polyprotein", "nonstructural protein NS2A"],
             "jurgen_schmidt",
         ),
         (
             "AC_000008.1",
             0,
+            [],
+            [],
+            [],
             "jurgen_schmidt",
         ),
     ],
 )
-def test_get_kmer_info(accession, exp, mapping_method):
+def test_get_kmer_info(
+    accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method
+):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())
     records = sp.load_from_cache(
@@ -542,6 +592,9 @@ def test_get_kmer_info(accession, exp, mapping_method):
         data_in, records, tbl, mapping_method
     )
 
+    assert_array_equal(viruses_PC, exp_viruses)
+    assert_array_equal(kmers_PC, exp_kmers)
+    assert_array_equal(protein_name_PC, exp_proteins)
     assert len(viruses_PC) == len(kmers_PC) == len(protein_name_PC) == exp
 
 

@@ -382,6 +382,7 @@ def train_clfr(
     train_data: pd.DataFrame,
     data_target: pd.Series,
     n_folds: int,
+    max_features: int,
     random_state: int,
 ) -> tuple:
     """
@@ -395,6 +396,8 @@ def train_clfr(
         The feature targets for the given target column
     n_folds: int
         number of training cross-folds to perform
+    max_features: int
+        the number of features to consider when calculating the top feature consensus counts
     random_state: int
         random seed for intializing ML classifier
 
@@ -445,7 +448,7 @@ def train_clfr(
         )
 
         feature_count = feature_count_consensus(
-            clfr_importances, shap_importances, feature_count, len(train_data)
+            clfr_importances, shap_importances, feature_count, max_features
         )
 
         # aggregate the raw shap values to be used in the beeswarm plot
@@ -1872,8 +1875,9 @@ if __name__ == "__main__":
 
         # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
         n_folds = 5
+        max_features = 20
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
-            X, y, n_folds, random_state
+            X, y, n_folds, max_features, random_state
         )
         top_features_array = feature_count["Features"].values[:20]
 

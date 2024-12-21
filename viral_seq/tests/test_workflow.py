@@ -833,3 +833,84 @@ def test_feature_count_consensus():
 
     assert_frame_equal(feature_count_out, feature_count_out_exp)
     assert_frame_equal(feature_count, feature_count_exp)
+
+
+def test_train_clfr():
+    random_state = 123
+    rng = np.random.default_rng(random_state)
+    kmer_data = rng.integers(0, 2, size=(12, 12))
+    data_target = [
+        True,
+        False,
+        True,
+        False,
+        True,
+        False,
+        True,
+        False,
+        True,
+        False,
+        True,
+        True,
+    ]
+    kmer_data[0, :] = [1 if x is True else 0 for x in data_target]
+    kmer_data[1, :] = [0 if x is True else 1 for x in data_target]
+
+    kmer_names = [
+        "kmer_AA_TRYWQSV",
+        "kmer_AA_LKIVNGS",
+        "kmer_AA_AAARTHI",
+        "kmer_AA_VVLLITY",
+        "kmer_PC_ABAAGCA",
+        "kmer_PC_GCACADG",
+        "kmer_PC_ABCAGCA",
+        "kmer_PC_GCACEDG",
+        "kmer_PC_0445800",
+        "kmer_PC_0325678",
+        "kmer_PC_1834561",
+        "kmer_PC_0081453",
+    ]
+
+    train_data = pd.DataFrame(np.transpose(kmer_data), columns=kmer_names)
+    y = pd.Series(data_target)
+
+    (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
+        train_data, y, n_folds=5, max_features=3, random_state=random_state
+    )
+    feature_rank = list(feature_count["Features"])
+    count_rank = list(feature_count["Counts"])
+    pearson_rank = list(feature_count["Pearson R"])
+
+    feature_rank_exp = [
+        "kmer_AA_TRYWQSV",
+        "kmer_AA_LKIVNGS",
+        "kmer_PC_GCACEDG",
+        "kmer_AA_AAARTHI",
+        "kmer_PC_GCACADG",
+        "kmer_AA_VVLLITY",
+        "kmer_PC_ABAAGCA",
+        "kmer_PC_ABCAGCA",
+        "kmer_PC_0445800",
+        "kmer_PC_0325678",
+        "kmer_PC_1834561",
+        "kmer_PC_0081453",
+    ]
+    count_rank_exp = [5.0, 5.0, 3.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    pearson_rank_exp = [
+        0.9996711941300674,
+        -0.9996691301273101,
+        0.9730987271741324,
+        -0.9805544971707032,
+        -0.9621383402310417,
+        -0.3000284520602986,
+        -0.9630255174306687,
+        -0.1466167849072281,
+        0.9708902952359766,
+        -0.3634615375823603,
+        -0.44967868772588543,
+        0.2450408021387,
+    ]
+
+    assert_array_equal(feature_rank, feature_rank_exp)
+    assert_array_equal(count_rank, count_rank_exp)
+    assert np.allclose(pearson_rank, pearson_rank_exp)

@@ -30,14 +30,20 @@ matplotlib.use("Agg")
 def validate_feature_table(file_name, idx, prefix, loose=False):
     # rtol loosened to account for lib version discrepancies
     # so far this is only seen to affect tables after feature selection
+    atol = 6 if loose else 0
     rtol = 1e-3 if loose else 1e-8
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()
     expected_shape = table_info.iloc[idx][prefix + "_shape"]
-    if not np.allclose(df.shape, expected_shape, rtol=rtol):
+    if not df.shape[0] == expected_shape[0]:
         raise ValueError(
-            "Feature table shape is not within acceptable variation from what was precalculated.\nActual: %s\nExpected: %s"
-            % (df.shape, expected_shape)
+            "Number of rows in feature table does not match what was precalculated.\nActual: %s\nExpected: %s"
+            % (df.shape[0], expected_shape[0])
+        )
+    if not np.allclose(df.shape[1], expected_shape[1], rtol=0, atol=atol):
+        raise ValueError(
+            "Number of columns in feature table is not within acceptable variation from what was precalculated.\nActual: %s\nExpected: %s"
+            % (df.shape[1], expected_shape[1])
         )
     actual_sum = df.select_dtypes(["number"]).to_numpy().sum()
     expected_sum = table_info.iloc[idx][prefix + "_sum"]
@@ -325,9 +331,7 @@ def build_tables(feature_checkpoint=0, debug=False):
                 tables_per_dataset - (this_checkpoint - this_checkpoint_modifier)
             )
             validate_feature_table(this_outfile, idx, prefix)
-        for PC in [False, True]:
-            kmer_type = "PC" if PC else "AA"
-            kmer_suff = "-pc" if PC else ""
+        for kmer_type, kmer_suff in [("AA", ""), ("PC", "-pc")]:
             for k in range(2, 11):
                 this_checkpoint -= 1
                 this_outfile = folder + "/" + prefix + f"_k{kmer_type}{k}.parquet.gzip"

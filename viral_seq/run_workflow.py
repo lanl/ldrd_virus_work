@@ -33,7 +33,7 @@ import matplotlib.patches as mpatches
 matplotlib.use("Agg")
 
 
-def check_kmer_feature_lengths(kmer_features: list, kmer_range: str) -> None:
+def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
     """
     check that the lengths of features in the dataset 'X' are within
     the range of values as specified by the command line flag '--kmer_range'
@@ -950,7 +950,7 @@ def optimize_model(
     config,
     num_samples,
     optimize="skip",
-    name="Classifier", # noqa: ARG001
+    name="Classifier",  # noqa: ARG001
     debug=False,
     random_state=123,
     n_jobs_cv=1,

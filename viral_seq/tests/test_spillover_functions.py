@@ -304,7 +304,7 @@ def test_univariate_selection(uni_type):
         )
 
 
-def test_load_multi_parquet(tmp_path): # noqa: ARG001
+def test_load_multi_parquet(tmp_path):  # noqa: ARG001
     """Regression test joining parquet files created with multiple calculate-table commands"""
     this_cache = files("viral_seq.tests") / "cache"
     cache_str = str(this_cache.resolve())

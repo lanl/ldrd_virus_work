@@ -821,8 +821,8 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     debug = False
                     this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
 
-                    min_kmer = int(kmer_range_list[0])
-                    max_kmer = int(kmer_range_list[-1])
+                    min_kmer = int(kmer_range[0])
+                    max_kmer = int(kmer_range[-1])
 
                     kmer_range_length = max_kmer - min_kmer + 1
                     if feature_checkpoint > kmer_range_length:
@@ -950,7 +950,7 @@ def optimize_model(
     config,
     num_samples,
     optimize="skip",
-    name="Classifier",
+    name="Classifier", # noqa: ARG001
     debug=False,
     random_state=123,
     n_jobs_cv=1,
@@ -1167,7 +1167,7 @@ if __name__ == "__main__":
         "--kmer-range",
         type=str,
         default="8-12",
-        help="Range of kmer lengths for building feature dataset (must be a string in the format 'start-end')",
+        help="Range of kmer lengths for building feature dataset (must be a string in the format 'start-end' or a single kmer length value)",
     )
 
     args = parser.parse_args()
@@ -1190,6 +1190,8 @@ if __name__ == "__main__":
     kmer_range_list = kmer_range.split("-")
     if len(kmer_range_list) > 2:
         raise ValueError("Too many values provided for '--kmer-range'")
+    if int(kmer_range_list[0]) > int(kmer_range_list[-1]):
+        raise ValueError("'--kmer-range' has lower bound that exceeds upper bound")
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))

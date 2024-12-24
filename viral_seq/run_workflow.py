@@ -33,6 +33,29 @@ import matplotlib.patches as mpatches
 matplotlib.use("Agg")
 
 
+def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
+    """
+    check that the lengths of features in the dataset 'X' are within
+    the range of values as specified by the command line flag '--kmer_range'
+
+    Parameters:
+    kmer_features: list
+        list of kmer features from the training dataset
+    kmer_range: str
+        string specifying the range of values for which to generate features
+    """
+
+    kmer_range_list = kmer_range.split("-")
+    min_kmer = kmer_range_list[0]
+    max_kmer = kmer_range_list[-1]
+    shortest = len(min(kmer_features, key=len)) - 8
+    longest = len(max(kmer_features, key=len)) - 8
+    if (shortest < int(min_kmer)) or (longest > int(max_kmer)):
+        raise ValueError(
+            f"k-mer feature lengths not within desired range: {min_kmer}-{max_kmer}"
+        )
+
+
 def feature_signs(
     is_exposed: list,
     not_exposed: list,
@@ -187,6 +210,9 @@ def FIC_plot(
         if kmer_name in surface_exposed_dict:
             percent_exposed = surface_exposed_dict[kmer_name]
             percent_lbl = f"{percent_exposed:.2f}%"
+        # TODO: Remove this statement after merge !91
+        else:
+            percent_lbl = "0.00%"
 
         left, bottom, width, height = p.get_bbox().bounds
 
@@ -674,7 +700,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False):
+def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -794,11 +820,16 @@ def build_tables(feature_checkpoint=0, debug=False):
                     prefix = "Train"
                     debug = False
                     this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
-                    if feature_checkpoint > 5:
-                        feature_checkpoint = 5
+
+                    min_kmer = int(kmer_range[0])
+                    max_kmer = int(kmer_range[-1])
+
+                    kmer_range_length = max_kmer - min_kmer + 1
+                    if feature_checkpoint > kmer_range_length:
+                        feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
 
-                for k in range(11 - feature_checkpoint, 11):
+                for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
                         print(
@@ -919,7 +950,7 @@ def optimize_model(
     config,
     num_samples,
     optimize="skip",
-    name="Classifier",
+    name="Classifier",  # noqa: ARG001
     debug=False,
     random_state=123,
     n_jobs_cv=1,
@@ -1131,6 +1162,13 @@ if __name__ == "__main__":
         default="shen_2007",
         help="Preference of scheme for mapping AA-kmers to PC-kmers",
     )
+    parser.add_argument(
+        "-k",
+        "--kmer-range",
+        type=str,
+        default="8-12",
+        help="Range of kmer lengths for building feature dataset (must be a string in the format 'start-end' or a single kmer length value)",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1147,6 +1185,13 @@ if __name__ == "__main__":
     target_column = args.target_column
     workflow = args.workflow
     mapping_method = args.mapping_method
+    kmer_range = args.kmer_range
+
+    kmer_range_list = kmer_range.split("-")
+    if len(kmer_range_list) > 2:
+        raise ValueError("Too many values provided for '--kmer-range'")
+    if int(kmer_range_list[0]) > int(kmer_range_list[-1]):
+        raise ValueError("'--kmer-range' has lower bound that exceeds upper bound")
 
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))
@@ -1207,7 +1252,9 @@ if __name__ == "__main__":
         )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    build_tables(
+        feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
+    )
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -1451,6 +1498,10 @@ if __name__ == "__main__":
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
         y = tbl[target_column]
+
+        # check that none of the features in tbl have kmers outside of the range
+        # of given kmer lengths from command line option '--kmer-range'
+        check_kmer_feature_lengths(list(X.columns), kmer_range)
 
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.

@@ -7,6 +7,7 @@ import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
+from contextlib import nullcontext
 
 
 def test_optimization_plotting(tmpdir):
@@ -406,3 +407,28 @@ def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
     out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
 
     assert_allclose(list(out_dict.values()), percent_values)
+
+
+@pytest.mark.parametrize(
+    "kmer_features, kmer_range, exp",
+    (
+        [
+            ["kmer_PC_0123456", "kmer_AA_VLYWG", "kmer_PC_CBBA", "kmer_PC_012345678"],
+            "10-10",
+            pytest.raises(ValueError, match="k-mer feature lengths"),
+        ],
+        [
+            ["kmer_PC_01234", "kmer_AA_VLYW", "kmer_PC_CBBA", "kmer_PC_5678901"],
+            "4-7",
+            nullcontext(0),
+        ],
+        [
+            ["kmer_PC_0123456", "kmer_AA_VLYWG", "kmer_PC_CBBA", "kmer_PC_012345678"],
+            "10",
+            pytest.raises(ValueError, match="k-mer feature lengths"),
+        ],
+    ),
+)
+def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
+    with exp:
+        workflow.check_kmer_feature_lengths(kmer_features, kmer_range)

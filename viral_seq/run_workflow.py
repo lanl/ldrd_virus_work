@@ -27,20 +27,29 @@ from collections import defaultdict
 matplotlib.use("Agg")
 
 
-def validate_feature_table(file_name, idx, prefix):
+def validate_feature_table(file_name, idx, prefix, loose=False):
+    # rtol loosened to account for lib version discrepancies
+    # so far this is only seen to affect tables after feature selection
+    atol = 6 if loose else 0
+    rtol = 1e-3 if loose else 1e-8
     print("Validating", file_name)
     df = pl.read_parquet(file_name).to_pandas()
     expected_shape = table_info.iloc[idx][prefix + "_shape"]
-    if not np.array_equal(df.shape, expected_shape):
+    if not df.shape[0] == expected_shape[0]:
         raise ValueError(
-            "Feature table shape does not match what was precalculated.\nActual: %s\nExpected: %s"
-            % (df.shape, expected_shape)
+            "Number of rows in feature table does not match what was precalculated.\nActual: %s\nExpected: %s"
+            % (df.shape[0], expected_shape[0])
+        )
+    if not np.allclose(df.shape[1], expected_shape[1], rtol=0, atol=atol):
+        raise ValueError(
+            "Number of columns in feature table is not within acceptable variation from what was precalculated.\nActual: %s\nExpected: %s"
+            % (df.shape[1], expected_shape[1])
         )
     actual_sum = df.select_dtypes(["number"]).to_numpy().sum()
     expected_sum = table_info.iloc[idx][prefix + "_sum"]
-    if not np.allclose(actual_sum, expected_sum, rtol=1e-8):
+    if not np.allclose(actual_sum, expected_sum, rtol=rtol):
         raise ValueError(
-            "The feature table's numerical sum, which sums all feature values for all viruses, does not match what was precalculated. Verify integrity of input data and feature calculation.\nActual: %s\nExpected: %s"
+            "The feature table's numerical sum, which sums all feature values for all viruses, is not within acceptable variation from what was precalculated. Verify integrity of input data and feature calculation.\nActual: %s\nExpected: %s"
             % (actual_sum, expected_sum),
         )
 
@@ -288,16 +297,17 @@ def build_tables(feature_checkpoint=0, debug=False):
             debug = False
 
     # tables are built in multiple parts as this is faster for reading/writing
+    tables_per_dataset = 19
     for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
         prefix = "Train" if i == 0 else "Test"
-        this_checkpoint_modifier = (1 - i) * 8
-        this_checkpoint = 8 + this_checkpoint_modifier
+        this_checkpoint_modifier = (1 - i) * tables_per_dataset
+        this_checkpoint = tables_per_dataset + this_checkpoint_modifier
         this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
         if feature_checkpoint >= this_checkpoint:
             print(
                 "Building table for",
                 prefix,
-                "which includes genomic features, gc content, kmers with k=2,3,4, pc kmers with k=2,3,4,5,6, and similarity features for ISG and housekeeping genes.",
+                "which includes genomic features, gc content, and similarity features for ISG and housekeeping genes.",
             )
             print("To restart at this point use --features", this_checkpoint)
             cli.calculate_table(
@@ -310,12 +320,6 @@ def build_tables(feature_checkpoint=0, debug=False):
                     this_outfile,
                     "--features-genomic",
                     "--features-gc",
-                    "--features-kmers",
-                    "--kmer-k",
-                    "2 3 4",
-                    "--features-kmers-pc",
-                    "--kmer-k-pc",
-                    "2 3 4 5 6",
                     "--similarity-genomic",
                     "--similarity-cache",
                     cache_isg + " " + cache_hk,
@@ -323,57 +327,39 @@ def build_tables(feature_checkpoint=0, debug=False):
                 standalone_mode=False,
             )
         if debug:
-            idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-            validate_feature_table(this_outfile, idx, prefix)
-        this_checkpoint -= 1
-        this_outfile = folder + "/" + prefix + "_kpc7.parquet.gzip"
-        if feature_checkpoint >= this_checkpoint:
-            print("Building table for", prefix, "which includes pc kmers with k=7.")
-            print("To restart at this point use --features", this_checkpoint)
-            cli.calculate_table(
-                [
-                    "--file",
-                    file,
-                    "--cache",
-                    cache_viral,
-                    "--outfile",
-                    this_outfile,
-                    "--features-kmers-pc",
-                    "--kmer-k-pc",
-                    "7",
-                ],
-                standalone_mode=False,
+            idx = np.abs(
+                tables_per_dataset - (this_checkpoint - this_checkpoint_modifier)
             )
-        if debug:
-            idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
             validate_feature_table(this_outfile, idx, prefix)
-        for k in range(5, 11):
-            this_checkpoint -= 1
-            this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
-            if feature_checkpoint >= this_checkpoint:
-                print(
-                    "Building table for",
-                    prefix,
-                    "which includes kmers with k={}.".format(k),
-                )
-                print("To restart at this point use --features", this_checkpoint)
-                cli.calculate_table(
-                    [
-                        "--file",
-                        file,
-                        "--cache",
-                        cache_viral,
-                        "--outfile",
-                        this_outfile,
-                        "--features-kmers",
-                        "--kmer-k",
-                        str(k),
-                    ],
-                    standalone_mode=False,
-                )
-            if debug:
-                idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
-                validate_feature_table(this_outfile, idx, prefix)
+        for kmer_type, kmer_suff in [("AA", ""), ("PC", "-pc")]:
+            for k in range(2, 11):
+                this_checkpoint -= 1
+                this_outfile = folder + "/" + prefix + f"_k{kmer_type}{k}.parquet.gzip"
+                if feature_checkpoint >= this_checkpoint:
+                    print(
+                        f"Building table for {prefix} which includes {kmer_type} kmers with k={k}.",
+                    )
+                    print("To restart at this point use --features", this_checkpoint)
+                    cli.calculate_table(
+                        [
+                            "--file",
+                            file,
+                            "--cache",
+                            cache_viral,
+                            "--outfile",
+                            this_outfile,
+                            f"--features-kmers{kmer_suff}",
+                            f"--kmer-k{kmer_suff}",
+                            str(k),
+                        ],
+                        standalone_mode=False,
+                    )
+                if debug:
+                    idx = np.abs(
+                        tables_per_dataset
+                        - (this_checkpoint - this_checkpoint_modifier)
+                    )
+                    validate_feature_table(this_outfile, idx, prefix)
 
 
 def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
@@ -441,7 +427,7 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     if debug and extract_cookie.is_file():
         # these might not exist if the workflow has only been run with --feature-selection none
         if Path(table_loc_train_best).is_file():
-            validate_feature_table(table_loc_train_best, 8, "Train")
+            validate_feature_table(table_loc_train_best, 19, "Train", loose=True)
         else:
             warn(
                 "File at {} cannot be validated because it does not exist. If using option '--feature-selection none' this is expected behavior.".format(
@@ -560,7 +546,7 @@ def get_test_features(
                 "Will use previously calculated X_test stored at", table_loc_test_saved
             )
             if debug:
-                validate_feature_table(table_loc_test_saved, 8, "Test")
+                validate_feature_table(table_loc_test_saved, 19, "Test", loose=True)
             return X_test, y_test
         else:
             print(
@@ -574,7 +560,7 @@ def get_test_features(
     print("Saving X_test to", table_loc_test_saved)
     X_test.to_parquet(table_loc_test_saved)
     if debug:
-        validate_feature_table(table_loc_test_saved, 8, "Test")
+        validate_feature_table(table_loc_test_saved, 19, "Test", loose=True)
     return X_test, y_test
 
 
@@ -592,9 +578,9 @@ if __name__ == "__main__":
         "-f",
         "--features",
         type=int,
-        choices=range(17),
-        default=16,
-        help="Specify feature table building checkpoint(0-16), typically 0 or 16: 0 skips building feature tables, 16 builds all feature tables.",
+        choices=range(39),
+        default=38,
+        help="Specify feature table building checkpoint(0-38), typically 0 or 38: 0 skips building feature tables, 38 builds all feature tables.",
     )
     parser.add_argument(
         "-fs",
@@ -661,7 +647,7 @@ if __name__ == "__main__":
     test_file = str(data.joinpath("Mollentze_Holdout.csv"))
     cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
     viral_files = [train_file, test_file]
-    table_file = str(files("viral_seq.tests") / "train_test_table_info.csv")
+    table_file = str(files("viral_seq.tests.expected") / "train_test_table_info.csv")
     hyperparams_stored_path = files("viral_seq.data.hyperparameters")
 
     paths = []

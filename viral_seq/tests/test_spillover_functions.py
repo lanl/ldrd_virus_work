@@ -225,7 +225,7 @@ def test_expanded_kmers():
     cache_str = str(this_cache.resolve())
     csv_train_str = str(csv_train.resolve())
     expected_table = str(
-        files("viral_seq.tests").joinpath("test_expanded_kmers.csv").resolve()
+        files("viral_seq.tests.expected").joinpath("test_expanded_kmers.csv").resolve()
     )
     runner = CliRunner()
     with runner.isolated_filesystem():

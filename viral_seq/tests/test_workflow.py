@@ -297,34 +297,29 @@ def test_fic_plot(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "constant, not_exposed_idx, exposed_idx, response_effect_exp, surface_exposed_exp",
+    "constant, exposed_idx, response_effect_exp, surface_exposed_exp",
     [
         (
             False,
-            [2],
             [1],
             ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
             ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
         ),
         (
             False,
-            list(range(10)),
             list(range(10)),
             ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
             ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
         ),
         (
             True,
-            [2],
             [1],
             ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
             ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
         ),
     ],
 )
-def test_feature_sign(
-    constant, not_exposed_idx, exposed_idx, response_effect_exp, surface_exposed_exp
-):
+def test_feature_sign(constant, exposed_idx, response_effect_exp, surface_exposed_exp):
     found_kmers = [
         "CDDEEC",
         "CCGDEA",
@@ -336,9 +331,6 @@ def test_feature_sign(
         "ECDGDE",
         "CCACAD",
         "FECAEA",
-    ]
-    not_exposed = [
-        s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
     is_exposed = [s if i not in exposed_idx else "" for i, s in enumerate(found_kmers)]
 
@@ -353,7 +345,7 @@ def test_feature_sign(
         syn_data[:, -1] = 0
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, not_exposed, syn_shap_values, syn_data
+        is_exposed, syn_shap_values, syn_data
     )
 
     assert_array_equal(response_effect_out, response_effect_exp)
@@ -603,19 +595,21 @@ def test_get_kmer_info(
     [
         (
             "NC_001563.2",
-            "kmer_PC_GADAGA",
+            ["kmer_PC_GADAGA"],
             "shen_2007",
             "jurgen_schmidt",
         ),
         (
             "NC_001563.2",
-            "kmer_PC_012",
+            ["kmer_PC_012"],
             "jurgen_schmidt",
             "shen_2007",
         ),
     ],
 )
-def test_get_kmer_info_error(accession, kmer, mapping_method, mismatch_method):
+def test_get_kmer_info_error(
+    accession: str, kmer: list[str], mapping_method: str, mismatch_method: str
+):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())
     records = sp.load_from_cache(

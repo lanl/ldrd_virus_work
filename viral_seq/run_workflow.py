@@ -59,14 +59,13 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 # TODO: this class object serves as a placeholder for
 # a different class to be implemented in accordance with issue #97
 class kmer_data:
-    def __init__(self, mapping_method: str, kmer_data: list):
+    def __init__(self, mapping_method: str, kmer_data: list[str]):
         self.mapping_method = mapping_method
         self.kmer_names = kmer_data
 
 
 def feature_signs(
     is_exposed: list,
-    not_exposed: list,
     shap_values: np.ndarray,
     shap_data: np.ndarray,
 ) -> tuple:
@@ -78,8 +77,6 @@ def feature_signs(
     -----------
     is_exposed: list
         list of kmers that are surface exposed
-    not_exposed: list
-        list of kmers that are not surface exposed
     shap_values: np.ndarray
         shap feature importance values
     shap_data: np.ndarray
@@ -98,8 +95,6 @@ def feature_signs(
     for i in range(len(is_exposed)):
         if is_exposed[i]:
             sign = "+"
-        elif not_exposed[i]:
-            sign = "-"
         else:
             sign = "-"
         surface_exposed_sign.append(sign)
@@ -293,12 +288,8 @@ def FIC_plot(
     for kmer_idx, p in enumerate(bars):
         # calculate corresponding surface exposure %
         kmer_name = topN_kmers[kmer_idx][8:]
-        if kmer_name in surface_exposed_dict:
-            percent_exposed = surface_exposed_dict[kmer_name]
-            percent_lbl = f"{percent_exposed:.2f}%"
-        # TODO: Remove this statement after merge !91
-        else:
-            percent_lbl = "0.00%"
+        percent_exposed = surface_exposed_dict[kmer_name]
+        percent_lbl = f"{percent_exposed:.2f}%"
 
         left, bottom, width, height = p.get_bbox().bounds
 
@@ -1893,7 +1884,6 @@ if __name__ == "__main__":
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            not_exposed,
             positive_shap_values.values,
             positive_shap_values.data,
         )

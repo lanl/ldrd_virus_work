@@ -259,7 +259,7 @@ def test_fic_plot(tmp_path):
     target_column = "Is_Integrin"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
-    exposure_status_sign = ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"]
+    exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
     surface_exposed_dict = {
         "CDDEEC": 42.86,
         "CCGDEA": 0.00,
@@ -297,29 +297,31 @@ def test_fic_plot(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "constant, exposed_idx, response_effect_exp, surface_exposed_exp",
+    "constant, not_exposed_idx, surface_exposed_exp",
     [
         (
             False,
             [1],
-            ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
             ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
         ),
         (
             False,
             list(range(10)),
-            ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
             ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
         ),
         (
             True,
             [1],
-            ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"],
             ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
         ),
     ],
 )
-def test_feature_sign(constant, exposed_idx, response_effect_exp, surface_exposed_exp):
+def test_feature_sign(
+    constant,
+    not_exposed_idx,
+    surface_exposed_exp,
+):
+    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     found_kmers = [
         "CDDEEC",
         "CCGDEA",
@@ -332,7 +334,9 @@ def test_feature_sign(constant, exposed_idx, response_effect_exp, surface_expose
         "CCACAD",
         "FECAEA",
     ]
-    is_exposed = [s if i not in exposed_idx else "" for i, s in enumerate(found_kmers)]
+    is_exposed = [
+        s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
+    ]
 
     rng = np.random.default_rng(seed=123)
     syn_shap_values = rng.uniform(-1, 1, (10, 10))
@@ -448,20 +452,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         (
             "NC_001563.2",
             12,
-            [
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-                "WNV",
-            ],
+            ["WNV"] * 12,
             [
                 "AFDAEF",
                 "AFDAEF",
@@ -495,7 +486,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         (
             "NC_001563.2",
             2,
-            ["WNV", "WNV"],
+            ["WNV"] * 2,
             ["LVFGGIT", "LVFGGIT"],
             ["polyprotein", "nonstructural protein NS2A"],
             "jurgen_schmidt",
@@ -511,10 +502,15 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
     ],
 )
 def test_get_kmer_info(
-    accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method
+    accession: str,
+    exp: int,
+    exp_viruses: list[str],
+    exp_kmers: list[str],
+    exp_proteins: list[str],
+    mapping_method: str,
 ):
     this_cache = files("viral_seq.tests") / "cache_test"
-    cache_str = str(this_cache.resolve())
+    cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
     records = sp.load_from_cache(
         accessions=[accession], cache=cache_str, verbose=True, filter=False
     )
@@ -576,18 +572,18 @@ def test_get_kmer_info(
                 get_features.aa_map(s, method=mapping_method) for s in topN_kmer
             ]
             new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
-        if i >= len(kmers) / 2:
+        else:
             new_kmers.append("kmer_AA_" + topN_kmer)
     data_in = workflow.kmer_data(mapping_method, new_kmers)
 
-    viruses_PC, kmers_PC, protein_name_PC = workflow.get_kmer_info(
+    viruses, kmers, protein_name = workflow.get_kmer_info(
         data_in, records, tbl, mapping_method
     )
 
-    assert_array_equal(viruses_PC, exp_viruses)
-    assert_array_equal(kmers_PC, exp_kmers)
-    assert_array_equal(protein_name_PC, exp_proteins)
-    assert len(viruses_PC) == len(kmers_PC) == len(protein_name_PC) == exp
+    assert_array_equal(viruses, exp_viruses)
+    assert_array_equal(kmers, exp_kmers)
+    assert_array_equal(protein_name, exp_proteins)
+    assert len(viruses) == len(kmers) == len(protein_name) == exp
 
 
 @pytest.mark.parametrize(
@@ -611,7 +607,7 @@ def test_get_kmer_info_error(
     accession: str, kmer: list[str], mapping_method: str, mismatch_method: str
 ):
     this_cache = files("viral_seq.tests") / "cache_test"
-    cache_str = str(this_cache.resolve())
+    cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
     records = sp.load_from_cache(
         accessions=[accession], cache=cache_str, verbose=True, filter=False
     )

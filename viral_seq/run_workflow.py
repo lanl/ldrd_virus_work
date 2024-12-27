@@ -65,7 +65,7 @@ class kmer_data:
 
 
 def feature_signs(
-    is_exposed: list,
+    is_exposed: list[str],
     shap_values: np.ndarray,
     shap_data: np.ndarray,
 ) -> tuple:
@@ -140,7 +140,7 @@ def get_kmer_info(
     kmer_features: list
         list of kmers that were found in viral sequence
     protein_names: list
-        list of viral proteins associated with virues where kmers were identified in viral protein sequence
+        list of viral protein names associated with the retrieved kmers
     """
     virus_names = []
     protein_names = []

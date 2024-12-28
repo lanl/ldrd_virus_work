@@ -1,13 +1,14 @@
 from viral_seq import run_workflow as workflow
 import numpy as np
 from importlib.resources import files
-from contextlib import ExitStack
+from contextlib import ExitStack, nullcontext
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
-from contextlib import nullcontext
+from viral_seq.analysis import spillover_predict as sp
+from viral_seq.analysis import get_features
 
 
 def test_optimization_plotting(tmpdir):
@@ -258,7 +259,7 @@ def test_fic_plot(tmp_path):
     target_column = "Is_Integrin"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
-    exposure_status_sign = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
+    exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
     surface_exposed_dict = {
         "CDDEEC": 42.86,
         "CCGDEA": 0.00,
@@ -296,15 +297,31 @@ def test_fic_plot(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "constant, response_effect_exp",
+    "constant, not_exposed_idx, surface_exposed_exp",
     [
-        (False, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
-        # case for constant input producing np.nan per
-        # issue 96
-        (True, ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]),
+        (
+            False,
+            [1],
+            ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
+        ),
+        (
+            False,
+            list(range(10)),
+            ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ),
+        (
+            True,
+            [1],
+            ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
+        ),
     ],
 )
-def test_feature_sign(constant, response_effect_exp):
+def test_feature_sign(
+    constant,
+    not_exposed_idx,
+    surface_exposed_exp,
+):
+    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     found_kmers = [
         "CDDEEC",
         "CCGDEA",
@@ -317,12 +334,9 @@ def test_feature_sign(constant, response_effect_exp):
         "CCACAD",
         "FECAEA",
     ]
-    not_exposed_idx = [2]
-    exposed_idx = [1, 2]
-    not_exposed = [
+    is_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
-    is_exposed = [s if i not in exposed_idx else "" for i, s in enumerate(found_kmers)]
 
     rng = np.random.default_rng(seed=123)
     syn_shap_values = rng.uniform(-1, 1, (10, 10))
@@ -335,10 +349,8 @@ def test_feature_sign(constant, response_effect_exp):
         syn_data[:, -1] = 0
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, not_exposed, syn_shap_values, syn_data
+        is_exposed, syn_shap_values, syn_data
     )
-
-    surface_exposed_exp = ["+", "-", "x", "+", "+", "+", "+", "+", "+", "+"]
 
     assert_array_equal(response_effect_out, response_effect_exp)
     assert_array_equal(surface_exposed_out, surface_exposed_exp)
@@ -432,3 +444,182 @@ def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
 def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
     with exp:
         workflow.check_kmer_feature_lengths(kmer_features, kmer_range)
+
+
+@pytest.mark.parametrize(
+    "accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method",
+    [
+        (
+            "NC_001563.2",
+            12,
+            ["WNV"] * 12,
+            [
+                "AFDAEF",
+                "AFDAEF",
+                "AFDAEF",
+                "FCCGDA",
+                "FCCGDA",
+                "EADAAC",
+                "EADAAC",
+                "EADAAC",
+                "DGACFC",
+                "DGACFC",
+                "LVFGGIT",
+                "LVFGGIT",
+            ],
+            [
+                "polyprotein",
+                "envelope protein E",
+                "truncated polyprotein NS1 prime",
+                "polyprotein",
+                "nonstructural protein NS3",
+                "polyprotein",
+                "envelope protein E",
+                "truncated polyprotein NS1 prime",
+                "polyprotein",
+                "RNA-dependent RNA polymerase NS5",
+                "polyprotein",
+                "nonstructural protein NS2A",
+            ],
+            "shen_2007",
+        ),
+        (
+            "NC_001563.2",
+            2,
+            ["WNV"] * 2,
+            ["LVFGGIT", "LVFGGIT"],
+            ["polyprotein", "nonstructural protein NS2A"],
+            "jurgen_schmidt",
+        ),
+        (
+            "AC_000008.1",
+            0,
+            [],
+            [],
+            [],
+            "jurgen_schmidt",
+        ),
+    ],
+)
+def test_get_kmer_info(
+    accession: str,
+    exp: int,
+    exp_viruses: list[str],
+    exp_kmers: list[str],
+    exp_proteins: list[str],
+    mapping_method: str,
+):
+    this_cache = files("viral_seq.tests") / "cache_test"
+    cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
+    records = sp.load_from_cache(
+        accessions=[accession], cache=cache_str, verbose=True, filter=False
+    )
+    data_table = {
+        "Species": {
+            0: "hMPV",
+            1: "MERS-CoV",
+            2: "FMDV",
+            3: "influenza_A_H1N1",
+            4: "HSV-2",
+            5: "type_3_reovirus",
+            6: "WNV",
+            7: "type_1_reovirus",
+            8: "JEV",
+            9: "BKPyV human polyomavirus",
+        },
+        "Accessions": {
+            0: "NC_039199.1",
+            1: "NC_019843.3",
+            2: "NC_039210.1",
+            3: "NC_026438.1 NC_026435.1 NC_026437.1 NC_026433.1 NC_026436.1 NC_026434.1 NC_026432.1 NC_026431.1",
+            4: "NC_001798.2",
+            5: "NC_077846.1 NC_077845.1 NC_077844.1 NC_077843.1 NC_077842.1 NC_077841.1 NC_077840.1 NC_077839.1 NC_077838.1 NC_077837.1",
+            6: "NC_001563.2",
+            7: "MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1",
+            8: "NC_001437.1",
+            9: "NC_001538.1",
+        },
+    }
+    tbl = pd.DataFrame(data_table)
+
+    kmers = [
+        "ADMAHD",
+        "DFFKSG",
+        "HKFLVP",
+        "NGTGGI",
+        "MRTAPT",
+        "SRGLDP",
+        "YDTIPI",
+        "DRGIFV",
+        "MDSIPG",
+        "FHIPGE",
+        "LVFGGIT",
+        "IPKMNV",
+        "LIPDIT",
+        "FLAGVPT",
+        "FALMKV",
+        "LDIHMY",
+        "KFHFDT",
+        "HLTKTW",
+        "LIAPGT",
+        "DHIAQV",
+    ]
+
+    new_kmers = []
+    for i, topN_kmer in enumerate(kmers):
+        if i < len(kmers) / 2:
+            topN_kmer_PC = [
+                get_features.aa_map(s, method=mapping_method) for s in topN_kmer
+            ]
+            new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
+        else:
+            new_kmers.append("kmer_AA_" + topN_kmer)
+    data_in = workflow.kmer_data(mapping_method, new_kmers)
+
+    viruses, kmers, protein_name = workflow.get_kmer_info(
+        data_in, records, tbl, mapping_method
+    )
+
+    assert_array_equal(viruses, exp_viruses)
+    assert_array_equal(kmers, exp_kmers)
+    assert_array_equal(protein_name, exp_proteins)
+    assert len(viruses) == len(kmers) == len(protein_name) == exp
+
+
+@pytest.mark.parametrize(
+    "accession, kmer, mapping_method, mismatch_method",
+    [
+        (
+            "NC_001563.2",
+            ["kmer_PC_GADAGA"],
+            "shen_2007",
+            "jurgen_schmidt",
+        ),
+        (
+            "NC_001563.2",
+            ["kmer_PC_012"],
+            "jurgen_schmidt",
+            "shen_2007",
+        ),
+    ],
+)
+def test_get_kmer_info_error(
+    accession: str, kmer: list[str], mapping_method: str, mismatch_method: str
+):
+    this_cache = files("viral_seq.tests") / "cache_test"
+    cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
+    records = sp.load_from_cache(
+        accessions=[accession], cache=cache_str, verbose=True, filter=False
+    )
+    data_table = {
+        "Species": {
+            0: "hMPV",
+        },
+        "Accessions": {
+            0: "NC_039199.1",
+        },
+    }
+    tbl = pd.DataFrame(data_table)
+    data_in = workflow.kmer_data(mapping_method, kmer)
+    with pytest.raises(ValueError, match="kmer mapping method does not match"):
+        _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)

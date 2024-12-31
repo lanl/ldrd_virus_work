@@ -37,6 +37,6 @@ ci_test_linux:
 
   parallel:
     matrix:
-      - IMAGE: ['python:3.10.8', 'python:3.11.9']
+      - IMAGE: ['python:3.10.8', 'python:3.11.9', 'python:3.12.7']
         REQ: ['ci/requirements_low.txt', 'ci/requirements_high.txt']
   allow_failure: false

@@ -568,15 +568,16 @@ def test_grab_features_kmer_maps():
             kmer_k_pc=[10],
             mapping_method="shen_2007",
             gather_kmer_info=True,
+            filter_structural=None,
         )
         all_kmer_info.extend(kmer_info)
 
-    assert len(all_kmer_info) == 3408 * 2
+    assert len(all_kmer_info) == 3408
 
     kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
     kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
 
-    assert len(kmer_maps_df) == 3408 * 2
+    assert len(kmer_maps_df) == 3408
 
     # we expect one AA --> AA kmer identity map per PC --> AA kmer map
     kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]

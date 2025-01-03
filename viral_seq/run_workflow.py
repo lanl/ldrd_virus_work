@@ -24,7 +24,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List
+from typing import Dict, Any, Sequence, List, Literal, Optional
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -144,6 +144,9 @@ def get_kmer_info(
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
+    filter_structural: Optional[
+        Literal["surface_exposed", "not_surface_exposed", "all_features"]
+    ] = None,
 ) -> tuple:
     """
     for topN kmers from ml classifier output, gather information regarding
@@ -160,6 +163,9 @@ def get_kmer_info(
         training dataframe
     mapping_method:
         preferred mapping method for translating AA to PC kmers
+    filter_structural: Optional[Literal["surface_exposed", "not_surface_exposed", "all_features"]]
+        option to filter only structural proteins (i.e. "surface_exposed"), remove all structural proteins (i.e. "not_surface_exposed")
+        or use all proteins in dataset (i.e. ``all_features``)
 
     Returns:
     --------
@@ -190,6 +196,7 @@ def get_kmer_info(
         # feature exists within a given protein sequence
         for record in records:
             single_polyprotein = False
+            virus_name = record.annotations["organism"]
             for feature in record.features:
                 # check to see if the only gene product is 'polyprotein'
                 # TODO: check other edge cases of other precursor-like protein products that
@@ -228,6 +235,16 @@ def get_kmer_info(
                             m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
                         ]
                         if kmer_idx:
+                            if filter_structural in [
+                                "surface_exposed",
+                                "not_surface_exposed",
+                            ]:
+                                protein_name = feature.qualifiers.get("product")[0]
+                                is_structural = get_features.filter_structural_proteins(
+                                    virus_name, protein_name, filter_structural
+                                )
+                                if not is_structural:
+                                    continue
                             virus_names.append(
                                 tbl.loc[tbl["Accessions"].str.contains(record.id)][
                                     "Species"
@@ -875,7 +892,12 @@ def build_cache(cache_checkpoint=3, debug=False, data_file=None):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
+def build_tables(
+    feature_checkpoint=0,
+    debug=False,
+    kmer_range=None,
+    filter_structural=None,
+):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -1032,6 +1054,8 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                                 target_column,
                                 "--mapping-method",
                                 mapping_method,
+                                "--filter-structural",
+                                filter_structural,
                             ],
                             standalone_mode=False,
                         )
@@ -1072,6 +1096,7 @@ def feature_selection_rfc(
         X, y = sp.get_training_columns(
             table_filename=train_files, class_column=target_column
         )
+        print(f"Total train features: {len(X.columns)}")
         # if running DTRA workflow, check for presence of positive controls in unfiltered training dataset
         if wf == "DTRA":
             for mode in ["PC", "AA"]:
@@ -1401,6 +1426,14 @@ if __name__ == "__main__":
         help="Cached accession files for running workflow with cli flag '--cache extract'",
     )
     parser.add_argument(
+        "-s",
+        "--filter-structural",
+        type=str,
+        choices=["surface_exposed", "not_surface_exposed", "all_features"],
+        default=None,
+        help="Option for filtering dataset for only structural proteins when building data tables",
+    )
+    parser.add_argument(
         "-mf",
         "--merge-file",
         choices=["igsf_training.csv"],
@@ -1426,6 +1459,7 @@ if __name__ == "__main__":
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
     merge_file = args.merge_file
+    filter_structural = args.filter_structural
 
     # check to make sure the correct `cache-tarball` is being used
     # for the given workflow when calling '--cache extract'
@@ -1506,7 +1540,10 @@ if __name__ == "__main__":
     else:
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(
-        feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
+        feature_checkpoint=feature_checkpoint,
+        debug=debug,
+        kmer_range=kmer_range_list,
+        filter_structural=filter_structural,
     )
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
@@ -1876,7 +1913,7 @@ if __name__ == "__main__":
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
-            kmer_info, records, tbl, mapping_method
+            kmer_info, records, tbl, mapping_method, filter_structural
         )
 
         # get surface exposure status of all kmers using `surface_exposed_df`

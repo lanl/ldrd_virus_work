@@ -3,10 +3,12 @@ from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
 from Bio.SeqUtils import gc_fraction
 from skbio import Sequence
-from typing import Any, Union
+from typing import Any, Union, Literal
 import pandas as pd
 import numpy as np
 import scipy.stats
+from importlib.resources import files
+from Bio.SeqRecord import SeqRecord
 
 codontab = standard_dna_table.forward_table.copy()  # type: ignore
 for codon in standard_dna_table.stop_codons:  # type: ignore
@@ -34,14 +36,99 @@ class KmerData:
         kmer_maps: Union[None, list, str] = None,
         virus_name: str = "",
         protein_name: str = "",
-        include_pair: bool = True,
     ):
         self.mapping_method = mapping_method
         self.kmer_names = kmer_names
         self.kmer_maps = kmer_maps
         self.virus_name = virus_name
         self.protein_name = protein_name
-        self.include_pair = include_pair
+
+
+def get_feature_idx(record: SeqRecord) -> tuple:
+    """
+    get the indices of sequence records that correspond to protein products
+    of interest when filtering for (non) structural proteins in the DTRA workflow
+
+    Parameters:
+    -----------
+    record: SeqRecord
+        record of interest for filtering the appropriate features
+
+    Returns:
+    --------
+    protein_idx: tuple
+        tuple of indices indicating which record features to use for filtering
+        (non) structural proteins
+    """
+    all_products = [
+        (f, feat.qualifiers["product"][0])
+        for f, feat in enumerate(record.features)
+        if feat.type in ["CDS", "mat_peptide"]
+    ]
+    # check if all_products is empty (related to issue #103)
+    if not all_products:
+        return ()
+    # remove all "polyprotein" products if feature is not a ``single polyprotein``
+    # TODO: implement filtering using feature.location instead of product name
+    # in line with issue #102
+    if not (len(all_products) == 1 and "polyprotein" in all_products[0][1]):
+        all_products = [p for p in all_products if "polyprotein" not in p[1]]
+
+    protein_idx, _ = zip(*all_products)
+    return protein_idx
+
+
+def filter_structural_proteins(
+    virus_name: str,
+    protein_name: str,
+    filter_structural: Literal[
+        "surface_exposed", "not_surface_exposed", "all_features"
+    ] = "surface_exposed",
+) -> bool:
+    """
+    check if the given protein name is found within a list of known structural
+    proteins and return a boolean value depending on the result
+
+    Parameters:
+    -----------
+    virus_name: str
+        name of the virus to check
+    protein_name: str
+        name of viral protein to check
+    filter_structural: Literal["surface_exposed", "not_surface_exposed", "all_features"]
+        option for the selection of surface exposed protein status.
+        if ``surface_exposed``, only surface-exposed proteins will be returned
+        if ``not_surface_exposed``, only non-surface-exposed proteins will be returned
+        function call gated on ``filter_structural in ["surface_exposed", "not_surface_exposed"]``
+
+    Returns:
+    --------
+    bool:
+        return True if protein name is found within list of surface exposed proteins
+        return False if protein name is not found within list of surface exposed proteins
+    """
+    # get corresponding ``yes``, ``no`` status of surface exposure based on
+    # ``--filter-structural`` flag for checking against surface_exposed_df
+    exposure_status = "yes" if filter_structural == "surface_exposed" else "no"
+
+    # load dataframe containing all virus-protein pairs and corresponding
+    # surface exposed ("surface_exposed", "not_surface_exposed") status
+    surface_exposed_file = files("viral_seq.data").joinpath("surface_exposed_df.csv")
+    surface_exposed_df = pd.read_csv(str(surface_exposed_file))
+
+    # find the row in the dataframe that match the exact virus-protein pair query
+    df_row = surface_exposed_df[
+        (surface_exposed_df["virus_names"] == virus_name)
+        & (surface_exposed_df["protein_names"] == protein_name)
+    ]
+    # skip all 'polyprotein' products (excluded from ``surface_exposed_df``)
+    if df_row.empty:
+        return False
+    # determine surface exposed status of virus-protein pair
+    elif df_row.surface_exposed_status.item() == exposure_status:
+        return True
+    else:
+        return False
 
 
 def get_similarity_features(
@@ -72,6 +159,7 @@ def get_kmers(
     kmer_type="AA",
     mapping_method=None,
     gather_kmer_info=False,
+    filter_structural=None,
 ) -> tuple[dict[str, int], list[KmerData]]:
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
@@ -80,22 +168,25 @@ def get_kmers(
     kmers: dict = defaultdict(int)
     kmer_info = []
     for record in records:
-        # for a given record, determine if the accession contains a single polyprotein product
-        # and allow for kmer features to be extracted by setting ``single_polyprotein = True``
-        single_polyprotein = False
-        if gather_kmer_info:
-            all_products = []
-            for feat in record.features:
-                if feat.type in ["CDS", "mat_peptide"]:
-                    nuc_seq = feat.location.extract(record.seq)
-                    if len(nuc_seq) % 3 == 0:
-                        all_products.append(feat.qualifiers["product"][0])
-            single_polyprotein = (
-                len(all_products) == 1 and all_products[0] == "polyprotein"
-            )
-        for feature in record.features:
-            if feature.type not in ["CDS", "mat_peptide"]:
-                continue
+        # get the appropriate record features when searching for (non) structural proteins
+        if filter_structural in [
+            "not_surface_exposed",
+            "surface_exposed",
+            "all_features",
+        ]:
+            feature_idx = get_feature_idx(record)
+            record_features = [record.features[i] for i in feature_idx]
+        else:
+            record_features = [f for f in record.features if f.type == "CDS"]
+        for feature in record_features:
+            if filter_structural in ["not_surface_exposed", "surface_exposed"]:
+                virus_name = record.annotations["organism"]
+                protein_name = feature.qualifiers.get("product")[0]
+                matches_filter = filter_structural_proteins(
+                    virus_name, protein_name, filter_structural
+                )
+                if not matches_filter:
+                    continue
             nuc_seq = feature.location.extract(record.seq)
             if len(nuc_seq) % 3 != 0:
                 # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
@@ -108,19 +199,13 @@ def get_kmers(
             else:
                 new_seq = this_seq
 
-            record_pair = (
-                single_polyprotein
-                or "polyprotein" not in feature.qualifiers["product"][0]
-            )
-
             for kmer, new_kmer in zip(
                 Sequence(str(this_seq)).iter_kmers(k, overlap=True),
                 Sequence(str(new_seq)).iter_kmers(k, overlap=True),
             ):
                 kmer = f"kmer_AA_{kmer}"
                 new_kmer = f"kmer_{kmer_type}_{new_kmer}"
-                if feature.type == "CDS":
-                    kmers[new_kmer] += 1
+                kmers[new_kmer] += 1
                 if gather_kmer_info:
                     kmer_info.append(
                         KmerData(
@@ -129,7 +214,6 @@ def get_kmers(
                             kmer,
                             record.annotations["organism"],
                             feature.qualifiers["product"][0],
-                            record_pair,
                         )
                     )
     return kmers, kmer_info

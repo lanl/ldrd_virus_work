@@ -373,9 +373,8 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
         kmer: [
             tuple(pair[:2])
             for pair in all_kmer_info[all_kmer_info["kmer_names"] == kmer][
-                ["virus_name", "protein_name", "include_pair"]
+                ["virus_name", "protein_name"]
             ].values
-            if pair[2]
         ]
         for kmer in topN_kmers
     }

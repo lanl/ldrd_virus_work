@@ -23,7 +23,7 @@ from sklearn.metrics import (
 from sklearn.feature_selection import SelectKBest
 from urllib.request import HTTPError
 import time
-from typing import Any, Union
+from typing import Any, Union, Literal, Optional
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
@@ -309,6 +309,7 @@ def _populate_kmer_dict(
     kmer_type="AA",
     mapping_method=None,
     gather_kmer_info=False,
+    filter_structural=None,
 ):
     all_kmer_info = []
     for this_k in kmer:
@@ -318,6 +319,7 @@ def _populate_kmer_dict(
             kmer_type=kmer_type,
             mapping_method=mapping_method,
             gather_kmer_info=gather_kmer_info,
+            filter_structural=filter_structural,
         )
         all_kmer_info.extend(kmer_info)
         if this_res is None:
@@ -338,6 +340,7 @@ def _grab_features(
     kmer_k_pc,
     mapping_method,
     gather_kmer_info,
+    filter_structural,
 ):
     feat_genomic = None
     feat_gc = None
@@ -350,9 +353,12 @@ def _grab_features(
             features.update(feat_genomic)
     if kmers:
         kmer_info = _populate_kmer_dict(
-            kmer_k, records, features, gather_kmer_info=gather_kmer_info
+            kmer_k,
+            records,
+            features,
+            gather_kmer_info=gather_kmer_info,
+            filter_structural=filter_structural,
         )
-        all_kmer_info.extend(kmer_info)
     if kmers_pc:
         kmer_info = _populate_kmer_dict(
             kmer_k_pc,
@@ -361,6 +367,7 @@ def _grab_features(
             kmer_type="PC",
             mapping_method=mapping_method,
             gather_kmer_info=gather_kmer_info,
+            filter_structural=filter_structural,
         )
         all_kmer_info.extend(kmer_info)
     if gc:
@@ -413,6 +420,9 @@ def build_table(
     target_column: str = "Human Host",
     mapping_method: str = "shen_2007",
     gather_kmer_info: bool = False,
+    filter_structural: Optional[
+        Literal["surface_exposed", "not_surface_exposed", "all_features"]
+    ] = None,
 ):
     if kmer_k is None:
         kmer_k = [10]
@@ -455,6 +465,7 @@ def build_table(
                 kmer_k_pc,
                 mapping_method,
                 gather_kmer_info,
+                filter_structural,
             )
             all_kmer_info.extend(kmer_info)
             if this_result is not None:
@@ -476,6 +487,7 @@ def build_table(
                 kmer_k_pc,
                 mapping_method,
                 False,
+                filter_structural,
             )
             if this_result is not None:
                 calculated_feature_rows.append(this_result)

@@ -1,5 +1,10 @@
 from viral_seq.analysis import get_features
-from viral_seq.analysis.get_features import get_genomic_features, get_kmers
+from viral_seq.analysis.get_features import (
+    get_genomic_features,
+    get_kmers,
+    filter_structural_proteins,
+    get_feature_idx,
+)
 from viral_seq.analysis.spillover_predict import _append_recs
 import pandas as pd
 from pandas.testing import assert_frame_equal
@@ -7,6 +12,7 @@ import os
 from importlib.resources import files
 from Bio import SeqIO
 import pytest
+from numpy.testing import assert_array_equal
 
 
 @pytest.mark.parametrize(
@@ -133,3 +139,85 @@ def test_get_kmers(accession, kmer_type, mapping_method, exp_kmer, exp_len):
 
     assert test_kmer == exp_kmer
     assert len(mapped_kmers) == exp_len
+
+
+@pytest.mark.parametrize(
+    "filter_structural, exp_out",
+    [
+        # this case tests that the function finds the correct virus-protein
+        # pairs with ``filter_structural=='surface_exposed'``
+        (
+            "surface_exposed",
+            [False] * 6 + [True] + [False] * 10,
+        ),
+        # this case tests that the function finds the correct virus-protein
+        # pairs with ``filter_structural=='not_surface_exposed'``
+        (
+            "not_surface_exposed",
+            [False] + [True] * 5 + [False] + [True] * 8 + [False] + [True],
+        ),
+    ],
+)
+def test_filter_structural_proteins(filter_structural, exp_out):
+    out = []
+    tests_dir = (
+        files("viral_seq.tests.cache_test") / "NC_001563.2"
+    )  # aka West Nile Virus
+    test_record = _append_recs(tests_dir)
+    for feature in test_record.features:
+        if feature.type in ["CDS", "mat_peptide"]:
+            virus_name = test_record.annotations["organism"]
+            protein_name = feature.qualifiers.get("product")[0]
+            is_structural = filter_structural_proteins(
+                virus_name, protein_name, filter_structural
+            )
+            out.append(is_structural)
+
+    assert_array_equal(out, exp_out)
+
+
+@pytest.mark.parametrize(
+    "filter_structural, exp_len",
+    [
+        # test case for only surface exposed protein kmers
+        ("surface_exposed", 488),
+        # test case for only non-surface exposed protein kmers
+        ("not_surface_exposed", 2893),
+        # test case for gathering kmers from only ``CDS`` features
+        (None, 3464),
+        # test case for gathering kmers from ``CDS`` and ``mat_peptide`` features without ``polyproteins``
+        ("all_features", 3381),
+    ],
+)
+def test_get_kmers_filter_structural(filter_structural, exp_len):
+    tests_dir = (
+        files("viral_seq.tests.cache_test") / "NC_001563.2"
+    )  # aka West Nile Virus
+    test_record = _append_recs(tests_dir)
+
+    kmers, _ = get_kmers(
+        [test_record],
+        kmer_type="PC",
+        mapping_method="jurgen_schmidt",
+        filter_structural=filter_structural,
+    )
+
+    assert len(kmers) == exp_len
+
+
+@pytest.mark.parametrize(
+    "accession, exp_out",
+    [
+        # this test case checks that the correct indices are returned by _get_feature_idx
+        # for the accession corresponding to ``West Nile Virus``
+        ("NC_001563.2", (5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20)),
+        # this test case checks that the single polyprotein product idx is returned for ``FMDV``
+        ("NC_039210.1", (2,)),
+    ],
+)
+def test_get_feature_idx(accession, exp_out):
+    tests_dir = files("viral_seq.tests.cache_test") / accession
+    test_record = _append_recs(tests_dir)
+    idx_out = get_feature_idx(test_record)
+
+    assert idx_out == exp_out

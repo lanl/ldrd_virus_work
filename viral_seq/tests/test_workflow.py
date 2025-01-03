@@ -589,7 +589,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
 
 
 @pytest.mark.parametrize(
-    "accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method",
+    "accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method, filter_structural",
     [
         # this test checks that the correct virus-protein pairs are found
         # when using the shen_2007 mapping scheme.
@@ -612,6 +612,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
                 "nonstructural protein NS2A",
             ],
             "shen_2007",
+            None,
         ),
         # this test checks that the correct virus-protein products are found
         # when using the "jurgen_schmidt" mapping scheme
@@ -622,6 +623,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["kmer_AA_LVFGGIT"],
             ["nonstructural protein NS2A"],
             "jurgen_schmidt",
+            None,
         ),
         # this test checks that nothing is returned for accession records
         # that do not contain instances of the topN kmers
@@ -632,6 +634,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             [],
             [],
             "jurgen_schmidt",
+            None,
         ),
         # this test checks that the function finds single polyprotein gene products
         (
@@ -641,6 +644,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["kmer_PC_300840"],
             ["polyprotein"],
             "jurgen_schmidt",
+            None,
         ),
         # this test checks the patch for the bug fix in !122.
         # the genbank file for Ross River Virus contains two
@@ -655,6 +659,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["kmer_PC_60837226", "kmer_PC_45724566"],
             ["nsP3 protein", "E2 protein"],
             "jurgen_schmidt",
+            None,
         ),
         # this case utilizes the PC kmer '6203664', which is the longest kmer shared between the viral sequences
         # stored in the multi-cassette accession for PHV, which recapitulates the bug described in issue #107
@@ -672,6 +677,32 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
                 "envelope surface glycoprotein G1",
             ],
             "jurgen_schmidt",
+            None,
+        ),
+        # the two test cases below check that the function works as intended when setting
+        # ``--filter-structural surface_exposed`` the function returns only surface exposed proteins
+        # and when ``--filter-structural not_surface_exposed`` the function returns only non-structural proteins
+        (
+            ["NC_001563.2"],
+            2,
+            ["WNV"] * 2,
+            ["kmer_PC_164156", "kmer_PC_514113"],
+            ["envelope protein E", "envelope protein E"],
+            "shen_2007",
+            "surface_exposed",
+        ),
+        (
+            ["NC_001563.2"],
+            3,
+            ["WNV"] * 3,
+            ["kmer_PC_633741", "kmer_PC_471363", "kmer_AA_LVFGGIT"],
+            [
+                "nonstructural protein NS3",
+                "RNA-dependent RNA polymerase NS5",
+                "nonstructural protein NS2A",
+            ],
+            "shen_2007",
+            "not_surface_exposed",
         ),
     ],
 )
@@ -682,6 +713,7 @@ def test_get_kmer_info(
     exp_kmers,
     exp_proteins,
     mapping_method,
+    filter_structural,
 ):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
@@ -758,7 +790,7 @@ def test_get_kmer_info(
     data_in = get_features.KmerData(mapping_method, new_kmers)
 
     viruses, kmers, protein_name = workflow.get_kmer_info(
-        data_in, records, tbl, mapping_method
+        data_in, records, tbl, mapping_method, filter_structural
     )
 
     assert_array_equal(viruses, exp_viruses)

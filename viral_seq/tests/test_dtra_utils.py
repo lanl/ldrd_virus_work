@@ -587,8 +587,7 @@ def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
     assert all_kmer_info_df.iloc[0].kmer_names == "kmer_PC_6536613006"
     assert all_kmer_info_df.iloc[0].kmer_maps == "kmer_AA_MRHIICHGGV"
     assert all_kmer_info_df.iloc[0].virus_name == "Human adenovirus 5"
-    assert all_kmer_info_df.iloc[0].include_pair
-    assert all_kmer_info_df.shape == (11037, 6)
+    assert all_kmer_info_df.shape == (11037, 5)
 
 
 def test_load_all_kmer_info():
@@ -615,7 +614,6 @@ def test_transform_kmer_data():
     kmer_maps = [f"kmer_AA_{string.ascii_uppercase[v]}" for v in values]
     viruses = [f"virus_{v}" for v in values]
     proteins = [f"proteins_{v}" for v in values]
-    include = [bool(v % 2) for v in values]
 
     kmer_data_list = []
     for i in range(len(values)):
@@ -626,7 +624,6 @@ def test_transform_kmer_data():
                 [kmer_maps[i]],
                 viruses[i],
                 proteins[i],
-                include[i],
             )
         )
     # expected dictionary
@@ -637,7 +634,6 @@ def test_transform_kmer_data():
             "kmer_maps": {i: [f"kmer_AA_{string.ascii_uppercase[i]}"] for i in values},
             "virus_name": {i: f"virus_{i}" for i in values},
             "protein_name": {i: f"proteins_{i}" for i in values},
-            "include_pair": {i: bool(i % 2) for i in values},
         }
     )
     df_out = dtra_utils.transform_kmer_data(kmer_data_list)

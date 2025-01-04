@@ -93,6 +93,14 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 
 # TODO: this class object serves as a placeholder for
 # a different class to be implemented in accordance with issue #97
+# this class should return:
+#     1. kmer feature
+#     2. mapping_method
+#     3. virus name
+#     4. other important information
+# ...and should
+#     a. use the kmer as a key to build a default dictionary that stores the associated information
+#     b. be used to lookup the virus names associated with a specific kmer
 class kmer_data:
     def __init__(self, mapping_method: str, kmer_data: list[str]):
         self.mapping_method = mapping_method
@@ -878,7 +886,7 @@ def build_cache(cache_checkpoint=3, debug=False, data_file=None):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
+def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=None):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -987,9 +995,10 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                 if debug:
                     idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
                     validate_feature_table(this_outfile, idx, prefix)
-
+        return None
     elif workflow == "DTRA":
         if feature_checkpoint > 0:
+            all_kmer_info = {}
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
@@ -1018,7 +1027,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             "To restart at this point use --features",
                             this_checkpoint,
                         )
-                        cli.calculate_table(
+                        kmer_info = cli.calculate_table(
                             [
                                 "--file",
                                 file,
@@ -1039,7 +1048,9 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             ],
                             standalone_mode=False,
                         )
+                        all_kmer_info[f"k_{k}"] = kmer_info
                         this_checkpoint -= 1
+        return all_kmer_info
 
 
 def feature_selection_rfc(
@@ -1491,7 +1502,7 @@ if __name__ == "__main__":
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
     else:
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(
+    all_kmer_info = build_tables(
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
     X_train, y_train = feature_selection_rfc(

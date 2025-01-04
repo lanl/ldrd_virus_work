@@ -35,7 +35,7 @@ def get_similarity_features(
     return df_features.join(df_simfeats, rsuffix=suffix)
 
 
-def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
+def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None):
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
     if kmer_type == "PC" and mapping_method is None:
@@ -55,8 +55,16 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
                         new_seq += aa_map(each, method=mapping_method)
                     this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                    kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
-    return kmers
+                    kmer_name = "kmer_" + kmer_type + "_" + str(kmer)
+                    kmers[kmer_name] += 1
+                    mm = mapping_method if mapping_method is not None else "None"
+                    kmer_info[kmer_name].append(
+                        {
+                            "virus_name": record.annotations["organism"],
+                            "mapping_method": mm,
+                        }
+                    )
+    return kmer_info, kmers
 
 
 def get_gc(records):

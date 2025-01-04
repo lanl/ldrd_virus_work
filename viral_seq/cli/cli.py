@@ -3,6 +3,7 @@ import viral_seq.analysis.spillover_predict as sp
 import viral_seq.analysis.get_features as gf
 import pandas as pd
 import pickle
+from collections import defaultdict
 import os
 
 
@@ -249,6 +250,13 @@ def pull_ensembl_transcripts(email, cache, file):
     default="shen_2007",
     help="Preference of scheme for mapping AA-kmers to PC-kmers",
 )
+# @click.option(
+#     "--kmer-info",
+#     "-ki",
+#     type=defaultdict(list),
+#     default=None,
+#     help="Dictionary for storing information relation to kmer features"
+# )
 def calculate_table(
     cache,
     file,
@@ -268,8 +276,10 @@ def calculate_table(
     random_state,
     target_column,
     mapping_method,
+    # kmer_info,
 ):
     """Build a data table from given viral species and selected features."""
+    kmer_info = defaultdict(list)
     df = pd.read_csv(file)
     rfc = None
     if rfc_file is not None:
@@ -305,7 +315,7 @@ def calculate_table(
         kmer_k = [int(i) for i in kmer_k.split()]
     if features_kmers_pc:
         kmer_k_pc = [int(i) for i in kmer_k_pc.split()]
-    df_feats = sp.build_table(
+    df_feats, kmer_info = sp.build_table(
         df,
         rfc=rfc,
         cache=cache,
@@ -323,6 +333,7 @@ def calculate_table(
         random_state=random_state,
         target_column=target_column,
         mapping_method=mapping_method,
+        kmer_info=kmer_info,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
@@ -339,6 +350,8 @@ def calculate_table(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
         sp.save_files(df_feats, outfile)
+
+    return kmer_info
 
 
 # --- cross-validation ---

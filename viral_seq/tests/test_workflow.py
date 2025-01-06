@@ -10,6 +10,7 @@ from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from sklearn.metrics import roc_curve, auc
+from sklearn.ensemble import RandomForestClassifier
 
 
 def test_optimization_plotting(tmpdir):
@@ -836,81 +837,59 @@ def test_feature_count_consensus():
 
 
 def test_train_clfr():
+    # this test checks that the ranking of features is performed correctly during classifier training.
+    # the synthetic dataset is initialized with random numbers, and then two feature columns are assigned
+    # values that are correlated/inversely with the data targets, such that if the classifier aggregation
+    # is working correctly, these two features should show up at the top of the ranked list of features
     random_state = 123
     rng = np.random.default_rng(random_state)
-    kmer_data = rng.integers(0, 2, size=(12, 12))
-    data_target = [
-        True,
-        False,
-        True,
-        False,
-        True,
-        False,
-        True,
-        False,
-        True,
-        False,
-        True,
-        True,
-    ]
-    kmer_data[0, :] = [1 if x is True else 0 for x in data_target]
-    kmer_data[1, :] = [0 if x is True else 1 for x in data_target]
+    kmer_data = rng.integers(0, 2, size=(1000, 12))
+    data_target = np.asarray([1, 0] * 500)
+    data_target[-1] = 1
 
-    kmer_names = [
-        "kmer_AA_TRYWQSV",
-        "kmer_AA_LKIVNGS",
-        "kmer_AA_AAARTHI",
-        "kmer_AA_VVLLITY",
-        "kmer_PC_ABAAGCA",
-        "kmer_PC_GCACADG",
-        "kmer_PC_ABCAGCA",
-        "kmer_PC_GCACEDG",
-        "kmer_PC_0445800",
-        "kmer_PC_0325678",
-        "kmer_PC_1834561",
-        "kmer_PC_0081453",
-    ]
+    kmer_data[:, 0] = data_target
+    kmer_data[:, 1] = 1 - data_target
 
-    train_data = pd.DataFrame(np.transpose(kmer_data), columns=kmer_names)
+    kmer_names = np.array(
+        [
+            "kmer_AA_TRYWQSV",
+            "kmer_AA_LKIVNGS",
+            "kmer_AA_AAARTHI",
+            "kmer_AA_VVLLITY",
+            "kmer_PC_ABAAGCA",
+            "kmer_PC_GCACADG",
+            "kmer_PC_ABCAGCA",
+            "kmer_PC_GCACEDG",
+            "kmer_PC_0445800",
+            "kmer_PC_0325678",
+            "kmer_PC_1834561",
+            "kmer_PC_0081453",
+        ]
+    )
+
+    train_data = pd.DataFrame(kmer_data, columns=kmer_names)
     y = pd.Series(data_target)
 
-    (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
-        train_data, y, n_folds=5, max_features=3, random_state=random_state
+    classifier_parameters = dict(
+        clfr_name=RandomForestClassifier, n_estimators=100, n_jobs=None
     )
-    feature_rank = list(feature_count["Features"])
-    count_rank = list(feature_count["Counts"])
-    pearson_rank = list(feature_count["Pearson R"])
+    (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
+        train_data,
+        y,
+        classifier_parameters,
+        n_folds=2,
+        max_features=3,
+        random_state=random_state,
+    )
+    feature_rank = feature_count["Features"]
+    count_rank = feature_count["Counts"]
+    pearson_rank = feature_count["Pearson R"]
 
-    feature_rank_exp = [
-        "kmer_AA_TRYWQSV",
-        "kmer_AA_LKIVNGS",
-        "kmer_PC_GCACEDG",
-        "kmer_AA_AAARTHI",
-        "kmer_PC_GCACADG",
-        "kmer_AA_VVLLITY",
-        "kmer_PC_ABAAGCA",
-        "kmer_PC_ABCAGCA",
-        "kmer_PC_0445800",
-        "kmer_PC_0325678",
-        "kmer_PC_1834561",
-        "kmer_PC_0081453",
-    ]
-    count_rank_exp = [5.0, 5.0, 3.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    pearson_rank_exp = [
-        0.9996711941300674,
-        -0.9996691301273101,
-        0.9730987271741324,
-        -0.9805544971707032,
-        -0.9621383402310417,
-        -0.3000284520602986,
-        -0.9630255174306687,
-        -0.1466167849072281,
-        0.9708902952359766,
-        -0.3634615375823603,
-        -0.44967868772588543,
-        0.2450408021387,
-    ]
+    feature_rank_exp = kmer_names[np.asarray([0, 1, 10, 7, 9, 2, 3, 4, 5, 6, 8, 11])]
 
+    count_rank_exp = [2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    assert np.all(np.abs(np.array(pearson_rank[:2])) > 0.99)
+    assert np.all(np.abs(np.array(pearson_rank[2:])) <= 0.80)
     assert_array_equal(feature_rank, feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
-    assert np.allclose(pearson_rank, pearson_rank_exp)

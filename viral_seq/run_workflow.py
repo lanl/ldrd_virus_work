@@ -381,6 +381,7 @@ def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFram
 def train_clfr(
     train_data: pd.DataFrame,
     data_target: pd.Series,
+    classifier_parameters: dict,
     n_folds: int,
     max_features: int,
     random_state: int,
@@ -394,6 +395,8 @@ def train_clfr(
         The feature dataset for training the ML classifiers
     data_target: pd.Series
         The feature targets for the given target column
+    classifier_parameters: dict
+        dictionary containing the classifier and associated parameters to initialize classifier
     n_folds: int
         number of training cross-folds to perform
     max_features: int
@@ -413,9 +416,10 @@ def train_clfr(
         for plotting the consensus ROC curve
     """
     cv = StratifiedKFold(n_splits=n_folds)
-    clfr = RandomForestClassifier(
-        n_estimators=10000, n_jobs=-1, random_state=random_state
-    )
+    model = classifier_parameters.get("clfr_name", RandomForestClassifier)
+    n_estimators = classifier_parameters.get("n_estimators")
+    n_jobs = classifier_parameters.get("n_jobs")
+    clfr = model(n_estimators=n_estimators, n_jobs=n_jobs, random_state=random_state)
 
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
@@ -471,7 +475,7 @@ def train_clfr(
     pearson_r_clfr = np.mean(pearson_r_clfr, axis=0)
     feature_count["Pearson R"] = pearson_r_clfr
     feature_count.sort_values(by=["Counts"], ascending=False, inplace=True)
-    feature_count["Counts"] = feature_count["Counts"] / 2
+    feature_count["Counts"] = feature_count["Counts"] // 2
 
     # average the shap feature consensus values across all training folds
     shap_clfr_consensus = np.nanmean(shap_values_clfr, axis=0)
@@ -1876,8 +1880,11 @@ if __name__ == "__main__":
         # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
         n_folds = 5
         max_features = 20
+        classifier_parameters = dict(
+            clfr_name=RandomForestClassifier, n_estimators=10000, n_jobs=-1
+        )
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
-            X, y, n_folds, max_features, random_state
+            X, y, classifier_parameters, n_folds, max_features, random_state
         )
         top_features_array = feature_count["Features"].values[:20]
 

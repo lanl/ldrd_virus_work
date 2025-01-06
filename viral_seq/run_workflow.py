@@ -23,6 +23,7 @@ from time import perf_counter
 import tarfile
 import shap
 from collections import defaultdict
+import os
 
 matplotlib.use("Agg")
 
@@ -767,7 +768,8 @@ if __name__ == "__main__":
             best_params[name] = best_params_group[val["group"]]
         elif optimize == "pre-optimized":
             print("Using hyperparameters pre-caclulated for", val["group"])
-            this_filename = "params_" + val["group"] + ".json"
+            train_file_suff = os.path.splitext(os.path.basename(train_file))[0]
+            this_filename = f"params_{val['group']}_{train_file_suff}.json"
             with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
                 res = json.load(f)
             best_params[name] = res["params"]

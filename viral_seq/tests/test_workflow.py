@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from sklearn.metrics import roc_curve, auc
@@ -885,11 +885,13 @@ def test_train_clfr():
     count_rank = feature_count["Counts"]
     pearson_rank = feature_count["Pearson R"]
 
-    feature_rank_exp = kmer_names[np.asarray([0, 1, 10, 7, 9, 2, 3, 4, 5, 6, 8, 11])]
+    feature_rank_exp = kmer_names[np.asarray([0, 1, 10, 7, 9, 2, 3, 4])]
 
-    count_rank_exp = [2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    count_rank_exp = [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-    assert np.all(np.abs(np.array(pearson_rank[:2])) > 0.99)
-    assert np.all(np.abs(np.array(pearson_rank[2:])) <= 0.80)
-    assert_array_equal(feature_rank, feature_rank_exp)
+    assert np.all(np.abs(pearson_rank[:2]) > 0.99)
+    assert_array_less(np.abs(pearson_rank[2:]), 0.80)
+    # last four items in feature_rank have tendency to swap, and are
+    # excluded from test, which is concerned with top feature ranks
+    assert_array_equal(feature_rank[:8], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)

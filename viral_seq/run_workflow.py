@@ -67,7 +67,6 @@ class kmer_data:
 
 def feature_signs(
     is_exposed: list,
-    not_exposed: list,
     found_kmers: list,
     feature_count: pd.DataFrame,
 ) -> tuple:
@@ -79,8 +78,6 @@ def feature_signs(
     -----------
     is_exposed: list
         list of kmers that are surface exposed
-    not_exposed: list
-        list of kmers that are not surface exposed
     found_kmers: list
         list of all topN kmers
     feature_count: pd.DataFrame
@@ -194,8 +191,7 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
-
-def plot_cv_roc(clfr_preds: list, target_column: str, path: Path):
+def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     """
     Plot ROC curve from ml cross-validation predictions
 
@@ -380,7 +376,6 @@ def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFram
     importances_df.reset_index(inplace=True)
 
     return importances_df
->>>>>>> 922ba0c (ENH: Abstract feature importance dataframe creation to function with test)
 
 
 def train_clfr(
@@ -591,7 +586,7 @@ def FIC_plot(
 
     for kmer_idx, p in enumerate(bars):
         # calculate corresponding surface exposure %
-        kmer_name = topN_kmers[kmer_idx][8:]
+        kmer_name = top_features[kmer_idx][8:]
         percent_exposed = surface_exposed_dict[kmer_name]
         percent_lbl = f"{percent_exposed:.2f}%"
 
@@ -1954,7 +1949,7 @@ if __name__ == "__main__":
             index=False,
         )
 
-        kmer_info = kmer_data(mapping_method, array2)
+        kmer_info = kmer_data(mapping_method, top_features_array)
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
@@ -2101,7 +2096,6 @@ if __name__ == "__main__":
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            not_exposed,
             found_kmers,
             feature_count,
         )

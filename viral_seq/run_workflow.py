@@ -251,7 +251,7 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
-def plot_cv_roc(clfr_preds: list, target_column: str, path: Path):
+def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     """
     Plot ROC curve from ml cross-validation predictions
 
@@ -2068,7 +2068,7 @@ if __name__ == "__main__":
         )
         print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
-        kmer_info = kmer_data(mapping_method, array2)
+        kmer_info = kmer_data(mapping_method, top_features_array)
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(

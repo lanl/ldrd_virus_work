@@ -535,7 +535,7 @@ def train_clfr(
     pearson_r_clfr = np.mean(pearson_r_clfr, axis=0)
     feature_count["Pearson R"] = pearson_r_clfr
     feature_count.sort_values(by=["Counts"], ascending=False, inplace=True)
-    feature_count["Counts"] = feature_count["Counts"] // 2
+    feature_count["Counts"] = feature_count["Counts"] / 2
 
     # average the shap feature consensus values across all training folds
     shap_clfr_consensus = np.nanmean(shap_values_clfr, axis=0)

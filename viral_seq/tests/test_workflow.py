@@ -9,8 +9,6 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
-from numpy.testing import assert_array_equal
-from matplotlib.testing.compare import compare_images
 from sklearn.metrics import roc_curve, auc
 
 
@@ -284,7 +282,7 @@ def test_fic_plot(tmp_path):
     target_column = "Is_Integrin"
 
     response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
-    exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "x", "-", "+"]
+    exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "-", "-", "+"]
 
     surface_exposed_dict = {
         "kmer_PC_CDDEEC": 42.86,

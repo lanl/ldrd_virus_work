@@ -262,7 +262,7 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
-def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
+def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path) -> None:
     """
     Plot ROC curve from ml cross-validation predictions
 
@@ -386,7 +386,6 @@ def FIC_plot(
     feature_count,
     n_folds,
     target_column,
-    exposure_status_sign,
     response_effect_sign,
     surface_exposed_dict,
     path,
@@ -407,8 +406,6 @@ def FIC_plot(
         number of cv folds performed by classifier
     target_column: str
         name of column on which classifier was trained
-    exposure_status_sign: list
-        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
     response_effect_sign: list
         list of +/- symbols denoting response effect from shap importance pearson-r correlation
     surface_exposed_dict: dict
@@ -2200,7 +2197,6 @@ if __name__ == "__main__":
             feature_count,
             n_folds,
             target_column,
-            exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
             n_classifiers,

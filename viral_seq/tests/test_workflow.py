@@ -399,7 +399,6 @@ def test_fic_plot(tmp_path):
     shap_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     clfr_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
-    exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "-", "-", "+"]
 
     surface_exposed_dict = {
         "kmer_PC_CDDEEC": 42.86,
@@ -424,7 +423,6 @@ def test_fic_plot(tmp_path):
         df_in,
         n_folds,
         target_column,
-        exposure_status_sign,
         response_effect_sign,
         surface_exposed_dict,
         n_classifiers,

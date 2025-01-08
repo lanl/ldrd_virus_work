@@ -1851,12 +1851,17 @@ if __name__ == "__main__":
             "membrane protein V1",
             "hexon",
             "hexon protein",
+            "3A",
+            "3A protein",
+            "Asp",  # HIV-1 Antisense Protein
+            "CR1-beta",
         ]
         # list comprehension
         surface_exposed_status = [
             "Yes" if item in surface_exposed else "No" for item in protein_names
         ]
-        # manually curated on the basis of links (DOIs and ViralZone urls) that I could find for a subset of items in `np.unique(protein_names)`. The curation of references is currently incomplete.
+        # manually curated on the basis of links (DOIs and ViralZone urls) that I could
+        # find for a subset of items in `np.unique(protein_names)`. The curation of references is currently incomplete.
         references = [
             "membrane protein M",
             "1B(VP2)",

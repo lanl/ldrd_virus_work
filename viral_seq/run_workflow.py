@@ -951,7 +951,15 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                         this_checkpoint -= 1
 
 
-def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
+def feature_selection_rfc(
+    feature_selection,
+    debug,
+    n_jobs,
+    random_state,
+    wf=None,
+    mapping_method=None,
+    positive_controls=None,
+):
     """Sub-select features using best performing from a trained random forest classifier"""
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
@@ -959,6 +967,30 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
         X, y = sp.get_training_columns(
             table_filename=train_files, class_column=target_column
         )
+        # if running DTRA workflow, check for presence of positive controls in unfiltered training dataset
+        if wf == "DTRA":
+            # count of PC positive controls in pre-feature selection dataset
+            pos_con_all_PC = check_positive_controls(
+                positive_controls=positive_controls,
+                kmers_list=list(X.columns),
+                mapping_method=mapping_method,
+                mode="PC",
+            )
+            print(
+                "Count of Positive Control PC k-mers in Full Train Dataset:\n",
+                pos_con_all_PC.tail(1).to_string(index=False),
+            )
+            # count of AA positive controls in pre-feature selection dataset
+            pos_con_all_AA = check_positive_controls(
+                positive_controls=positive_controls,
+                kmers_list=list(X.columns),
+                mapping_method=mapping_method,
+                mode="AA",
+            )
+            print(
+                "Count of Positive Control AA k-mers in Full Train Dataset:\n",
+                pos_con_all_AA.tail(1).to_string(index=False),
+            )
         if feature_selection == "none":
             print(
                 "All training features will be used as X_train in the following steps."
@@ -1342,11 +1374,38 @@ if __name__ == "__main__":
     build_tables(
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
+
+    # Here is a list of common integrin-binding motifs. These motifs interact with
+    # specific integrins, playing critical roles in cell adhesion, signaling, and
+    # interaction with the extracellular matrix:
+    # RGD (Arg-Gly-Asp)
+    # KGE (Lys-Gly-Glu)
+    # LDV (Leu-Asp-Val)
+    # DGEA (Asp-Gly-Glu-Ala)
+    # REDV (Arg-Glu-Asp-Val)
+    # YGRK (Tyr-Gly-Arg-Lys)
+    # PHSRN (Pro-His-Ser-Arg-Asn)
+    # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
+
+    pos_controls = [
+        "RGD",
+        "KGE",
+        "LDV",
+        "DGEA",
+        "REDV",
+        "YGRK",
+        "PHSRN",
+        "SVVYGLR",
+    ]
+
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
         n_jobs=n_jobs,
         random_state=random_state,
+        wf=workflow,
+        mapping_method=mapping_method,
+        positive_controls=pos_controls,
     )
     if workflow == "DR":
         X_test, y_test = get_test_features(
@@ -1552,29 +1611,6 @@ if __name__ == "__main__":
 
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
-
-        # Here is a list of common integrin-binding motifs. These motifs interact with
-        # specific integrins, playing critical roles in cell adhesion, signaling, and
-        # interaction with the extracellular matrix:
-        # RGD (Arg-Gly-Asp)
-        # KGE (Lys-Gly-Glu)
-        # LDV (Leu-Asp-Val)
-        # DGEA (Asp-Gly-Glu-Ala)
-        # REDV (Arg-Glu-Asp-Val)
-        # YGRK (Tyr-Gly-Arg-Lys)
-        # PHSRN (Pro-His-Ser-Arg-Asn)
-        # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
-
-        pos_controls = [
-            "RGD",
-            "KGE",
-            "LDV",
-            "DGEA",
-            "REDV",
-            "YGRK",
-            "PHSRN",
-            "SVVYGLR",
-        ]
 
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)

@@ -382,7 +382,27 @@ def test_pos_con_columns(target_column, len_exp_keys):
     assert len(out_df.columns) == len_exp_keys
 
 
-def test_fic_plot(tmp_path):
+@pytest.mark.parametrize(
+    "shap_counts, clfr_counts, n_folds, plot_title",
+    # fractional values of shap and clfr counts are used to check that
+    # thresholds for plotting percent surface exposure values are appropriate
+    # for deciding when to plot inside the bar vs outside the bar
+    [
+        (
+            np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+            np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+            2,
+            "test_1",
+        ),
+        (
+            np.array([10.0, 9.0, 0.0, 2.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0]),
+            np.array([5.0, 1.0, 9.0, 5.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]),
+            10,
+            "test_2",
+        ),
+    ],
+)
+def test_fic_plot(tmp_path, shap_counts, clfr_counts, n_folds, plot_title):
     kmer_features = [
         "kmer_PC_FECAEA",
         "kmer_PC_CCACAD",
@@ -395,9 +415,8 @@ def test_fic_plot(tmp_path):
         "kmer_PC_CCGDEA",
         "kmer_PC_CDDEEC",
     ]
+    target_column = "IN"
 
-    shap_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-    clfr_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
 
     surface_exposed_dict = {
@@ -413,12 +432,13 @@ def test_fic_plot(tmp_path):
         "kmer_PC_FECAEA": 14.29,
     }
 
-    n_folds = 2
     n_classifiers = 1
     df_in = pd.DataFrame()
+    clfr_props = clfr_counts / (n_folds * 2) * 100
+    shap_props = shap_counts / (n_folds * 2) * 100
     df_in["Features"] = kmer_features
-    df_in["Clfr"] = clfr_counts
-    df_in["SHAP"] = shap_counts
+    df_in["Classifier Proportion"] = clfr_props
+    df_in["SHAP Proportion"] = shap_props
     workflow.FIC_plot(
         df_in,
         n_folds,
@@ -431,8 +451,8 @@ def test_fic_plot(tmp_path):
 
     assert (
         compare_images(
-            files("viral_seq.tests.expected") / "FIC_expected.png",
-            str(tmp_path / "FIC_Integrin.png"),
+            files("viral_seq.tests.expected") / f"FIC_expected_{plot_title}.png",
+            str(tmp_path / "FIC_Is_Integrin.png"),
             0.001,
         )
         is None
@@ -1109,3 +1129,17 @@ def test_pearson_aggregation():
     ]
     # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
     assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)
+
+
+def test_sort_feature_counts():
+    feature_df = pd.DataFrame()
+    kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_GCAFGDG", "kmer_PC_0134657"])
+    feature_df["Features"] = kmer_features
+    feature_df["Clfr"] = [5, 1, 5]
+    feature_df["SHAP"] = [4, 1, 1]
+    feature_df["Pearson R"] = [0.99, -0.99, -0.41]
+
+    out_df = workflow.sort_feature_counts(feature_df, n_folds=5)
+    out_features = np.asarray(out_df["Features"])
+    out_exp = kmer_features[np.asarray([1, 2, 0])]
+    assert_array_equal(out_exp, out_features)

@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 
@@ -88,63 +88,59 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Both == 4
 
 
-@pytest.mark.parametrize(
-    "kmers_list, kmers_status, kmers_topN, is_exposed_exp",
-    [
-        # this test case checks the output of the function when using the
-        # 'shen_2007' mapping method. This includes a fix for the bug in
-        # issue #93, which was incorrectly mapping the kmer 'kmer_AA_CADAFFE'
-        # as surface exposed due to the lack of 'kmer_' prefixes causing double
-        # counting of "kmer_status = 'yes'" for both (PC and AA) versions of the kmer
-        (
-            [
-                "kmer_PC_CADAFFE",
-                "kmer_PC_CADAFFE",
-                "kmer_AA_CCABDAC",
-                "kmer_AA_CCABDAC",
-                "kmer_AA_CCABDAC",
-                "kmer_PC_CCAACDA",
-                "kmer_PC_CCAACDA",
-                "kmer_AA_CADAFFE",
-                "kmer_AA_CADAFFE",
-                "kmer_PC_ECDGDE",
-            ],
-            ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"],
-            [
-                "kmer_PC_CADAFFE",
-                "kmer_AA_CCABDAC",
-                "kmer_PC_CCAACDA",
-                "kmer_AA_CADAFFE",
-                "kmer_PC_ECDGDE",
-            ],
-            ["kmer_PC_CADAFFE", "", "kmer_PC_CCAACDA", "", "kmer_PC_ECDGDE"],
-        ),
-        # this test case checks the output of the function when using the 'jurgen_schmidt'
-        # mapping method.
-        (
-            [
-                "kmer_PC_01234",
-                "kmer_AA_ABCDE",
-                "kmer_PC_1234567",
-                "kmer_PC_1234567",
-                "kmer_AA_HIJKL",
-                "kmer_AA_HIJKL",
-            ],
-            ["Yes", "No", "Yes", "Yes", "No", "No"],
-            [
-                "kmer_PC_01234",
-                "kmer_AA_ABCDE",
-                "kmer_PC_1234567",
-                "kmer_AA_HIJKL",
-            ],
-            ["kmer_PC_01234", "", "kmer_PC_1234567", ""],
-        ),
-    ],
-)
-def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_exp):
-    kmers_list_status = list(set(zip(kmers_list, kmers_status)))
-    is_exposed = workflow.label_surface_exposed(kmers_list_status, kmers_topN)
-    np.testing.assert_array_equal(is_exposed, is_exposed_exp)
+def test_label_surface_exposed():
+    kmers_status = ["yes", "no", "no", "no", "yes"]
+
+    kmers_topN = [
+        "kmer_PC_CADAFFE",
+        "kmer_AA_CCABDAC",
+        "kmer_PC_CCAACDA",
+        "kmer_AA_CADAFFE",
+        "kmer_PC_085173",
+    ]
+
+    exposed_kmers_exp = ["kmer_PC_CADAFFE", "kmer_AA_CADAFFE"]
+    surface_exposed_exp = {
+        "virus_names": {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
+        "protein_names": {0: "F", 1: "G", 2: "H", 3: "I", 4: "J"},
+        "surface_exposed_status": {0: "yes", 1: "no", 2: "no", 3: "no", 4: "yes"},
+        "kmer_names": {
+            0: "kmer_PC_CADAFFE",
+            1: "kmer_AA_CCABDAC",
+            2: "kmer_PC_085173",
+            3: "kmer_PC_CCAACDA",
+            4: "kmer_AA_CADAFFE",
+        },
+        "_merge": {0: "both", 1: "both", 2: "both", 3: "both", 4: "both"},
+    }
+    surface_exposed_exp = pd.DataFrame(surface_exposed_exp)
+    virus_names_surface = np.array(["A", "B", "C", "D", "E"])
+    protein_names_surface = np.array(["F", "G", "H", "I", "J"])
+    virus_names_info = virus_names_surface[np.asarray([0, 1, 3, 4, 2])]
+    protein_names_info = protein_names_surface[np.asarray([0, 1, 3, 4, 2])]
+
+    surface_exposed_df = pd.DataFrame()
+    surface_exposed_df["virus_names"] = virus_names_surface
+    surface_exposed_df["protein_names"] = protein_names_surface
+    surface_exposed_df["surface_exposed_status"] = kmers_status
+
+    kmer_info_df = pd.DataFrame()
+    kmer_info_df["kmer_names"] = kmers_topN
+    kmer_info_df["virus_names"] = virus_names_info
+    kmer_info_df["protein_names"] = protein_names_info
+
+    exposed_kmers_list, surface_exposed_status = workflow.label_surface_exposed(
+        kmer_info_df, surface_exposed_df
+    )
+
+    assert_array_equal(exposed_kmers_list, exposed_kmers_exp)
+    assert_frame_equal(
+        surface_exposed_status.drop(columns=["_merge"]),
+        surface_exposed_exp.drop(columns=["_merge"]),
+    )
+    assert_array_equal(
+        list(surface_exposed_status["_merge"]), list(np.array(["both"] * 5))
+    )
 
 
 @pytest.mark.parametrize(
@@ -282,6 +278,9 @@ def test_fic_plot(tmp_path):
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
+    sign_dict = {
+        k: [e, r] for k, e, r in zip(array2, exposure_status_sign, response_effect_sign)
+    }
     surface_exposed_dict = {
         "kmer_PC_CDDEEC": 42.86,
         "kmer_PC_CCGDEA": 0.00,
@@ -302,8 +301,7 @@ def test_fic_plot(tmp_path):
         array1,
         n_folds,
         target_column,
-        exposure_status_sign,
-        response_effect_sign,
+        sign_dict,
         surface_exposed_dict,
         tmp_path,
     )
@@ -319,42 +317,74 @@ def test_fic_plot(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "constant, not_exposed_idx, surface_exposed_exp",
+    "constant, not_exposed_idx, sign_dict_exp",
     [
         (
             False,
             [1],
-            ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
+            {
+                "kmer_PC_CDDEEC": ["+", "+"],
+                "kmer_PC_CCGDEA": ["-", "-"],
+                "kmer_PC_CCCFCF": ["+", "+"],
+                "kmer_PC_CCAAACD": ["+", "+"],
+                "kmer_PC_CACDGA": ["+", "+"],
+                "kmer_PC_CFCEDD": ["+", "+"],
+                "kmer_PC_GCECFD": ["+", "+"],
+                "kmer_PC_ECDGDE": ["+", "-"],
+                "kmer_PC_CCACAD": ["+", "+"],
+                "kmer_PC_FECAEA": ["+", "-"],
+            },
         ),
         (
             False,
             list(range(10)),
-            ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+            {
+                "kmer_PC_CDDEEC": ["-", "+"],
+                "kmer_PC_CCGDEA": ["-", "-"],
+                "kmer_PC_CCCFCF": ["-", "+"],
+                "kmer_PC_CCAAACD": ["-", "+"],
+                "kmer_PC_CACDGA": ["-", "+"],
+                "kmer_PC_CFCEDD": ["-", "+"],
+                "kmer_PC_GCECFD": ["-", "+"],
+                "kmer_PC_ECDGDE": ["-", "-"],
+                "kmer_PC_CCACAD": ["-", "+"],
+                "kmer_PC_FECAEA": ["-", "-"],
+            },
         ),
         (
             True,
             [1],
-            ["+", "-", "+", "+", "+", "+", "+", "+", "+", "+"],
+            {
+                "kmer_PC_CDDEEC": ["+", "+"],
+                "kmer_PC_CCGDEA": ["-", "-"],
+                "kmer_PC_CCCFCF": ["+", "+"],
+                "kmer_PC_CCAAACD": ["+", "+"],
+                "kmer_PC_CACDGA": ["+", "+"],
+                "kmer_PC_CFCEDD": ["+", "+"],
+                "kmer_PC_GCECFD": ["+", "+"],
+                "kmer_PC_ECDGDE": ["+", "-"],
+                "kmer_PC_CCACAD": ["+", "+"],
+                "kmer_PC_FECAEA": ["+", "-"],
+            },
         ),
     ],
 )
 def test_feature_sign(
     constant,
     not_exposed_idx,
-    surface_exposed_exp,
+    sign_dict_exp,
 ):
-    response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     found_kmers = [
-        "CDDEEC",
-        "CCGDEA",
-        "CCCFCF",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
+        "kmer_PC_CDDEEC",
+        "kmer_PC_CCGDEA",
+        "kmer_PC_CCCFCF",
+        "kmer_PC_CCAAACD",
+        "kmer_PC_CACDGA",
+        "kmer_PC_CFCEDD",
+        "kmer_PC_GCECFD",
+        "kmer_PC_ECDGDE",
+        "kmer_PC_CCACAD",
+        "kmer_PC_FECAEA",
     ]
     is_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
@@ -370,12 +400,11 @@ def test_feature_sign(
         syn_shap_values[:, -1] = 0.0
         syn_data[:, -1] = 0
 
-    surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, syn_shap_values, syn_data
+    sign_dict = workflow.feature_signs(
+        is_exposed, found_kmers, syn_shap_values, syn_data
     )
 
-    assert_array_equal(response_effect_out, response_effect_exp)
-    assert_array_equal(surface_exposed_out, surface_exposed_exp)
+    assert_equal(sign_dict, sign_dict_exp)
 
 
 @pytest.mark.parametrize(
@@ -391,7 +420,7 @@ def test_feature_sign(
                 "kmer_PC_FEAGAD",
                 "kmer_PC_GACADA",
             ],
-            ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"],
+            ["yes", "no", "yes", "yes", "yes", "no", "no"],
             [50.0, 75.0, 0.0],
         ],
         [
@@ -404,7 +433,7 @@ def test_feature_sign(
                 "kmer_PC_741065",
                 "kmer_PC_741065",
             ],
-            ["Yes", "Yes", "Yes", "Yes", "No", "No", "No"],
+            ["yes", "yes", "yes", "yes", "no", "no", "no"],
             [100.0, 0.0],
         ],
         [
@@ -417,8 +446,8 @@ def test_feature_sign(
                 "kmer_AA_ILGNMCS",
                 "kmer_AA_ILGNMCS",
             ],
-            ["No", "No", "Yes", "No", "No", "Yes", "No"],
-            [33.333333, 0.0, 33.333333],
+            ["no", "no", "yes", "no", "no", "yes", "no"],
+            [33.333333, 33.333333, 0.0],
         ],
         [
             [
@@ -432,13 +461,19 @@ def test_feature_sign(
                 "kmer_AA_ILGNMCS",
                 "kmer_AA_ILGNMCS",
             ],
-            ["No", "No", "No", "No", "Yes", "No", "No", "Yes", "No"],
-            [0.0, 0.0, 0.0, 50.0, 0.0, 50.0],
+            ["no", "no", "no", "no", "yes", "no", "no", "yes", "no"],
+            [0.0, 50.0, 0.0, 50.0, 0.0, 0.0],
         ],
     ),
 )
 def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
-    out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
+    kmer_names = list(np.unique(syn_kmers))
+    kmer_status = pd.DataFrame()
+    kmer_status["surface_exposed_status"] = syn_status
+    kmer_status["kmer_names"] = syn_kmers
+    data_in = workflow.kmer_data("mapping_method", kmer_names)
+
+    out_dict = workflow.percent_surface_exposed(data_in, kmer_status)
 
     assert_allclose(list(out_dict.values()), percent_values)
 
@@ -637,14 +672,15 @@ def test_get_kmer_info(
             new_kmers.append("kmer_AA_" + topN_kmer)
     data_in = workflow.kmer_data(mapping_method, new_kmers)
 
-    viruses, kmers, protein_name = workflow.get_kmer_info(
-        data_in, records, tbl, mapping_method
-    )
+    out_df = workflow.get_kmer_info(data_in, records, tbl, mapping_method)
+    viruses = list(out_df["virus_names"])
+    kmers = list(out_df["kmer_names"])
+    protein_names = list(out_df["protein_names"])
 
     assert_array_equal(viruses, exp_viruses)
     assert_array_equal(kmers, exp_kmers)
-    assert_array_equal(protein_name, exp_proteins)
-    assert len(viruses) == len(kmers) == len(protein_name) == exp
+    assert_array_equal(protein_names, exp_proteins)
+    assert len(viruses) == len(kmers) == len(protein_names) == exp
 
 
 @pytest.mark.parametrize(

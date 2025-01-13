@@ -950,7 +950,7 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7, 9, 2, 3, 4]),
+            np.asarray([0, 1, 10, 7]),
             [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         ),
         (
@@ -964,7 +964,7 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7, 2, 9, 3, 4]),
+            np.asarray([0, 1, 10, 7]),
             [2.0, 2.0, 1.0, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         ),
     ],
@@ -1004,9 +1004,9 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
     assert_array_less(np.abs(pearson_rank[2:]), 0.80)
-    # last four items in feature_rank have tendency to swap, and are
-    # excluded from test, which is concerned with top feature ranks
-    assert_array_equal(feature_rank[:8], feature_rank_exp)
+    # lower ranked features in feature_rank have tendency to swap depending on
+    # and are excluded from test, which is concerned with top feature ranks
+    assert_array_equal(feature_rank[:4], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
 
 

@@ -318,9 +318,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     ax.set(
         xlabel="False Positive Rate",
         ylabel="True Positive Rate",
-        title="Mean ROC curve for with variability\n(Positive label '"
-        + str(target_column)
-        + "')",
+        title=f"Mean ROC curve with variability\n(Positive label {target_column})",
     )
 
     # plot chance line
@@ -458,7 +456,6 @@ def train_clfr(
         clfr = subdict["clfr"]
         clfr.set_params(**subdict["params"], random_state=random_state)
 
-        pearson_r_clfr = []
         clfr_preds = {}
         for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
             # index training cv split
@@ -558,6 +555,7 @@ def FIC_plot(
     exposure_status_sign: list,
     response_effect_sign: list,
     surface_exposed_dict: dict,
+    n_classifiers: int,
     path: Path,
 ):
     """
@@ -583,6 +581,8 @@ def FIC_plot(
     surface_exposed_dict: dict
         dictionary containing the topN kmers and their respective ratios of surface exposed to
         not surface exposed viral proteins for plotting '% surface exposed'
+    n_classifiers: int
+        number of classifiers used for consensus
     path: Path
         path to save figure
     """
@@ -608,7 +608,7 @@ def FIC_plot(
     ax.set_xlim(0, 100)
     ax.set_yticks(y_pos, labels=top_features)
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
+        f"Feature importance consensus amongst {n_folds * n_classifiers} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
@@ -2001,9 +2001,11 @@ if __name__ == "__main__":
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
 
         # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
+        # TODO: add CLI option for determining which classifiers to train
         n_folds = 5
         max_features = 20
-        clfr_names = ["Random Forest", "XGBoost", "LightGBM"]
+        clfr_names = ["Random Forest", "ExtraTreesClassifier", "XGBClassifier"]
+        n_classifiers = len(clfr_names)
         classifier_parameters = {
             "RandomForestClassifier": {
                 "clfr": RandomForestClassifier(),
@@ -2116,5 +2118,6 @@ if __name__ == "__main__":
             exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
+            n_classifiers,
             paths[-1],
         )

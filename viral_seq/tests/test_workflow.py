@@ -10,9 +10,8 @@ from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from sklearn.metrics import roc_curve, auc
-from sklearn.ensemble import RandomForestClassifier
 import sys
-from collections import defaultdict
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
 
 def test_optimization_plotting(tmpdir):
@@ -418,6 +417,7 @@ def test_fic_plot(tmp_path):
     }
 
     n_folds = 2
+    n_classifiers = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
     df_in["Counts"] = kmer_counts
@@ -428,6 +428,7 @@ def test_fic_plot(tmp_path):
         exposure_status_sign,
         response_effect_sign,
         surface_exposed_dict,
+        n_classifiers,
         tmp_path,
     )
 
@@ -472,6 +473,7 @@ def test_feature_sign(
         "kmer_PC_CCACAD",
         "kmer_PC_FECAEA",
     ]
+
     is_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
@@ -888,11 +890,11 @@ def test_plot_cv_roc(tmp_path):
     syn_roc_auc = auc(syn_fpr, syn_tpr)
 
     clfr_preds = {}
-    clfr_preds_all = defaultdict()
-    clfr_preds[0] = {"fpr": syn_fpr, "tpr": syn_tpr, "auc": syn_roc_auc}
-    clfr_preds_all["RandomForestClassifier"] = clfr_preds
+    clfr_preds["RandomForestClassifier"] = {
+        0: {"fpr": syn_fpr, "tpr": syn_tpr, "auc": syn_roc_auc}
+    }
 
-    workflow.plot_cv_roc(clfr_preds_all, "Test", tmp_path)
+    workflow.plot_cv_roc(clfr_preds, "Test", tmp_path)
     assert (
         compare_images(
             files("viral_seq.tests.expected") / "ROC_cv_expected.png",
@@ -938,7 +940,36 @@ def test_feature_count_consensus():
     assert_frame_equal(feature_count, feature_count_exp)
 
 
-def test_train_clfr():
+@pytest.mark.parametrize(
+    "classifier_parameters, feature_rank_array, count_rank_exp",
+    [
+        (
+            {
+                "RandomForestClassifier": {
+                    "clfr": RandomForestClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+            },
+            np.asarray([0, 1, 10, 7, 9, 2, 3, 4]),
+            [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ),
+        (
+            {
+                "RandomForestClassifier": {
+                    "clfr": RandomForestClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+                "ExtraTreesClassifier": {
+                    "clfr": ExtraTreesClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+            },
+            np.asarray([0, 1, 10, 7, 2, 9, 3, 4]),
+            [2.0, 2.0, 1.0, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ),
+    ],
+)
+def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
     # this test checks that the ranking of features is performed correctly during classifier training.
     # the synthetic dataset is initialized with random numbers, and then two feature columns are assigned
     # values that are correlated/inversely with the data targets, such that if the classifier aggregation
@@ -957,12 +988,6 @@ def test_train_clfr():
     train_data = pd.DataFrame(kmer_data, columns=kmer_names)
     y = pd.Series(data_target)
 
-    classifier_parameters = {
-        "RandomForestClassifier": {
-            "clfr": RandomForestClassifier(),
-            "params": {"n_estimators": 100, "n_jobs": 1},
-        }
-    }
     (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
         train_data,
         y,
@@ -975,9 +1000,7 @@ def test_train_clfr():
     count_rank = feature_count["Counts"]
     pearson_rank = feature_count["Pearson R"]
 
-    feature_rank_exp = kmer_names[np.asarray([0, 1, 10, 7, 9, 2, 3, 4])]
-
-    count_rank_exp = [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    feature_rank_exp = kmer_names[feature_rank_array]
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
     assert_array_less(np.abs(pearson_rank[2:]), 0.80)

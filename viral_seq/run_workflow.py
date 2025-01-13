@@ -1398,6 +1398,15 @@ if __name__ == "__main__":
         "SVVYGLR",
     ]
 
+    pos_controls_SA = [
+        "RAGDRPYQDAP",
+        "REGANTDQDAP",
+        "REGAIISRDSP",
+        "LRM",
+        "QDAP",
+        "REGA",
+    ]
+
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -1405,7 +1414,7 @@ if __name__ == "__main__":
         random_state=random_state,
         wf=workflow,
         mapping_method=mapping_method,
-        positive_controls=pos_controls,
+        positive_controls=pos_controls_SA,
     )
     if workflow == "DR":
         X_test, y_test = get_test_features(
@@ -1717,7 +1726,7 @@ if __name__ == "__main__":
 
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls_SA,
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="PC",
@@ -1734,7 +1743,7 @@ if __name__ == "__main__":
 
         # count of PC positive controls in topN (array2)
         pos_con_topN_PC = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls_SA,
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="PC",
@@ -1751,7 +1760,7 @@ if __name__ == "__main__":
 
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls_SA,
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="AA",
@@ -1768,7 +1777,7 @@ if __name__ == "__main__":
 
         # count of AA positive controls in topN (array2)
         pos_con_topN_AA = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls_SA,
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="AA",

@@ -149,7 +149,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
 
 
 @pytest.mark.parametrize(
-    "syn_kmers, mapping_method, mode, expected_dict",
+    "syn_kmers, mapping_method, mode, target_column, expected_dict",
     [
         (
             [
@@ -160,14 +160,15 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "kmer_PC_311221",
                 "kmer_PC_1111",
                 "kmer_AA_ECVGDE",
-                "kmer_AA_AAFDAE",
+                "kmer_AA_AARGDE",
                 "kmer_AA_CCAFEE",
-                "kmer_AA_CGDCCCA",
-                "kmer_AA_FGGCCA",
+                "kmer_AA_CGKGECA",
+                "kmer_AA_FGLDVA",
                 "kmer_AA_AAAA",
             ],
             "shen_2007",
             "PC",
+            "Is_Integrin",
             {
                 "221": {
                     0: "kmer_PC_221366",
@@ -200,28 +201,25 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             ],
             "shen_2007",
             "AA",
+            "Is_Integrin",
             {
-                "CCA": {
-                    0: "kmer_AA_CCAFEE",
-                    1: "kmer_AA_CGDCCCA",
-                    2: "kmer_AA_FGGCCA",
-                    3: 3,
-                },
-                "DCA": {0: None, 1: None, 2: None, 3: 0},
-                "GDDA": {0: None, 1: None, 2: None, 3: 0},
-                "GGCC": {0: "kmer_AA_FGGCCA", 1: None, 2: None, 3: 1},
-                "AAF": {0: "kmer_AA_AAFDAE", 1: None, 2: None, 3: 1},
-                "CGDC": {0: "kmer_AA_CGDCCCA", 1: None, 2: None, 3: 1},
-                "AAA": {0: "kmer_AA_AAAA", 1: None, 2: None, 3: 1},
+                "RGD": {0: "kmer_AA_CRGDEE", 1: None, 2: 1},
+                "KGE": {0: "kmer_AA_AAKGEE", 1: "kmer_AA_CGDKGEA", 2: 2},
+                "LDV": {0: None, 1: None, 2: 0},
+                "DGEA": {0: "kmer_AA_FDGEA", 1: None, 2: 1},
+                "REDV": {0: None, 1: None, 2: 0},
+                "YGRK": {0: "kmer_AA_YGRKDE", 1: None, 2: 1},
+                "PHSRN": {0: None, 1: None, 2: 0},
+                "SVVYGLR": {0: None, 1: None, 2: 0},
             },
         ),
         (
             [
-                "kmer_PC_416044",
+                "kmer_PC_454464",
                 "kmer_PC_007404",
                 "kmer_PC_110744",
-                "kmer_PC_1041110",
-                "kmer_PC_700110",
+                "kmer_PC_6465646",
+                "kmer_PC_764610",
                 "kmer_PC_0000",
                 "kmer_AA_ECVGDE",
                 "kmer_AA_AAFDAE",
@@ -232,28 +230,24 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             ],
             "jurgen_schmidt",
             "PC",
+            "Is_Integrin",
             {
-                "110": {
-                    0: "kmer_PC_110744",
-                    1: "kmer_PC_1041110",
-                    2: "kmer_PC_700110",
-                    3: 3,
-                },
-                "410": {0: None, 1: None, 2: None, 3: 0},
-                "0440": {0: None, 1: None, 2: None, 3: 0},
-                "0011": {0: "kmer_PC_700110", 1: None, 2: None, 3: 1},
-                "007": {0: "kmer_PC_007404", 1: None, 2: None, 3: 1},
-                "1041": {0: "kmer_PC_1041110", 1: None, 2: None, 3: 1},
-                "000": {0: "kmer_PC_0000", 1: None, 2: None, 3: 1},
+                "504": {0: None, 1: None, 2: 0},
+                "646": {0: "kmer_PC_6465646", 1: "kmer_PC_764610", 2: 2},
+                "4040": {0: None, 1: None, 2: 0},
+                "5446": {0: "kmer_PC_454464", 1: None, 2: 1},
+                "2055": {0: None, 1: None, 2: 0},
+                "83253": {0: None, 1: None, 2: 0},
+                "2662065": {0: None, 1: None, 2: 0},
             },
         ),
     ],
 )
-def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
-    syn_pos_controls = ["CCA", "DCA", "GDDA", "GGCC", "AAF", "CGDC", "AAA"]
-
+def test_positive_controls(
+    syn_kmers, mapping_method, mode, target_column, expected_dict
+):
     out_df = workflow.check_positive_controls(
-        positive_controls=syn_pos_controls,
+        target_column=target_column,
         kmers_list=syn_kmers,
         mapping_method=mapping_method,
         mode=mode,
@@ -262,6 +256,42 @@ def test_positive_controls(syn_kmers, mapping_method, mode, expected_dict):
         pd.DataFrame.from_dict(expected_dict).replace({np.nan: None}).convert_dtypes()
     )
     assert_frame_equal(out_df, expected_df)
+
+
+@pytest.mark.parametrize(
+    "target_column, len_exp_keys",
+    [
+        ("Is_Integrin", 7),
+        ("Is_Sialic_Acid", 6),
+        ("Is_IgSF", 8),
+        ("SA_IG", 14),
+        ("IN_IG", 15),
+        ("IN_SA", 13),
+        ("ALL", 21),
+    ],
+)
+def test_pos_con_columns(target_column, len_exp_keys):
+    kmers_in = [
+        "kmer_PC_CDDEEC",
+        "kmer_PC_CCGDEA",
+        "kmer_PC_CCCFCF",
+        "kmer_PC_CCAAACD",
+        "kmer_PC_CACDGA",
+        "kmer_PC_CFCEDD",
+        "kmer_PC_GCECFD",
+        "kmer_PC_ECDGDE",
+        "kmer_PC_CCACAD",
+        "kmer_PC_FECAEA",
+    ]
+
+    out_df = workflow.check_positive_controls(
+        target_column=target_column,
+        kmers_list=kmers_in,
+        mapping_method="jurgen_schmidt",
+        mode="PC",
+    )
+
+    assert len(out_df.columns) == len_exp_keys
 
 
 def test_fic_plot(tmp_path):
@@ -743,6 +773,7 @@ def test_print_pos_con(
 
         captured = capsys.readouterr()
         assert captured.out == exp_output
+
 
 def test_merge_convert_tbl():
     igsf_data = files("viral_seq.data") / "igsf_training.csv"

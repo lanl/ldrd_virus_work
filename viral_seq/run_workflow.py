@@ -679,7 +679,7 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
 
 
 def check_positive_controls(
-    positive_controls: Sequence[str],
+    target_column: str,
     kmers_list: list[str],
     mapping_method: str,
     mode: str,
@@ -690,8 +690,8 @@ def check_positive_controls(
 
     Parameters
     ----------
-    positive_controls: list
-        A list of strings denoting known AA-kmers associated with surface protein binding
+    target_column: str
+        target binding receptor(s)
     kmers_list: list
         A list containing kmer feature strings from either the training dataset
         or topN classifier rankings
@@ -706,6 +706,56 @@ def check_positive_controls(
         Dataframe containing the names of kmer features found in the dataset that contain
         each of the positive control sequences, and the counts for each
     """
+
+    # lists of positive controls for each binding target
+    pos_control_dict = {
+        "Integrin": [
+            "RGD",
+            "KGE",
+            "LDV",
+            "DGEA",
+            "REDV",
+            "YGRK",
+            "PHSRN",
+            "SVVYGLR",
+        ],
+        "Sialic_Acid": [
+            "RAGDRPYQDAP",
+            "REGANTDQDAP",
+            "REGAIISRDSP",
+            "LRM",
+            "QDAP",
+            "REGA",
+        ],
+        "IgSF": [
+            "DEDGYITLN",
+            "EEEIYTSLQ",
+            "DEERYMTLN",
+            "DEDGYTQL",
+            "ISYTTL",
+            "VTYSAL",
+            "IHYSEL",
+            "VDYVIL",
+        ],
+    }
+
+    # combine lists of positive controls based on target_column
+    # choices "Is_Integrin", "Is_Sialic_Acid", "Is_IgSF", "SA_IG", "IN_IG", "IN_SA", "ALL", "Human Host",
+    # gather appropriate lists from pos_control_dict
+    # not using "Human Host" target column in DTRA workflow
+    receptor_names = target_column.split("_")
+    positive_controls = []
+    for receptor_name in receptor_names:
+        if receptor_name in ["Integrin", "IN"]:
+            positive_controls.extend(pos_control_dict["Integrin"])
+        # only check for "Sialic" because .split('_') will split
+        # 'Is_Sialic_Acid' into ["Is", "Sialic", "Acid"]
+        elif receptor_name in ["Sialic", "SA"]:
+            positive_controls.extend(pos_control_dict["Sialic_Acid"])
+        elif receptor_name in ["IgSF", "IG"]:
+            positive_controls.extend(pos_control_dict["IgSF"])
+        elif receptor_name == "ALL":
+            positive_controls = sum(pos_control_dict.values(), [])
 
     if mode == "PC":
         # map positive_controls to PC-kmers using desired mapping method
@@ -1099,28 +1149,25 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     validate_feature_table(this_outfile, idx, prefix)
 
     elif workflow == "DTRA":
-        for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                if target_column == "Is_IgSF":
+        if feature_checkpoint > 0:
+            for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     igsf_path = str(data.joinpath("igsf_training.csv"))
                     merged_tbl = merge_tables(train_file, igsf_path)
                     convert_merged_tbl(merged_tbl).to_csv(temp_file)
                     file = temp_file.name
-                else:
-                    (file).to_csv(temp_file)
-                    file = temp_file.name
-            if i == 0:
-                prefix = "Train"
-                debug = False
-                this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
+                if i == 0:
+                    prefix = "Train"
+                    debug = False
+                    this_outfile = folder + "/" + prefix + "_main.parquet.gzip"
 
-                min_kmer = int(kmer_range[0])
-                max_kmer = int(kmer_range[-1])
+                    min_kmer = int(kmer_range[0])
+                    max_kmer = int(kmer_range[-1])
 
-                kmer_range_length = max_kmer - min_kmer + 1
-                if feature_checkpoint > kmer_range_length:
-                    feature_checkpoint = kmer_range_length
-                this_checkpoint = feature_checkpoint
+                    kmer_range_length = max_kmer - min_kmer + 1
+                    if feature_checkpoint > kmer_range_length:
+                        feature_checkpoint = kmer_range_length
+                    this_checkpoint = feature_checkpoint
 
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
@@ -1179,7 +1226,7 @@ def feature_selection_rfc(
             for mode in ["PC", "AA"]:
                 # count of PC and AA positive controls in pre-feature selection dataset
                 pos_con_all_data = check_positive_controls(
-                    positive_controls=positive_controls[target_column],
+                    target_column=target_column,
                     kmers_list=list(X.columns),
                     mapping_method=mapping_method,
                     mode=mode,
@@ -1460,9 +1507,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Is_Integrin", "Is_Sialic_Acid", "Is_IgSF", "Is_Both", "Human Host"],
+        choices=[
+            "Is_Integrin",
+            "Is_Sialic_Acid",
+            "Is_IgSF",
+            "SA_IG",
+            "IN_IG",
+            "IN_SA",
+            "ALL",
+            "Human Host",
+        ],
         default="Human Host",
-        help="Target column to be used for binary clasification.",
+        help="Target column to be used for binary classification.",
     )
     parser.add_argument(
         "-w",
@@ -1588,51 +1644,18 @@ if __name__ == "__main__":
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
 
-    # Here is a list of common integrin-binding motifs. These motifs interact with
-    # specific integrins, playing critical roles in cell adhesion, signaling, and
-    # interaction with the extracellular matrix:
-    # RGD (Arg-Gly-Asp)
-    # KGE (Lys-Gly-Glu)
-    # LDV (Leu-Asp-Val)
-    # DGEA (Asp-Gly-Glu-Ala)
-    # REDV (Arg-Glu-Asp-Val)
-    # YGRK (Tyr-Gly-Arg-Lys)
-    # PHSRN (Pro-His-Ser-Arg-Asn)
-    # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
-
-    pos_controls = {
-        "Is_Integrin": [
-            "RGD",
-            "KGE",
-            "LDV",
-            "DGEA",
-            "REDV",
-            "YGRK",
-            "PHSRN",
-            "SVVYGLR",
-        ],
-        "Is_Sialic_Acid": [
-            "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding (https://doi.org/10.1038/s41467-017-00836-6)
-            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with corboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
-            # primary and secondary sialic acid binding sites of NA composed of non-linear binding motifs (https://doi.org/10.3389/fmicb.2019.00039)
-            "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
-        ],
-    }
-    pos_controls["Is_Both"] = (
-        pos_controls["Is_Integrin"] + pos_controls["Is_Sialic_Acid"]
-    )
-
-    if target_column == "Is_IgSF":
+    if workflow == "DTRA":
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            if target_column == "Is_IgSF":
-                igsf_path = str(data.joinpath("igsf_training.csv"))
-                merged_tbl = merge_tables(train_file, igsf_path)
-                convert_merged_tbl(merged_tbl).to_csv(temp_file)
-                file = temp_file.name
+            igsf_path = str(data.joinpath("igsf_training.csv"))
+            merged_tbl = merge_tables(train_file, igsf_path)
+            convert_merged_tbl(merged_tbl).to_csv(temp_file)
+            file = temp_file.name
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
     else:
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    build_tables(
+        feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
+    )
 
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
@@ -1849,22 +1872,17 @@ if __name__ == "__main__":
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
+        igsf_path = str(data.joinpath("igsf_training.csv"))
+        merged_tbl = merge_tables(train_file, igsf_path)
+        tbl = convert_merged_tbl(merged_tbl)
+        # TODO: this call below may be redundant because
+        # X_train is returned by `feature_selection_rfc`
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        tbl = csv_conversion(train_file)
         y = y_train
 
         # check that none of the features in tbl have kmers outside of the range
         # of given kmer lengths from command line option '--kmer-range'
         check_kmer_feature_lengths(list(X.columns), kmer_range)
-
-        if target_column == "Is_IgSF":
-            igsf_path = str(data.joinpath("igsf_training.csv"))
-            merged_tbl = merge_tables(train_file, igsf_path)
-            tbl = convert_merged_tbl(merged_tbl)
-        else:
-            tbl = csv_conversion(train_file)
-        X = pl.read_parquet(table_loc_train_best).to_pandas()
-        y = tbl[target_column]
 
         ### Estimation and visualization of the variance of the
         ### Receiver Operating Characteristic (ROC) metric using cross-validation.
@@ -1963,7 +1981,7 @@ if __name__ == "__main__":
 
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="PC",
@@ -1972,7 +1990,7 @@ if __name__ == "__main__":
 
         # count of PC positive controls in topN (array2)
         pos_con_topN_PC = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="PC",
@@ -1981,7 +1999,7 @@ if __name__ == "__main__":
 
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="AA",
@@ -1990,7 +2008,7 @@ if __name__ == "__main__":
 
         # count of AA positive controls in topN (array2)
         pos_con_topN_AA = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="AA",

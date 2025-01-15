@@ -950,42 +950,35 @@ def test_match_kmers(tmpdir):
     ]
 
     kmer_matches_exp = {
-        ("kmer_PC_DDCEACA", "kmer_PC_6263063"): ["kmer_AA_MSLQGIH"],
-        ("kmer_PC_DCEACEA", "kmer_PC_2630636"): ["kmer_AA_SLQGIHL"],
-        ("kmer_PC_CEACECG", "kmer_PC_6306362"): ["kmer_AA_LQGIHLS"],
-        ("kmer_PC_EACECDC", "kmer_PC_3063624"): ["kmer_AA_QGIHLSD"],
-        ("kmer_PC_ACECDFD", "kmer_PC_0636246"): ["kmer_AA_GIHLSDL"],
-        ("kmer_PC_CECDFFG", "kmer_PC_6362462"): ["kmer_AA_IHLSDLS"],
-        ("kmer_PC_ECDFCDC", "kmer_PC_3624622"): ["kmer_AA_HLSDLSY"],
-        ("kmer_PC_CDFCDDA", "kmer_PC_6246225"): ["kmer_AA_LSDLSYK"],
-        ("kmer_PC_DFCDDGG", "kmer_PC_2462253"): ["kmer_AA_SDLSYKH"],
-        ("kmer_PC_FCDDGEE", "kmer_PC_4622530"): ["kmer_AA_DLSYKHA"],
-        ("kmer_PC_6263063", "kmer_PC_DDCEACA"): ["kmer_AA_MSLQGIH"],
-        ("kmer_PC_2630636", "kmer_PC_DCEACEA"): ["kmer_AA_SLQGIHL"],
-        ("kmer_PC_6306362", "kmer_PC_CEACECG"): ["kmer_AA_LQGIHLS"],
-        ("kmer_PC_3063624", "kmer_PC_EACECDC"): ["kmer_AA_QGIHLSD"],
-        ("kmer_PC_0636246", "kmer_PC_ACECDFD"): ["kmer_AA_GIHLSDL"],
-        ("kmer_PC_6362462", "kmer_PC_CECDFFG"): ["kmer_AA_IHLSDLS"],
-        ("kmer_PC_3624622", "kmer_PC_ECDFCDC"): ["kmer_AA_HLSDLSY"],
-        ("kmer_PC_6246225", "kmer_PC_CDFCDDA"): ["kmer_AA_LSDLSYK"],
-        ("kmer_PC_2462253", "kmer_PC_DFCDDGG"): ["kmer_AA_SDLSYKH"],
-        ("kmer_PC_4622530", "kmer_PC_FCDDGEE"): ["kmer_AA_DLSYKHA"],
+        "kmer_AA_MSLQGIH": [("kmer_PC_DDCEACA", "kmer_PC_6263063")],
+        "kmer_AA_SLQGIHL": [("kmer_PC_DCEACEA", "kmer_PC_2630636")],
+        "kmer_AA_LQGIHLS": [("kmer_PC_CEACECG", "kmer_PC_6306362")],
+        "kmer_AA_QGIHLSD": [("kmer_PC_EACECDC", "kmer_PC_3063624")],
+        "kmer_AA_GIHLSDL": [("kmer_PC_ACECDFD", "kmer_PC_0636246")],
+        "kmer_AA_IHLSDLS": [("kmer_PC_CECDFFG", "kmer_PC_6362462")],
+        "kmer_AA_HLSDLSY": [("kmer_PC_ECDFCDC", "kmer_PC_3624622")],
+        "kmer_AA_LSDLSYK": [("kmer_PC_CDFCDDA", "kmer_PC_6246225")],
+        "kmer_AA_SDLSYKH": [("kmer_PC_DFCDDGG", "kmer_PC_2462253")],
+        "kmer_AA_DLSYKHA": [("kmer_PC_FCDDGEE", "kmer_PC_4622530")],
     }
 
     syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
     pd.DataFrame(kmer_matches_mm1).to_parquet(f"{tmpdir}/kmer_maps_k7_mm1.parquet.gzip")
     pd.DataFrame(kmer_matches_mm2).to_parquet(f"{tmpdir}/kmer_maps_k7_mm2.parquet.gzip")
     mapping_methods = ["mm1", "mm2"]
-    kmer_matches_out = workflow.match_kmers(syn_topN_df, mapping_methods, tmpdir)
+    with tmpdir.as_cwd():
+        kmer_matches_out = workflow.match_kmers(syn_topN_df, mapping_methods, tmpdir)
     kmer_matches_out_df = pd.DataFrame(kmer_matches_out)
     kmer_matches_exp_df = pd.DataFrame(kmer_matches_exp)
+
     assert_frame_equal(kmer_matches_out_df, kmer_matches_exp_df)
 
 
-def test_find_matching_kmers():
-    result = workflow.find_matching_kmers(
-        target_column="test", mapping_methods=["mm1", "mm2"]
-    )
+def test_find_matching_kmers(tmpdir):
+    with tmpdir.as_cwd():
+        result = workflow.find_matching_kmers(
+            target_column="test", mapping_methods=["mm1", "mm2"]
+        )
     assert (
         result
         == "Must run workflow using both mapping methods before performing kmer mapping."

@@ -38,6 +38,7 @@ import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
 import os
 
+
 matplotlib.use("Agg")
 
 
@@ -115,8 +116,8 @@ def find_matching_kmers(target_column, mapping_methods=None):
             topN_files.append(topN_file)
         kmer_matches = match_kmers(topN_files, mapping_methods)
         if kmer_matches:
-            for (kmer1, kmer2), values in kmer_matches.items():
-                return f"Matching AA kmers between PC kmers '{kmer1}' and '{kmer2}': {values}"
+            for kmer_match, [kmers] in kmer_matches.items():
+                return f"Matching AA kmers between PC kmers '{kmers[0]}' and '{kmers[1]}': {kmer_match}"
         else:
             return "No matching AA kmers found in TopN."
     except FileNotFoundError:
@@ -343,7 +344,7 @@ def match_kmers(
     matching_kmers_df.to_csv("topN_PC_AA_kmer_mappings.csv", index=False)
 
     # find matching PC kmers from different mapping schemes
-    kmer_matches = {}
+    kmer_matches: Dict = defaultdict(list)
     for kmer1 in matching_kmers_df.columns:
         for kmer2 in matching_kmers_df.columns:
             if kmer1 != kmer2:
@@ -353,7 +354,19 @@ def match_kmers(
                     .isin(matching_kmers_df[kmer2].dropna())
                 ]
                 if not kmer_match.empty:
-                    kmer_matches[(kmer1, kmer2)] = kmer_match
+                    # check if tuple exists in dict already
+                    # first see if the AA kmer key is in the dictionary already
+                    kmer_pair_exist = False
+                    if kmer_match.item() in kmer_matches:
+                        # then check if the current tuple exists in the
+                        # list of tuples contained in kmer_matches already
+                        kmer_matches_list = kmer_matches[kmer_match.item()]
+                        kmer_pair_exist = any(
+                            set((kmer1, kmer2)).issubset(set(k))
+                            for k in kmer_matches_list
+                        )
+                    if not kmer_pair_exist:
+                        kmer_matches[kmer_match.item()].append((kmer1, kmer2))
 
     return kmer_matches
 

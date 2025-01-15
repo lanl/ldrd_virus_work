@@ -65,6 +65,8 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
                     break
                 else:
                     response_2 = input("reference:")
+                    if not response_2:
+                        response_2 = "None"
                     response_list[i] = response_1
                     reference_list[i] = response_2
 

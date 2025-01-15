@@ -194,8 +194,8 @@ Adeno-Associated Virus Type 4 (AAV4),capsid,yes,10.1128/JVI.79.8.5047-5058.2005
 Epstein-Barr virus (EBV),large tegument protein,no,https://doi.org/10.1371/journal.ppat.1003960
 Epstein-Barr virus (EBV),tegument protein UL37,no,https://doi.org/10.1038/s41467-020-19259-x
 Epstein-Barr virus (EBV),capsid triplex subunit 1,no,https://doi.org/10.1128/jvi.01565-10
-Epstein-Barr virus (EBV),tegument protein G48,no,None
-Epstein-Barr virus (EBV),nuclear antigen EBNA-1,no,None
+Epstein-Barr virus (EBV),tegument protein G48,no,
+Epstein-Barr virus (EBV),nuclear antigen EBNA-1,no,
 Vaccinia virus,EEV membrane phosphoglycoprotein,yes,
 HSV-2,helicase-primase subunit,no,
 HSV-2,single-stranded DNA-binding protein,no,
@@ -203,7 +203,7 @@ HSV-2,DNA packaging protein UL32,no,
 HSV-2,nuclear egress membrane protein,yes,
 HSV-2,envelope protein UL43,yes,
 HSV-2,membrane protein UL56,yes,
-HSV-2,transcriptional regulator ICP4,no,None
+HSV-2,transcriptional regulator ICP4,no,
 Equine herpesvirus type 1,virion protein V67,no,https://doi.org/10.3390/vetsci4010011
 Canine adenovirus type 2,fiber,yes,https://doi.org/10.1007/s00705-023-05718-5
 Equine herpesvirus type 1,tegument protein VP13/14,yes,
@@ -211,7 +211,7 @@ HSV-2,ubiquitin E3 ligase ICP0,no,
 HSV-2,tegument protein VP11/12,yes,
 Equine herpesvirus type 1,membrane protein US9,yes,
 Bovine torovirus (Breda virus),spike glycoprotein,yes,
-human cytomegalovirus,protein UL84,,[A[A[B
+human cytomegalovirus,protein UL84,no,https://doi.org/10.3389/fviro.2022.1026452
 Goat torovirus,spike glycoprotein,yes,
 Human parvovirus B19,capsid protein 1,yes,https://doi.org/10.3390/v12121463
 Human parvovirus B19,capsid protein 2,yes,https://doi.org/10.3390/v12121463
@@ -244,21 +244,21 @@ Human adenovirus type 5,pVIII,yes,
 Simian adenovirus 11,pVIII,yes,
 Hepatitis C,polyprotein,no,
 Hepatitis C,NS4B protein,no,
-Kaposi’s sarcoma-associated herpesvirus,K3,,
-Kaposi’s sarcoma-associated herpesvirus,K5,,
-human cytomegalovirus,large tegument protein,,
+Kaposi’s sarcoma-associated herpesvirus,K3,no,https://doi.org/10.1128/jvi.00873-14
+Kaposi’s sarcoma-associated herpesvirus,K5,no,
+human cytomegalovirus,large tegument protein,no,
 human cytomegalovirus,helicase-primase subunit,no,
-human cytomegalovirus,capsid portal protein,,
+human cytomegalovirus,capsid portal protein,no,
 Epstein-Barr virus (EBV),capsid maturation protease,no,
-Epstein-Barr virus (EBV),capsid scaffold protein,,
+Epstein-Barr virus (EBV),capsid scaffold protein,no,
 Bovine adenovirus 3,hypothetical protein,no,
 Vaccinia virus,hypothetical protein,no,
 HSV-2,DNA packaging tegument protein UL17,no,
-HSV-2,large tegument protein,,
+HSV-2,large tegument protein,no,
 HSV-2,envelope glycoprotein C,yes,
 HSV-2,membrane protein UL45,yes,
 HSV-2,membrane protein US8A,yes,
-Simian adenovirus 11,E1A,,
+Simian adenovirus 11,E1A,no ,https://doi.org/10.1016/j.chom.2017.11.008
 Transmissible gastroenteritis virus (TGEV),replicase,no,
 Murine coronavirus,nsp4,no,
 human cytomegalovirus,membrane glycoprotein UL7,yes,
@@ -266,38 +266,38 @@ human cytomegalovirus,membrane protein US19,yes,
 Murray Valley encephalitis virus,NS2A,no,
 Epstein-Barr virus (EBV),envelope glycoprotein L,yes,
 Epstein-Barr virus (EBV),envelope glycoprotein B,yes,
-Zika virus,protein 2K,,
+Zika virus,protein 2K,no,https://doi.org/10.3390/v10050233
 Hepatitis C,NS5B RNA-dependent RNA polymerase,no,
 Equine herpesvirus type 1,envelope glycoprotein M,yes,
-hMPV,fusion protein,,
+hMPV,fusion protein,yes,https://doi.org/10.1038/s41467-022-28931-3
 Kaposi’s sarcoma-associated herpesvirus,ORF23,no,
 Minute virus of mice (MVM),hypothetical protein,no,
 HSV-2,envelope glycoprotein M,yes,
-Simian adenovirus 11,E1B 55K,,
-Simian adenovirus 11,33K,,
-Simian adenovirus 11,22K,,
-Tick-borne encephalitis virus (TBEV),anchored core protein C,,
-Tick-borne encephalitis virus (TBEV),core protein C,,
-Simian adenovirus 11,pVI,,
-Kaposi’s sarcoma-associated herpesvirus,vIRF-2,,
+Simian adenovirus 11,E1B 55K,no,https://doi.org/10.1128/jvi.02417-08
+Simian adenovirus 11,33K,no,https://doi.org/10.3390/v15122378
+Simian adenovirus 11,22K,no,
+Tick-borne encephalitis virus (TBEV),anchored core protein C,no,
+Tick-borne encephalitis virus (TBEV),core protein C,no,
+Simian adenovirus 11,pVI,no,https://doi.org/10.3390/v6114536
+Kaposi’s sarcoma-associated herpesvirus,vIRF-2,no,https://doi.org/10.1371/journal.ppat.1007743
 Ross River virus (RR),structural polyprotein,no,
-Ross River virus (RR),E1 protein,,
+Ross River virus (RR),E1 protein,yes,https://doi.org/10.1128/cmr.14.4.909-932.2001
 Kaposi’s sarcoma-associated herpesvirus,ORF50,no,
-hMPV,small hydrophobic protein,,
+hMPV,small hydrophobic protein,yes,https://doi.org/10.1128/jvi.02848-13
 Kaposi’s sarcoma-associated herpesvirus,ORF22,no,
 Epstein-Barr virus (EBV),DNA packaging tegument protein UL17,no,
 Murine adenovirus 3,pVIII,yes,
-Human Papillomavirus type 16 (HPV),replication protein E1,,
+Human Papillomavirus type 16 (HPV),replication protein E1,no,https://doi.org/10.1128/jvi.06450-11
 HIV-1,"Envelope surface glycoprotein gp160, precursor",yes,
 HIV-1,Envelope transmembrane domain,yes,
 HSV-2,envelope glycoprotein K,yes,
-human cytomegalovirus,tegument protein UL43,,
-Human adenovirus type 5,52K,,
-Ross River virus (RR),C protein,,
-Human adenovirus type 5,pX,,
-New Jersey polyomavirus (NJPyV),large T antigen,,
+human cytomegalovirus,tegument protein UL43,no,https://doi.org/10.1007/s13337-022-00799-3
+Human adenovirus type 5,52K,no,https://doi.org/10.3390/v13030388
+Ross River virus (RR),C protein,no,
+Human adenovirus type 5,pX,no,https://doi.org/10.3390/v13030388
+New Jersey polyomavirus (NJPyV),large T antigen,no,https://doi.org/10.1016/j.tvr.2024.200306
 Murine adenovirus 3,E4 ORFD,no,
-Canine adenovirus type 2,pX,,
+Canine adenovirus type 2,pX,no,
 Echovirus 1 (EV1),protease 2A,no,
 Echovirus 9 strain Barty,2A,,
 Coxsackievirus A9 (CVA9),2A protein,,

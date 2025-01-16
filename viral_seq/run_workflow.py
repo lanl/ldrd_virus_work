@@ -159,31 +159,36 @@ def get_kmer_info(
         for record in records:
             for feature in record.features:
                 if feature.type == "CDS" or feature.type == "mat_peptide":
-                    nuc_seq = feature.location.extract(record.seq)
-                    if len(nuc_seq) % 3 != 0:
-                        continue
-                    this_seq_AA = nuc_seq.translate()
-                    this_seq_AA = str(this_seq_AA)
+                    if "polyprotein" not in feature.qualifiers["product"]:
+                        nuc_seq = feature.location.extract(record.seq)
+                        if len(nuc_seq) % 3 != 0:
+                            continue
+                        this_seq_AA = nuc_seq.translate()
+                        this_seq_AA = str(this_seq_AA)
 
-                    new_seq = ""
-                    if kmer_status:
-                        for each in this_seq_AA:
-                            new_seq += get_features.aa_map(each, method=mapping_method)
-                        this_seq = new_seq
-                        this_seq = str(this_seq)
-                    else:
-                        this_seq = this_seq_AA
-                    kmer_idx = [
-                        m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
-                    ]
-                    if kmer_idx:
-                        acc_exist = tbl.Accessions.isin([record.id])
-                        if sum(acc_exist):
-                            virus_names.append(tbl.Species[np.nonzero(acc_exist)[0][0]])
-                            protein_names.append(
-                                str(feature.qualifiers.get("product"))[2:-2]
-                            )
-                            kmer_features.append(k_mer)
+                        new_seq = ""
+                        if kmer_status:
+                            for each in this_seq_AA:
+                                new_seq += get_features.aa_map(
+                                    each, method=mapping_method
+                                )
+                            this_seq = new_seq
+                            this_seq = str(this_seq)
+                        else:
+                            this_seq = this_seq_AA
+                        kmer_idx = [
+                            m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
+                        ]
+                        if kmer_idx:
+                            acc_exist = tbl.Accessions.isin([record.id])
+                            if sum(acc_exist):
+                                virus_names.append(
+                                    tbl.Species[np.nonzero(acc_exist)[0][0]]
+                                )
+                                protein_names.append(
+                                    str(feature.qualifiers.get("product"))[2:-2]
+                                )
+                                kmer_features.append(k_mer)
 
     return virus_names, kmer_features, protein_names
 

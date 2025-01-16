@@ -299,48 +299,48 @@ New Jersey polyomavirus (NJPyV),large T antigen,no,https://doi.org/10.1016/j.tvr
 Murine adenovirus 3,E4 ORFD,no,
 Canine adenovirus type 2,pX,no,
 Echovirus 1 (EV1),protease 2A,no,
-Echovirus 9 strain Barty,2A,,
-Coxsackievirus A9 (CVA9),2A protein,,
-Hepatitis C,core protein,,
+Echovirus 9 strain Barty,2A,no,https://doi.org/10.1016/S0168-1702(99)00110-0
+Coxsackievirus A9 (CVA9),2A protein,no,https://doi.org/10.3390/v12010068
+Hepatitis C,core protein,no,https://doi.org/10.1007/s12026-014-8494-3
 Epstein-Barr virus (EBV),nuclear antigen EBNA-3C,no,
 HSV-2,capsid maturation protease,no,
-HSV-2,capsid scaffold protein,,
+HSV-2,capsid scaffold protein,no,https://doi.org/10.1126/science.aao7283
 BKPyV human polyomavirus,VP1,yes,
 Simian virus 40,hypothetical protein,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF34,no,
 SARS-CoV-2,nsp6,no,
 SARS-CoV-2,ORF1a polyprotein,no,
-Epstein-Barr virus (EBV),tegument protein G75,,
+Epstein-Barr virus (EBV),tegument protein G75,no,
 Sapporo virus,polyprotein precursor,no,
 Zika virus,nonstructural protein NS2A,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF58,no,
-Ross River virus (RR),E2 protein,,
-HSV-2,capsid triplex subunit 1,,
+Ross River virus (RR),E2 protein,yes,https://doi.org/10.1016/j.virol.2017.12.022
+HSV-2,capsid triplex subunit 1,no,
 Equine herpesvirus type 1,envelope protein UL43,yes,
-human cytomegalovirus,tegument protein UL37,,
+human cytomegalovirus,tegument protein UL37,no,
 Epstein-Barr virus (EBV),DNA polymerase processivity subunit,no,
 Equine herpesvirus type 1,envelope glycoprotein C,yes,
 Epstein-Barr virus (EBV),envelope glycoprotein 150,yes,
-HSV-2,small capsid protein,,
-Epstein-Barr virus (EBV),protein UL49,,
+HSV-2,small capsid protein,no,
+Epstein-Barr virus (EBV),protein UL49,no,https://doi.org/10.1016/j.isci.2022.105168
 Human adenovirus type 5,pIIIa,yes,
 Kaposi’s sarcoma-associated herpesvirus,ORF40,no,
-Canine adenovirus type 2,V,,
+Canine adenovirus type 2,V,no,
 HSV-2,envelope glycoprotein N,yes,
 Tick-borne encephalitis virus (TBEV),non-structural protein NS2b,no,
-Classical swine fever virus (CSF),E2*,,
+Classical swine fever virus (CSF),E2*,yes,https://doi.org/10.1128/jvi.01642-19
 Classical swine fever virus (CSF),nonstructural protein p7,no,
 Hepatitis C,NS3 protease/helicase,no,
-human cytomegalovirus,multifunctional expression regulator,,
-human cytomegalovirus,tegument protein pp71,,
-Bovine adenovirus 3,penton protein,,
-Human Papillomavirus type 16 (HPV),major capsid protein L1,,
-Human respirovirus 3,nucleocapsid protein,,
-Monkey lymphotropic papovavirus (LPV),VP-2,,
-Monkey lymphotropic papovavirus (LPV),VP-3,,
+human cytomegalovirus,multifunctional expression regulator,no,https://doi.org/10.1128/jvi.01399-15
+human cytomegalovirus,tegument protein pp71,no,https://doi.org/10.1128/jvi.80.2.951-963.2006
+Bovine adenovirus 3,penton protein,yes,https://doi.org/10.1016/j.virol.2003.12.007
+Human Papillomavirus type 16 (HPV),major capsid protein L1,yes,
+Human respirovirus 3,nucleocapsid protein,no,https://doi.org/10.1128/JVI.01648-21
+Monkey lymphotropic papovavirus (LPV),VP-2,yes,https://doi.org/10.1128/jvi.55.1.96-100.1985
+Monkey lymphotropic papovavirus (LPV),VP-3,yes,
 African green monkey B-lymphotropic polyomavirus,VP2 capsid protein,yes,
 African green monkey B-lymphotropic polyomavirus,VP3 capsid protein,yes,
-Human parainfluenza virus 3,nucleocapsid protein,,
+Human parainfluenza virus 3,nucleocapsid protein,no,
 Human parainfluenza virus 1,nucleoprotein,,
 Hepatitis C,protein F,,
 Equine herpesvirus type 1,virion protein US10,,

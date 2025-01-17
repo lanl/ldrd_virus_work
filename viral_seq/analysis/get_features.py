@@ -7,6 +7,7 @@ from typing import Any
 import pandas as pd
 import numpy as np
 import scipy.stats
+from viral_seq import run_workflow as wf
 
 codontab = standard_dna_table.forward_table.copy()
 for codon in standard_dna_table.stop_codons:
@@ -58,12 +59,15 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None
                     kmer_name = "kmer_" + kmer_type + "_" + str(kmer)
                     kmers[kmer_name] += 1
                     mm = mapping_method if mapping_method is not None else "None"
-                    kmer_info[kmer_name].append(
-                        {
-                            "virus_name": record.annotations["organism"],
-                            "mapping_method": mm,
-                        }
-                    )
+                    if kmer_info is not None:
+                        kmer_out = wf.kmer_data(
+                            mm,
+                            [kmer_name],
+                            record.annotations["organism"],
+                            feature.qualifiers["product"][0],
+                        )
+                        kmer_info[kmer_name].append(kmer_out)
+
     return kmer_info, kmers
 
 

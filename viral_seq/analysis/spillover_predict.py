@@ -23,7 +23,7 @@ from sklearn.metrics import (
 from sklearn.feature_selection import SelectKBest
 from urllib.request import HTTPError
 import time
-from typing import Any, Union, Dict
+from typing import Any, Union
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
@@ -317,7 +317,7 @@ def _populate_kmer_dict(
             return None
         else:
             features.update(this_res)
-            return kmer_info
+    return kmer_info
 
 
 def _grab_features(
@@ -400,7 +400,7 @@ def build_table(
     random_state: int = 123456789,
     target_column: str = "Human Host",
     mapping_method: str = "shen_2007",
-    kmer_info: Dict[Any, Any] = {},
+    kmer_info=None,
 ):
     if kmer_k is None:
         kmer_k = [10]

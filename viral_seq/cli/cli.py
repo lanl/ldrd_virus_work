@@ -250,13 +250,6 @@ def pull_ensembl_transcripts(email, cache, file):
     default="shen_2007",
     help="Preference of scheme for mapping AA-kmers to PC-kmers",
 )
-# @click.option(
-#     "--kmer-info",
-#     "-ki",
-#     type=defaultdict(list),
-#     default=None,
-#     help="Dictionary for storing information relation to kmer features"
-# )
 def calculate_table(
     cache,
     file,
@@ -276,7 +269,6 @@ def calculate_table(
     random_state,
     target_column,
     mapping_method,
-    # kmer_info,
 ):
     """Build a data table from given viral species and selected features."""
     kmer_info = defaultdict(list)
@@ -337,7 +329,7 @@ def calculate_table(
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
-            this_table = sp.build_table(
+            this_table, _ = sp.build_table(
                 cache=sim_cache,
                 save=False,
                 genomic=similarity_genomic,
@@ -350,8 +342,8 @@ def calculate_table(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
         sp.save_files(df_feats, outfile)
-
-    return kmer_info
+    if kmer_info:
+        return kmer_info
 
 
 # --- cross-validation ---

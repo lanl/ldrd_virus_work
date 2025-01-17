@@ -68,6 +68,51 @@ def print_pos_con(
     )
 
 
+def load_kmer_info(file_name: str):
+    """
+    load parquet file containing all_kmer_info and convert
+    dictionary data to kmer_data class
+
+    Parameters:
+    -----------
+    file_name: str
+        file name to load
+
+    Return:
+    -------
+    all_kmer_info: pd.DataFrame
+        dataframe containing kmer_data class objects
+    """
+
+    all_kmer_info = pd.read_parquet(file_name)
+    all_kmer_info["Info"] = all_kmer_info["Info"].apply(
+        lambda x: [kmer_data(**json.loads(x[0])) for obj in x]
+    )
+
+    return all_kmer_info
+
+
+def save_kmer_info(all_kmer_info: pd.Series, save_file: str):
+    """
+    save list of dataframes containing kmer information
+
+    Parameters:
+    -----------
+    all_kmer_info: list
+        list of dataframes containing kmer_data class objects
+    """
+    all_kmer_info = pd.concat(all_kmer_info)
+    all_kmer_info["Info"] = all_kmer_info.apply(
+        lambda row: [x for x in row if x is not None and not pd.isna(x)], axis=1
+    )
+    all_kmer_info = all_kmer_info["Info"]
+    kmer_info_df = all_kmer_info.to_frame()
+    kmer_info_df["Info"] = kmer_info_df["Info"].apply(
+        lambda x: [json.dumps(obj.__dict__) for obj in x]
+    )
+    kmer_info_df.to_parquet(save_file, engine="pyarrow", compression="gzip")
+
+
 def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
     """
     check that the lengths of features in the dataset 'X' are within
@@ -102,9 +147,17 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 #     a. use the kmer as a key to build a default dictionary that stores the associated information
 #     b. be used to lookup the virus names associated with a specific kmer
 class kmer_data:
-    def __init__(self, mapping_method: str, kmer_data: list[str]):
+    def __init__(
+        self,
+        mapping_method: str,
+        kmer_names: list[str],
+        virus_name: str = "",
+        protein_name: str = "",
+    ):
         self.mapping_method = mapping_method
-        self.kmer_names = kmer_data
+        self.kmer_names = kmer_names
+        self.virus_name = virus_name
+        self.protein_name = protein_name
 
 
 def feature_signs(
@@ -998,7 +1051,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
         return None
     elif workflow == "DTRA":
         if feature_checkpoint > 0:
-            all_kmer_info = {}
+            all_kmer_info = []
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
@@ -1048,9 +1101,13 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                             ],
                             standalone_mode=False,
                         )
-                        all_kmer_info[f"k_{k}"] = kmer_info
+                        all_kmer_info.append(
+                            pd.DataFrame.from_dict(kmer_info, orient="index")
+                        )
                         this_checkpoint -= 1
-        return all_kmer_info
+
+        # save kmer info as parquet file
+        save_kmer_info(all_kmer_info, "all_kmer_info.parquet.gzip")
 
 
 def feature_selection_rfc(
@@ -1502,7 +1559,7 @@ if __name__ == "__main__":
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
     else:
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    all_kmer_info = build_tables(
+    build_tables(
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
     X_train, y_train = feature_selection_rfc(
@@ -1718,6 +1775,10 @@ if __name__ == "__main__":
 
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
+        # TODO: - refactor workflow to use all_kmer_info
+        #       - write tests for save/load functions
+        #       - write tests for functionality
+        all_kmer_info = load_kmer_info("all_kmer_info.parquet.gzip")
 
         tbl = dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
         # TODO: this call below may be redundant because

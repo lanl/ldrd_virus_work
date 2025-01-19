@@ -341,39 +341,39 @@ Monkey lymphotropic papovavirus (LPV),VP-3,yes,
 African green monkey B-lymphotropic polyomavirus,VP2 capsid protein,yes,
 African green monkey B-lymphotropic polyomavirus,VP3 capsid protein,yes,
 Human parainfluenza virus 3,nucleocapsid protein,no,
-Human parainfluenza virus 1,nucleoprotein,,
-Hepatitis C,protein F,,
-Equine herpesvirus type 1,virion protein US10,,
+Human parainfluenza virus 1,nucleoprotein,no,https://www.uniprot.org/uniprotkb/P24304/entry
+Hepatitis C,protein F,no,https://doi.org/10.1128/jvi.77.2.1578-1583.2003
+Equine herpesvirus type 1,virion protein US10,no,None
 Kaposi’s sarcoma-associated herpesvirus,ORF74,no,
 Human adenovirus species D,single-stranded DNA-binding protein,no,
 Human adenovirus species D,membrane glycoprotein E3 CR1-beta,yes,
 Classical swine fever virus (CSF),envelope glycoprotein E2,yes,
 JEV,non-structural protein NS2a,no,
-Ross River virus (RR),6K protein,,
+Ross River virus (RR),6K protein,yes,https://doi.org/10.1128/jvi.03192-15
 BKPyV human polyomavirus,VP2,yes,
-Equine herpesvirus type 1,large tegument protein,,
+Equine herpesvirus type 1,large tegument protein,no,None
 Hepatitis C,NS4A protein,no,
-HIV-1,Vpu,,
+HIV-1,Vpu,yes,https://doi.org/10.3390/v7082824
 SARS-CoV-2,nsp4,no,
 Human parvovirus B19,non-structural protein NS1,no,
-Human rubulavirus 2,fusion protein,,
+Human rubulavirus 2,fusion protein,yes,https://www.ncbi.nlm.nih.gov/gene?Db=gene&Cmd=DetailsSearch&Term=935186
 Norwalk virus (murine norovirus),capsid protein VP1,yes,
 Canine adenovirus type 2,E4 ORFA,no,
 HIV-1,Gag-Pol,no,
 HIV-1,Pol,no,
 HIV-1,integrase,no,
-Epstein-Barr virus (EBV),protein BHLF1,,
+Epstein-Barr virus (EBV),protein BHLF1,no,https://doi.org/10.1128/jvi.01215-20
 Equine herpesvirus type 1,envelope glycoprotein D,yes,
 SARS-CoV-2,membrane glycoprotein,yes,
-Bovine adenovirus 3,pVI,,
-Human Papillomavirus type 16 (HPV),minor capsid protein L2,,
+Bovine adenovirus 3,pVI,no,https://doi.org/10.1128/jvi.72.2.1394-1402.1998
+Human Papillomavirus type 16 (HPV),minor capsid protein L2,no,https://doi.org/10.1016/j.virol.2013.04.017
 Enterovirus 70,protease 2A,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF75,no,
 Porcine sapovirus,polyprotein,no,
-human cytomegalovirus,protein UL140,,
+human cytomegalovirus,protein UL140,no,https://doi.org/10.3389/fmicb.2020.02104
 Tick-borne encephalitis virus (TBEV),non-structural protein NS2a,no,
-Epstein-Barr virus (EBV),protein BARF0,,
-Classical swine fever virus (CSF),capsid protein,,
+Epstein-Barr virus (EBV),protein BARF0,no,https://doi.org/10.1128/jvi.78.23.12848-12856.2004
+Classical swine fever virus (CSF),capsid protein,no,None
 Bovine adenovirus 3,fiber protein,,
 Vaccinia virus,ribonucleotide reductase large subunit,no,
 HSV-2,tegument protein UL21,,

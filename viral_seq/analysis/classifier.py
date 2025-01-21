@@ -560,7 +560,7 @@ def plot_roc_curve_comparison(
                 intersection.x,  # type: ignore
                 intersection.y,  # type: ignore
                 marker="x",
-                label=f"{name} {eer_threshold = :.2f}",
+                label=f"{name} {eer_threshold = :.2e}",
                 alpha=1.0,
                 ms=12,
             )
@@ -622,6 +622,7 @@ def plot_calibration_curve(
 
 def cal_eer_thresh_and_val(fpr, tpr, threshold):
     # see EER details: https://stackoverflow.com/a/46026962/2942522
+    # also Probabilistic Machine Learning: An Introduction by Kevin P. Murphy, section 5.7.2.1
     fnr = 1 - tpr
     threshold_index = np.nanargmin(np.absolute((fnr - fpr)))
     eer_threshold = threshold[threshold_index]

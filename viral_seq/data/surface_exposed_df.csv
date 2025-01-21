@@ -343,7 +343,7 @@ African green monkey B-lymphotropic polyomavirus,VP3 capsid protein,yes,
 Human parainfluenza virus 3,nucleocapsid protein,no,
 Human parainfluenza virus 1,nucleoprotein,no,https://www.uniprot.org/uniprotkb/P24304/entry
 Hepatitis C,protein F,no,https://doi.org/10.1128/jvi.77.2.1578-1583.2003
-Equine herpesvirus type 1,virion protein US10,no,None
+Equine herpesvirus type 1,virion protein US10,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF74,no,
 Human adenovirus species D,single-stranded DNA-binding protein,no,
 Human adenovirus species D,membrane glycoprotein E3 CR1-beta,yes,
@@ -351,7 +351,7 @@ Classical swine fever virus (CSF),envelope glycoprotein E2,yes,
 JEV,non-structural protein NS2a,no,
 Ross River virus (RR),6K protein,yes,https://doi.org/10.1128/jvi.03192-15
 BKPyV human polyomavirus,VP2,yes,
-Equine herpesvirus type 1,large tegument protein,no,None
+Equine herpesvirus type 1,large tegument protein,no,
 Hepatitis C,NS4A protein,no,
 HIV-1,Vpu,yes,https://doi.org/10.3390/v7082824
 SARS-CoV-2,nsp4,no,
@@ -373,38 +373,38 @@ Porcine sapovirus,polyprotein,no,
 human cytomegalovirus,protein UL140,no,https://doi.org/10.3389/fmicb.2020.02104
 Tick-borne encephalitis virus (TBEV),non-structural protein NS2a,no,
 Epstein-Barr virus (EBV),protein BARF0,no,https://doi.org/10.1128/jvi.78.23.12848-12856.2004
-Classical swine fever virus (CSF),capsid protein,no,None
-Bovine adenovirus 3,fiber protein,,
+Classical swine fever virus (CSF),capsid protein,no,
+Bovine adenovirus 3,fiber protein,yes,https://doi.org/10.1128/jvi.68.8.5239-5246.1994
 Vaccinia virus,ribonucleotide reductase large subunit,no,
-HSV-2,tegument protein UL21,,
-Murine adenovirus 3,52k,,
+HSV-2,tegument protein UL21,no,None
+Murine adenovirus 3,52k,no,https://doi.org/10.3389/fmicb.2016.01503
 Echovirus 1 (EV1),1D(VP1),yes,
-Equine herpesvirus type 1,major capsid protein,,
-human cytomegalovirus,protein UL49,,
+Equine herpesvirus type 1,major capsid protein,no,None
+human cytomegalovirus,protein UL49,no,https://doi.org/10.1016/j.isci.2022.105168
 Dengue virus type 2,membrane glycoprotein precursor prM,yes,
 Dengue virus type 2,membrane glycoprotein M,yes,
-SARS-CoV-2,leader protein,,
-Kaposi’s sarcoma-associated herpesvirus,K15,,
-Murine adenovirus 3,pVII,,
+SARS-CoV-2,leader protein,no,https://doi.org/10.1007/s12104-021-10019-6
+Kaposi’s sarcoma-associated herpesvirus,K15,yes,https://doi.org/10.3858/emm.2008.40.5.565
+Murine adenovirus 3,pVII,no,https://www.uniprot.org/uniprotkb/C3SAU3/entry
 Vaccinia virus,DNA-dependent RNA polymerase subunit rpo147,no,
 human cytomegalovirus,membrane protein US15,yes,
 Epstein-Barr virus (EBV),nuclear antigen EBNA-3A,yes,
-HSV-2,capsid portal protein,,
+HSV-2,capsid portal protein,no,https://doi.org/10.1128/jvi.01534-20
 Kaposi’s sarcoma-associated herpesvirus,ORF17,no,
 Equine herpesvirus type 1,helicase-primase primase subunit,no,
 Ross River virus (RR),non-structural polyprotein,no,
-Ross River virus (RR),nsP4 protein,,
-human cytomegalovirus,protein UL15A,,
+Ross River virus (RR),nsP4 protein,no,None
+human cytomegalovirus,protein UL15A,no,https://doi.org/10.3390/ijms23052768
 Equine herpesvirus type 1,DNA packaging terminase subunit 2,no,
 WNV,nonstructural protein NS2A,no,
-Murine coronavirus,hemagglutinin-esterase,,
-Human adenovirus species D,core protein precursor pX,,
-Murine adenovirus 3,pX,,
-Vaccinia virus,S-S bond formation pathway protein,,
-HSV-2,tegument protein UL7,,
+Murine coronavirus,hemagglutinin-esterase,yes,None
+Human adenovirus species D,core protein precursor pX,no,https://doi.org/10.3390/v13030388
+Murine adenovirus 3,pX,no,None
+Vaccinia virus,S-S bond formation pathway protein,no,https://doi.org/10.1073/pnas.062163799
+HSV-2,tegument protein UL7,no,None
 HSV-2,tegument protein VP13/14,yes,
-Simian adenovirus 11,pX,,
-Hepatitis C,E1 protein,,
+Simian adenovirus 11,pX,no,None
+Hepatitis C,E1 protein,yes,https://doi.org/10.3389/fimmu.2018.01411
 human cytomegalovirus,protein UL138,,
 Dengue virus type 2,nonstructural protein NS4B,no,
 Epstein-Barr virus (EBV),virion protein G11,,

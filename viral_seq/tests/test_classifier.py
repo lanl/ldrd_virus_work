@@ -189,26 +189,34 @@ def test_get_roc_curve():
 
 
 @pytest.mark.parametrize(
-    "eer_data, expected_filename",
+    "get_eer_data, seed, expected_filename",
     [
-        (None, "test_plot_roc_curve.png"),
+        (False, 951753, "test_plot_roc_curve.png"),
         (
-            classifier.EER_Data(
-                eer_threshold_index=4,
-                eer_threshold=0.15316563099288472,
-                eer_value=0.46799428536085275,
-            ),
-            "test_plot_roc_curve_eer.png",
+            True,
+            951753,
+            "test_plot_roc_curve_eer_horz.png",
+        ),
+        (
+            True,
+            357687,
+            "test_plot_roc_curve_eer_vert.png",
         ),
     ],
 )
-def test_plot_roc_curve(eer_data, expected_filename, tmpdir):
-    rng = np.random.default_rng(951753)
+def test_plot_roc_curve(get_eer_data, seed, expected_filename, tmpdir):
+    rng = np.random.default_rng(seed)
     expected_plot = files("viral_seq.tests.expected").joinpath(expected_filename)
     # generate random input typical of fpr, tpr values
     # arrays of values increasing by random intervals from 0.0 to 1.0
-    tpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
-    fpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    # values are repeated to generate typical stepped curve
+    tpr = np.repeat(np.sort(np.append(rng.random((4,)), [0.0, 1.0])), 2)[0:-1]
+    fpr = np.repeat(np.sort(np.append(rng.random((4,)), [0.0, 1.0])), 2)[1:]
+    threshold = np.sort(np.append(rng.random((9,)), [0.0, 1.0]))
+    if get_eer_data:
+        eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
+    else:
+        eer_data = None
     with tmpdir.as_cwd():
         classifier.plot_roc_curve("Test", fpr, tpr, eer_data=eer_data)
         assert compare_images(expected_plot, "roc_plot.png", 0.001) is None

@@ -21,6 +21,7 @@ from lightgbm import LGBMClassifier
 from matplotlib import pyplot as plt
 from xgboost import XGBClassifier
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from shapely.geometry import LineString
 
 
 class CV_data(NamedTuple):
@@ -543,9 +544,21 @@ def plot_roc_curve_comparison(
             eer_line = True
             eer_threshold = eer_data_list[i].eer_threshold
             eer_threshold_index = eer_data_list[i].eer_threshold_index
+            eer_x = fprs[i][eer_threshold_index]
+            eer_y = tprs[i][eer_threshold_index]
+            # assume point is below eer line
+            next_idx = eer_threshold_index + 1
+            if eer_x + eer_y > 1.0:
+                # above eer line case
+                next_idx = eer_threshold_index - 1
+            # find intercept between this line segment and eer line
+            eer_next_x = fprs[i][next_idx]
+            eer_next_y = tprs[i][next_idx]
+            this_line = LineString([(eer_x, eer_y), (eer_next_x, eer_next_y)])
+            intersection = this_line.intersection(LineString([(0, 1), (1, 0)]))
             ax.plot(
-                fprs[i][eer_threshold_index],
-                tprs[i][eer_threshold_index],
+                intersection.x,  # type: ignore
+                intersection.y,  # type: ignore
                 marker="x",
                 label=f"{name} {eer_threshold = :.2f}",
                 alpha=1.0,

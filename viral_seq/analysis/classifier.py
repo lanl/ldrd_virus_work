@@ -24,9 +24,9 @@ from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 
 
 class CV_data(NamedTuple):
-    y_tests: list
-    y_preds: list
-    scores: list
+    y_tests: list[np.ndarray]
+    y_preds: list[np.ndarray]
+    scores: npt.NDArray[np.floating[Any]]
 
 
 class CV_ROC_data(NamedTuple):
@@ -237,22 +237,22 @@ def cross_validation(
         **kwargs: passed to model
 
     Returns:
-        y_tests (list): each test set for each fold
-        y_preds (list): corresponding predictions for each test set
-        scores (list): score achieved for each fold.
+        y_tests (list[np.ndarray]): each test set for each fold
+        y_preds (list[np.ndarray]): corresponding predictions for each test set
+        scores (np.ndarray(np.floating[Any]): score achieved for each fold.
     """
     cv = StratifiedKFold(n_splits=n_splits)
-    scores = []
+    scores = np.zeros(n_splits)
     y_preds = []
     y_tests = []
     r = Parallel(n_jobs=n_jobs_cv)(
         delayed(_cv_child)(model, X, y, scoring, train, test, **kwargs)
         for train, test in cv.split(X, y)
     )
-    for res in r:
+    for i, res in enumerate(r):
         y_tests.append(res[0])
         y_preds.append(res[1])
-        scores.append(res[2])
+        scores[i] = res[2]
     return CV_data(y_tests, y_preds, scores)
 
 
@@ -436,7 +436,7 @@ def get_roc_curve(
 
 
 def get_roc_curve_cv(
-    y_trues: list[npt.ArrayLike], predictions: list[list[npt.ArrayLike]]
+    y_trues: list[npt.ArrayLike], predictions: list[list[np.ndarray]]
 ) -> CV_ROC_data:
     """Like `sklearn.metrics.roc_curve` designed to handle multiple copies of k-fold cross-validation data.
 

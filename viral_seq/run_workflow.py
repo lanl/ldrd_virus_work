@@ -649,7 +649,7 @@ if __name__ == "__main__":
         "--target-column",
         choices=["Human Host"],
         default="Human Host",
-        help="Target column to be used for binary clasification.",
+        help="Target column to be used for binary classification.",
     )
 
     args = parser.parse_args()

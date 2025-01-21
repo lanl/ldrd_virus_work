@@ -396,6 +396,7 @@ def test_plot_calibration_curve(tmpdir):
 
 
 def test_cal_eer_thresh_and_val():
+    """Regression test calc_eer_thresh_and_val."""
     rng = np.random.default_rng(4684365)
     expected_eer_data = classifier.EER_Data(
         eer_threshold_index=5,
@@ -405,5 +406,21 @@ def test_cal_eer_thresh_and_val():
     tpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
     fpr = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
     threshold = np.sort(np.append(rng.random((8,)), [0.0, 1.0]))
+    eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
+    assert_allclose(eer_data, expected_eer_data)
+
+
+@pytest.mark.parametrize(
+    "input_data, expected_eer_data",
+    [
+        (np.arange(0, 1, 0.1), (5, 0.5, 0.5)),
+        (np.arange(0, 1, 0.01), (50, 0.5, 0.5)),
+    ],
+)
+def test_cal_eer_thresh_and_val_functional(input_data, expected_eer_data):
+    """Check expected test cases of calc_eer_thresh_and_val."""
+    tpr = input_data
+    fpr = input_data
+    threshold = input_data
     eer_data = classifier.cal_eer_thresh_and_val(fpr, tpr, threshold)
     assert_allclose(eer_data, expected_eer_data)

@@ -952,12 +952,17 @@ if __name__ == "__main__":
         comp_names_ensembles.append(f"Hard Votes Ensemble at {name} Threshold")
         comp_fprs_ensembles.append(this_fpr)
         comp_tprs_ensembles.append(this_tpr)
+    this_title = (
+        f"ROC Curve\nEnsemble Models\nContributing classifiers averaged over {copies} seeds."
+        if copies > 1
+        else "ROC Curve\nEnsemble Models"
+    )
     classifier.plot_roc_curve_comparison(
         comp_names_ensembles,
         comp_fprs_ensembles,
         comp_tprs_ensembles,
         filename=str(plots_path / "roc_plot_ensemble_comparison.png"),
-        title="ROC Curve\nEnsemble Models",
+        title=this_title,
     )
     # check feature importance and consensus
     feature_importances = []

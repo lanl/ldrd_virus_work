@@ -731,22 +731,7 @@ def test_train_clfr():
     kmer_data[:, 0] = data_target
     kmer_data[:, 1] = 1 - data_target
 
-    kmer_names = np.array(
-        [
-            "kmer_AA_TRYWQSV",
-            "kmer_AA_LKIVNGS",
-            "kmer_AA_AAARTHI",
-            "kmer_AA_VVLLITY",
-            "kmer_PC_ABAAGCA",
-            "kmer_PC_GCACADG",
-            "kmer_PC_ABCAGCA",
-            "kmer_PC_GCACEDG",
-            "kmer_PC_0445800",
-            "kmer_PC_0325678",
-            "kmer_PC_1834561",
-            "kmer_PC_0081453",
-        ]
-    )
+    kmer_names = np.array([f"kmer_{i}" for i in range(12)])
 
     train_data = pd.DataFrame(kmer_data, columns=kmer_names)
     y = pd.Series(data_target)

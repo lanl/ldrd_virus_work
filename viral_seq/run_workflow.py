@@ -2015,11 +2015,14 @@ if __name__ == "__main__":
                 "clfr": ExtraTreesClassifier(),
                 "params": {"n_estimators": 10000, "n_jobs": -1},
             },
-            "XGBClassifier": {"clfr": XGBClassifier(), "params": {}},
+            "XGBClassifier": {
+                "clfr": XGBClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
             # TODO: LGBM giving some bad results
             # "LGBMClassifier": {
             #     "clfr": LGBMClassifier(),
-            #     "params": {}
+            #     "params": {"num_leaves":10000, "n_estimators": 10000, "n_jobs": -1}
             # }
         }
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(

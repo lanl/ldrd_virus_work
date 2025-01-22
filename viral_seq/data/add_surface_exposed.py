@@ -22,6 +22,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "pol",
         "3C",
         "hypothetical",
+        "Hypothetical",
         "pTP",
         "TP",
         "ORF",
@@ -29,6 +30,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "IVa2",
         "tegument",
         "nsP",
+        "nuclear",
     ]
     not_exposed_exceptions = ["hemagglutinin-neuraminidase", "hemagglutinin-esterase"]
     exposed = [
@@ -41,6 +43,8 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "hemagglutinin-esterase",
         "hemagglutinin-neuraminidase",
         "fusion",
+        "hemagglutinin",
+        "fiber",
     ]
     for i, row in enumerate(surface_exposed_df.itertuples()):
         if pd.isna(row.surface_exposed_status):

@@ -316,13 +316,6 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
                 else row[f"{col}_train"],
                 axis=1,
             )
-    # fix repeated accessions
-    reconciled_df["Accessions"] = reconciled_df.apply(
-        lambda row: row["Accessions"]
-        if len(row["Accessions"].split()) == 1
-        else row["Accessions"].split()[0],
-        axis=1,
-    )
 
     return reconciled_df
 

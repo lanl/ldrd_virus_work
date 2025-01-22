@@ -719,6 +719,8 @@ def check_positive_controls(
             "LRM",
             "QDAP",
             "REGA",
+            "NYNYLYK",
+            "NYNYLYQ",
         ],
         "IgSF": [
             "DEDGYITLN",

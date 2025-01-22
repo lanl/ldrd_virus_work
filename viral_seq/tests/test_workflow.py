@@ -262,12 +262,12 @@ def test_positive_controls(
     "target_column, len_exp_keys",
     [
         ("Is_Integrin", 7),
-        ("Is_Sialic_Acid", 6),
+        ("Is_Sialic_Acid", 8),
         ("Is_IgSF", 8),
-        ("SA_IG", 14),
+        ("SA_IG", 16),
         ("IN_IG", 15),
-        ("IN_SA", 13),
-        ("ALL", 21),
+        ("IN_SA", 15),
+        ("ALL", 23),
     ],
 )
 def test_pos_con_columns(target_column, len_exp_keys):

@@ -425,7 +425,7 @@ hMPV,RNA-dependent RNA polymerase,no,
 Canine adenovirus type 2,100K,no,https://doi.org/10.1016/j.virusres.2017.06.024
 hMPV,matrix protein,no,http://www.doi.org/10.1016/j.str.2013.10.013
 Kaposi’s sarcoma-associated herpesvirus,ORF21,no,
-human cytomegalovirus,protein UL150,no,None
+human cytomegalovirus,protein UL150,no,
 human cytomegalovirus,membrane protein US14,yes,
 human cytomegalovirus,envelope glycoprotein UL33,yes,
 Enterovirus 70,3D-POL,no,https://doi.org/10.3390/v7082832
@@ -449,7 +449,7 @@ Epstein-Barr virus (EBV),envelope glycoprotein 48,yes,
 Equine herpesvirus type 1,DNA packaging protein UL32,no,
 Equine herpesvirus type 1,tegument serine/threonine protein kinase,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF45,no,
-Epstein-Barr virus (EBV),multifunctional expression regulator,no,None
+Epstein-Barr virus (EBV),multifunctional expression regulator,no,
 Vaccinia virus,hydroxysteroid dehydrogenase,no,
 human cytomegalovirus,membrane protein US18,yes,
 Vaccinia virus,IMV membrane protein,yes,
@@ -462,26 +462,26 @@ Murine coronavirus,nsp10,no,
 HCoV-HKU1,nsp10,no,
 Porcine epidemic diarrhea virus,formerly known as growth-factor-like protein,no,https://www.ncbi.nlm.nih.gov/gene?cmd=Retrieve&dopt=full_report&list_uids=935181
 MERS-CoV,nsp10 protein,no,
-Murine coronavirus,PL-PRO,no,None
+Murine coronavirus,PL-PRO,no,
 Kaposi’s sarcoma-associated herpesvirus,vIRF-4,no,https://doi.org/10.1016/S0304-419X(01)00040-3
 HSV-2,ribonucleotide reductase subunit 2,no,
 Equine herpesvirus type 1,capsid maturation protease,no,
-Vaccinia virus,ankyin-like protein,no,None
-Human rubulavirus 2,matrix protein,no,None
+Vaccinia virus,ankyin-like protein,no,
+Human rubulavirus 2,matrix protein,no,
 Porcine sapelovirus,polymerase,no,
 human cytomegalovirus,membrane glycoprotein UL119,yes,
 Dengue virus type 2,nonstructural protein NS2A,no,
 Epstein-Barr virus (EBV),envelope glycoprotein M,yes,
-hMPV,nucleoprotein,no,None
+hMPV,nucleoprotein,no,
 Classical swine fever virus (CSF),nonstructural protein NS5A,no,
-Rabies virus (RABV),nucleoprotein N,no,None
+Rabies virus (RABV),nucleoprotein N,no,
 HSV-2,thymidine kinase,no,
 Vaccinia virus,DNA-dependent RNA polymerase subunit rpo132,no,
 HSV-2,envelope glycoprotein D,yes,
 Equine herpesvirus type 1,deoxyribonuclease,no,
 Mumps virus (MuV),hemagglutinin-neuraminidase,yes,
 Simian adenovirus 11,DBP,no,https://doi.org/10.1128/jvi.01885-23
-Murine adenovirus 3,DBP,no,None
+Murine adenovirus 3,DBP,no,
 Epstein-Barr virus (EBV),glycoprotein 350,yes,
 Epstein-Barr virus (EBV),envelope glycoprotein H,yes,
 Equine herpesvirus type 1,envelope glycoprotein J,yes,
@@ -495,56 +495,56 @@ Equine herpesvirus type 1,tegument protein VP11/12,yes,
 Kaposi’s sarcoma-associated herpesvirus,ORF28,no,
 Classical swine fever virus (CSF),nonstructural protein NS4A,no,
 HSV-2,envelope glycoprotein G,yes,
-Mumps virus (MuV),fusion protein,yes,None
-Vaccinia virus,precursor p4a of core protein 4a,,
+Mumps virus (MuV),fusion protein,yes,
+Vaccinia virus,precursor p4a of core protein 4a,no,https://doi.org/10.1128/jvi.75.13.5778-5795.2001
 Hepatitis C,NS5A protein,no,
-Epstein-Barr virus (EBV),protein G10,,
-Epstein-Barr virus (EBV),protein G49,,
-human cytomegalovirus,protein UL27,,
+Epstein-Barr virus (EBV),protein G10,no,https://doi.org/10.3390/biom12020227
+Epstein-Barr virus (EBV),protein G49,no,https://www.ncbi.nlm.nih.gov/gene/3783728
+human cytomegalovirus,protein UL27,no,https://doi.org/10.1128/jvi.78.13.7124-7130.2004
 Murray Valley encephalitis virus,NS4B,no,
-Kaposi’s sarcoma-associated herpesvirus,K14,,
+Kaposi’s sarcoma-associated herpesvirus,K14,yes,https://doi.org/10.1128/jvi.76.10.4688-4698.2002
 Rabies virus (RABV),transmembrane glycoprotein G,yes,
-Simian adenovirus 11,RID-beta,,
+Simian adenovirus 11,RID-beta,yes,https://doi.org/10.1186/1471-2164-10-557
 HCoV-OC43,nsp8,no,
 Murine coronavirus,nsp8,no,
 HCoV-HKU1,nsp8,no,
 MERS-CoV,nsp8 protein,no,
-Human adenovirus type 5,E3 RID-alpha,,
+Human adenovirus type 5,E3 RID-alpha,yes,
 WNV,membrane glycoprotein precursor prM,yes,
 WNV,membrane glycoprotein M,yes,
 Murray Valley encephalitis virus,pre-membrane protein prM,yes,
 Murray Valley encephalitis virus,membrane protein M,yes,
 Zika virus,membrane glycoprotein precursor prM,yes,
 Zika virus,membrane glycoprotein M,yes,
-Human respirovirus 3,matrix potein,,
-Human parainfluenza virus 3,matrix potein,,
-Human parainfluenza virus 1,matrix protein,,
-Hepatitis C,p7 protein,,
+Human respirovirus 3,matrix potein,yes,https://www.uniprot.org/uniprotkb/P07873/entry
+Human parainfluenza virus 3,matrix potein,yes,
+Human parainfluenza virus 1,matrix protein,yes,
+Hepatitis C,p7 protein,yes,https://doi.org/10.1038/s41598-019-44413-x
 Bovine adenovirus 3,IVa2,no,
 Equine herpesvirus type 1,envelope glycoprotein K,yes,
 HSV-2,helicase-primase primase subunit,no,
 Vaccinia virus,guanylate kinase,no,
-Ross River virus (RR),nsP2 protein,,
+Ross River virus (RR),nsP2 protein,no,
 human cytomegalovirus,envelope glycoprotein UL132,yes,
 human cytomegalovirus,membrane protein US17,yes,
 SARS-CoV-2,envelope protein,yes,
 HSV-2,envelope glycoprotein J,yes,
 HIV-1,aspartic peptidase,no,
 Equine herpesvirus type 1,nuclear egress membrane protein,yes,
-HIV-1,Pr55(Gag),,
-HIV-1,capsid,,
-Murine adenovirus 3,pV,,
-human cytomegalovirus,tegument protein pp150,,
+HIV-1,Pr55(Gag),no,https://doi.org/10.3390/v12080888
+HIV-1,capsid,no,
+Murine adenovirus 3,pV,no,https://doi.org/10.3390/v13030388
+human cytomegalovirus,tegument protein pp150,no,
 Vaccinia virus,CD47-like putative membrane protein,yes,
-Simian adenovirus 11,fiber-2,,
-Kaposi’s sarcoma-associated herpesvirus,K8.1,,
+Simian adenovirus 11,fiber-2,yes,https://doi.org/10.3201/eid1807.111665
+Kaposi’s sarcoma-associated herpesvirus,K8.1,yes,https://doi.org/10.1128/jvi.78.12.6389-6398.2004
 SARS-CoV-2,ORF10 protein,no,
-Simian virus 40,large T antigen,,
-Equine herpesvirus type 1,tegument protein UL7,,
-Adeno-Associated Virus Type 2 (AAV2),assembly activating protein AAP,,
-HIV-1,p66 subunit,,
+Simian virus 40,large T antigen,no,https://www.uniprot.org/uniprotkb/P03070/entry
+Equine herpesvirus type 1,tegument protein UL7,no,
+Adeno-Associated Virus Type 2 (AAV2),assembly activating protein AAP,no,https://doi.org/10.1128/jvi.01198-17
+HIV-1,p66 subunit,no,https://doi.org/10.1002/prot.24594
 Equine herpesvirus type 1,ubiquitin E3 ligase ICP0,no,
-Human adenovirus type 5,E3 RID-beta,,
+Human adenovirus type 5,E3 RID-beta,yes,
 HSV-2,envelope glycoprotein E,yes,
 HCoV-OC43,nsp4,no,
 HCoV-HKU1,nsp4 (TM2),no,

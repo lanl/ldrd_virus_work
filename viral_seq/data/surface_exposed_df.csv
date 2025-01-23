@@ -725,8 +725,8 @@ Kaposi’s sarcoma-associated herpesvirus,ORF25,no,
 Porcine epidemic diarrhea virus,hypothetical protein,no,
 Coxsackievirus A9 (CVA9),VP1 protein,yes,
 Echovirus 1 (EV1),protein 2B,no,https://doi.org/10.1016/j.tim.2004.12.005
-Echovirus 9 strain Barty,2B,no,None
-Coxsackievirus A9 (CVA9),2B protein,no,None
+Echovirus 9 strain Barty,2B,no,
+Coxsackievirus A9 (CVA9),2B protein,no,
 HCoV-OC43,nsp7,no,
 Murine coronavirus,nsp7,no,
 HCoV-HKU1,nsp7,no,
@@ -740,41 +740,41 @@ human cytomegalovirus,membrane glycoprotein US9,yes,
 Simian adenovirus 11,protease,no,
 Epstein-Barr virus (EBV),DNA packaging terminase subunit 2,no,
 Vaccinia virus,DNA helicase,no,
-Enterovirus 70,protein VP0,,
-Enterovirus 70,capsid protein 1B,,
-HIV-1,Vif,,
+Enterovirus 70,protein VP0,yes,https://doi.org/10.1371/journal.ppat.1012511
+Enterovirus 70,capsid protein 1B,yes,https://www.ncbi.nlm.nih.gov/protein/NP_740413.1
+HIV-1,Vif,no,https://doi.org/10.1038/s41586-023-05779-1
 Tick-borne encephalitis virus (TBEV),non-structural protein NS4b,no,
 human cytomegalovirus,membrane protein UL121,yes,
-Epstein-Barr virus (EBV),capsid triplex subunit 2,,
-HSV-2,capsid triplex subunit 2,,
-human cytomegalovirus,tegument protein UL23,,
-Encephalomyocarditis virus (Cardiovirus A),protein 3D,,
+Epstein-Barr virus (EBV),capsid triplex subunit 2,no,
+HSV-2,capsid triplex subunit 2,no,
+human cytomegalovirus,tegument protein UL23,no,
+Encephalomyocarditis virus (Cardiovirus A),protein 3D,no,https://doi.org/10.4161/viru.20573
 Vaccinia virus,"ATPase, nucleoside triphosphate phosphohydrolase-I, NPH-I",no,
-Vaccinia virus,kelch-like protein,,
-Canine adenovirus type 2,E1B 55K,,
+Vaccinia virus,kelch-like protein,no,https://doi.org/10.1099/vir.0.81854-0
+Canine adenovirus type 2,E1B 55K,no,https://doi.org/10.3389/fcimb.2022.854876
 Vaccinia virus,thymidine kinase,no,
 MERS-CoV,nsp1 protein,no,
 Vaccinia virus,DNA-dependent RNA polymerase subunit rpo22,no,
-Vaccinia virus,soluble interferon-gamma receptor-like protein,,
+Vaccinia virus,soluble interferon-gamma receptor-like protein,yes,https://doi.org/10.1099/0022-1317-83-3-545
 Tick-borne encephalitis virus (TBEV),non-structural protein NS1,no,
 Classical swine fever virus (CSF),nonstructural protein NS4B,no,
-Human adenovirus type 5,22K,,
-Human Papillomavirus type 16 (HPV),regulatory protein E2,,
+Human adenovirus type 5,22K,no,https://doi.org/10.1128/jvi.02455-08
+Human Papillomavirus type 16 (HPV),regulatory protein E2,no,https://doi.org/10.1128/jvi.00502-16
 human cytomegalovirus,envelope protein UL78,yes,
 human cytomegalovirus,DNA packaging protein UL32,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF17.5,no,
-human cytomegalovirus,capsid triplex subunit 2,,
-Murray Valley encephalitis virus,2K protein,,
-Epstein-Barr virus (EBV),protein UL87,,
-Norwalk virus (murine norovirus),small basic protein,,
+human cytomegalovirus,capsid triplex subunit 2,no,
+Murray Valley encephalitis virus,2K protein,no,https://doi.org/10.1371/journal.pone.0170462
+Epstein-Barr virus (EBV),protein UL87,no,https://doi.org/10.1128/jvi.00159-12
+Norwalk virus (murine norovirus),small basic protein,yes,https://doi.org/10.1007/978-3-030-27209-8_2
 Equine herpesvirus type 1,envelope glycoprotein B,yes,
-Human respirovirus 3,phosphoprotein,,
-Human parainfluenza virus 3,phosphoprotein,,
-Equine herpesvirus type 1,protein V57,,
-Equine herpesvirus type 1,nuclear protein UL3,,
+Human respirovirus 3,phosphoprotein,no,https://doi.org/10.1128/JVI.01648-21
+Human parainfluenza virus 3,phosphoprotein,no,
+Equine herpesvirus type 1,protein V57,no,https://doi.org/10.1016/j.micpath.2024.106755
+Equine herpesvirus type 1,nuclear protein UL3,no,
 MERS-CoV,2'-O-methyltransferase,no,
-Kaposi’s sarcoma-associated herpesvirus,K12,,
-human cytomegalovirus,tegument protein pp65,,
+Kaposi’s sarcoma-associated herpesvirus,K12,no,https://doi.org/10.1128/jvi.76.23.11880-11888.2002
+human cytomegalovirus,tegument protein pp65,no,
 human cytomegalovirus,membrane protein US30,yes,
 HSV-2,envelope protein UL20,yes,
 Kaposi’s sarcoma-associated herpesvirus,vIRF-3,,

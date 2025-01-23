@@ -647,10 +647,10 @@ Canine adenovirus type 2,protease,no,
 Bovine adenovirus 3,protease,no,
 human cytomegalovirus,protein UL145,no,https://doi.org/10.1016/j.celrep.2020.01.070
 human cytomegalovirus,capsid maturation protease,no,
-human cytomegalovirus,capsid scaffold protein,no,None
+human cytomegalovirus,capsid scaffold protein,no,
 Human adenovirus type 5,E4 34K,no,https://www.uniprot.org/uniprotkb/Q6VGT3/entry
-Epstein-Barr virus (EBV),small capsid protein,no,None
-Epstein-Barr virus (EBV),capsid portal protein,no,None
+Epstein-Barr virus (EBV),small capsid protein,no,
+Epstein-Barr virus (EBV),capsid portal protein,no,
 Porcine epidemic diarrhea virus,putative leader protein,no,https://www.ncbi.nlm.nih.gov/gene?Db=gene&Cmd=DetailsSearch&Term=935181
 Epstein-Barr virus (EBV),single-stranded DNA-binding protein,no,
 HSV-2,serine/threonine protein kinase US3,no,
@@ -658,19 +658,19 @@ Equine herpesvirus type 1,membrane protein UL45,yes,
 HSV-2,tegument serine/threonine protein kinase,no,
 Vaccinia virus,p4b precursor of core protein 4b,no,https://doi.org/10.1128/jvi.56.3.830-838.1985
 HSV-2,deoxyuridine triphosphatase,no,
-Equine herpesvirus type 1,nuclear egress lamina protein,no,None
+Equine herpesvirus type 1,nuclear egress lamina protein,no,
 human cytomegalovirus,membrane glycoprotein US8,yes,
-HIV-1,matrix,,
+HIV-1,matrix,no,https://doi.org/10.1128/jvi.72.2.1671-1676.1998
 Human parainfluenza virus 1,F glycoprotein,yes,
-Porcine sapelovirus,capsid protein 1C,,
-Vaccinia virus,45kDa large subunit of intermediate gene transcription factor VITF-3,,
-human cytomegalovirus,tegument protein vICA,,
+Porcine sapelovirus,capsid protein 1C,yes,https://doi.org/10.3390/v14020349
+Vaccinia virus,45kDa large subunit of intermediate gene transcription factor VITF-3,no,https://doi.org/10.1073/pnas.96.6.2692
+human cytomegalovirus,tegument protein vICA,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF18,no,
 Vaccinia virus,DNA-binding virion core protein,no,
 human cytomegalovirus,envelope glycoprotein UL37,yes,
 Kaposi’s sarcoma-associated herpesvirus,ORF52,no,
 Echovirus 1 (EV1),1C(VP3),yes,
-Classical swine fever virus (CSF),N-Pro,,
+Classical swine fever virus (CSF),N-Pro,no,https://doi.org/10.1016/j.virusres.2023.199280
 Coxsackievirus A9 (CVA9),VP3 protein,yes,
 HCoV-OC43,envelope protein,yes,
 human cytomegalovirus,membrane protein UL124,yes,
@@ -681,13 +681,13 @@ Canine adenovirus type 2,E3 ORFA,no,
 SARS-CoV-2,endoRNAse,no,
 Equine herpesvirus type 1,ribonucleotide reductase subunit 2,no,
 human cytomegalovirus,membrane protein UL20,yes,
-Human Papillomavirus type 16 (HPV),transforming protein E5,,
+Human Papillomavirus type 16 (HPV),transforming protein E5,no,https://doi.org/10.1158/0008-5472.CAN-19-1771
 Kaposi’s sarcoma-associated herpesvirus,ORF61,no,
 SARS-CoV-2,ORF3a protein,no,
-Epstein-Barr virus (EBV),nuclear antigen EBNA-3B,,
+Epstein-Barr virus (EBV),nuclear antigen EBNA-3B,no,
 human cytomegalovirus,membrane protein US12,yes,
-Dengue virus type 2,anchored capsid protein ancC,,
-Epstein-Barr virus (EBV),nuclear protein UL24,,
+Dengue virus type 2,anchored capsid protein ancC,no,https://doi.org/10.1099/vir.0.070813-0
+Epstein-Barr virus (EBV),nuclear protein UL24,no,
 Feline calicivirus,nonstructural protein,no,
 HIV-1,Asp,yes,
 Vaccinia virus,serine protease inhibitor-like SPI-1,no,
@@ -695,11 +695,11 @@ Canine adenovirus type 2,E4 ORFC,no,
 Epstein-Barr virus (EBV),deoxyuridine triphosphatase,no,
 Canine adenovirus type 2,E4 ORFD,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF6,no,
-Vaccinia virus,cowpox A-type inclusion protein,,
+Vaccinia virus,cowpox A-type inclusion protein,no,https://doi.org/10.1128/jvi.70.6.3372-3377.1996
 Kaposi’s sarcoma-associated herpesvirus,ORF11,no,
 Vaccinia virus,phospholipase-D-like protein,no,
-Murine adenovirus 3,fiber,,
-HCoV-OC43,PLpro,,
+Murine adenovirus 3,fiber,yes,
+HCoV-OC43,PLpro,no,https://doi.org/10.1128/jvi.79.24.15189-15198.2005
 human cytomegalovirus,envelope glycoprotein US27,yes,
 Equine herpesvirus type 1,DNA replication origin-binding helicase,no,
 New Jersey polyomavirus (NJPyV),VP2,yes,
@@ -709,12 +709,12 @@ Human polyomavirus 12,VP3,yes,
 Murine polyomavirus strain BG,minor capsid protein VP2,yes,
 Murine polyomavirus strain BG,minor capsid protein VP3,yes,
 Canine adenovirus type 2,IVa2,no,
-HCoV-HKU1,nucleocapsid phosphoprotein 2,,
+HCoV-HKU1,nucleocapsid phosphoprotein 2,no,
 human cytomegalovirus,membrane protein UL14,yes,
 Bovine adenovirus 3,DNA polymerase,no,
 Equine herpesvirus type 1,ribonucleotide reductase subunit 1,no,
-HIV-1,Rev,,
-SARS-CoV-2,nucleocapsid phosphoprotein,,
+HIV-1,Rev,no,https://doi.org/10.1146/annurev.micro.52.1.491
+SARS-CoV-2,nucleocapsid phosphoprotein,no,
 Equine herpesvirus type 1,helicase-primase helicase subunit,no,
 human cytomegalovirus,DNA packaging tegument protein UL17,no,
 hMPV,attachment glycoprotein,yes,
@@ -724,18 +724,18 @@ bovine parvovirus,hypothetical protein,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF25,no,
 Porcine epidemic diarrhea virus,hypothetical protein,no,
 Coxsackievirus A9 (CVA9),VP1 protein,yes,
-Echovirus 1 (EV1),protein 2B,,
-Echovirus 9 strain Barty,2B,,
-Coxsackievirus A9 (CVA9),2B protein,,
+Echovirus 1 (EV1),protein 2B,no,https://doi.org/10.1016/j.tim.2004.12.005
+Echovirus 9 strain Barty,2B,no,None
+Coxsackievirus A9 (CVA9),2B protein,no,None
 HCoV-OC43,nsp7,no,
 Murine coronavirus,nsp7,no,
 HCoV-HKU1,nsp7,no,
-Vaccinia virus,rifampicin target,,
-Human Papillomavirus type 16 (HPV),transforming protein E6,,
-Vaccinia virus,semaphorin-like protein,,
+Vaccinia virus,rifampicin target,no,https://doi.org/10.1073/pnas.1810398115
+Human Papillomavirus type 16 (HPV),transforming protein E6,no,https://doi.org/10.1128/jvi.65.9.4860-4866.1991
+Vaccinia virus,semaphorin-like protein,yes,https://doi.org/10.1016/s1074-7613(00)80552-x
 Adeno-Associated Virus Type 2 (AAV2),major coat protein VP2,yes,
 Adeno-Associated Virus Type 2 (AAV2),major coat protein VP3,yes,
-Vaccinia virus,EEV maturation protein,,
+Vaccinia virus,EEV maturation protein,no,https://doi.org/10.4049/jimmunol.1400663
 human cytomegalovirus,membrane glycoprotein US9,yes,
 Simian adenovirus 11,protease,no,
 Epstein-Barr virus (EBV),DNA packaging terminase subunit 2,no,

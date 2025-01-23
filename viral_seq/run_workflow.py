@@ -147,6 +147,7 @@ def get_kmer_info(
     kmer_features = []
     kmer_mm = kmer_data.mapping_method
     topN_kmers = kmer_data.kmer_names
+    accessions = set((" ".join(tbl["Accessions"].values)).split())
     if kmer_mm != mapping_method:
         raise ValueError("kmer mapping method does not match mapping method argument.")
     for item in topN_kmers:
@@ -196,10 +197,11 @@ def get_kmer_info(
                             m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
                         ]
                         if kmer_idx:
-                            acc_exist = tbl.Accessions.isin([record.id])
-                            if sum(acc_exist):
+                            if record.id in accessions:
                                 virus_names.append(
-                                    tbl.Species[np.nonzero(acc_exist)[0][0]]
+                                    tbl.loc[tbl["Accessions"].str.contains(record.id)][
+                                        "Species"
+                                    ].item()
                                 )
                                 protein_names.append(
                                     str(feature.qualifiers.get("product"))[2:-2]

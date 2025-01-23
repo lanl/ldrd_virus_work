@@ -38,6 +38,8 @@ import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
 from sklearn.metrics import roc_curve
 from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+import os
 
 matplotlib.use("Agg")
 
@@ -266,14 +268,14 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
         file path for saving figure
     """
     mean_fpr = np.linspace(0, 1, 100)
-    fig, ax = plt.subplots(figsize=(8, 8))
     for clfr_name, clfr_values in clfr_preds.items():
+        fig, ax = plt.subplots(figsize=(8, 8))
         # plot individual fold lines
         for i, pred in enumerate(clfr_values.values()):
             ax.plot(
                 pred["fpr"],
                 pred["tpr"],
-                label=f"{clfr_name} Fold {i+1} (AUC = {pred['auc']:.2f})",
+                label=f"Fold {i+1} (AUC = {pred['auc']:.2f})",
             )
 
         # calculate and plot mean and std lines
@@ -314,26 +316,28 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
             label=r"$\pm$ 1 std. dev.",
         )
 
-    # set ax titles
-    ax.set(
-        xlabel="False Positive Rate",
-        ylabel="True Positive Rate",
-        title=f"Mean ROC curve with variability\n(Positive label {target_column})",
-    )
+        # set ax titles
+        ax.set(
+            xlabel="False Positive Rate",
+            ylabel="True Positive Rate",
+            title=f"Mean ROC curve with variability for {clfr_name}\n(Positive label {target_column})",
+        )
 
-    # plot chance line
-    ax.plot(
-        [0, 1],
-        [0, 1],
-        color="black",
-        linestyle="--",
-        lw=2,
-        label="Chance level (AUC = 0.5)",
-    )
-    ax.legend(loc="lower right")
-    fig.tight_layout()
-    fig.savefig(str(path) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
-    plt.close(fig)
+        # plot chance line
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            color="black",
+            linestyle="--",
+            lw=2,
+            label="Chance level (AUC = 0.5)",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(str(path), f"ROC_{clfr_name}_{target_column}.png"), dpi=300
+        )
+        plt.close(fig)
 
 
 def feature_count_consensus(
@@ -2004,8 +2008,6 @@ if __name__ == "__main__":
         # TODO: add CLI option for determining which classifiers to train
         n_folds = 5
         max_features = 20
-        clfr_names = ["Random Forest", "ExtraTreesClassifier", "XGBClassifier"]
-        n_classifiers = len(clfr_names)
         classifier_parameters = {
             "RandomForestClassifier": {
                 "clfr": RandomForestClassifier(),
@@ -2019,12 +2021,20 @@ if __name__ == "__main__":
                 "clfr": XGBClassifier(),
                 "params": {"n_estimators": 10000, "n_jobs": -1},
             },
-            # TODO: LGBM giving some bad results
-            # "LGBMClassifier": {
-            #     "clfr": LGBMClassifier(),
-            #     "params": {"num_leaves":10000, "n_estimators": 10000, "n_jobs": -1}
-            # }
+            "LGBMClassifier": {
+                "clfr": LGBMClassifier(),
+                "params": {
+                    "min_data_in_bin": 1,
+                    "min_data_in_leaf": 1,
+                    "boosting_type": "dart",
+                    "n_estimators": 1000,
+                    "n_jobs": -1,
+                },
+            },
         }
+        clfr_names = list(classifier_parameters.keys())
+        n_classifiers = len(clfr_names)
+
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
             X, y, classifier_parameters, n_folds, max_features, random_state
         )

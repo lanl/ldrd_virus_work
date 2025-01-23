@@ -898,7 +898,7 @@ def test_plot_cv_roc(tmp_path):
     assert (
         compare_images(
             files("viral_seq.tests.expected") / "ROC_cv_expected.png",
-            str(tmp_path / "ROC_Test.png"),
+            str(tmp_path / "ROC_RandomForestClassifier_Test.png"),
             0.001,
         )
         is None

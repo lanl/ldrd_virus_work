@@ -268,54 +268,21 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
         reconciled overlapping entries
     """
     # load igsf and receptor datasets
-    igsf_data = pd.read_csv(igsf_file)
-    train_df = pd.read_csv(train_file)
+    igsf_training = pd.read_csv(igsf_file)
+    receptor_training = pd.read_csv(train_file)
 
-    reconciled_df = pd.DataFrame(columns=train_df.columns)
-    new_df = pd.merge(
-        train_df,
-        igsf_data,
-        on="Accessions",
-        how="outer",
-        suffixes=("_train", "_igsf"),
-        indicator=True,
+    receptor_training["Receptor_Type"] = receptor_training["Receptor_Type"].str.replace(
+        "both", "integrin_sialic_acid"
     )
-    # replace the "Accessions" column for igsf that was removed
-    # during merge and rename the "Accessions" colum for train
-    new_df["Accessions_igsf"] = new_df["Accessions"]
-    new_df.rename(columns={"Accessions": "Accessions_train"}, inplace=True)
-
-    train_data_columns = list(train_df.columns)
-
-    for col in train_data_columns:
-        # copy the left column to the new df if there is a duplicate entry
-        # and copy the right column if there is no left column
-        reconciled_df[col] = new_df.apply(
-            lambda row: row[f"{col}_train"]
-            if row["_merge"] in ["left_only", "both"]
-            else row[f"{col}_igsf"],
-            axis=1,
-        )
-        # combine "Receptor_Type" names if there is a duplication
-        if col == "Receptor_Type":
-            # change "both" receptor type name to "integrin_sialic_acid"
-            reconciled_df[col] = reconciled_df.apply(
-                lambda row: "integrin_sialic_acid" if row[col] == "both" else row[col],
-                axis=1,
-            )
-            new_df[f"{col}_train"] = reconciled_df[col]
-            reconciled_df[col] = new_df.apply(
-                lambda row: "all"
-                if row[f"{col}_train"] == "integrin_sialic_acid"
-                and row["_merge"] == "both"
-                else f"{row['Receptor_Type_train']}_{row['Receptor_Type_igsf']}"
-                if row["_merge"] == "both"
-                and row["Receptor_Type_train"] != row["Receptor_Type_igsf"]
-                else row[f"{col}_igsf"]
-                if row["_merge"] == "right_only"
-                else row[f"{col}_train"],
-                axis=1,
-            )
+    reconciled_df = pd.concat([receptor_training, igsf_training], ignore_index=True)
+    existing_entries = reconciled_df.duplicated(subset="Accessions", keep="last")
+    reconciled_df.loc[existing_entries, "Receptor_Type"] = (
+        reconciled_df.loc[existing_entries, "Receptor_Type"] + "_IgSF"
+    )
+    new_entries = reconciled_df[
+        reconciled_df.duplicated(subset="Accessions", keep="first")
+    ].index
+    reconciled_df = reconciled_df.drop(new_entries).reset_index(drop=True)
 
     return reconciled_df
 
@@ -389,15 +356,12 @@ def FIC_plot(
     path: Path
         path to save figure
     """
-
-    if target_column == "Is_Integrin":
-        target_name = "Integrin"
-    elif target_column == "Is_Sialic_Acid":
-        target_name = "Sialic Acid"
-    elif target_column == "Is_Both":
-        target_name = "Integrin and Sialic Acid"
-    else:
-        target_name = target_column
+    target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
+    target_columns = target_column.split("_")
+    target_names = []
+    for target in target_columns:
+        target_names.append(target_column_mappings[target])
+    target_name = ", ".join(target_names)
 
     fig, ax = plt.subplots(figsize=(10, 10))
     y_pos = np.arange(len(topN_kmers))
@@ -491,7 +455,7 @@ def FIC_plot(
         )
 
         fig.tight_layout()
-        fig.savefig(str(path) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
+        fig.savefig(str(path) + "/" + "FIC_" + "_".join(target_names) + ".png", dpi=300)
         plt.close()
 
 
@@ -562,60 +526,66 @@ def convert_merged_tbl(input_tbl) -> pd.DataFrame:
     table = input_tbl.drop(
         columns=["Citation_for_receptor", "Whole_Genome", "Mammal_Host", "Primate_Host"]
     )
-    table = table.rename(
+
+    table["SA_IG"] = np.where(
+        table["Receptor_Type"].isin(["sialic_acid_IgSF", "integrin_sialic_acid_IgSF"]),
+        True,
+        False,
+    )
+    table["IN_IG"] = np.where(
+        table["Receptor_Type"].isin(["integrin_IgSF", "integrin_sialic_acid_IgSF"]),
+        True,
+        False,
+    )
+    table["IN_SA"] = np.where(
+        table["Receptor_Type"] == "integrin_sialic_acid", True, False
+    )
+    table["IN_SA_IG"] = np.where(
+        table["Receptor_Type"] == "integrin_sialic_acid_IgSF", True, False
+    )
+
+    table["SA"] = np.where(
+        np.isin(
+            table["Receptor_Type"],
+            [
+                "sialic_acid",
+                "integrin_sialic_acid",
+                "sialic_acid_IgSF",
+                "integrin_sialic_acid_IgSF",
+            ],
+        ),
+        True,
+        False,
+    )
+    table["IG"] = np.where(
+        np.isin(
+            table["Receptor_Type"],
+            ["IgSF", "integrin_IgSF", "sialic_acid_IgSF", "integrin_sialic_acid_IgSF"],
+        ),
+        True,
+        False,
+    )
+    table["IN"] = np.where(
+        np.isin(
+            table["Receptor_Type"],
+            [
+                "integrin",
+                "integrin_sialic_acid",
+                "integrin_IgSF",
+                "integrin_sialic_acid_IgSF",
+            ],
+        ),
+        True,
+        False,
+    )
+    table.rename(
         columns={
             "Virus_Name": "Species",
             "Human_Host": "Human Host",
-            "Receptor_Type": "Is_Integrin",
-        }
+        },
+        inplace=True,
     )
-
-    table["SA_IG"] = np.where(table["Is_Integrin"] == "sialic_acid_IgSF", True, False)
-    table["IN_IG"] = np.where(table["Is_Integrin"] == "integrin_IgSF", True, False)
-    table["IN_SA"] = np.where(
-        table["Is_Integrin"] == "integrin_sialic_acid", True, False
-    )
-    table["ALL"] = np.where(table["Is_Integrin"] == "all", True, False)
-    table["Is_Sialic_Acid"] = pd.Series(dtype="bool")
-    table["Is_IgSF"] = pd.Series(dtype="bool")
-    table = table[
-        [
-            "Species",
-            "Accessions",
-            "Human Host",
-            "Is_Integrin",
-            "Is_Sialic_Acid",
-            "SA_IG",
-            "IN_IG",
-            "IN_SA",
-            "ALL",
-            "Is_IgSF",
-        ]
-    ]
-
-    table["Is_Sialic_Acid"] = np.where(
-        np.isin(
-            table["Is_Integrin"],
-            ["sialic_acid", "integrin_sialic_acid", "sialic_acid_IgSF", "all"],
-        ),
-        True,
-        False,
-    )
-    table["Is_IgSF"] = np.where(
-        np.isin(
-            table["Is_Integrin"], ["IgSF", "integrin_IgSF", "sialic_acid_IgSF", "all"]
-        ),
-        True,
-        False,
-    )
-    table["Is_Integrin"] = np.where(
-        np.isin(
-            table["Is_Integrin"],
-            ["integrin", "integrin_sialic_acid", "integrin_IgSF", "all"],
-        ),
-        True,
-        False,
-    )
+    table.drop(columns="Receptor_Type", inplace=True)
 
     return table
 
@@ -664,10 +634,8 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
             "Is_Both",
         ]
     ]
-
     table["Is_Sialic_Acid"] = np.where(table["Is_Integrin"] == "integrin", False, True)
     table["Is_Integrin"] = np.where(table["Is_Integrin"] == "sialic_acid", False, True)
-
     return table
 
 
@@ -735,23 +703,18 @@ def check_positive_controls(
     }
 
     # combine lists of positive controls based on target_column
-    # choices "Is_Integrin", "Is_Sialic_Acid", "Is_IgSF", "SA_IG", "IN_IG", "IN_SA", "ALL", "Human Host",
+    # choices "IN", "SA", "IG", "SA_IG", "IN_IG", "IN_SA", "IN_SA_IG", "Human Host",
     # gather appropriate lists from pos_control_dict
     # not using "Human Host" target column in DTRA workflow
     receptor_names = target_column.split("_")
     positive_controls = []
     for receptor_name in receptor_names:
-        if receptor_name in ["Integrin", "IN"]:
+        if receptor_name == "IN":
             positive_controls.extend(pos_control_dict["Integrin"])
-        # only check for "Sialic" because .split('_') will split
-        # 'Is_Sialic_Acid' into ["Is", "Sialic", "Acid"]
-        elif receptor_name in ["Sialic", "SA"]:
+        elif receptor_name == "SA":
             positive_controls.extend(pos_control_dict["Sialic_Acid"])
-        elif receptor_name in ["IgSF", "IG"]:
+        elif receptor_name == "IG":
             positive_controls.extend(pos_control_dict["IgSF"])
-        elif receptor_name == "ALL":
-            positive_controls = sum(pos_control_dict.values(), [])
-
     if mode == "PC":
         # map positive_controls to PC-kmers using desired mapping method
         pc_pos_con = []
@@ -1503,13 +1466,13 @@ if __name__ == "__main__":
         "-tc",
         "--target-column",
         choices=[
-            "Is_Integrin",
-            "Is_Sialic_Acid",
-            "Is_IgSF",
+            "IN",
+            "SA",
+            "IG",
             "SA_IG",
             "IN_IG",
             "IN_SA",
-            "ALL",
+            "IN_SA_IG",
             "Human Host",
         ],
         default="Human Host",
@@ -1651,7 +1614,6 @@ if __name__ == "__main__":
     build_tables(
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
-
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,

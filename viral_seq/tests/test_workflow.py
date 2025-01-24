@@ -82,7 +82,6 @@ def test_csv_conversion():
             "Is_Both",
         ],
     )
-
     assert postprocessed_df.shape == (94, 6)
     assert postprocessed_df.sum().Is_Integrin == 45
     assert postprocessed_df.sum().Is_Sialic_Acid == 53
@@ -168,7 +167,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             ],
             "shen_2007",
             "PC",
-            "Is_Integrin",
+            "IN",
             {
                 "221": {
                     0: "kmer_PC_221366",
@@ -201,7 +200,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             ],
             "shen_2007",
             "AA",
-            "Is_Integrin",
+            "IN",
             {
                 "RGD": {0: "kmer_AA_CRGDEE", 1: None, 2: 1},
                 "KGE": {0: "kmer_AA_AAKGEE", 1: "kmer_AA_CGDKGEA", 2: 2},
@@ -230,7 +229,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             ],
             "jurgen_schmidt",
             "PC",
-            "Is_Integrin",
+            "IN",
             {
                 "504": {0: None, 1: None, 2: 0},
                 "646": {0: "kmer_PC_6465646", 1: "kmer_PC_764610", 2: 2},
@@ -261,13 +260,13 @@ def test_positive_controls(
 @pytest.mark.parametrize(
     "target_column, len_exp_keys",
     [
-        ("Is_Integrin", 7),
-        ("Is_Sialic_Acid", 8),
-        ("Is_IgSF", 8),
+        ("IN", 7),
+        ("SA", 8),
+        ("IG", 8),
         ("SA_IG", 16),
         ("IN_IG", 15),
         ("IN_SA", 15),
-        ("ALL", 23),
+        ("IN_SA_IG", 23),
     ],
 )
 def test_pos_con_columns(target_column, len_exp_keys):
@@ -309,7 +308,7 @@ def test_fic_plot(tmp_path):
     ]
 
     array1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.7, 1.8, 1.9, 2.0])
-    target_column = "Is_Integrin"
+    target_column = "IN"
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
@@ -342,7 +341,7 @@ def test_fic_plot(tmp_path):
     assert (
         compare_images(
             files("viral_seq.tests.expected") / "FIC_expected.png",
-            str(tmp_path / "FIC_Is_Integrin.png"),
+            str(tmp_path / "FIC_Integrin.png"),
             0.001,
         )
         is None
@@ -784,10 +783,10 @@ def test_merge_convert_tbl():
 
     assert merged_df.shape == (118, 8)
     assert converted_df.shape == (118, 10)
-    assert converted_df.Is_Integrin.sum() == 45
-    assert converted_df.Is_Sialic_Acid.sum() == 53
-    assert converted_df.SA_IG.sum() == 4
-    assert converted_df.IN_IG.sum() == 5
+    assert converted_df.IN.sum() == 45
+    assert converted_df.SA.sum() == 53
+    assert converted_df.SA_IG.sum() == 6
+    assert converted_df.IN_IG.sum() == 7
     assert converted_df.IN_SA.sum() == 2
-    assert converted_df.ALL.sum() == 2
-    assert converted_df.Is_IgSF.sum() == 35
+    assert converted_df.IN_SA_IG.sum() == 2
+    assert converted_df.IG.sum() == 35

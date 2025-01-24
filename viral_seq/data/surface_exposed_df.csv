@@ -777,20 +777,20 @@ Kaposi’s sarcoma-associated herpesvirus,K12,no,https://doi.org/10.1128/jvi.76.
 human cytomegalovirus,tegument protein pp65,no,
 human cytomegalovirus,membrane protein US30,yes,
 HSV-2,envelope protein UL20,yes,
-Kaposi’s sarcoma-associated herpesvirus,vIRF-3,,
+Kaposi’s sarcoma-associated herpesvirus,vIRF-3,no,https://doi.org/10.1074/jbc.M309485200
 HSV-2,helicase-primase helicase subunit,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF35,no,
-Equine herpesvirus type 1,capsid portal protein,,
+Equine herpesvirus type 1,capsid portal protein,no,
 human cytomegalovirus,membrane protein RL12,yes,
 Norwalk virus (murine norovirus),polyprotein,no,
-New Jersey polyomavirus (NJPyV),alternative T antigen,,
+New Jersey polyomavirus (NJPyV),alternative T antigen,no,https://doi.org/10.1128/jvi.00911-15
 JEV,non-structural protein NS2b,no,
 Epstein-Barr virus (EBV),tegument serine/threonine protein kinase,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF57,no,
 human cytomegalovirus,membrane glycoprotein UL9,yes,
-human cytomegalovirus,protein UL135,,
+human cytomegalovirus,protein UL135,no,https://doi.org/10.1128/jvi.00919-18
 human cytomegalovirus,membrane protein US13,yes,
-human cytomegalovirus,protein UL21A,,
+human cytomegalovirus,protein UL21A,no,https://doi.org/10.1128/jvi.01116-09
 Kaposi’s sarcoma-associated herpesvirus,ORF48,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF53,no,
 human cytomegalovirus,envelope glycoprotein M,yes,
@@ -801,38 +801,38 @@ HSV-2,envelope glycoprotein I,yes,
 Human adenovirus type 5,E4 ORF1,no,
 human cytomegalovirus,helicase-primase primase subunit,no,
 human cytomegalovirus,protein US33A,yes,
-Bovine adenovirus 3,211R,,
-Vaccinia virus,IL-beta-binding protein,,
+Bovine adenovirus 3,211R,no,https://www.uniprot.org/uniprotkb/Q64842/entry
+Vaccinia virus,IL-beta-binding protein,yes,https://doi.org/10.1016/0092-8674(92)90274-G
 human cytomegalovirus,membrane protein US20,yes,
 Equine herpesvirus type 1,membrane protein UL56,yes,
 Kaposi’s sarcoma-associated herpesvirus,ORF26,no,
-Human adenovirus type 5,E3 gp19K,,
+Human adenovirus type 5,E3 gp19K,no,https://doi.org/10.1006/smvy.1998.0156
 SARS-CoV-2,ORF7a protein,no,
-Vaccinia virus,32kDa small subunit of transcription factor VITF-3,,
+Vaccinia virus,32kDa small subunit of transcription factor VITF-3,no,https://www.uniprot.org/uniprotkb/P68720/entry
 Simian adenovirus 11,ORF2,no,
-Murine adenovirus 3,E1B 55k,,
+Murine adenovirus 3,E1B 55k,no,https://journals.asm.org/doi/10.1128/jvi.02062-21
 Epstein-Barr virus (EBV),thymidine kinase,no,
 HSV-2,DNA replication origin-binding helicase,no,
 MERS-CoV,NS3 protein,no,
-Kaposi’s sarcoma-associated herpesvirus,K7,,
-Encephalomyocarditis virus (Cardiovirus A),protein 1B,,
+Kaposi’s sarcoma-associated herpesvirus,K7,no,https://doi.org/10.1128/jvi.76.22.11491-11504.2002
+Encephalomyocarditis virus (Cardiovirus A),protein 1B,yes,https://doi.org/10.4161/viru.20573
 Encephalomyocarditis virus (Cardiovirus A),truncated polyprotein,no,
 human cytomegalovirus,membrane glycoprotein UL40,yes,
-Epstein-Barr virus (EBV),protein BWRF1,,
-HSV-2,multifunctional expression regulator,,
+Epstein-Barr virus (EBV),protein BWRF1,no,https://doi.org/10.1128/jvi.00920-17
+HSV-2,multifunctional expression regulator,no,
 Kaposi’s sarcoma-associated herpesvirus,ORF27,no,
 SARS-CoV-2,3C-like proteinase,no,
-Epstein-Barr virus (EBV),protein Rta,,
-Epstein-Barr virus (EBV),apoptosis regulator BALF1,,
-HIV-1,Nef,,
+Epstein-Barr virus (EBV),protein Rta,no,https://doi.org/10.1128/jvi.73.12.9858-9866.1999
+Epstein-Barr virus (EBV),apoptosis regulator BALF1,no,https://doi.org/10.1128/jvi.76.5.2469-2479.2002
+HIV-1,Nef,no,https://doi.org/10.1128/jvi.01322-19
 Epstein-Barr virus (EBV),envelope glycoprotein N,yes,
-Kaposi’s sarcoma-associated herpesvirus,LANA,,
+Kaposi’s sarcoma-associated herpesvirus,LANA,no,https://doi.org/10.1128/jvi.02158-18
 Vaccinia virus,putative metalloprotease,no,
 Vaccinia virus,uracil-DNA glycosylase,no,
-Human Papillomavirus type 16 (HPV),cell cycle modulating protein E1^E4,,
-Adeno-Associated Virus Type 2 (AAV2),Rep 78 protein,,
-Adeno-Associated Virus Type 2 (AAV2),Rep 52 protein,,
-Adeno-Associated Virus Type 4 (AAV4),rep,,
+Human Papillomavirus type 16 (HPV),cell cycle modulating protein E1^E4,no,https://doi.org/10.1016/j.virol.2006.02.024
+Adeno-Associated Virus Type 2 (AAV2),Rep 78 protein,no,https://doi.org/10.1128/jvi.74.20.9441-9450.2000
+Adeno-Associated Virus Type 2 (AAV2),Rep 52 protein,no,https://doi.org/10.1093/emboj/20.12.3282
+Adeno-Associated Virus Type 4 (AAV4),rep,no,https://doi.org/10.1128/jvi.71.9.6823-6833.1997
 Epstein-Barr virus (EBV),DNA packaging tegument protein UL25,no,
 JEV,non-structural protein NS4b,no,
 Vaccinia virus,RNA polymerase subunit,no,
@@ -842,7 +842,7 @@ Bovine torovirus (Breda virus),hemagglutinin esterase,no,
 Porcine torovirus,hemagglutinin esterase,no,
 Bovine coronavirus,hemmaglutinin-esterase,no,
 Goat torovirus,hemagglutinin esterase,no,
-HIV-1,p1,,
+HIV-1,p1,no,https://doi.org/10.1023/A:1021070512287
 Canine adenovirus type 2,DBP,,
 Equine rhinitis A virus,VP1,yes,
 HSV-2,regulatory protein ICP22,,

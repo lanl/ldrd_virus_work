@@ -508,6 +508,14 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["nsP3 protein", "E2 protein"],
             "jurgen_schmidt",
         ),
+        (
+            "NC_026433.1",
+            2,
+            ["influenza_A_H1N1", "influenza_A_H1N1"],
+            ["INDKGK", "INDKGK"],
+            ["hemagglutinin", "HA1"],
+            "jurgen_schmidt",
+        ),
     ],
 )
 def test_get_kmer_info(
@@ -575,7 +583,7 @@ def test_get_kmer_info(
         "KFHFDT",
         "HLTKTW",
         "LIAPGT",
-        "DHIAQV",
+        "INDKGK",
     ]
 
     new_kmers = []

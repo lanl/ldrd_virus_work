@@ -32,6 +32,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "nsP",
         "nuclear",
         "nucleocapsid",
+        "transcription",
     ]
     not_exposed_exceptions = ["hemagglutinin-neuraminidase", "hemagglutinin-esterase"]
     exposed = [

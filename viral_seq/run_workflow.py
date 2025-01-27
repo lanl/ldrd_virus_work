@@ -363,7 +363,9 @@ def build_tables(feature_checkpoint=0, debug=False):
                     validate_feature_table(this_outfile, idx, prefix)
 
 
-def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
+def feature_selection_rfc(
+    feature_selection, debug, n_jobs, random_state, target_column="Human Host"
+):
     """Sub-select features using best performing from a trained random forest classifier"""
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
@@ -535,6 +537,7 @@ def get_test_features(
     X_train,
     extract_cookie,
     debug=False,
+    target_column="Human Host",
 ):
     if not extract_cookie.is_file():
         debug = False
@@ -734,6 +737,7 @@ if __name__ == "__main__":
         debug=debug,
         n_jobs=n_jobs,
         random_state=random_state,
+        target_column=target_column,
     )
     X_test, y_test = get_test_features(
         table_loc_test,
@@ -742,6 +746,7 @@ if __name__ == "__main__":
         X_train,
         extract_cookie,
         debug=debug,
+        target_column=target_column,
     )
     best_params: Dict[str, Any] = {}
     best_params_group: Dict[str, Any] = {}

@@ -39,9 +39,9 @@ class CV_ROC_data(NamedTuple):
 
 
 class EER_Data(NamedTuple):
-    eer_threshold_index: int
-    eer_threshold: float
-    eer_value: float
+    eer_threshold_index: np.int32
+    eer_threshold: np.float64
+    eer_value: np.float64
 
 
 def get_model_arguments(
@@ -620,7 +620,9 @@ def plot_calibration_curve(
     plt.close()
 
 
-def cal_eer_thresh_and_val(fpr, tpr, threshold):
+def cal_eer_thresh_and_val(
+    fpr: np.ndarray, tpr: np.ndarray, threshold: np.ndarray
+) -> EER_Data:
     # see EER details: https://stackoverflow.com/a/46026962/2942522
     # also Probabilistic Machine Learning: An Introduction by Kevin P. Murphy, section 5.7.2.1
     fnr = 1 - tpr

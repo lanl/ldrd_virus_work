@@ -776,7 +776,7 @@ if __name__ == "__main__":
     # cross-validation
     test_folds: list = []
     predictions_cv = defaultdict(list)
-    model_eer_threshold = defaultdict(list)
+    model_eer_threshold: dict[str, np.float64] = defaultdict(np.float64)
     for name, val in model_arguments.items():
         these_params = {
             k: v for k, v in best_params[name].items() if k not in val["predict"]
@@ -953,7 +953,7 @@ if __name__ == "__main__":
         comp_fprs_ensembles.append(this_fpr)
         comp_tprs_ensembles.append(this_tpr)
     this_title = (
-        f"ROC Curve\nEnsemble Models\nContributing classifiers averaged over {copies} seeds."
+        f"ROC Curve\nEnsemble Models of {len(predictions_ensemble_hard)} independent classifiers\n({len(predictions)} model types across {copies} seeds)"
         if copies > 1
         else "ROC Curve\nEnsemble Models"
     )

@@ -730,8 +730,14 @@ def test_percent_exposed_error():
 
     syn_status = rng.choice(["yes", "no"], size=10)
 
+    kmer_status = pd.DataFrame()
+    kmer_status["surface_exposed_status"] = syn_status
+    kmer_status["kmer_names"] = kmer_names
+
+    data_in = workflow.kmer_data("mapping_method", kmer_names)
+
     with pytest.raises(ValueError, match="kmer feature name missing prefix."):
-        workflow.percent_surface_exposed(kmer_names, syn_status)
+        workflow.percent_surface_exposed(data_in, kmer_status)
 
 
 @pytest.mark.parametrize(

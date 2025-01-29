@@ -21,6 +21,13 @@ from lightgbm import LGBMClassifier
 from matplotlib import pyplot as plt
 from xgboost import XGBClassifier
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from shapely.geometry import LineString
+
+
+class CV_data(NamedTuple):
+    y_tests: list[np.ndarray]
+    y_preds: list[np.ndarray]
+    scores: npt.NDArray[np.floating[Any]]
 
 
 class CV_ROC_data(NamedTuple):
@@ -29,6 +36,12 @@ class CV_ROC_data(NamedTuple):
     tpr_folds: list[np.ndarray]
     fpr_folds: Optional[list[np.ndarray]]
     tpr_std_folds: Optional[list[np.ndarray]]
+
+
+class EER_Data(NamedTuple):
+    eer_threshold_index: np.int32
+    eer_threshold: np.float64
+    eer_value: np.float64
 
 
 def get_model_arguments(
@@ -213,7 +226,7 @@ def cross_validation(
     scoring: str = "roc_auc",
     n_jobs_cv: int = 1,
     **kwargs,  # classifier arguments
-) -> tuple[list, list, list]:
+) -> CV_data:
     """Perform k-fold cross-validation stratified on target
 
     Parameters:
@@ -225,23 +238,23 @@ def cross_validation(
         **kwargs: passed to model
 
     Returns:
-        y_tests (list): each test set for each fold
-        y_preds (list): corresponding predictions for each test set
-        scores (list): score achieved for each fold.
+        y_tests (list[np.ndarray]): each test set for each fold
+        y_preds (list[np.ndarray]): corresponding predictions for each test set
+        scores (np.ndarray(np.floating[Any]): score achieved for each fold.
     """
     cv = StratifiedKFold(n_splits=n_splits)
-    scores = []
+    scores = np.zeros(n_splits)
     y_preds = []
     y_tests = []
     r = Parallel(n_jobs=n_jobs_cv)(
         delayed(_cv_child)(model, X, y, scoring, train, test, **kwargs)
         for train, test in cv.split(X, y)
     )
-    for res in r:
+    for i, res in enumerate(r):
         y_tests.append(res[0])
         y_preds.append(res[1])
-        scores.append(res[2])
-    return y_tests, y_preds, scores
+        scores[i] = res[2]
+    return CV_data(y_tests, y_preds, scores)
 
 
 def cv_score(
@@ -253,10 +266,8 @@ def cv_score(
     n_jobs_cv: int = 1,
     **kwargs,  # classifier arguments
 ) -> float:
-    y_tests, y_preds, scores = cross_validation(
-        model, X, y, n_splits, scoring, n_jobs_cv, **kwargs
-    )
-    return np.mean(scores)
+    cv_data = cross_validation(model, X, y, n_splits, scoring, n_jobs_cv, **kwargs)
+    return np.mean(cv_data.scores)
 
 
 def _tune_objective(config, **kwargs):
@@ -426,7 +437,7 @@ def get_roc_curve(
 
 
 def get_roc_curve_cv(
-    y_trues: list[npt.ArrayLike], predictions: list[list[npt.ArrayLike]]
+    y_trues: list[npt.ArrayLike], predictions: list[list[np.ndarray]]
 ) -> CV_ROC_data:
     """Like `sklearn.metrics.roc_curve` designed to handle multiple copies of k-fold cross-validation data.
 
@@ -493,9 +504,13 @@ def plot_roc_curve(
     tpr_std: Optional[np.ndarray] = None,
     filename: str = "roc_plot.png",
     title: str = "ROC curve",
+    eer_data: Optional[EER_Data] = None,
 ):
     tpr_stds = None if tpr_std is None else [tpr_std]
-    plot_roc_curve_comparison([name], [fpr], [tpr], tpr_stds, filename, title)
+    eer_data_list = None if eer_data is None else [eer_data]
+    plot_roc_curve_comparison(
+        [name], [fpr], [tpr], tpr_stds, filename, title, eer_data_list
+    )
 
 
 def plot_roc_curve_comparison(
@@ -505,11 +520,13 @@ def plot_roc_curve_comparison(
     tpr_stds: Optional[list[np.ndarray]] = None,
     filename: str = "roc_plot_comparison.png",
     title: str = "ROC curve",
+    eer_data_list: Optional[list[EER_Data]] = None,
 ):
     """Can plot one or multiple roc curves. Will plot a plus/minus 1 standard deviation shaded region for curves if provided."""
     fig, ax = plt.subplots(figsize=(6, 6))
     if fprs is None:
         fprs = [np.linspace(0, 1, 100) for _ in range(len(tprs))]
+    eer_line = False
     for i, name in enumerate(names):
         this_auc = auc(fprs[i], tprs[i])
         ax.plot(fprs[i], tprs[i], label=f"{name} (AUC = {this_auc:.2f})")
@@ -523,8 +540,37 @@ def plot_roc_curve_comparison(
                 label=f"{name} \u00B11 std. dev.",
                 alpha=0.2,
             )
+        if eer_data_list and eer_data_list[i] is not None:
+            eer_line = True
+            eer_threshold = eer_data_list[i].eer_threshold
+            eer_threshold_index = eer_data_list[i].eer_threshold_index
+            eer_x = fprs[i][eer_threshold_index]
+            eer_y = tprs[i][eer_threshold_index]
+            # assume point is below eer line
+            next_idx = eer_threshold_index + 1
+            if eer_x + eer_y > 1.0:
+                # above eer line case
+                next_idx = eer_threshold_index - 1
+            # find intercept between this line segment and eer line
+            eer_next_x = fprs[i][next_idx]
+            eer_next_y = tprs[i][next_idx]
+            this_line = LineString([(eer_x, eer_y), (eer_next_x, eer_next_y)])
+            intersection = this_line.intersection(LineString([(0, 1), (1, 0)]))
+            ax.plot(
+                intersection.x,  # type: ignore
+                intersection.y,  # type: ignore
+                marker="x",
+                label=f"{name} {eer_threshold = :.2e}",
+                alpha=1.0,
+                ms=12,
+            )
+
     # chance line
     ax.plot([0, 1], [0, 1], "r--")
+    # EER line
+    if eer_line:
+        ax.plot([0, 1], [1, 0], "--", color="grey", alpha=0.5)
+
     ax.set(
         xlim=[-0.05, 1.05],
         ylim=[-0.05, 1.05],
@@ -572,3 +618,20 @@ def plot_calibration_curve(
     fig.tight_layout()
     fig.savefig(filename, dpi=300)
     plt.close()
+
+
+def cal_eer_thresh_and_val(
+    fpr: np.ndarray, tpr: np.ndarray, threshold: np.ndarray
+) -> EER_Data:
+    # see EER details: https://stackoverflow.com/a/46026962/2942522
+    # also Probabilistic Machine Learning: An Introduction by Kevin P. Murphy, section 5.7.2.1
+    fnr = 1 - tpr
+    threshold_index = np.nanargmin(np.absolute((fnr - fpr)))
+    eer_threshold = threshold[threshold_index]
+    eer_value = fpr[threshold_index]
+    eer_data = EER_Data(
+        eer_threshold_index=threshold_index,
+        eer_threshold=eer_threshold,
+        eer_value=eer_value,
+    )
+    return eer_data

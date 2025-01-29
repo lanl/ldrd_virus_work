@@ -23,6 +23,7 @@ from time import perf_counter
 import tarfile
 import shap
 from collections import defaultdict
+import os
 
 matplotlib.use("Agg")
 
@@ -362,7 +363,9 @@ def build_tables(feature_checkpoint=0, debug=False):
                     validate_feature_table(this_outfile, idx, prefix)
 
 
-def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
+def feature_selection_rfc(
+    feature_selection, debug, n_jobs, random_state, target_column="Human Host"
+):
     """Sub-select features using best performing from a trained random forest classifier"""
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
@@ -423,7 +426,7 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
     elif feature_selection == "skip":
         print("Will use previously calculated X_train stored at", table_loc_train_best)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        y = pd.read_csv(train_file)["Human Host"]
+        y = pd.read_csv(train_file)[target_column]
     if debug and extract_cookie.is_file():
         # these might not exist if the workflow has only been run with --feature-selection none
         if Path(table_loc_train_best).is_file():
@@ -534,13 +537,14 @@ def get_test_features(
     X_train,
     extract_cookie,
     debug=False,
+    target_column="Human Host",
 ):
     if not extract_cookie.is_file():
         debug = False
     print("Ensuring X_test has only the features in X_train...")
     if Path(table_loc_test_saved).exists():
         X_test = pl.read_parquet(table_loc_test_saved).to_pandas()
-        y_test = pd.read_csv(test_file)["Human Host"]
+        y_test = pd.read_csv(test_file)[target_column]
         if set(X_test.columns) == set(X_train.columns):
             print(
                 "Will use previously calculated X_test stored at", table_loc_test_saved
@@ -629,6 +633,27 @@ if __name__ == "__main__":
         action="store_true",
         help="Calibrate classifiers with `CalibratedClassiferCV`.",
     )
+    parser.add_argument(
+        "-tr",
+        "--train-file",
+        choices=["Mollentze_Training.csv", "Mollentze_Training_Fixed.csv"],
+        default="Mollentze_Training.csv",
+        help="File to be used corresponding to training data.",
+    )
+    parser.add_argument(
+        "-ts",
+        "--test-file",
+        choices=["Mollentze_Holdout.csv", "Mollentze_Holdout_Fixed.csv"],
+        default="Mollentze_Holdout.csv",
+        help="File to be used corresponding to test data.",
+    )
+    parser.add_argument(
+        "-tc",
+        "--target-column",
+        choices=["Human Host"],
+        default="Human Host",
+        help="Target column to be used for binary classification.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -641,10 +666,19 @@ if __name__ == "__main__":
     copies = args.copies
     check_optimization = args.check_optimization
     check_calibration = args.check_calibration
+    train_file = args.train_file
+    test_file = args.test_file
+    target_column = args.target_column
 
+    if debug and (
+        train_file != "Mollentze_Training.csv" or test_file != "Mollentze_Holdout.csv"
+    ):
+        raise ValueError(
+            "Debug Mode is intended to validate the workflow by running checks with the default training (Mollentze_Training.csv) and testing (Mollentze_Holdout.csv) data only."
+        )
     data = files("viral_seq.data")
-    train_file = str(data.joinpath("Mollentze_Training.csv"))
-    test_file = str(data.joinpath("Mollentze_Holdout.csv"))
+    train_file = str(data.joinpath(train_file))
+    test_file = str(data.joinpath(test_file))
     cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
     viral_files = [train_file, test_file]
     table_file = str(files("viral_seq.tests.expected") / "train_test_table_info.csv")
@@ -703,6 +737,7 @@ if __name__ == "__main__":
         debug=debug,
         n_jobs=n_jobs,
         random_state=random_state,
+        target_column=target_column,
     )
     X_test, y_test = get_test_features(
         table_loc_test,
@@ -711,6 +746,7 @@ if __name__ == "__main__":
         X_train,
         extract_cookie,
         debug=debug,
+        target_column=target_column,
     )
     best_params: Dict[str, Any] = {}
     best_params_group: Dict[str, Any] = {}
@@ -737,7 +773,8 @@ if __name__ == "__main__":
             best_params[name] = best_params_group[val["group"]]
         elif optimize == "pre-optimized":
             print("Using hyperparameters pre-caclulated for", val["group"])
-            this_filename = "params_" + val["group"] + ".json"
+            train_file_suff = os.path.splitext(os.path.basename(train_file))[0]
+            this_filename = f"params_{val['group']}_{train_file_suff}.json"
             with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
                 res = json.load(f)
             best_params[name] = res["params"]

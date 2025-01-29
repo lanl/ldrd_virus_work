@@ -473,6 +473,8 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ],
             "shen_2007",
         ),
+        # this case tests that the function skips polyprotein products that also
+        # have mature protein products within the accession
         (
             "NC_001563.2",
             1,
@@ -487,6 +489,15 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             [],
             [],
             [],
+            "jurgen_schmidt",
+        ),
+        # this case tests if function finds single polyprotein gene products
+        (
+            "NC_039210.1",
+            1,
+            ["FMDV"],
+            ["300840"],
+            ["polyprotein"],
             "jurgen_schmidt",
         ),
     ],
@@ -516,6 +527,7 @@ def test_get_kmer_info(
             7: "type_1_reovirus",
             8: "JEV",
             9: "BKPyV human polyomavirus",
+            10: "FMDV",
         },
         "Accessions": {
             0: "NC_039199.1",
@@ -528,6 +540,7 @@ def test_get_kmer_info(
             7: "MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1",
             8: "NC_001437.1",
             9: "NC_001538.1",
+            10: "NC_039210.1",
         },
     }
     tbl = pd.DataFrame(data_table)
@@ -537,7 +550,7 @@ def test_get_kmer_info(
         "DFFKSG",
         "HKFLVP",
         "NGTGGI",
-        "MRTAPT",
+        "NGAPEA",
         "SRGLDP",
         "YDTIPI",
         "DRGIFV",

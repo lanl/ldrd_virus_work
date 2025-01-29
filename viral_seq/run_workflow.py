@@ -157,9 +157,25 @@ def get_kmer_info(
         k_mer = item.replace("kmer_PC_", "").replace("kmer_AA_", "")
 
         for record in records:
+            single_polyprotein = False
             for feature in record.features:
+                # check to see if the only gene product is 'polyprotein'
+                # TODO: check other edge cases of other precursor-like protein products that
+                # may be causing double couting because of genomic overlap with mature protein products
+                # i.e. issue #102
+                all_products = [
+                    feat.qualifiers["product"][0]
+                    for feat in record.features
+                    if feat.type in ["CDS", "mat_peptide"]
+                ]
+                if len(all_products) == 1 and all_products[0] == "polyprotein":
+                    single_polyprotein = True
                 if feature.type == "CDS" or feature.type == "mat_peptide":
-                    if "polyprotein" not in feature.qualifiers["product"]:
+                    # only skip the polyprotein accessions if there are other gene products in the record features
+                    if (
+                        "polyprotein" not in feature.qualifiers["product"]
+                        or single_polyprotein
+                    ):
                         nuc_seq = feature.location.extract(record.seq)
                         if len(nuc_seq) % 3 != 0:
                             continue

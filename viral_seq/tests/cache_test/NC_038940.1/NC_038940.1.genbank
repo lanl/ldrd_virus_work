@@ -1,0 +1,146 @@
+LOCUS       NC_038940               3707 bp    RNA     linear   VRL 24-AUG-2018
+DEFINITION  Prospect Hill virus mRNA for glycoproteins G1 and G2.
+ACCESSION   NC_038940
+VERSION     NC_038940.1
+DBLINK      BioProject: PRJNA485481
+KEYWORDS    RefSeq; glycoprotein G1; glycoprotein G2.
+SOURCE      Orthohantavirus prospectense
+  ORGANISM  Orthohantavirus prospectense
+            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
+            Polyploviricotina; Ellioviricetes; Bunyavirales; Hantaviridae;
+            Mammantavirinae; Orthohantavirus.
+REFERENCE   1  (bases 1 to 3707)
+  AUTHORS   Parrington,M.A., Lee,P.W. and Kang,C.Y.
+  TITLE     Molecular characterization of the Prospect Hill virus M RNA segment:
+            a comparison with the M RNA segments of other hantaviruses
+  JOURNAL   J. Gen. Virol. 72 (PT 8), 1845-1854 (1991)
+   PUBMED   1840609
+REFERENCE   2  (bases 1 to 3707)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (24-AUG-2018) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 3707)
+  AUTHORS   Parrington,M.A.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (28-NOV-1990) Parrington M.A., Dept. of Microbiology &
+            Immunology, Faculty of Medicine, University of Ottawa, 451 Smyth
+            Rd., Ottawa, Ont. K1H 8M5, Canada
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to X55129.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..3707
+                     /organism="Orthohantavirus prospectense"
+                     /mol_type="genomic RNA"
+                     /db_xref="taxon:3052492"
+                     /segment="M"
+                     /clone="M3', P111, R355, T103, S110, P108, P15, M5"
+                     /clone_lib="pUC19"
+     gene            50..3478
+                     /locus_tag="D1T52_sMgp1"
+                     /db_xref="GeneID:37619667"
+     CDS             50..3478
+                     /locus_tag="D1T52_sMgp1"
+                     /codon_start=1
+                     /product="G1 and G2 proteins"
+                     /protein_id="YP_009508267.1"
+                     /db_xref="GOA:P27315"
+                     /db_xref="InterPro:IPR002532"
+                     /db_xref="InterPro:IPR002534"
+                     /db_xref="InterPro:IPR012316"
+                     /db_xref="InterPro:IPR016402"
+                     /db_xref="UniProtKB/Swiss-Prot:P27315"
+                     /db_xref="GeneID:37619667"
+                     /translation="MSKFCLCLSLLGVLLLQVCDTRSLLELKIECPHTVGLGQGLVIGT
+                     VDLNPVPVESVSTLKLESSCNFDVHTSSATQQAVTKWTWEKKADTAETAKAASTTFQSK
+                     STELNLRGLCVIPTLVLETANKLRKTVTCYDLSCNQTACIPTVYLIAPIHTCVTTKSCL
+                     LGLGTQRIQVTYEKTYCVSGQLVEGTCFNPIHTMALSQPSHTYDIVTIPVRCFFIAKKT
+                     NDDTLKIEKQFETILEKSGCTAANIKGYYVCFLGATSEPIFVPTMDDFRASQILSDMAI
+                     SPHGEDHDSALSSVSTFRIAGKLSGKAPSTESSDTVQGVAFSGHPLYTSLSVLASKEDP
+                     VYIWSPGIIPERNHTVCDKKTLPLTWTGYLPLPGGIEKTTQCTIFCTLAGPGADCEAYS
+                     DTGIFNISSPTCLINRVQRFRGAEQQIKFVCQRVDLDIVVYCNGMKKVILTKTLVIGQC
+                     IYTFTSVFSLMPGIAHSLAVELCVPGIHGWSTIALLATFCFGWLLIPIISLVSIKIMLL
+                     FAYMCSKYSNDSKFRLLIEKVKQEYQKTMGSMVCEVCQQECEMAKELESHKKSCPNGMC
+                     PYCMNPTESTESALQAHFKVCKLTTRFQENLRKSLNPYEPKRGCYRTLSVFRYRSRCFV
+                     GLVWCILLVLELVIWAASADTVEIKTGWTDTAHGAGVIPLKSDLELDFSLPSSATYIYR
+                     RDLQNPANEQERIPFHFQLQRQVIHAEIQNLGHWMDGTFNLKTSFHCYGACEKYAYPWQ
+                     TAKCFLEKDYEFETGWGCNPGDCPGVGTGCTACGVYLDKLRSVGKVFKVISLKFTRRVC
+                     IQLGSEQSCKTIDSNDCLMTTSVKVCMIGTVSKFQPGDTLLFLGPLEEGGIIFKQWCTT
+                     TCHFGDPGDIMSTPQGMQCPEHTGAFRKKCAFATMPTCEYDGNTLSGYQRMLATRDSFQ
+                     SFNITEPHITSNSLEWVDPDSSLKDHINLVVNRDVSFQDLSENPCQVGVAVSSIDGAWG
+                     SGVGFNLVCSVSLTECASFLTSIKACDAAMCYGATTANLVRGQNTVHILGKGGHSGSKF
+                     MCCHSTECSSTGLTAAAPHLDRVTGYNVIDNDKVFDDGSPECGVHCWFKKSGEWLMGIL
+                     SGNWMVVAVLVVLLILSIFLFSLCCPRRVVHKKSS"
+     mat_peptide     113..2011
+                     /locus_tag="D1T52_sMgp1"
+                     /product="envelope surface glycoprotein G1"
+                     /protein_id="YP_009509096.1"
+     mat_peptide     2012..3475
+                     /locus_tag="D1T52_sMgp1"
+                     /product="envelope surface glycoprotein G2"
+                     /protein_id="YP_009509097.1"
+ORIGIN
+        1 tagtagtaga ctccgcaaga agaagcaaac acagagagaa catagaaaaa tgagtaaatt
+       61 ttgtctgtgt ttgagtcttt tgggagtact actactgcag gtctgtgaca ccaggagcct
+      121 tctggaattg aagattgaat gtcctcatac tgtaggttta ggtcaaggcc ttgtaatagg
+      181 gactgtggat ttaaaccctg tccctgttga gtctgtgagc acattaaagt tagaaagctc
+      241 ttgtaacttt gatgtgcata caagctcagc cacacagcag gctgttacaa agtggacatg
+      301 ggaaaagaaa gctgacacag cagaaacagc aaaggcagct tcaacaacat ttcaatcaaa
+      361 gagtacagaa ttaaatttac ggggcttatg tgttattcca actttggtcc ttgagactgc
+      421 taataagctc cgtaagactg tcacatgtta tgatctttca tgtaatcaga cagcatgcat
+      481 cccaacagtt tacttaattg ctcccataca tacatgtgtg acaacaaaga gctgtttact
+      541 gggattagga actcaacgga ttcaagtgac ttatgaaaag acatactgtg tgtctggaca
+      601 actggtagaa ggcacatgct tcaatccgat ccacacaatg gcattatctc aaccaagcca
+      661 tacatatgat attgtcacta taccagtcag gtgttttttc attgcaaaga aaacaaatga
+      721 tgataccctt aaaatagaga aacagtttga gacaattcta gagaaatcag ggtgtacagc
+      781 tgcaaatata aaaggctatt atgtctgttt tttaggtgca acatcagaac ctatatttgt
+      841 gccaacaatg gatgatttta gagcatccca gatcttgtct gatatggcaa tttctcctca
+      901 cggggaagat cacgacagtg ctctatcatc tgtgagtacc tttagaattg cagggaaatt
+      961 aagcggaaag gcaccatcca ctgagtcatc tgatactgtc caaggtgtag cattttcagg
+     1021 acatccattg tatacgtccc tttccgtgct agcctcaaag gaagatccag tttacatttg
+     1081 gtcacctgga ataatcccgg aacggaatca cactgtatgt gacaagaaga cactaccatt
+     1141 gacatggaca ggttatttgc cattgcctgg agggatcgaa aagaccacac agtgcaccat
+     1201 attttgtact cttgctgggc ccggtgcaga ttgtgaagca tattcagaca caggtatttt
+     1261 caatatcagt tcacccacat gtctcataaa tcgagttcag agatttcggg gggcagagca
+     1321 acaaatcaaa tttgtgtgtc agcgggtaga cctggatatc gttgtgtact gtaatggcat
+     1381 gaagaaggta attcttacta aaacccttgt tataggtcag tgcatatata cattcacaag
+     1441 tgttttctcc ctaatgcctg gaattgctca ttcacttgca gtggaattgt gtgtgcctgg
+     1501 catacacggg tggtcaacaa ttgctttact tgcaacattc tgttttggct ggctccttat
+     1561 ccctatcata tctctagtat caatcaagat aatgctactt tttgcttata tgtgttcaaa
+     1621 atatagtaat gactcgaaat tccggttact tatagaaaag gttaagcagg aatatcagaa
+     1681 aactatgggt tctatggtct gtgaggtttg tcagcaggaa tgtgaaatgg caaaagaatt
+     1741 ggagtctcac aagaaaagtt gtcctaatgg tatgtgccct tactgcatga accctacaga
+     1801 gtctactgag tctgccctgc aagctcattt caaagtgtgt aaacttacaa caaggttcca
+     1861 ggagaacctt cgcaagtcac taaatccata tgagcctaaa cgaggttgct ataggacact
+     1921 ctctgtgttt agatatcgga gtaggtgctt tgtgggcctt gtttggtgca tcctacttgt
+     1981 attagaactt gtcatatggg ctgcaagtgc ggatactgta gaaataaaaa caggttggac
+     2041 tgacactgca catggagctg gggtaatacc actcaaatca gatttagagc ttgatttttc
+     2101 gttgccatca tctgcaacat acatatacag acgagatctt caaaacccag caaatgagca
+     2161 agaaagaatc ccttttcact tccagctaca gcgtcaggtg attcatgcag agattcaaaa
+     2221 tttaggccac tggatggatg gaacatttaa tctgaaaaca tcattccatt gttacggtgc
+     2281 ttgtgaaaag tatgcttatc cgtggcaaac tgcaaaatgt ttcttagaga aagattatga
+     2341 atttgaaaca gggtggggct gtaatcctgg tgattgccca ggtgtaggca ctggatgtac
+     2401 tgcttgtgga gtttatttgg ataaattgcg ctctgttggc aaggtattca aagtgatatc
+     2461 cctaaagttc acaagacggg tttgtataca attaggcagt gaacaatcat gtaagaccat
+     2521 tgattcgaat gactgtttga tgacaacatc tgtgaaggtt tgcatgattg ggacagtttc
+     2581 aaaatttcag cccggtgata cccttttatt tttaggccct ttagaggaag gtggtattat
+     2641 atttaagcaa tggtgtacta ctacctgtca ctttggagac ccgggggaca tcatgagtac
+     2701 tccgcagggt atgcaatgcc cagagcatac aggtgccttt agaaagaaat gtgcatttgc
+     2761 tacaatgcca acatgtgagt atgatggaaa cactctttct ggttaccagc ggatgcttgc
+     2821 aacaagggat tctttccagt ctttcaacat tacagaacca catattacca gcaattcact
+     2881 tgaatgggta gatccagata gttcattaaa ggatcatatt aatttggtag ttaatcgcga
+     2941 tgtatcattt caggacttat ctgaaaatcc ctgtcaagtt ggtgtggccg tgtcttccat
+     3001 tgatggtgca tggggctcag gtgtgggttt taatctggta tgtagtgtga gtttgacaga
+     3061 atgtgctagt tttctaactt caataaaggc atgtgacgct gcaatgtgtt acggtgcaac
+     3121 aacagctaat ctagtgagag ggcaaaatac tgtgcacatt ttaggaaaag ggggacactc
+     3181 tggctcaaaa tttatgtgtt gccatagcac tgaatgttca tcaacaggct tgacagctgc
+     3241 tgcaccacat cttgatagag tcactggcta taatgttatc gacaatgata aagtatttga
+     3301 tgacggctct cctgagtgtg gtgtacactg ctggtttaaa aagtctgggg aatggttaat
+     3361 ggggattttg agtggtaatt ggatggtagt ggcagtttta gtcgtactgc tgatcttatc
+     3421 aatattctta ttcagcttat gttgccctcg aagggttgtc cataaaaaat cctcgtaact
+     3481 tagatccata atcatttact cacaatgtgt catgttgtta accctagaat tacacttatg
+     3541 tattacttct attatagcac tttaaaacta acatactaat ttaataagta ataaatagca
+     3601 tatatatatt cactcttaat catatatcaa aaaaaactaa aactttggta tactaaccct
+     3661 atatatcagc tttacctgga cttttgttcc tgcggagtct actacta
+//

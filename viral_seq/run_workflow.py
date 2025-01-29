@@ -147,16 +147,19 @@ def get_kmer_info(
     kmer_features = []
     kmer_mm = kmer_data.mapping_method
     topN_kmers = kmer_data.kmer_names
-    accessions = set((" ".join(tbl["Accessions"].values)).split())
+    # check if the mapping method to be used for translating the accession
+    # matches that of the kmer feature
     if kmer_mm != mapping_method:
         raise ValueError("kmer mapping method does not match mapping method argument.")
+    # iterate through topN kmers and check where they exist within the cached sequences
     for item in topN_kmers:
         if item[:8] == "kmer_PC_":
             kmer_status = True
         else:
             kmer_status = False
         k_mer = item.replace("kmer_PC_", "").replace("kmer_AA_", "")
-
+        # iterate over all the cached records to check if the kmer
+        # feature exists within a given protein sequence
         for record in records:
             single_polyprotein = False
             for feature in record.features:
@@ -197,16 +200,15 @@ def get_kmer_info(
                             m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
                         ]
                         if kmer_idx:
-                            if record.id in accessions:
-                                virus_names.append(
-                                    tbl.loc[tbl["Accessions"].str.contains(record.id)][
-                                        "Species"
-                                    ].item()
-                                )
-                                protein_names.append(
-                                    str(feature.qualifiers.get("product"))[2:-2]
-                                )
-                                kmer_features.append(k_mer)
+                            virus_names.append(
+                                tbl.loc[tbl["Accessions"].str.contains(record.id)][
+                                    "Species"
+                                ].item()
+                            )
+                            protein_names.append(
+                                str(feature.qualifiers.get("product"))[2:-2]
+                            )
+                            kmer_features.append(k_mer)
 
     return virus_names, kmer_features, protein_names
 

@@ -469,10 +469,16 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         # when using the "jurgen_schmidt" mapping scheme
         (
             "NC_001563.2",
-            1,
-            ["WNV"],
-            ["LVFGGIT"],
-            ["nonstructural protein NS2A"],
+            2,
+            ["WNV"] * 2,
+            [
+                "66666666",
+                "LVFGGIT",
+            ],
+            [
+                "nonstructural protein NS4A",
+                "nonstructural protein NS2A",
+            ],
             "jurgen_schmidt",
         ),
         # this test checks that nothing is returned for accession records
@@ -508,12 +514,18 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["nsP3 protein", "E2 protein"],
             "jurgen_schmidt",
         ),
+        # this case utilizes the PC kmer '66666666', which was triggering the original bug because of
+        # the corresponding viral accession being part of a multi-cassette accession string within the
+        # feature table.
+        # TODO: the observance of both precursor ('G1 and G2 proteins') and mature
+        # protein products('envelope surface glycoprotein G2') in this excession has
+        # been noted in #102 and needs to be dealt with in a separate MR
         (
-            "NC_026433.1",
+            "NC_038940.1",
             2,
-            ["influenza_A_H1N1", "influenza_A_H1N1"],
-            ["INDKGK", "INDKGK"],
-            ["hemagglutinin", "HA1"],
+            ["Prospect hill hantavirus (PHV)", "Prospect hill hantavirus (PHV)"],
+            ["66666666", "66666666"],
+            ["G1 and G2 proteins", "envelope surface glycoprotein G2"],
             "jurgen_schmidt",
         ),
     ],
@@ -531,34 +543,21 @@ def test_get_kmer_info(
     records = sp.load_from_cache(
         accessions=[accession], cache=cache_str, verbose=True, filter=False
     )
+    # 'data_table' is used to look up the information associated with the
+    # viral protein in which the kmer feature is found. Only those entries that
+    # contain the appropriate accessions are necessary for the testing data_table
     data_table = {
         "Species": {
-            0: "hMPV",
-            1: "MERS-CoV",
+            0: "WNV",
+            1: "Prospect hill hantavirus (PHV)",
             2: "FMDV",
-            3: "influenza_A_H1N1",
-            4: "HSV-2",
-            5: "type_3_reovirus",
-            6: "WNV",
-            7: "type_1_reovirus",
-            8: "JEV",
-            9: "BKPyV human polyomavirus",
-            10: "FMDV",
-            11: "Ross River virus (RR)",
+            3: "Ross River virus (RR)",
         },
         "Accessions": {
-            0: "NC_039199.1",
-            1: "NC_019843.3",
+            0: "NC_001563.2",
+            1: "NC_038939.1 NC_038940.1 NC_038938.1",
             2: "NC_039210.1",
-            3: "NC_026438.1 NC_026435.1 NC_026437.1 NC_026433.1 NC_026436.1 NC_026434.1 NC_026432.1 NC_026431.1",
-            4: "NC_001798.2",
-            5: "NC_077846.1 NC_077845.1 NC_077844.1 NC_077843.1 NC_077842.1 NC_077841.1 NC_077840.1 NC_077839.1 NC_077838.1 NC_077837.1",
-            6: "NC_001563.2",
-            7: "MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1",
-            8: "NC_001437.1",
-            9: "NC_001538.1",
-            10: "NC_039210.1",
-            11: "NC_075016.1",
+            3: "NC_075016.1",
         },
     }
     tbl = pd.DataFrame(data_table)
@@ -570,6 +569,7 @@ def test_get_kmer_info(
         "NGTGGI",
         "NGAPEA",
         "SRGLDP",
+        "VVVVVVVV",
         "YDTIPI",
         "VGPNFSTV",  # this AA kmer is found in RR "non-structural polyprotein" and "nsP3 protein"
         "DKFSERII",  # this AA kemr is found in RR "structual polyprotein" and "E2 protein"
@@ -583,7 +583,6 @@ def test_get_kmer_info(
         "KFHFDT",
         "HLTKTW",
         "LIAPGT",
-        "INDKGK",
     ]
 
     new_kmers = []

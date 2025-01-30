@@ -40,41 +40,40 @@ def get_bad_indexes(df, cache, train_accessions=None):
 
 
 def shuffle(df_train, df_test, random_state=2930678936):
+    """Combine data and shuffle into a new train & test set.
+    Algorithm preserves:
+        - Number of samples in train & test
+        - Number of 'Human Host' in train & test
+    """
     train_count = df_train.shape[0]
-    train_ratio = df_train["Human Host"].value_counts()[True] / train_count
+    train_ratio = df_train["Human Host"].sum() / train_count
     # put all data together
     all_data = pd.concat([df_train, df_test])
-    # use a martini method to randomly add a virus from all data (without replacement) to a new training set if the new virus moves the target ratio of the new training set closer to that of the original training data
-    # this should ensure we have the same amount of "Human Host" in the new set as the old set
-    df_train_new = pd.DataFrame(columns=all_data.columns)
-    df_test_new = pd.DataFrame(columns=all_data.columns)
     indexes = [i for i in range(all_data.shape[0])]
     rng = np.random.default_rng(random_state)
+    # start by making a new train
+    train_new = []
+    train_new_true = 0
     for i in range(train_count):
+        train_ratio_new = 0
         if i > 0:
-            value_counts = df_train_new["Human Host"].value_counts()
-            true_counts = 0 if True not in value_counts.index else value_counts[True]
-            train_ratio_new = true_counts / (i + 1)
+            train_ratio_new = train_new_true / len(train_new)
         while True:
+            # randomly select candidate virus from all data
             this_idx = rng.choice(indexes)
-            this_row = all_data.iloc[this_idx]
-            new_idx = len(df_train_new.index)
-            if i == 0:
-                df_train_new.loc[new_idx] = this_row
-                indexes.pop(indexes.index(this_idx))
+            this_row = all_data.iloc[this_idx].to_dict()
+            # check if selection moves 'Human Host' closer to original train
+            this_bool = train_ratio_new < train_ratio
+            if this_row["Human Host"] == this_bool or i == 0:
+                # add selection to new train, remove from selection pool
+                train_new.append(this_row)
+                train_new_true += int(this_row["Human Host"])
+                indexes.remove(this_idx)
                 break
-            else:
-                this_bool = train_ratio_new < train_ratio
-                if this_row["Human Host"] == this_bool:
-                    df_train_new.loc[new_idx] = this_row
-                    indexes.pop(indexes.index(this_idx))
-                    break
-    # everything left is test
-    for this_idx in indexes:
-        this_row = all_data.iloc[this_idx]
-        new_idx = len(df_test_new.index)
-        df_test_new.loc[new_idx] = this_row
 
+    df_train_new = pd.DataFrame(train_new)
+    # everything left is test
+    df_test_new = all_data.iloc[indexes]
     return df_train_new, df_test_new
 
 

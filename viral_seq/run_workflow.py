@@ -157,33 +157,54 @@ def get_kmer_info(
         k_mer = item.replace("kmer_PC_", "").replace("kmer_AA_", "")
 
         for record in records:
+            single_polyprotein = False
             for feature in record.features:
+                # check to see if the only gene product is 'polyprotein'
+                # TODO: check other edge cases of other precursor-like protein products that
+                # may be causing double couting because of genomic overlap with mature protein products
+                # i.e. issue #102
+                all_products = [
+                    feat.qualifiers["product"][0]
+                    for feat in record.features
+                    if feat.type in ["CDS", "mat_peptide"]
+                ]
+                if len(all_products) == 1 and all_products[0] == "polyprotein":
+                    single_polyprotein = True
                 if feature.type == "CDS" or feature.type == "mat_peptide":
-                    nuc_seq = feature.location.extract(record.seq)
-                    if len(nuc_seq) % 3 != 0:
-                        continue
-                    this_seq_AA = nuc_seq.translate()
-                    this_seq_AA = str(this_seq_AA)
+                    # only skip the polyprotein accessions if there are other gene products in the record features
+                    if (
+                        "polyprotein" not in feature.qualifiers["product"]
+                        or single_polyprotein
+                    ):
+                        nuc_seq = feature.location.extract(record.seq)
+                        if len(nuc_seq) % 3 != 0:
+                            continue
+                        this_seq_AA = nuc_seq.translate()
+                        this_seq_AA = str(this_seq_AA)
 
-                    new_seq = ""
-                    if kmer_status:
-                        for each in this_seq_AA:
-                            new_seq += get_features.aa_map(each, method=mapping_method)
-                        this_seq = new_seq
-                        this_seq = str(this_seq)
-                    else:
-                        this_seq = this_seq_AA
-                    kmer_idx = [
-                        m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
-                    ]
-                    if kmer_idx:
-                        acc_exist = tbl.Accessions.isin([record.id])
-                        if sum(acc_exist):
-                            virus_names.append(tbl.Species[np.nonzero(acc_exist)[0][0]])
-                            protein_names.append(
-                                str(feature.qualifiers.get("product"))[2:-2]
-                            )
-                            kmer_features.append(k_mer)
+                        new_seq = ""
+                        if kmer_status:
+                            for each in this_seq_AA:
+                                new_seq += get_features.aa_map(
+                                    each, method=mapping_method
+                                )
+                            this_seq = new_seq
+                            this_seq = str(this_seq)
+                        else:
+                            this_seq = this_seq_AA
+                        kmer_idx = [
+                            m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
+                        ]
+                        if kmer_idx:
+                            acc_exist = tbl.Accessions.isin([record.id])
+                            if sum(acc_exist):
+                                virus_names.append(
+                                    tbl.Species[np.nonzero(acc_exist)[0][0]]
+                                )
+                                protein_names.append(
+                                    str(feature.qualifiers.get("product"))[2:-2]
+                                )
+                                kmer_features.append(k_mer)
 
     return virus_names, kmer_features, protein_names
 

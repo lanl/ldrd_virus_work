@@ -23,7 +23,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "3C",
         "hypothetical",
         "Hypothetical",
-        "pTP",
+        "pTP",  # protein tyrosine phosphatase
         "TP",
         "ORF",
         "100k",
@@ -33,8 +33,18 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "nuclear",
         "nucleocapsid",
         "transcription",
+        "non-structural",
+        "nucleo",
+        "core",
+        "regulator",
+        "gag",
+        "Gag",
     ]
-    not_exposed_exceptions = ["hemagglutinin-neuraminidase", "hemagglutinin-esterase"]
+    not_exposed_exceptions = [
+        "hemagglutinin-neuraminidase",
+        "hemagglutinin-esterase",
+        "neuraminidase",
+    ]
     exposed = [
         "membrane",
         "glycoprotein",
@@ -47,6 +57,11 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "fusion",
         "hemagglutinin",
         "fiber",
+        "HA",
+        "NA",
+        "neuraminidase",
+        "G1",
+        "G2",
     ]
     for i, row in enumerate(surface_exposed_df.itertuples()):
         if pd.isna(row.surface_exposed_status):

@@ -1171,59 +1171,59 @@ HCoV-OC43,nsp6,no,
 HCoV-OC43,nsp9,no,
 HCoV-OC43,nsp15,no,
 HCoV-OC43,nsp11,no,
-HCoV-OC43,ns12.9,,
-HCoV-OC43,I protein,,
+HCoV-OC43,ns12.9,yes,https://doi.org/10.1128/jvi.01986-15
+HCoV-OC43,I protein,no,https://www.uniprot.org/uniprotkb/Q4VID0/entry
 Human rotavirus B,nonstructural protein,no,
 Highly Pathogenic Avian Influenza A (H5N1),hemagglutinin,yes,
 Highly Pathogenic Avian Influenza A (H5N1),HA1,yes,
 Highly Pathogenic Avian Influenza A (H5N1),HA2,yes,
 Influenza D virus,nonstructural protein 2,no,
 Influenza D virus,nonstructural protein 1,no,
-Murine coronavirus,leader protein,,
+Murine coronavirus,leader protein,no,https://doi.org/10.1006/viro.1995.1281
 Murine coronavirus,nsp2,no,
 Murine coronavirus,nsp6,no,
 Murine coronavirus,nsp9,no,
-Murine coronavirus,NendoU,,
+Murine coronavirus,NendoU,no,https://doi.org/10.1128/jvi.00547-07
 Murine coronavirus,nsp11,no,
 Murine coronavirus,32 kD non-structural protein,no,
 Murine coronavirus,15 kD non-structural protein,no,
 Murine coronavirus,envelope protein,yes,
-type_1_reovirus,sigma-2 protein,,
-Human adenovirus species D,control protein E1A,,
-Human adenovirus species D,control protein E1B 19K,,
-Human adenovirus species D,control protein E1B 55K,,
-Human adenovirus species D,protein 13.6K,,
+type_1_reovirus,sigma-2 protein,no,https://doi.org/10.1128/jvi.65.11.5721-5731.1991
+Human adenovirus species D,control protein E1A,no,https://doi.org/10.3390/v11020143
+Human adenovirus species D,control protein E1B 19K,no,https://doi.org/10.1186/1471-2164-9-213
+Human adenovirus species D,control protein E1B 55K,no,
+Human adenovirus species D,protein 13.6K,no,https://doi.org/10.1016/0092-8674(80)90138-5
 Human adenovirus species D,core protein V,no,
-Human adenovirus species D,capsid protein precursor pVI,,
+Human adenovirus species D,capsid protein precursor pVI,no,https://doi.org/10.1128/jvi.79.4.2559-2572.2005
 Human adenovirus species D,protease,no,
 Human adenovirus species D,hexon assembly protein 100K,yes,
-Human adenovirus species D,encapsidation protein 22K,,
+Human adenovirus species D,encapsidation protein 22K,no,https://doi.org/10.1128/jvi.00859-13
 Human adenovirus species D,capsid protein precursor pVIII,yes,
-Human adenovirus species D,control protein E3 12.5K,,
+Human adenovirus species D,control protein E3 12.5K,no,https://doi.org/10.1002/1873-3468.13848
 Human adenovirus species D,membrane glycoprotein E3 CR1-alpha,yes,
 Human adenovirus species D,membrane protein E3 RID-alpha,yes,
 Human adenovirus species D,membrane protein E3 RID-beta,yes,
-Human adenovirus species D,control protein E3 14.7K,,
-Human adenovirus species D,protein U,,
-Human adenovirus species D,control protein E4orf6/7,,
-Human adenovirus species D,control protein E4 34K,,
-Human adenovirus species D,control protein E4orf3,,
-Human adenovirus species D,control protein E4orf2,,
-Human adenovirus species D,control protein E4orf1,,
+Human adenovirus species D,control protein E3 14.7K,no,https://doi.org/10.1110/ps.4180102
+Human adenovirus species D,protein U,no,https://www.genome.jp/dbget-bin/www_bget?refseq:NC_001405
+Human adenovirus species D,control protein E4orf6/7,no,
+Human adenovirus species D,control protein E4 34K,no,
+Human adenovirus species D,control protein E4orf3,no,
+Human adenovirus species D,control protein E4orf2,no,
+Human adenovirus species D,control protein E4orf1,no,
 Puumala orthohantavirus,glycoprotein polyprotein precursor,no,
-Murine adenovirus 3,E1A,,
-Murine adenovirus 3,pIX,,
-Murine adenovirus 3,E4 34k,,
+Murine adenovirus 3,E1A,no,https://doi.org/10.1016/j.virol.2004.06.043
+Murine adenovirus 3,pIX,yes,https://doi.org/10.3390/v13030388
+Murine adenovirus 3,E4 34k,no,https://doi.org/10.1074/jbc.M000566200
 Murine adenovirus 3,E4 ORFC,no,
 Murine adenovirus 3,E4 ORFA,no,
 Influenza D virus,nucleoprotein,no,
-type_1_reovirus,mu-1 protein,,
+type_1_reovirus,mu-1 protein,yes,https://doi.org/10.1016/S0092-8674(02)00612-8
 Sin Nombre virus,glycoprotein precursor,yes,
-influenza_A_H1N1,matrix protein 2,,
-influenza_A_H1N1,matrix protein 1,,
-type_3_reovirus,sigma-2 protein,,
-Bluetongue virus,VP6 protein,,
-HCoV-HKU1,Leader protein,,
+influenza_A_H1N1,matrix protein 2,no,https://doi.org/10.1093/infdis/jiz003
+influenza_A_H1N1,matrix protein 1,no,https://doi.org/10.1038/s41586-020-2696-8
+type_3_reovirus,sigma-2 protein,no,https://doi.org/10.1128/jvi.65.11.5721-5731.1991
+Bluetongue virus,VP6 protein,no,https://doi.org/10.1128/jvi.02023-18
+HCoV-HKU1,Leader protein,no,None
 HCoV-HKU1,nsp2,no,
 HCoV-HKU1,nsp6 (hydrophobic domain),no,
 HCoV-HKU1,nsp9,no,
@@ -1232,20 +1232,20 @@ HCoV-HKU1,nsp11,no,
 HCoV-HKU1,non-structural protein,no,
 HCoV-HKU1,envelope protein,yes,
 HCoV-HKU1,nucleocapsid phosphoprotein,no,
-Adeno-Associated Virus Type 2 (AAV2),Rep 68 protein,,
-Adeno-Associated Virus Type 2 (AAV2),Rep 40 protein,,
-type_3_reovirus,lambda-1 protein,,
-Canine adenovirus type 2,pVII,,
-Canine adenovirus type 2,22K,,
+Adeno-Associated Virus Type 2 (AAV2),Rep 68 protein,no,https://doi.org/10.1128/jvi.01939-08
+Adeno-Associated Virus Type 2 (AAV2),Rep 40 protein,no,https://doi.org/10.1093/emboj/20.12.3282
+type_3_reovirus,lambda-1 protein,no,https://doi.org/10.1016/0042-6822(88)90051-7
+Canine adenovirus type 2,pVII,no,https://doi.org/10.3390/v13030388
+Canine adenovirus type 2,22K,no,https://doi.org/10.3390/v6093563
 Canine adenovirus type 2,pVIII,yes,
-Canine adenovirus type 2,E3 12.5K,,
-Canine adenovirus type 2,U exon,,
+Canine adenovirus type 2,E3 12.5K,no,None
+Canine adenovirus type 2,U exon,no,None
 Canine adenovirus type 2,E4 ORF6/7,no,
-Human rotavirus B,outer capsid protein,,
+Human rotavirus B,outer capsid protein,yes,None
 influenza_A_H1N1,polymerase PB1,no,
 Sangassou orthohantavirus,glycoprotein precursor,yes,
 Influenza D virus,polymerase 3,no,
-type_1_reovirus,lambda-1 protein,,
+type_1_reovirus,lambda-1 protein,no,None
 Dobrava virus,glycoprotein precursor (G1-G2),yes,
 Echovirus 1 (EV1),3B(VPg),,
 type_3_reovirus,lambda-3 protein,,

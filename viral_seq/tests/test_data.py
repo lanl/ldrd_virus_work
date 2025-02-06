@@ -3,6 +3,11 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 from importlib.resources import files
 import pytest
+import numpy as np
+from numpy.testing import assert_array_equal
+from hypothesis import given
+import hypothesis.strategies as st
+import hypothesis.extra.numpy as hnp
 
 
 # Utilizing some pre-existing accessions in the test folder
@@ -51,29 +56,63 @@ def test_get_bad_indexes(cache, accession, train_accessions, expected_result):
         assert result[key] == expected_result[key]
 
 
-@pytest.mark.parametrize("random_state", [123456, 203254, 987654])
-def test_shuffle(random_state):
+def test_shuffle_regression():
+    exp_train_species = [
+        "Echarate phlebovirus",
+        "Alphapapillomavirus 3",
+        "Alphapapillomavirus 7",
+        "Betapapillomavirus 1",
+        "Chagres phlebovirus",
+        "Adana phlebovirus",
+        "Acerodon celebensis polyomavirus 2",
+        "Ndumu virus",
+        "Uganda S virus",
+        "Bujaru phlebovirus",
+    ]
+    exp_test_species = [
+        "Getah virus",
+        "Nyando orthobunyavirus",
+        "Alenquer phlebovirus",
+        "Akhmeta virus",
+        "Cardiovirus D",
+        "Royal Farm virus",
+        "Aguacate phlebovirus",
+        "Acerodon celebensis polyomavirus 1",
+        "Abatino macacapox virus",
+        "Israel turkey meningoencephalomyelitis virus",
+    ]
     train_data = files("viral_seq.tests") / "TrainingSet.csv"
     test_data = files("viral_seq.tests") / "TestSet.csv"
     df_train = pd.read_csv(train_data, index_col=0)
     df_test = pd.read_csv(test_data, index_col=0)
     df_train_shuffled, df_test_shuffled = make_alts.shuffle(
+        df_train, df_test, random_state=123456
+    )
+    assert_array_equal(df_train_shuffled["Species"].values, exp_train_species)
+    assert_array_equal(df_test_shuffled["Species"].values, exp_test_species)
+
+
+@given(
+    random_state=hnp.from_dtype(np.dtype(np.uint32)), different_balance=st.booleans()
+)
+def test_shuffle_property(random_state, different_balance):
+    """Test the properties that should be perserved by the shuffle."""
+    # train/test sets are half human host, 10 samples
+    train_data = files("viral_seq.tests") / "TrainingSet.csv"
+    test_data = files("viral_seq.tests") / "TestSet.csv"
+    df_train = pd.read_csv(train_data, index_col=0)
+    df_test = pd.read_csv(test_data, index_col=0)
+    if different_balance:
+        # make train human host ratio and number of samples not match test
+        df_train = df_train.loc[df_train["Human Host"]]
+    df_train_shuffled, df_test_shuffled = make_alts.shuffle(
         df_train, df_test, random_state
     )
 
-    # assert count of "Human Host" hasn't changed
+    # assert counts of "Human Host" values haven't changed for each set
     for df1, df2 in zip([df_train_shuffled, df_test_shuffled], [df_train, df_test]):
-        for truth in [True, False]:
-            assert (
-                df1["Human Host"].value_counts()[truth]
-                == df2["Human Host"].value_counts()[truth]
-            )
-
-    # assert we have changed the tables in some way
-    with pytest.raises(AssertionError):
-        assert_frame_equal(df_train, df_train_shuffled, check_dtype=False)
-    with pytest.raises(AssertionError):
-        assert_frame_equal(df_test, df_test_shuffled, check_dtype=False)
+        assert df1["Human Host"].sum() == df2["Human Host"].sum()
+        assert df1.shape[0] == df2.shape[0]
 
     # assert we still have the same data present
     original_data = pd.concat([df_train, df_test]).sort_values(

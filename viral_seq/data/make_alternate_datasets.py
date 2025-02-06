@@ -3,7 +3,6 @@ from viral_seq.analysis import spillover_predict as sp
 from importlib.resources import files
 from pathlib import Path
 import tarfile
-import numpy as np
 
 
 def get_bad_indexes(df, cache, train_accessions=None):
@@ -39,41 +38,37 @@ def get_bad_indexes(df, cache, train_accessions=None):
     }
 
 
-def shuffle(df_train, df_test, random_state=2930678936):
+def shuffle(
+    df_train: pd.DataFrame, df_test: pd.DataFrame, random_state: int = 2930678936
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Combine data and shuffle into a new train & test set.
     Algorithm preserves:
         - Number of samples in train & test
         - Number of 'Human Host' in train & test
     """
-    train_count = df_train.shape[0]
-    train_ratio = df_train["Human Host"].sum() / train_count
-    # put all data together
-    all_data = pd.concat([df_train, df_test])
-    indexes = [i for i in range(all_data.shape[0])]
-    rng = np.random.default_rng(random_state)
-    # start by making a new train
-    train_new = []
-    train_new_true = 0
-    for i in range(train_count):
-        train_ratio_new = 0
-        if i > 0:
-            train_ratio_new = train_new_true / len(train_new)
-        while True:
-            # randomly select candidate virus from all data
-            this_idx = rng.choice(indexes)
-            this_row = all_data.iloc[this_idx].to_dict()
-            # check if selection moves 'Human Host' closer to original train
-            this_bool = train_ratio_new < train_ratio
-            if this_row["Human Host"] == this_bool or i == 0:
-                # add selection to new train, remove from selection pool
-                train_new.append(this_row)
-                train_new_true += int(this_row["Human Host"])
-                indexes.remove(this_idx)
-                break
+    train_human_count = df_train["Human Host"].sum()
+    train_non_human_count = df_train.shape[0] - train_human_count
 
-    df_train_new = pd.DataFrame(train_new)
-    # everything left is test
-    df_test_new = all_data.iloc[indexes]
+    # combine and shuffle data
+    all_data = pd.concat([df_train, df_test])
+    all_data = all_data.sample(frac=1, random_state=random_state)
+
+    # select appropriate number of human viruses for each set
+    human_data = all_data.loc[all_data["Human Host"]]
+    non_human_data = all_data.loc[~all_data["Human Host"]]
+    df_train_new = pd.concat(
+        [
+            human_data.iloc[:train_human_count],
+            non_human_data.iloc[:train_non_human_count],
+        ]
+    ).reset_index(drop=True)
+    df_test_new = pd.concat(
+        [
+            human_data.iloc[train_human_count:],
+            non_human_data.iloc[train_non_human_count:],
+        ]
+    ).reset_index(drop=True)
+
     return df_train_new, df_test_new
 
 

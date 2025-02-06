@@ -4,7 +4,6 @@ from pandas.testing import assert_frame_equal
 from importlib.resources import files
 import pytest
 import numpy as np
-from numpy.testing import assert_array_equal
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
@@ -57,30 +56,7 @@ def test_get_bad_indexes(cache, accession, train_accessions, expected_result):
 
 
 def test_shuffle_regression():
-    exp_train_species = [
-        "Echarate phlebovirus",
-        "Alphapapillomavirus 3",
-        "Alphapapillomavirus 7",
-        "Betapapillomavirus 1",
-        "Chagres phlebovirus",
-        "Adana phlebovirus",
-        "Acerodon celebensis polyomavirus 2",
-        "Ndumu virus",
-        "Uganda S virus",
-        "Bujaru phlebovirus",
-    ]
-    exp_test_species = [
-        "Getah virus",
-        "Nyando orthobunyavirus",
-        "Alenquer phlebovirus",
-        "Akhmeta virus",
-        "Cardiovirus D",
-        "Royal Farm virus",
-        "Aguacate phlebovirus",
-        "Acerodon celebensis polyomavirus 1",
-        "Abatino macacapox virus",
-        "Israel turkey meningoencephalomyelitis virus",
-    ]
+    exp_order = [15, 19, 7, 8, 9, 2, 3, 11, 10, 1, 18, 17, 6, 5, 16, 13, 12, 14, 4, 0]
     train_data = files("viral_seq.tests") / "TrainingSet.csv"
     test_data = files("viral_seq.tests") / "TestSet.csv"
     df_train = pd.read_csv(train_data, index_col=0)
@@ -88,8 +64,13 @@ def test_shuffle_regression():
     df_train_shuffled, df_test_shuffled = make_alts.shuffle(
         df_train, df_test, random_state=123456
     )
-    assert_array_equal(df_train_shuffled["Species"].values, exp_train_species)
-    assert_array_equal(df_test_shuffled["Species"].values, exp_test_species)
+    actual_data = (
+        pd.concat([df_train_shuffled, df_test_shuffled])
+        .iloc[exp_order]
+        .reset_index(drop=True)
+    )
+    expected_data = pd.concat([df_train, df_test]).reset_index(drop=True)
+    assert_frame_equal(actual_data, expected_data)
 
 
 @given(

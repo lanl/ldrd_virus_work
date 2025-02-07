@@ -60,7 +60,8 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None
                     kmers[kmer_name] += 1
                     mm = mapping_method if mapping_method is not None else "None"
                     if kmer_info is not None:
-                        kmer_out = wf.kmer_data(
+                        # TODO: repeat entries are being added to the dictionary
+                        kmer_out = wf.kmerData(
                             mm,
                             [kmer_name],
                             record.annotations["organism"],

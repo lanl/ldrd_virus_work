@@ -9,6 +9,7 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
+from collections import defaultdict
 
 
 def test_optimization_plotting(tmpdir):
@@ -753,7 +754,7 @@ def test_get_kmer_info(
             new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
         else:
             new_kmers.append("kmer_AA_" + topN_kmer)
-    data_in = workflow.kmer_data(mapping_method, new_kmers)
+    data_in = workflow.kmerData(mapping_method, new_kmers)
 
     viruses, kmers, protein_name = workflow.get_kmer_info(
         data_in, records, tbl, mapping_method
@@ -799,7 +800,7 @@ def test_get_kmer_info_error(
         },
     }
     tbl = pd.DataFrame(data_table)
-    data_in = workflow.kmer_data(mapping_method, kmer)
+    data_in = workflow.kmerData(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)
 
@@ -860,3 +861,30 @@ def test_print_pos_con(
 
         captured = capsys.readouterr()
         assert captured.out == exp_output
+
+
+def test_get_kmer_viruses():
+    kmer_names = [f"kmer_PC_{n}" for n in range(10)]
+    virus_names = [f"virus{n}" for n in range(10)]
+    protein_names = [f"protein{n}" for n in range(10)]
+    kmer_info = defaultdict(list)
+    for kmer, virus, protein in zip(kmer_names, virus_names, protein_names):
+        kmer_info[kmer].append(workflow.kmerData(None, [kmer], virus, protein))
+
+    virus_pairs_exp = {
+        "kmer_PC_0": [("virus0", "protein0")],
+        "kmer_PC_1": [("virus1", "protein1")],
+        "kmer_PC_2": [("virus2", "protein2")],
+        "kmer_PC_3": [("virus3", "protein3")],
+        "kmer_PC_4": [("virus4", "protein4")],
+        "kmer_PC_5": [("virus5", "protein5")],
+        "kmer_PC_6": [("virus6", "protein6")],
+        "kmer_PC_7": [("virus7", "protein7")],
+        "kmer_PC_8": [("virus8", "protein8")],
+        "kmer_PC_9": [("virus9", "protein9")],
+    }
+    kmer_info_df = pd.DataFrame.from_dict(kmer_info, orient="index", columns=["Info"])
+    kmer_info_df["Info"] = kmer_info_df.apply(lambda row: [x for x in row], axis=1)
+    virus_pairs = workflow.get_kmer_viruses(kmer_names, kmer_info_df)
+
+    assert virus_pairs == virus_pairs_exp

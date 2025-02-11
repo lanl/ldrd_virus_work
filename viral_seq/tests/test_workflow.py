@@ -449,38 +449,38 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
 @pytest.mark.parametrize(
     "accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method",
     [
+        # this test checks that 'polyproteins' present in accessions
+        # that contain both precursor polyprotein products and mature peptides
+        # are not included when using the "shen_2007" mapping scheme
         (
             "NC_001563.2",
             7,
             ["WNV"] * 7,
-            [
-                "AFDAEF",
-                "AFDAEF",
-                "FCCGDA",
-                "EADAAC",
-                "EADAAC",
-                "DGACFC",
-                "LVFGGIT",
-            ],
+            ["AFDAEF", "FCCGDA", "EADAAC", "DGACFC", "CEACAGC", "CEACAGC", "LVFGGIT"],
             [
                 "envelope protein E",
-                "truncated polyprotein NS1 prime",
                 "nonstructural protein NS3",
                 "envelope protein E",
-                "truncated polyprotein NS1 prime",
                 "RNA-dependent RNA polymerase NS5",
+                "nonstructural protein NS1",
+                "nonstructural protein NS1 prime",
                 "nonstructural protein NS2A",
             ],
             "shen_2007",
         ),
         # this case tests that the function skips polyprotein products that also
-        # have mature protein products within the accession
+        # have mature protein products within the accession when using the
+        # "jurgen_schmidt" mapping scheme
         (
             "NC_001563.2",
-            1,
-            ["WNV"],
-            ["LVFGGIT"],
-            ["nonstructural protein NS2A"],
+            3,
+            ["WNV"] * 3,
+            ["8306056", "8306056", "LVFGGIT"],
+            [
+                "nonstructural protein NS1",
+                "nonstructural protein NS1 prime",
+                "nonstructural protein NS2A",
+            ],
             "jurgen_schmidt",
         ),
         (
@@ -553,7 +553,7 @@ def test_get_kmer_info(
         "NGAPEA",
         "SRGLDP",
         "YDTIPI",
-        "DRGIFV",
+        "PQGLAKI",  # this AA kmer is found in both the "truncated polyprotein NS1 prime" as well as its mature peptide products nonstructural protein NS1" and "nonstructural protein NS1 prime"
         "MDSIPG",
         "FHIPGE",
         "LVFGGIT",

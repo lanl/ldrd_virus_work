@@ -1223,7 +1223,7 @@ influenza_A_H1N1,matrix protein 2,no,https://doi.org/10.1093/infdis/jiz003
 influenza_A_H1N1,matrix protein 1,no,https://doi.org/10.1038/s41586-020-2696-8
 type_3_reovirus,sigma-2 protein,no,https://doi.org/10.1128/jvi.65.11.5721-5731.1991
 Bluetongue virus,VP6 protein,no,https://doi.org/10.1128/jvi.02023-18
-HCoV-HKU1,Leader protein,no,None
+HCoV-HKU1,Leader protein,no,
 HCoV-HKU1,nsp2,no,
 HCoV-HKU1,nsp6 (hydrophobic domain),no,
 HCoV-HKU1,nsp9,no,
@@ -1238,20 +1238,20 @@ type_3_reovirus,lambda-1 protein,no,https://doi.org/10.1016/0042-6822(88)90051-7
 Canine adenovirus type 2,pVII,no,https://doi.org/10.3390/v13030388
 Canine adenovirus type 2,22K,no,https://doi.org/10.3390/v6093563
 Canine adenovirus type 2,pVIII,yes,
-Canine adenovirus type 2,E3 12.5K,no,None
-Canine adenovirus type 2,U exon,no,None
+Canine adenovirus type 2,E3 12.5K,no,
+Canine adenovirus type 2,U exon,no,
 Canine adenovirus type 2,E4 ORF6/7,no,
-Human rotavirus B,outer capsid protein,yes,None
+Human rotavirus B,outer capsid protein,yes,
 influenza_A_H1N1,polymerase PB1,no,
 Sangassou orthohantavirus,glycoprotein precursor,yes,
 Influenza D virus,polymerase 3,no,
-type_1_reovirus,lambda-1 protein,no,None
+type_1_reovirus,lambda-1 protein,no,
 Dobrava virus,glycoprotein precursor (G1-G2),yes,
-Echovirus 1 (EV1),3B(VPg),,
-type_3_reovirus,lambda-3 protein,,
-human cytomegalovirus,protein RL1,,
-human cytomegalovirus,protein RL5A,,
-human cytomegalovirus,protein RL6,,
+Echovirus 1 (EV1),3B(VPg),no,https://doi.org/10.3390/cancers11050685
+type_3_reovirus,lambda-3 protein,no,https://doi.org/10.1038/nsb1009
+human cytomegalovirus,protein RL1,no,https://doi.org/10.1073/pnas.2108173119
+human cytomegalovirus,protein RL5A,no,https://doi.org/10.1099/vir.0.18856-0
+human cytomegalovirus,protein RL6,no,https://doi.org/10.3390/ijms23052768
 human cytomegalovirus,protein RL9A,,
 human cytomegalovirus,membrane glycoprotein RL11,yes,
 human cytomegalovirus,membrane protein UL1,yes,

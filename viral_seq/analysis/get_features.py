@@ -43,6 +43,7 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None
         raise ValueError("Please specify mapping method for PC-kmers.")
     kmers = defaultdict(int)
     for record in records:
+        single_polyprotein = False
         for feature in record.features:
             if feature.type == "CDS":
                 nuc_seq = feature.location.extract(record.seq)
@@ -58,16 +59,44 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmer_name = "kmer_" + kmer_type + "_" + str(kmer)
                     kmers[kmer_name] += 1
-                    mm = mapping_method if mapping_method is not None else "None"
-                    if kmer_info is not None:
-                        # TODO: repeat entries are being added to the dictionary
-                        kmer_out = wf.kmerData(
-                            mm,
-                            [kmer_name],
-                            record.annotations["organism"],
-                            feature.qualifiers["product"][0],
-                        )
-                        kmer_info[kmer_name].append(kmer_out)
+            # if gathering all_kmer_info, check all the record features
+            # TODO: potentially this could be its own, tested function
+            # but it also makes sense to do this concurrently with data table generation
+            if kmer_info is not None:
+                all_products = [
+                    feat.qualifiers["product"][0]
+                    for feat in record.features
+                    if feat.type in ["CDS", "mat_peptide"]
+                ]
+                if len(all_products) == 1 and all_products[0] == "polyprotein":
+                    single_polyprotein = True
+                if feature.type == "CDS" or feature.type == "mat_peptide":
+                    # only skip the polyprotein accessions if there are other gene products in the record features
+                    if (
+                        "polyprotein" not in feature.qualifiers["product"][0]
+                        or single_polyprotein
+                    ):
+                        nuc_seq = feature.location.extract(record.seq)
+                        if len(nuc_seq) % 3 != 0:
+                            continue
+                        this_seq = nuc_seq.translate()
+                        if kmer_type == "PC":
+                            new_seq = ""
+                            for each in this_seq:
+                                new_seq += aa_map(each, method=mapping_method)
+                            this_seq = new_seq
+                        for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
+                            kmer_name = "kmer_" + kmer_type + "_" + str(kmer)
+                            mm = (
+                                mapping_method if mapping_method is not None else "None"
+                            )
+                            kmer_out = wf.kmerData(
+                                mm,
+                                [kmer_name],
+                                record.annotations["organism"],
+                                feature.qualifiers["product"][0],
+                            )
+                            kmer_info[kmer_name].append(kmer_out)
 
     return kmer_info, kmers
 

@@ -84,7 +84,6 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     kmer_viruses: dict
         dictionary of kmer names and corresponding virus-protein pairs from all_kmer_info
     """
-    # TODO: this function needs a test
     kmer_viruses = defaultdict(list)
     for kmer in topN_kmers:
         all_kmer_data = all_kmer_info.loc[kmer].Info
@@ -114,13 +113,13 @@ def load_kmer_info(file_name: str):
 
     all_kmer_info = pd.read_parquet(file_name)
     all_kmer_info["Info"] = all_kmer_info["Info"].apply(
-        lambda x: [kmerData(**json.loads(x[0])) for obj in x]
+        lambda x: [kmerData(**json.loads(obj)) for obj in x]
     )
 
     return all_kmer_info
 
 
-def save_kmer_info(all_kmer_info: pd.Series, save_file: str):
+def save_kmer_info(all_kmer_info: list, save_file: str):
     """
     save list of dataframes containing kmer information
 
@@ -129,12 +128,12 @@ def save_kmer_info(all_kmer_info: pd.Series, save_file: str):
     all_kmer_info: list
         list of dataframes containing kmerData class objects
     """
-    all_kmer_info = pd.concat(all_kmer_info)
-    all_kmer_info["Info"] = all_kmer_info.apply(
+    all_kmer_info_df = pd.concat(all_kmer_info)
+    all_kmer_info_df["Info"] = all_kmer_info_df.apply(
         lambda row: [x for x in row if x is not None and not pd.isna(x)], axis=1
     )
-    all_kmer_info = all_kmer_info["Info"]
-    kmer_info_df = all_kmer_info.to_frame()
+    all_kmer_info_df = all_kmer_info_df["Info"]
+    kmer_info_df = all_kmer_info_df.to_frame()
     kmer_info_df["Info"] = kmer_info_df["Info"].apply(
         lambda x: [json.dumps(obj.__dict__) for obj in x]
     )

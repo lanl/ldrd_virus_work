@@ -125,7 +125,8 @@ if __name__ == "__main__":
     test_data_shuffled.to_csv(test_shuffled_data)
 
     print(
-        "Generated 'shuffled' datasets from 'fixed' datasets where viral genomes have been randomly sorted to train and test while preserving the number of viruses in each set and the human host ratio of each set:",
+        "Generated 'shuffled' datasets from 'fixed' datasets:\n",
         train_shuffled_data,
         test_shuffled_data,
+        "\nData from fixed datasets was combined and randomly assigned to train and test. Algorithm preserves:\n - Number of samples in train & test\n - Number of 'Human Host' in train & test",
     )

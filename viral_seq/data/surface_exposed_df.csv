@@ -1252,32 +1252,32 @@ type_3_reovirus,lambda-3 protein,no,https://doi.org/10.1038/nsb1009
 human cytomegalovirus,protein RL1,no,https://doi.org/10.1073/pnas.2108173119
 human cytomegalovirus,protein RL5A,no,https://doi.org/10.1099/vir.0.18856-0
 human cytomegalovirus,protein RL6,no,https://doi.org/10.3390/ijms23052768
-human cytomegalovirus,protein RL9A,,
+human cytomegalovirus,protein RL9A,no,https://doi.org/10.3389/fmicb.2020.02104
 human cytomegalovirus,membrane glycoprotein RL11,yes,
 human cytomegalovirus,membrane protein UL1,yes,
 human cytomegalovirus,membrane glycoprotein UL11,yes,
-human cytomegalovirus,protein UL17,,
+human cytomegalovirus,protein UL17,no,https://doi.org/10.1128/jvi.00384-16
 human cytomegalovirus,membrane glycoprotein UL18,yes,
 human cytomegalovirus,glycoprotein UL22A,yes,
 human cytomegalovirus,tegument protein UL26,no,
-human cytomegalovirus,protein UL30,,
-human cytomegalovirus,protein UL34,,
-human cytomegalovirus,protein UL41A,,
-human cytomegalovirus,small capsid protein,,
-human cytomegalovirus,protein UL79,,
+human cytomegalovirus,protein UL30,no,https://doi.org/10.1021/bi7002394
+human cytomegalovirus,protein UL34,no,https://doi.org/10.3390/v6020476
+human cytomegalovirus,protein UL41A,yes,1https://doi.org/10.1128/jvi.78.20.10960-10966.2004
+human cytomegalovirus,small capsid protein,no,https://doi.org/10.1128/mbio.01007-22
+human cytomegalovirus,protein UL79,no,https://doi.org/10.1371/journal.ppat.1004350
 human cytomegalovirus,tegument protein UL16,no,
 human cytomegalovirus,myristylated tegument protein,no,
-human cytomegalovirus,interleukin-10,,
+human cytomegalovirus,interleukin-10,yes,https://doi.org/10.1073/pnas.97.4.1695
 human cytomegalovirus,uracil-DNA glycosylase,no,
-human cytomegalovirus,protein UL116,,
+human cytomegalovirus,protein UL116,no,https://doi.org/10.1128/jvi.02207-20
 human cytomegalovirus,envelope protein UL131A,yes,
 human cytomegalovirus,membrane protein UL148,yes,
 human cytomegalovirus,membrane protein UL147A,yes,
-human cytomegalovirus,chemokine vCXCL2,,
-human cytomegalovirus,protein UL148B,,
-human cytomegalovirus,protein UL148C,,
-human cytomegalovirus,protein UL150A,,
-human cytomegalovirus,protein US1,,
+human cytomegalovirus,chemokine vCXCL2,yes,https://www.uniprot.org/uniprotkb/Q2IAA1/entry
+human cytomegalovirus,protein UL148B,no,https://doi.org/10.1128/mbio.02110-19
+human cytomegalovirus,protein UL148C,no,https://doi.org/10.3389/fmicb.2020.02104
+human cytomegalovirus,protein UL150A,no,https://doi.org/10.1128/jvi.80.2.710-722.2006
+human cytomegalovirus,protein US1,no,https://doi.org/10.1016/j.chom.2018.07.011
 human cytomegalovirus,membrane glycoprotein US2,yes,
 human cytomegalovirus,membrane glycoprotein US6,yes,
 human cytomegalovirus,membrane glycoprotein US10,yes,

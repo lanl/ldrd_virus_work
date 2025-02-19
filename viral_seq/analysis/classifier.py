@@ -10,6 +10,7 @@ from sklearn.metrics import (
     auc,
     roc_auc_score,
     confusion_matrix,
+    ConfusionMatrixDisplay,
 )
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
@@ -665,20 +666,16 @@ def plot_confusion_matrix_mean(
 def _plot_confusion_matrix(
     cm: np.ndarray, cm_std: Optional[np.ndarray], title: str, filename: str
 ):
-    # manual plot instead of `ConfusionMatrixDisplay` to also support mean ± std
     fig, ax = plt.subplots(figsize=(6, 5))
-    cax = ax.imshow(cm, cmap="viridis", interpolation="nearest")
-    plt.colorbar(cax)
-    plt.xticks(np.arange(cm.shape[1]), labels=["False", "True"])
-    plt.yticks(np.arange(cm.shape[0]), labels=["False", "True"])
-    plt.xlabel("Predicted Label")
-    plt.ylabel("True Label")
-    plt.title(title)
+    conf_mat = ConfusionMatrixDisplay(
+        confusion_matrix=cm, display_labels=["False", "True"]
+    )
+    conf_mat.plot(ax=ax, include_values=False)
+    # Manual annotations to support mean ± std
     # Use cmap for annotation colors
-    cmap = cax.get_cmap()
+    cmap = conf_mat.im_.get_cmap()
     cmap_min, cmap_max = cmap(0), cmap(1.0)
     thresh = (cm.max() + cm.min()) / 2.0
-    # Annotate each cell
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             mean_val = cm[i, j]
@@ -696,6 +693,9 @@ def _plot_confusion_matrix(
                 va="center",
                 color=color,
             )
+    ax.set_title(title)
+    ax.set_xlabel("Predicted Label")
+    ax.set_ylabel("True Label")
     fig.tight_layout()
     fig.savefig(filename.replace(" ", "_"), dpi=300)
     plt.close()

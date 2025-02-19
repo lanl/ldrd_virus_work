@@ -24,7 +24,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List
+from typing import Dict, Any, Sequence, List, Optional
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -375,6 +375,7 @@ def plot_shap_consensus(
     train_data: pd.DataFrame,
     target_column: str,
     path: Path,
+    rng: Optional[np.random.Generator] = None,
 ):
     """
     plots the shap beeswarm plot from the consensus over multiple cv folds
@@ -389,6 +390,8 @@ def plot_shap_consensus(
         training column from dataset
     path: Path
         path to file for saving figure
+    rng: np.random.Generator
+        pseudorandom number generator for plotting shap
     """
 
     max_features = 20
@@ -398,7 +401,9 @@ def plot_shap_consensus(
         max_display=max_features,
         feature_names=train_data.columns,
         show=False,
+        rng=rng,
     )
+
     plt.title(f"Effect of Top {max_features} Features\n Random Forest")
     plt.tight_layout()
     plt.savefig(str(path) + "/" + "SHAP_" + str(target_column) + ".png")

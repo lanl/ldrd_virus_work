@@ -906,11 +906,10 @@ def test_plot_shap_consensus(tmp_path):
     syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
     syn_df = pd.DataFrame(syn_data, columns=syn_features)
 
-    np.random.seed(123)
-    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path)
+    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path, rng=rng)
     assert (
         compare_images(
-            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
+            files("viral_seq.tests.expected") / "SHAP_Test.png",
             str(tmp_path / "SHAP_Test.png"),
             0.001,
         )

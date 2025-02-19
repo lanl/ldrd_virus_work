@@ -782,6 +782,24 @@ def test_plot_cv_roc(tmp_path):
     )
 
 
+def test_plot_shap_consensus(tmp_path):
+    rng = np.random.default_rng(seed=123)
+    syn_shap_values = rng.uniform(-1, 1, (10, 10))
+    syn_data = rng.choice([0, 1], size=[10, 10])
+    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    syn_df = pd.DataFrame(syn_data, columns=syn_features)
+
+    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path, rng=rng)
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "SHAP_Test.png",
+            str(tmp_path / "SHAP_Test.png"),
+            0.001,
+        )
+        is None
+    )
+
+
 def test_feature_count_consensus():
     rng = np.random.default_rng(seed=123)
     clfr_importances = rng.uniform(-1, 1, 10)

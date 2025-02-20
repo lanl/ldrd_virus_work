@@ -97,8 +97,8 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
 
 def load_kmer_info(file_name: str):
     """
-    load parquet file containing all_kmer_info and convert
-    dictionary data to kmerData class
+    load parquet file containing 'all_kmer_info' and convert
+    dictionary data back to kmerData class
 
     Parameters:
     -----------
@@ -121,7 +121,7 @@ def load_kmer_info(file_name: str):
 
 def save_kmer_info(all_kmer_info: list, save_file: str):
     """
-    save list of dataframes containing kmer information
+    save dataframe containing 'all_kmer_info' to parquet file
 
     Parameters:
     -----------
@@ -163,16 +163,15 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
         )
 
 
-# TODO: this class object serves as a placeholder for
-# a different class to be implemented in accordance with issue #97
+# the kmerData class is used to organize information associated with a list of kmer features
 # this class should return:
 #     1. kmer feature
 #     2. mapping_method
 #     3. virus name
-#     4. other important information
+#     4. TODO: other important information
 # ...and should
-#     a. use the kmer as a key to build a default dictionary that stores the associated information
-#     b. be used to lookup the virus names associated with a specific kmer
+#     a. use the kmers as dictionary keys that store the associated information
+#     b. be used to lookup the virus/protein names associated with a specific kmer
 class kmerData:
     def __init__(
         self,
@@ -1802,10 +1801,14 @@ if __name__ == "__main__":
 
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
-        # TODO: - refactor workflow to use all_kmer_info
-        #       - write tests for save/load functions
-        #       - write tests for functionality
-        all_kmer_info = load_kmer_info("all_kmer_info.parquet.gzip")
+
+        # load 'all_kmer_info.parquet.gzip' file for finding relevant virus-protein information
+        try:
+            all_kmer_info = load_kmer_info("all_kmer_info.parquet.gzip")
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "File 'all_kmer_info.parquet.gzip' not found. Feature tables must be built to generate file."
+            )
 
         tbl = dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
         # TODO: this call below may be redundant because
@@ -2005,6 +2008,7 @@ if __name__ == "__main__":
             paths[-1],
         )
 
+        # find and save virus-protein pairs associated with topN kmers
         top_viruses = get_kmer_viruses(array2, all_kmer_info)
         top_viruses_df = pd.DataFrame.from_dict(top_viruses, orient="index").T
         top_viruses_df.to_csv("topN_virus_protein_pairs.csv", index=False)

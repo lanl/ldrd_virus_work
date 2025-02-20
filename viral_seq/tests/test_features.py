@@ -176,7 +176,6 @@ def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
 
     # because the object hashes are different between save and load dataframes
     # open up the objects and check the contents are the same for some random kmers
-    # TODO: add assertion that checks if the kmer has > 1 entry and that they are not the same
     rng = np.random.default_rng(seed=2024)
     random_idx = rng.integers(0, len(kmer_info_load), 10)
     for idx in random_idx:
@@ -189,3 +188,24 @@ def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
         assert save_protein == load_protein
         assert save_virus == load_virus
         assert save_kmer == load_kmer
+
+    # assert that, if the kmer has > 1 entry, that they are not the same virus-protein pairs but still map to the same kmer_name
+    all_kmer_info_multiple_entries = all_kmer_info_df[
+        all_kmer_info_df["Info"].apply(len) > 1
+    ]
+    random_idx = rng.integers(0, len(all_kmer_info_multiple_entries), 10)
+    for idx in random_idx:
+        first_kmer_name = all_kmer_info_multiple_entries.iloc[idx].Info[0].kmer_names[0]
+        second_kmer_name = (
+            all_kmer_info_multiple_entries.iloc[idx].Info[1].kmer_names[0]
+        )
+        first_entry = (
+            all_kmer_info_multiple_entries.iloc[idx].Info[0].virus_name,
+            all_kmer_info_multiple_entries.iloc[idx].Info[0].protein_name,
+        )
+        second_entry = (
+            all_kmer_info_multiple_entries.iloc[idx].Info[1].virus_name,
+            all_kmer_info_multiple_entries.iloc[idx].Info[1].protein_name,
+        )
+        assert first_kmer_name == second_kmer_name
+        assert first_entry != second_entry

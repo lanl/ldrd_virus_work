@@ -268,31 +268,26 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
         file path for saving figure
     """
     mean_fpr = np.linspace(0, 1, 100)
+    all_curves: dict[str, tuple] = defaultdict(tuple)
     for clfr_name, clfr_values in clfr_preds.items():
         fig, ax = plt.subplots(figsize=(8, 8))
         # plot individual fold lines
         for i, pred in enumerate(clfr_values.values()):
             ax.plot(
-                pred["fpr"],
-                pred["tpr"],
+                mean_fpr,
+                pred["roc_curves"],
                 label=f"Fold {i+1} (AUC = {pred['auc']:.2f})",
             )
 
         # calculate and plot mean and std lines
         mean_tpr = np.mean(
-            [
-                np.interp(mean_fpr, pred["fpr"], pred["tpr"])
-                for pred in clfr_values.values()
-            ],
+            [pred["roc_curves"] for pred in clfr_values.values()],
             axis=0,
         )
         mean_auc = np.mean([pred["auc"] for pred in clfr_values.values()])
         std_auc = np.std([pred["auc"] for pred in clfr_values.values()])
         std_tpr = np.std(
-            [
-                np.interp(mean_fpr, pred["fpr"], pred["tpr"])
-                for pred in clfr_values.values()
-            ],
+            [pred["roc_curves"] for pred in clfr_values.values()],
             axis=0,
         )
         ax.plot(
@@ -303,7 +298,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
             lw=2,
             alpha=0.8,
         )
-
+        all_curves[clfr_name] = (mean_fpr, mean_tpr, mean_auc, std_auc)
         # plot upper and lower bounds of mean +/- std.
         tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
         tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
@@ -336,6 +331,43 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
         fig.tight_layout()
         fig.savefig(
             os.path.join(str(path), f"ROC_{clfr_name}_{target_column}.png"), dpi=300
+        )
+        plt.close(fig)
+
+    # if more than one estimator is being used, plot all average curves on same plot
+    if len(clfr_preds) > 1:
+        fig, ax = plt.subplots(figsize=(8, 8))
+        for curve_name, (
+            fpr_curve,
+            tpr_curve,
+            auc_curve,
+            std_curve,
+        ) in all_curves.items():
+            ax.plot(
+                fpr_curve,
+                tpr_curve,
+                label=f"{curve_name} AUC: {auc_curve:0.2f} $\pm$ {std_curve:0.2f}",
+                lw=2,
+                alpha=0.8,
+            )
+            ax.set(
+                xlabel="False Positive Rate",
+                ylabel="True Positive Rate",
+                title=f"Mean ROC curves for all classifiers\n(Positive label {target_column})",
+            )
+        # plot chance line
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            color="black",
+            linestyle="--",
+            lw=2,
+            label="Chance level (AUC = 0.5)",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(str(path), f"ROC_all_classifiers_{target_column}.png"), dpi=300
         )
         plt.close(fig)
 
@@ -448,6 +480,7 @@ def train_clfr(
     """
 
     cv = StratifiedKFold(n_splits=n_folds)
+    mean_fpr = np.linspace(0, 1, 100)
     clfr_preds_all = {}
     shap_values_all: List[float] = []
     feature_count = pd.DataFrame()
@@ -497,9 +530,12 @@ def train_clfr(
 
             # aggregate classifier predictions for ROC plot
             test_score = clfr.predict_proba(test_fold)[:, 1]
-            fpr, tpr, _ = roc_curve(test_target, test_score)
+            fpr, tpr, thresh = roc_curve(test_target, test_score)
+            interp_tpr = np.interp(mean_fpr, fpr, tpr)
+            interp_tpr[0] = 0.0
             roc_auc = auc(fpr, tpr)
-            clfr_preds[fold] = {"fpr": fpr, "tpr": tpr, "auc": roc_auc}
+
+            clfr_preds[fold] = {"roc_curves": interp_tpr, "auc": roc_auc}
 
         clfr_preds_all[clfr_name] = clfr_preds
 

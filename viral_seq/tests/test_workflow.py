@@ -882,27 +882,53 @@ def test_importances_df():
         workflow.importances_df(importances, train_fold)
 
 
-def test_plot_cv_roc(tmp_path):
+@pytest.mark.parametrize(
+    "classifier_names, n_folds",
+    [
+        (["RandomForestClassifier", "LGBMClassifier"], 1),
+        (["XGBoost"], 2),
+    ],
+)
+def test_plot_cv_roc(tmp_path, classifier_names, n_folds):
+    mean_fpr = np.linspace(0, 1, 100)
     rng = np.random.default_rng(seed=123)
-    syn_data = rng.uniform(0, 1, 10)
-    true_class = rng.choice([0, 1], size=10)
-    syn_fpr, syn_tpr, _ = roc_curve(true_class, syn_data)
-    syn_roc_auc = auc(syn_fpr, syn_tpr)
-
     clfr_preds = {}
-    clfr_preds["RandomForestClassifier"] = {
-        0: {"fpr": syn_fpr, "tpr": syn_tpr, "auc": syn_roc_auc}
-    }
-
+    # iterate over classifiers and append synthetic roc curves
+    # to the dictionary to be used to plot the cv roc plots
+    for classifier_name in classifier_names:
+        fold_preds = {}
+        for fold in range(n_folds):
+            syn_data = rng.uniform(0, 1, 10)
+            true_class = rng.choice([0, 1], size=10)
+            syn_fpr, syn_tpr, _ = roc_curve(true_class, syn_data)
+            interp_tpr = np.interp(mean_fpr, syn_fpr, syn_tpr)
+            interp_tpr[0] = 0.0
+            syn_roc_auc = auc(syn_fpr, syn_tpr)
+            fold_preds[fold] = {"roc_curves": interp_tpr, "auc": syn_roc_auc}
+        clfr_preds[classifier_name] = fold_preds
     workflow.plot_cv_roc(clfr_preds, "Test", tmp_path)
-    assert (
-        compare_images(
-            files("viral_seq.tests.expected") / "ROC_cv_expected.png",
-            str(tmp_path / "ROC_RandomForestClassifier_Test.png"),
-            0.001,
+    # test the individual classifier plots
+    for classifier_name in classifier_names:
+        assert (
+            compare_images(
+                files("viral_seq.tests.expected")
+                / f"ROC_cv_{classifier_name}_expected.png",
+                str(tmp_path / f"ROC_{classifier_name}_Test.png"),
+                0.001,
+            )
+            is None
         )
-        is None
-    )
+    # test the consensus plot if more than one classifier
+    if len(classifier_names) > 1:
+        assert (
+            compare_images(
+                files("viral_seq.tests.expected")
+                / "ROC_cv_all_classifiers_expected.png",
+                str(tmp_path / "ROC_all_classifiers_Test.png"),
+                0.001,
+            )
+            is None
+        )
 
 
 def test_feature_count_consensus():

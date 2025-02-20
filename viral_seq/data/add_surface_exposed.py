@@ -67,6 +67,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "G1",
         "G2",
     ]
+    remaining = surface_exposed_df["surface_exposed_status"].isna().sum()
     for i, row in enumerate(surface_exposed_df.itertuples()):
         if pd.isna(row.surface_exposed_status):
             if any(s in row.protein_names for s in not_exposed) and not any(
@@ -74,15 +75,19 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
             ):
                 response_list[i] = "no"
                 reference_list[i] = "None"
+                remaining -= 1
                 continue
             if any(s in row.protein_names for s in exposed) or any(
                 s in row.protein_names for s in surface_exposed_list
             ):
                 response_list[i] = "yes"
                 reference_list[i] = "None"
+                remaining -= 1
                 continue
             else:
-                print(f"{row.Index}, {row.virus_names}, {row.protein_names}")
+                print(
+                    f"{row.Index}, ({remaining}), {row.virus_names}, {row.protein_names}"
+                )
                 response_1 = input("surface exposure status:")
                 if response_1 == "exit":
                     surface_exposed_df.loc[
@@ -99,6 +104,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
                         response_2 = "None"
                     response_list[i] = response_1
                     reference_list[i] = response_2
+                remaining -= 1
 
 
 surface_exposed_list = [

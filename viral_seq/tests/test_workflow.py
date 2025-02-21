@@ -90,16 +90,16 @@ def test_csv_conversion():
 
 def test_label_surface_exposed():
     kmers_list = [
-        "CADAFFE",
-        "CADAFFE",
-        "CCABDAC",
-        "CCABDAC",
-        "CCABDAC",
-        "CCAACDA",
-        "CCAACDA",
-        "CADAFFE",
-        "CADAFFE",
-        "ECDGDE",
+        "kmer_PC_CADAFFE",
+        "kmer_PC_CADAFFE",
+        "kmer_AA_CCABDAC",
+        "kmer_AA_CCABDAC",
+        "kmer_AA_CCABDAC",
+        "kmer_PC_CCAACDA",
+        "kmer_PC_CCAACDA",
+        "kmer_AA_CADAFFE",
+        "kmer_AA_CADAFFE",
+        "kmer_PC_ECDGDE",
     ]
     kmers_status = ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"]
     kmers_list_status = list(set(zip(kmers_list, kmers_status)))
@@ -111,18 +111,13 @@ def test_label_surface_exposed():
         "kmer_AA_CADAFFE",
         "kmer_PC_ECDGDE",
     ]
+    # not including the kmer prefixes would cause an error in the expected surface
+    # exposed kmers because of the presence of 'CADAFFE' for both 'AA' and 'PC' kmers
+    is_exposed_exp = ["kmer_PC_CADAFFE", "", "kmer_PC_CCAACDA", "", "kmer_PC_ECDGDE"]
 
-    is_exposed_exp = ["CADAFFE", "", "CCAACDA", "CADAFFE", "ECDGDE"]
-    not_exposed_exp = ["CADAFFE", "CCABDAC", "", "CADAFFE", ""]
-    found_kmers_exp = ["CADAFFE", "CCABDAC", "CCAACDA", "CADAFFE", "ECDGDE"]
-
-    is_exposed, not_exposed, found_kmers = workflow.label_surface_exposed(
-        kmers_list_status, kmers_topN
-    )
+    is_exposed = workflow.label_surface_exposed(kmers_list_status, kmers_topN)
 
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
-    np.testing.assert_array_equal(not_exposed, not_exposed_exp)
-    np.testing.assert_array_equal(found_kmers, found_kmers_exp)
 
 
 @pytest.mark.parametrize(
@@ -261,16 +256,16 @@ def test_fic_plot(tmp_path):
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
     surface_exposed_dict = {
-        "CDDEEC": 42.86,
-        "CCGDEA": 0.00,
-        "CCCFCF": 0.00,
-        "CCAAACD": 21.15,
-        "CACDGA": 13.04,
-        "CFCEDD": 25.53,
-        "GCECFD": 17.86,
-        "ECDGDE": 100.0,
-        "CCACAD": 17.24,
-        "FECAEA": 14.29,
+        "kmer_PC_CDDEEC": 42.86,
+        "kmer_PC_CCGDEA": 0.00,
+        "kmer_PC_CCCFCF": 0.00,
+        "kmer_PC_CCAAACD": 21.15,
+        "kmer_PC_CACDGA": 13.04,
+        "kmer_PC_CFCEDD": 25.53,
+        "kmer_PC_GCECFD": 17.86,
+        "kmer_PC_ECDGDE": 100.0,
+        "kmer_PC_CCACAD": 17.24,
+        "kmer_PC_FECAEA": 14.29,
     }
 
     n_folds = 2
@@ -361,39 +356,39 @@ def test_feature_sign(
     (
         [
             [
-                "CAACAAD",
-                "CAACAAD",
-                "FEAGAD",
-                "FEAGAD",
-                "FEAGAD",
-                "FEAGAD",
-                "GACADA",
+                "kmer_PC_CAACAAD",
+                "kmer_PC_CAACAAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_FEAGAD",
+                "kmer_PC_GACADA",
             ],
             ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"],
             [50.0, 75.0, 0.0],
         ],
         [
             [
-                "0122345",
-                "0122345",
-                "0122345",
-                "0122345",
-                "741065",
-                "741065",
-                "741065",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_0122345",
+                "kmer_PC_741065",
+                "kmer_PC_741065",
+                "kmer_PC_741065",
             ],
             ["Yes", "Yes", "Yes", "Yes", "No", "No", "No"],
             [100.0, 0.0],
         ],
         [
             [
-                "RVDAQL",
-                "RVDAQL",
-                "RVDAQL",
-                "TYVWRCP",
-                "ILGNMCS",
-                "ILGNMCS",
-                "ILGNMCS",
+                "kmer_AA_RVDAQL",
+                "kmer_AA_RVDAQL",
+                "kmer_AA_RVDAQL",
+                "kmer_AA_TYVWRCP",
+                "kmer_AA_ILGNMCS",
+                "kmer_AA_ILGNMCS",
+                "kmer_AA_ILGNMCS",
             ],
             ["No", "No", "Yes", "No", "No", "Yes", "No"],
             [33.333333, 0.0, 33.333333],
@@ -455,7 +450,13 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["NC_001563.2"],
             5,
             ["WNV"] * 5,
-            ["AFDAEF", "FCCGDA", "EADAAC", "DGACFC", "LVFGGIT"],
+            [
+                "kmer_PC_AFDAEF",
+                "kmer_PC_FCCGDA",
+                "kmer_PC_EADAAC",
+                "kmer_PC_DGACFC",
+                "kmer_AA_LVFGGIT",
+            ],
             [
                 "envelope protein E",
                 "nonstructural protein NS3",
@@ -470,8 +471,8 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         (
             ["NC_001563.2"],
             1,
-            ["WNV"] * 1,
-            ["LVFGGIT"],
+            ["WNV"],
+            ["kmer_AA_LVFGGIT"],
             ["nonstructural protein NS2A"],
             "jurgen_schmidt",
         ),
@@ -490,7 +491,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["NC_039210.1"],
             1,
             ["FMDV"],
-            ["300840"],
+            ["kmer_PC_300840"],
             ["polyprotein"],
             "jurgen_schmidt",
         ),
@@ -504,7 +505,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["NC_075016.1"],
             2,
             ["Ross River virus (RR)", "Ross River virus (RR)"],
-            ["60837226", "45724566"],
+            ["kmer_PC_60837226", "kmer_PC_45724566"],
             ["nsP3 protein", "E2 protein"],
             "jurgen_schmidt",
         ),
@@ -656,3 +657,16 @@ def test_get_kmer_info_error(
     data_in = workflow.kmer_data(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)
+
+
+def test_percent_exposed_error():
+    rng = np.random.default_rng(seed=123)
+
+    kmer_names = rng.integers(0, 9, size=10)
+    kmer_names = [str(n) for n in kmer_names]
+
+    syn_status = rng.choice(2, 10)
+    syn_status = np.where(syn_status, "yes", "no")
+
+    with pytest.raises(ValueError, match="kmer feature name missing prefix."):
+        _ = workflow.percent_surface_exposed(kmer_names, syn_status)

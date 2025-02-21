@@ -1527,11 +1527,11 @@ bat mastadenovirus a,E4 ORFC,no,
 bat mastadenovirus a,E4 ORFB,no,
 bat mastadenovirus a,E4 ORFA,no,
 human herpesvirus 7,protein DR1,no,https://doi.org/10.1016/j.virol.2019.01.005
-human herpesvirus 7,protein DR6,no,None
+human herpesvirus 7,protein DR6,no,
 human herpesvirus 7,tegument protein UL23,no,
 human herpesvirus 7,tegument protein UL24,no,
 human herpesvirus 7,protein UL27, no,https://doi.org/10.1128/jvi.78.13.7124-7130.2004
-human herpesvirus 7,protein UL28,no,None
+human herpesvirus 7,protein UL28,no,
 human herpesvirus 7,protein UL31,no,https://doi.org/10.1038/s41598-017-02109-0
 human herpesvirus 7,tegument protein pp150,no,
 human herpesvirus 7,envelope glycoprotein UL33,yes,
@@ -1545,7 +1545,7 @@ human herpesvirus 7,membrane protein U20,yes,
 human herpesvirus 7,membrane protein U21,yes,
 human herpesvirus 7,membrane protein U23,yes,
 human herpesvirus 7,protein U24,no,https://doi.org/10.1128/jvi.01775-09
-human herpesvirus 7,protein U24A,no,None
+human herpesvirus 7,protein U24A,no,
 human herpesvirus 7,tegument protein UL43,no,
 human herpesvirus 7,envelope protein UL43,yes,
 human herpesvirus 7,DNA polymerase processivity subunit,no,
@@ -1580,16 +1580,16 @@ human herpesvirus 7,capsid scaffold protein,no,https://www.uniprot.org/uniprotkb
 human herpesvirus 7,tegument protein pp65,no,
 human herpesvirus 7,protein UL84,no,https://doi.org/10.1128/jvi.01559-07
 human herpesvirus 7,protein U55B,no,https://doi.org/10.1128/jvi.00651-16
-human herpesvirus 7,capsid triplex subunit 2,,
-human herpesvirus 7,major capsid protein,,
-human herpesvirus 7,protein UL87,,
+human herpesvirus 7,capsid triplex subunit 2,no,https://doi.org/10.1007/978-3-319-53168-7_6
+human herpesvirus 7,major capsid protein,no,
+human herpesvirus 7,protein UL87,no,https://doi.org/10.3389/fmicb.2016.00869
 human herpesvirus 7,tegument protein UL88,no,
 human herpesvirus 7,DNA packaging terminase subunit 1,no,
-human herpesvirus 7,protein UL91,,
-human herpesvirus 7,protein UL92,,
+human herpesvirus 7,protein UL91,no,
+human herpesvirus 7,protein UL92,no,
 human herpesvirus 7,DNA packaging tegument protein UL17,no,
 human herpesvirus 7,tegument protein UL16,no,
-human herpesvirus 7,protein UL95,,
+human herpesvirus 7,protein UL95,no,
 human herpesvirus 7,tegument protein UL14,no,
 human herpesvirus 7,tegument serine/threonine protein kinase,no,
 human herpesvirus 7,deoxyribonuclease,no,
@@ -1598,17 +1598,17 @@ human herpesvirus 7,envelope glycoprotein M,yes,
 human herpesvirus 7,DNA replication origin-binding helicase,no,
 human herpesvirus 7,helicase-primase subunit,no,
 human herpesvirus 7,tegument protein UL7,no,
-human herpesvirus 7,capsid portal protein,,
+human herpesvirus 7,capsid portal protein,no,
 human herpesvirus 7,helicase-primase helicase subunit,no,
-human herpesvirus 7,protein UL112,,
+human herpesvirus 7,protein UL112,no,PMID: 21348071
 human herpesvirus 7,uracil-DNA glycosylase,no,
 human herpesvirus 7,envelope glycoprotein L,yes,
-human herpesvirus 7,protein UL117,,
+human herpesvirus 7,protein UL117,no,https://doi.org/10.1128/jvi.01964-07
 human herpesvirus 7,membrane glycoprotein UL119,yes,
 human herpesvirus 7,regulatory protein IE2,no,
 human herpesvirus 7,regulatory protein IE1,no,
 human herpesvirus 7,membrane protein UL124,yes,
-human herpesvirus 7,protein U95,,
+human herpesvirus 7,protein U95,no,https://doi.org/10.1128/jvi.01156-07
 human herpesvirus 7,envelope glycoprotein Q,yes,
 herpes B virus,ubiquitin E3 ligase ICP0,no,
 herpes B virus,envelope glycoprotein L,yes,
@@ -1616,7 +1616,7 @@ herpes B virus,uracil-DNA glycosylase,no,
 herpes B virus,nuclear protein UL3,no,
 herpes B virus,nuclear protein UL4,no,
 herpes B virus,helicase-primase helicase subunit,no,
-herpes B virus,capsid portal protein,,
+herpes B virus,capsid portal protein,no,
 herpes B virus,tegument protein UL7,no,
 herpes B virus,helicase-primase subunit,no,
 herpes B virus,DNA replication origin-binding helicase,no,
@@ -1628,8 +1628,8 @@ herpes B virus,tegument protein UL14,no,
 herpes B virus,DNA packaging terminase subunit 1,no,
 herpes B virus,tegument protein UL16,no,
 herpes B virus,DNA packaging tegument protein UL17,no,
-herpes B virus,capsid triplex subunit 2,,
-herpes B virus,major capsid protein,,
+herpes B virus,capsid triplex subunit 2,no,
+herpes B virus,major capsid protein,no,
 herpes B virus,envelope protein UL20,yes,
 herpes B virus,tegument protein UL21,no,
 herpes B virus,envelope glycoprotein H,yes,
@@ -1637,7 +1637,7 @@ herpes B virus,thymidine kinase,no,
 herpes B virus,nuclear protein UL24,no,
 herpes B virus,DNA packaging tegument protein UL25,no,
 herpes B virus,capsid maturation protease,no,
-herpes B virus,capsid scaffold protein,,
+herpes B virus,capsid scaffold protein,no,
 herpes B virus,envelope glycoprotein B,yes,
 herpes B virus,DNA packaging terminase subunit 2,no,
 herpes B virus,single-stranded DNA-binding protein,no,
@@ -1646,10 +1646,10 @@ herpes B virus,nuclear egress lamina protein,no,
 herpes B virus,DNA packaging protein UL32,no,
 herpes B virus,DNA packaging protein UL33,no,
 herpes B virus,nuclear egress membrane protein,no,
-herpes B virus,small capsid protein,,
+herpes B virus,small capsid protein,no,
 herpes B virus,large tegument protein,no,
 herpes B virus,tegument protein UL37,no,
-herpes B virus,capsid triplex subunit 1,,
+herpes B virus,capsid triplex subunit 1,no,
 herpes B virus,ribonucleotide reductase subunit 1,no,
 herpes B virus,ribonucleotide reductase subunit 2,no,
 herpes B virus,tegument host shutoff protein,no,
@@ -1671,7 +1671,7 @@ herpes B virus,nuclear protein UL55,no,
 herpes B virus,membrane protein UL56,yes,
 herpes B virus,transcriptional regulator ICP4,no,
 herpes B virus,regulatory protein ICP22,no,
-herpes B virus,virion protein US2,,
+herpes B virus,virion protein US2,no,https://doi.org/10.1128/jvi.00994-13
 herpes B virus,serine/threonine protein kinase US3,no,
 herpes B virus,envelope glycoprotein G,yes,
 herpes B virus,envelope glycoprotein J,yes,
@@ -1680,140 +1680,140 @@ herpes B virus,envelope glycoprotein I,yes,
 herpes B virus,envelope glycoprotein E,yes,
 herpes B virus,membrane protein US8.5,yes,
 herpes B virus,membrane protein US9,yes,
-herpes B virus,virion protein US10,,
+herpes B virus,virion protein US10,no,https://doi.org/10.1371/journal.ppat.1010959
 herpes B virus,tegument protein US11,no,
 herpes B virus,TAP transporter inhibitor ICP47,no,
 measles virus,nucleocapsid protein,no,
-measles virus,phosphoprotein,,
-measles virus,V protein,,
-measles virus,C protein,,
-measles virus,matrix protein,,
+measles virus,phosphoprotein,no,https://doi.org/10.1128/jvi.78.21.11632-11640.2004
+measles virus,V protein,no,https://doi.org/10.1128/jvi.78.21.11632-11640.2004
+measles virus,C protein,no,https://doi.org/10.1128/jvi.78.21.11632-11640.2004
+measles virus,matrix protein,no,https://doi.org/10.1128/jvi.01056-09
 measles virus,fusion protein,yes,
 measles virus,hemagglutinin protein,yes,
 measles virus,large polymerase protein,no,
 bat influenza A virus,nuclear export protein,no,
 bat influenza A virus,nonstructural protein 1,no,
-porcine pseudorabies virus (PRV),UL56,,
-porcine pseudorabies virus (PRV),ICP27,,
-porcine pseudorabies virus (PRV),gK,,
+porcine pseudorabies virus (PRV),UL56,no,https://doi.org/10.1186/s12985-019-1191-z
+porcine pseudorabies virus (PRV),ICP27,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gK,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),helicase-primase primase subunit,no,
-porcine pseudorabies virus (PRV),UL51 protein,,
+porcine pseudorabies virus (PRV),UL51 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),dUTPase,no,
-porcine pseudorabies virus (PRV),gN,,
+porcine pseudorabies virus (PRV),gN,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),VP22,yes,
 porcine pseudorabies virus (PRV),VP16,yes,
 porcine pseudorabies virus (PRV),VP13/14,yes,
 porcine pseudorabies virus (PRV),VP11/12,yes,
-porcine pseudorabies virus (PRV),gB,,
-porcine pseudorabies virus (PRV),ICP18.5,,
-porcine pseudorabies virus (PRV),ICP8,,
+porcine pseudorabies virus (PRV),gB,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),ICP18.5,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),ICP8,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),polymerase catalytic subunit,no,
-porcine pseudorabies virus (PRV),UL31 protein,,
-porcine pseudorabies virus (PRV),UL32 protein,,
-porcine pseudorabies virus (PRV),UL33 protein,,
-porcine pseudorabies virus (PRV),UL34 protein,,
+porcine pseudorabies virus (PRV),UL31 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL32 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL33 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL34 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),VP26,yes,
 porcine pseudorabies virus (PRV),VP1/2,yes,
-porcine pseudorabies virus (PRV),UL37 protein,,
+porcine pseudorabies virus (PRV),UL37 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),VP19c,yes,
-porcine pseudorabies virus (PRV),RR1,,
-porcine pseudorabies virus (PRV),RR2,,
-porcine pseudorabies virus (PRV),vhs,,
+porcine pseudorabies virus (PRV),RR1,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),RR2,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),vhs,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),polymerase processivity subunit,no,
-porcine pseudorabies virus (PRV),UL43 protein,,
-porcine pseudorabies virus (PRV),gC,,
+porcine pseudorabies virus (PRV),UL43 protein,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gC,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),VP24,yes,
-porcine pseudorabies virus (PRV),scaffold,,
-porcine pseudorabies virus (PRV),UL25 protein,,
-porcine pseudorabies virus (PRV),UL24 protein,,
-porcine pseudorabies virus (PRV),TK,,
-porcine pseudorabies virus (PRV),gH,,
-porcine pseudorabies virus (PRV),UL21 protein,,
-porcine pseudorabies virus (PRV),UL20 protein,,
-porcine pseudorabies virus (PRV),VP5,,
+porcine pseudorabies virus (PRV),scaffold,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL25 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL24 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),TK,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gH,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL21 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL20 protein,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),VP5,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),VP23,yes,
 porcine pseudorabies virus (PRV),terminase subunit 1,no,
-porcine pseudorabies virus (PRV),UL17 protein,,
-porcine pseudorabies virus (PRV),UL16 protein,,
-porcine pseudorabies virus (PRV),UL14 protein,,
+porcine pseudorabies virus (PRV),UL17 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL16 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL14 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),VP18.8,yes,
-porcine pseudorabies virus (PRV),AN,,
-porcine pseudorabies virus (PRV),UL11 protein,,
-porcine pseudorabies virus (PRV),gM,,
-porcine pseudorabies virus (PRV),OBP,,
+porcine pseudorabies virus (PRV),AN,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL11 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gM,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),OBP,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),helicase-primase subunit,no,
-porcine pseudorabies virus (PRV),UL7 protein,,
+porcine pseudorabies virus (PRV),UL7 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 porcine pseudorabies virus (PRV),DNA packaging capsid portal protein,no,
 porcine pseudorabies virus (PRV),helicase-primase helicase subunit,no,
-porcine pseudorabies virus (PRV),UL4 protein,,
-porcine pseudorabies virus (PRV),V57,,
-porcine pseudorabies virus (PRV),UL3 protein,,
-porcine pseudorabies virus (PRV),UNG,,
-porcine pseudorabies virus (PRV),gL,,
-porcine pseudorabies virus (PRV),ICP0,,
-porcine pseudorabies virus (PRV),ICP4,,
-porcine pseudorabies virus (PRV),ICP22,,
-porcine pseudorabies virus (PRV),PK,,
-porcine pseudorabies virus (PRV),gG,,
-porcine pseudorabies virus (PRV),gD,,
-porcine pseudorabies virus (PRV),gI,,
-porcine pseudorabies virus (PRV),gE,,
-porcine pseudorabies virus (PRV),11 kDa protein,,
-porcine pseudorabies virus (PRV),28 kDa protein,,
+porcine pseudorabies virus (PRV),UL4 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),V57,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UL3 protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),UNG,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gL,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),ICP0,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),ICP4,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),ICP22,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),PK,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gG,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gD,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gI,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),gE,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),11 kDa protein,yes,https://doi.org/10.1128/mmbr.69.3.462-500.2005
+porcine pseudorabies virus (PRV),28 kDa protein,no,https://doi.org/10.1128/mmbr.69.3.462-500.2005
 coxsackievirus A21,polyprotein precursor,no,
-coxsackievirus A21,VP4 protein,,
+coxsackievirus A21,VP4 protein,no,https://www.uniprot.org/uniprotkb/P22055/entry
 coxsackievirus A21,VP2 protein,yes,
 coxsackievirus A21,VP3 protein,yes,
 coxsackievirus A21,VP1 protein,yes,
-coxsackievirus A21,2A protein,,
-coxsackievirus A21,2B protein,,
-coxsackievirus A21,2C protein,,
+coxsackievirus A21,2A protein,no,https://www.uniprot.org/uniprotkb/P22055/entry
+coxsackievirus A21,2B protein,no,https://www.uniprot.org/uniprotkb/P22055/entry
+coxsackievirus A21,2C protein,no,https://www.uniprot.org/uniprotkb/P22055/entry
 coxsackievirus A21,3A protein,yes,
-coxsackievirus A21,VPg (3B) protein,,
+coxsackievirus A21,VPg (3B) protein,no,https://www.uniprot.org/uniprotkb/P22055/entry
 coxsackievirus A21,protease (3C) protein,no,
 coxsackievirus A21,polymerase (3D) protein,no,
 bat influenza A virus,nucleocapsid protein,no,
 simian immunodeficiency virus,Gag-Pol,no,
 simian immunodeficiency virus,gag protein,no,
-simian immunodeficiency virus,vif protein,,
-simian immunodeficiency virus,vpx protein,,
+simian immunodeficiency virus,vif protein,no,https://www.uniprot.org/uniprotkb/Q9YL67/entry
+simian immunodeficiency virus,vpx protein,no,https://doi.org/10.1128/jvi.65.9.5088-5091.1991
 simian immunodeficiency virus,envelope protein,yes,
-simian immunodeficiency virus,nef protein,,
+simian immunodeficiency virus,nef protein,no,https://doi.org/10.1128/jvi.00904-07
 bat influenza A virus,polymerase PA,no,
-bat influenza A virus,PA-X protein,,
+bat influenza A virus,PA-X protein,no,https://doi.org/10.1128/jvi.02312-20
 human immunodeficiency virus 2,gag-pol fusion polyprotein,no,
 human immunodeficiency virus 2,gag polyprotein,no,
-human immunodeficiency virus 2,vif protein,,
-human immunodeficiency virus 2,vpx protein,,
-human immunodeficiency virus 2,vpr protein,,
-human immunodeficiency virus 2,tat protein,,
-human immunodeficiency virus 2,rev protein,,
+human immunodeficiency virus 2,vif protein,no,None
+human immunodeficiency virus 2,vpx protein,no,None
+human immunodeficiency virus 2,vpr protein,no,https://doi.org/10.1073/pnas.87.20.8080
+human immunodeficiency virus 2,tat protein,no,https://doi.org/10.1089/aid.1993.9.839
+human immunodeficiency virus 2,rev protein,no,https://doi.org/10.1093/nar/gkt353
 human immunodeficiency virus 2,env polyprotein,no,
-human immunodeficiency virus 2,nef protein,,
-canine adenovirus type 2,E1A,,
-canine adenovirus type 2,E1B 19K,,
-canine adenovirus type 2,E1B 55K,,
-canine adenovirus type 2,IX,,
+human immunodeficiency virus 2,nef protein,no,None
+canine adenovirus type 2,E1A,no,"https://www.uniprot.org/uniprotkb/P14264/entry#:~:text=Plays%20a%20role%20in%20viral%20genome%20replication,from%20G1%20to%20S%20phase%20allows%20the"
+canine adenovirus type 2,E1B 19K,no,https://doi.org/10.7774/cevr.2020.9.1.40
+canine adenovirus type 2,E1B 55K,no,https://doi.org/10.3390/v12070767
+canine adenovirus type 2,IX,yes,http://doi.org/10.1099/vir.0.80968-0
 canine adenovirus type 2,IVa2,no,
 canine adenovirus type 2,pol,no,
 canine adenovirus type 2,pTP,no,
-canine adenovirus type 2,52K,,
+canine adenovirus type 2,52K,no,https://www.uniprot.org/uniprotkb/P87555/entry
 canine adenovirus type 2,pIIIa,yes,
 canine adenovirus type 2,III,yes,
-canine adenovirus type 2,pVII,,
-canine adenovirus type 2,V,,
-canine adenovirus type 2,pX,,
-canine adenovirus type 2,pVI,,
+canine adenovirus type 2,pVII,no,https://www.uniprot.org/uniprotkb/P87558/entry
+canine adenovirus type 2,V,no,https://www.uniprot.org/uniprotkb/P68962/entry
+canine adenovirus type 2,pX,no,https://viralzone.expasy.org/4
+canine adenovirus type 2,pVI,no,https://viralzone.expasy.org/4
 canine adenovirus type 2,hexon,yes,
 canine adenovirus type 2,protease,no,
-canine adenovirus type 2,DBP,,
-canine adenovirus type 2,100K,,
-canine adenovirus type 2,33K,,
-canine adenovirus type 2,22K,,
+canine adenovirus type 2,DBP,no,https://www.uniprot.org/uniprotkb/P87553/entry
+canine adenovirus type 2,100K,no,https://doi.org/10.1128/jvi.01415-06
+canine adenovirus type 2,33K,no,https://doi.org/10.1128/jvi.00652-13
+canine adenovirus type 2,22K,no,https://doi.org/10.1128/jvi.00859-13
 canine adenovirus type 2,pVIII,yes,
-canine adenovirus type 2,E3 12.5K,,
+canine adenovirus type 2,E3 12.5K,no,https://doi.org/10.1016/0042-6822(92)90502-G
 canine adenovirus type 2,E3 ORFA,no,
-canine adenovirus type 2,U exon,,
+canine adenovirus type 2,U exon,no,https://doi.org/10.1128/jvi.01531-07
 canine adenovirus type 2,fiber,yes,
 canine adenovirus type 2,E4 ORF6/7,no,
 canine adenovirus type 2,E4 34K,,

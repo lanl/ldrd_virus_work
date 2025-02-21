@@ -563,7 +563,7 @@ def test_get_kmer_info(
         "NGAPEA",
         "SRGLDP",
         "YDTIPI",
-        "VGPNFSTV",  # this AA kmer is found in RR "non-structural polyprotein and nsP3 protein"
+        "VGPNFSTV",  # this AA kmer is found in RR "non-structural polyprotein" and "nsP3 protein"
         "DKFSERII",  # this AA kemr is found in RR "structual polyprotein" and "E2 protein"
         "FHIPGE",
         "LVFGGIT",

@@ -449,32 +449,24 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
 @pytest.mark.parametrize(
     "accession, exp, exp_viruses, exp_kmers, exp_proteins, mapping_method",
     [
+        # this test checks that the correct virus-protein pairs are found
+        # when using the shen_2007 mapping scheme.
         (
             "NC_001563.2",
-            7,
-            ["WNV"] * 7,
-            [
-                "AFDAEF",
-                "AFDAEF",
-                "FCCGDA",
-                "EADAAC",
-                "EADAAC",
-                "DGACFC",
-                "LVFGGIT",
-            ],
+            5,
+            ["WNV"] * 5,
+            ["AFDAEF", "FCCGDA", "EADAAC", "DGACFC", "LVFGGIT"],
             [
                 "envelope protein E",
-                "truncated polyprotein NS1 prime",
                 "nonstructural protein NS3",
                 "envelope protein E",
-                "truncated polyprotein NS1 prime",
                 "RNA-dependent RNA polymerase NS5",
                 "nonstructural protein NS2A",
             ],
             "shen_2007",
         ),
-        # this case tests that the function skips polyprotein products that also
-        # have mature protein products within the accession
+        # this test checks that the correct virus-protein products are found
+        # when using the "jurgen_schmidt" mapping scheme
         (
             "NC_001563.2",
             1,
@@ -483,6 +475,8 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["nonstructural protein NS2A"],
             "jurgen_schmidt",
         ),
+        # this test checks that nothing is returned for accession records
+        # that do not contain instances of the topN kmers
         (
             "AC_000008.1",
             0,
@@ -491,13 +485,27 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             [],
             "jurgen_schmidt",
         ),
-        # this case tests if function finds single polyprotein gene products
+        # this test checks that the function finds single polyprotein gene products
         (
             "NC_039210.1",
             1,
             ["FMDV"],
             ["300840"],
             ["polyprotein"],
+            "jurgen_schmidt",
+        ),
+        # this test checks the patch for the bug fix in !122.
+        # the genbank file for Ross River Virus contains two
+        # polyproteins, i.e., "non-structural" and "structural"
+        # as well as mature protein products
+        # This test asserts that only the mature protein
+        # products are found when calling get_kmer_info
+        (
+            "NC_075016.1",
+            2,
+            ["Ross River virus (RR)", "Ross River virus (RR)"],
+            ["60837226", "45724566"],
+            ["nsP3 protein", "E2 protein"],
             "jurgen_schmidt",
         ),
     ],
@@ -528,6 +536,7 @@ def test_get_kmer_info(
             8: "JEV",
             9: "BKPyV human polyomavirus",
             10: "FMDV",
+            11: "Ross River virus (RR)",
         },
         "Accessions": {
             0: "NC_039199.1",
@@ -541,6 +550,7 @@ def test_get_kmer_info(
             8: "NC_001437.1",
             9: "NC_001538.1",
             10: "NC_039210.1",
+            11: "NC_075016.1",
         },
     }
     tbl = pd.DataFrame(data_table)
@@ -553,8 +563,8 @@ def test_get_kmer_info(
         "NGAPEA",
         "SRGLDP",
         "YDTIPI",
-        "DRGIFV",
-        "MDSIPG",
+        "VGPNFSTV",  # this AA kmer is found in RR "non-structural polyprotein" and "nsP3 protein"
+        "DKFSERII",  # this AA kemr is found in RR "structual polyprotein" and "E2 protein"
         "FHIPGE",
         "LVFGGIT",
         "IPKMNV",

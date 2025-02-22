@@ -173,7 +173,7 @@ def get_kmer_info(
                 if feature.type == "CDS" or feature.type == "mat_peptide":
                     # only skip the polyprotein accessions if there are other gene products in the record features
                     if (
-                        "polyprotein" not in feature.qualifiers["product"]
+                        "polyprotein" not in feature.qualifiers["product"][0]
                         or single_polyprotein
                     ):
                         nuc_seq = feature.location.extract(record.seq)

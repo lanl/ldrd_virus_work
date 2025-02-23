@@ -105,6 +105,14 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
                     response_list[i] = response_1
                     reference_list[i] = response_2
                 remaining -= 1
+    # save responses after finishing
+    surface_exposed_df.loc[list(response_list.keys()), "surface_exposed_status"] = list(
+        response_list.values()
+    )
+    surface_exposed_df.loc[list(reference_list.keys()), "reference"] = list(
+        reference_list.values()
+    )
+    surface_exposed_df.to_csv(df_file, index=False)
 
 
 surface_exposed_list = [

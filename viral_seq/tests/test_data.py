@@ -56,7 +56,7 @@ def test_get_bad_indexes(cache, accession, train_accessions, expected_result):
 
 
 def test_shuffle_regression():
-    exp_order = [15, 19, 7, 8, 9, 2, 3, 11, 10, 1, 18, 17, 6, 5, 16, 13, 12, 14, 4, 0]
+    exp_order = [19, 9, 5, 6, 18, 13, 12, 2, 3, 4, 8, 7, 16, 15, 17, 0, 14, 11, 10, 1]
     train_data = files("viral_seq.tests") / "TrainingSet.csv"
     test_data = files("viral_seq.tests") / "TestSet.csv"
     df_train = pd.read_csv(train_data, index_col=0)
@@ -64,12 +64,12 @@ def test_shuffle_regression():
     df_train_shuffled, df_test_shuffled = make_alts.shuffle(
         df_train, df_test, random_state=123456
     )
-    actual_data = (
-        pd.concat([df_train_shuffled, df_test_shuffled])
-        .iloc[exp_order]
-        .reset_index(drop=True)
+    actual_data = pd.concat([df_train_shuffled, df_test_shuffled]).reset_index(
+        drop=True
     )
-    expected_data = pd.concat([df_train, df_test]).reset_index(drop=True)
+    expected_data = (
+        pd.concat([df_train, df_test]).iloc[exp_order].reset_index(drop=True)
+    )
     assert_frame_equal(actual_data, expected_data)
 
 

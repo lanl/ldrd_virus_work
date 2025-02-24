@@ -77,7 +77,7 @@ def test_shuffle_regression():
     random_state=hnp.from_dtype(np.dtype(np.uint32)), different_balance=st.booleans()
 )
 def test_shuffle_property(random_state, different_balance):
-    """Test the properties that should be perserved by the shuffle."""
+    """Test the properties that should be preserved by the shuffle."""
     # train/test sets are half human host, 10 samples
     train_data = files("viral_seq.tests") / "TrainingSet.csv"
     test_data = files("viral_seq.tests") / "TestSet.csv"

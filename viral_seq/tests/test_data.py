@@ -102,4 +102,4 @@ def test_shuffle_property(random_state, different_balance):
     shuffled_data = pd.concat([df_train_shuffled, df_test_shuffled]).sort_values(
         by="Species", ignore_index=True
     )
-    assert_frame_equal(original_data, shuffled_data, check_dtype=False)
+    assert_frame_equal(original_data, shuffled_data)

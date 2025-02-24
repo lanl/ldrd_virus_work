@@ -24,6 +24,7 @@ build/
 *.egg-info/
 .DS_Store
 .cache/
+.hypothesis/
 
 # Plots
 *png

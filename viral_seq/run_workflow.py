@@ -33,6 +33,34 @@ import matplotlib.patches as mpatches
 matplotlib.use("Agg")
 
 
+def print_pos_con(
+    pos_con_df: pd.DataFrame, kmer_prefix: str, mapping_method: str, dataset_name: str
+) -> None:
+    """
+    print and save the dataframe resulting from calling `check_positive_controls`
+
+    Parameters
+    ----------
+    pos_con_df: pd.DataFrame
+        dataframe containing positive controls with corresponding kmer features and count of total occurrences
+    kmer_prefix: str
+        kmer-prefix ("AA"  or "PC") that was used for translating positive controls
+    mapping_method: str
+        mapping method used to translate AA to PC kmers
+    dataset_name: str
+        name of dataset for which positive controls were checked (for saving file), i.e. "Train", "TopN", "Full"
+    """
+    print(
+        f"Count of Positive Control {kmer_prefix} k-mers in {dataset_name} Dataset:\n",
+        pos_con_df.tail(1).to_string(index=False),
+    )
+    pos_con_df.to_csv(
+        f"{dataset_name}_data_{kmer_prefix}_kmer_positive_controls_{mapping_method}.csv",
+        na_rep="",
+        index=False,
+    )
+
+
 def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
     """
     check that the lengths of features in the dataset 'X' are within
@@ -971,26 +999,22 @@ def feature_selection_rfc(
         if wf == "DTRA":
             # count of PC positive controls in pre-feature selection dataset
             pos_con_all_PC = check_positive_controls(
-                positive_controls=positive_controls,
+                positive_controls=positive_controls[target_column],
                 kmers_list=list(X.columns),
                 mapping_method=mapping_method,
                 mode="PC",
             )
-            print(
-                "Count of Positive Control PC k-mers in Full Train Dataset:\n",
-                pos_con_all_PC.tail(1).to_string(index=False),
-            )
+            print_pos_con(pos_con_all_PC, "PC", mapping_method, dataset_name="Full")
+
             # count of AA positive controls in pre-feature selection dataset
             pos_con_all_AA = check_positive_controls(
-                positive_controls=positive_controls,
+                positive_controls=positive_controls[target_column],
                 kmers_list=list(X.columns),
                 mapping_method=mapping_method,
                 mode="AA",
             )
-            print(
-                "Count of Positive Control AA k-mers in Full Train Dataset:\n",
-                pos_con_all_AA.tail(1).to_string(index=False),
-            )
+            print_pos_con(pos_con_all_AA, "AA", mapping_method, dataset_name="Full")
+
         if feature_selection == "none":
             print(
                 "All training features will be used as X_train in the following steps."
@@ -1387,25 +1411,29 @@ if __name__ == "__main__":
     # PHSRN (Pro-His-Ser-Arg-Asn)
     # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
 
-    pos_controls = [
-        "RGD",
-        "KGE",
-        "LDV",
-        "DGEA",
-        "REDV",
-        "YGRK",
-        "PHSRN",
-        "SVVYGLR",
-    ]
-
-    pos_controls_SA = [
-        "RAGDRPYQDAP",
-        "REGANTDQDAP",
-        "REGAIISRDSP",
-        "LRM",
-        "QDAP",
-        "REGA",
-    ]
+    pos_controls = {
+        "Is_Integrin": [
+            "RGD",
+            "KGE",
+            "LDV",
+            "DGEA",
+            "REDV",
+            "YGRK",
+            "PHSRN",
+            "SVVYGLR",
+        ],
+        "Is_Sialic_Acid": [
+            "RAGDRPYQDAP",
+            "REGANTDQDAP",
+            "REGAIISRDSP",
+            "LRM",
+            "QDAP",
+            "REGA",
+        ],
+    }
+    pos_controls["Is_Both"] = (
+        pos_controls["Is_Integrin"] + pos_controls["Is_Sialic_Acid"]
+    )
 
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
@@ -1414,7 +1442,7 @@ if __name__ == "__main__":
         random_state=random_state,
         wf=workflow,
         mapping_method=mapping_method,
-        positive_controls=pos_controls_SA,
+        positive_controls=pos_controls,
     )
     if workflow == "DR":
         X_test, y_test = get_test_features(
@@ -1726,71 +1754,39 @@ if __name__ == "__main__":
 
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
-            positive_controls=pos_controls_SA,
+            positive_controls=pos_controls[target_column],
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="PC",
         )
-        print(
-            "Count of Positive Control PC k-mers in Train Dataset:\n",
-            pos_con_train_PC.tail(1).to_string(index=False),
-        )
-        pos_con_train_PC.to_csv(
-            f"train_data_PC_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_train_PC, "PC", mapping_method, dataset_name="Train")
 
         # count of PC positive controls in topN (array2)
         pos_con_topN_PC = check_positive_controls(
-            positive_controls=pos_controls_SA,
+            positive_controls=pos_controls[target_column],
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="PC",
         )
-        print(
-            "Count of Positive Control PC k-mers in topN:\n",
-            pos_con_topN_PC.tail(1).to_string(index=False),
-        )
-        pos_con_topN_PC.to_csv(
-            f"topN_PC_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_topN_PC, "PC", mapping_method, dataset_name="TopN")
 
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
-            positive_controls=pos_controls_SA,
+            positive_controls=pos_controls[target_column],
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="AA",
         )
-        print(
-            "Count of Positive Control AA k-mers in Train Dataset:\n",
-            pos_con_train_AA.tail(1).to_string(index=False),
-        )
-        pos_con_train_AA.to_csv(
-            f"train_data_AA_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_train_AA, "AA", mapping_method, dataset_name="Train")
 
         # count of AA positive controls in topN (array2)
         pos_con_topN_AA = check_positive_controls(
-            positive_controls=pos_controls_SA,
+            positive_controls=pos_controls[target_column],
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="AA",
         )
-        print(
-            "Count of Positive Control AA k-mers in TopN:\n",
-            pos_con_topN_AA.tail(1).to_string(index=False),
-        )
-        pos_con_train_AA.to_csv(
-            f"topN_AA_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
         kmer_info = kmer_data(mapping_method, array2)
 

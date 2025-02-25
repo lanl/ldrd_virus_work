@@ -9,6 +9,7 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
+import os
 
 
 def test_optimization_plotting(tmpdir):
@@ -696,3 +697,46 @@ def test_percent_exposed_error():
 
     with pytest.raises(ValueError, match="kmer feature name missing prefix."):
         workflow.percent_surface_exposed(kmer_names, syn_status)
+
+
+@pytest.mark.parametrize(
+    "pos_con_dict, kmer_prefix, mapping_method, dataset_name",
+    [
+        (
+            {
+                "110": {
+                    0: "kmer_PC_110744",
+                    1: "kmer_PC_1041110",
+                    2: "kmer_PC_700110",
+                    3: 3,
+                },
+                "410": {0: None, 1: None, 2: None, 3: 0},
+                "0440": {0: None, 1: None, 2: None, 3: 0},
+                "0011": {0: "kmer_PC_700110", 1: None, 2: None, 3: 1},
+                "007": {0: "kmer_PC_007404", 1: None, 2: None, 3: 1},
+                "1041": {0: "kmer_PC_1041110", 1: None, 2: None, 3: 1},
+                "000": {0: "kmer_PC_0000", 1: None, 2: None, 3: 1},
+            },
+            "PC",
+            "jurgen_schmidt",
+            "Test",
+        ),
+    ],
+)
+def test_print_pos_con(
+    capsys, tmpdir, pos_con_dict, kmer_prefix, mapping_method, dataset_name
+):
+    pos_con_df = pd.DataFrame(pos_con_dict)
+    with tmpdir.as_cwd():
+        workflow.print_pos_con(pos_con_df, kmer_prefix, mapping_method, dataset_name)
+        assert os.path.exists(
+            os.path.join(
+                tmpdir,
+                f"{dataset_name}_data_{kmer_prefix}_kmer_positive_controls_{mapping_method}.csv",
+            )
+        )
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == f"Count of Positive Control {kmer_prefix} k-mers in {dataset_name} Dataset:\n {pos_con_df.tail(1).to_string(index=False)}\n"
+        )

@@ -88,35 +88,62 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Both == 4
 
 
-def test_label_surface_exposed():
-    kmers_list = [
-        "kmer_PC_CADAFFE",
-        "kmer_PC_CADAFFE",
-        "kmer_AA_CCABDAC",
-        "kmer_AA_CCABDAC",
-        "kmer_AA_CCABDAC",
-        "kmer_PC_CCAACDA",
-        "kmer_PC_CCAACDA",
-        "kmer_AA_CADAFFE",
-        "kmer_AA_CADAFFE",
-        "kmer_PC_ECDGDE",
-    ]
-    kmers_status = ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"]
+@pytest.mark.parametrize(
+    "kmers_list, kmers_status, kmers_topN, is_exposed_exp",
+    [
+        # this test case checks the output of the function when using the
+        # 'shen_2007' mapping method. This includes a fix for the bug in
+        # issue #93, which was incorrectly mapping the kmer 'kmer_AA_CADAFFE'
+        # as surface exposed due to the lack of 'kmer_' prefixes causing double
+        # counting of "kmer_status = 'yes'" for both (PC and AA) versions of the kmer
+        (
+            [
+                "kmer_PC_CADAFFE",
+                "kmer_PC_CADAFFE",
+                "kmer_AA_CCABDAC",
+                "kmer_AA_CCABDAC",
+                "kmer_AA_CCABDAC",
+                "kmer_PC_CCAACDA",
+                "kmer_PC_CCAACDA",
+                "kmer_AA_CADAFFE",
+                "kmer_AA_CADAFFE",
+                "kmer_PC_ECDGDE",
+            ],
+            ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"],
+            [
+                "kmer_PC_CADAFFE",
+                "kmer_AA_CCABDAC",
+                "kmer_PC_CCAACDA",
+                "kmer_AA_CADAFFE",
+                "kmer_PC_ECDGDE",
+            ],
+            ["kmer_PC_CADAFFE", "", "kmer_PC_CCAACDA", "", "kmer_PC_ECDGDE"],
+        ),
+        # this test case checks the output of the function when using the 'jurgen_schmidt'
+        # mapping method.
+        (
+            [
+                "kmer_PC_01234",
+                "kmer_AA_ABCDE",
+                "kmer_PC_1234567",
+                "kmer_PC_1234567",
+                "kmer_AA_HIJKL",
+                "kmer_AA_HIJKL",
+            ],
+            ["Yes", "No", "Yes", "Yes", "No", "No"],
+            [
+                "kmer_PC_01234",
+                "kmer_AA_ABCDE",
+                "kmer_PC_1234567",
+                "kmer_AA_HIJKL",
+            ],
+            ["kmer_PC_01234", "", "kmer_PC_1234567", ""],
+        ),
+    ],
+)
+def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_exp):
     kmers_list_status = list(set(zip(kmers_list, kmers_status)))
-
-    kmers_topN = [
-        "kmer_PC_CADAFFE",
-        "kmer_AA_CCABDAC",
-        "kmer_PC_CCAACDA",
-        "kmer_AA_CADAFFE",
-        "kmer_PC_ECDGDE",
-    ]
-    # not including the kmer prefixes would cause an error in the expected surface
-    # exposed kmers because of the presence of 'CADAFFE' for both 'AA' and 'PC' kmers
-    is_exposed_exp = ["kmer_PC_CADAFFE", "", "kmer_PC_CCAACDA", "", "kmer_PC_ECDGDE"]
-
     is_exposed = workflow.label_surface_exposed(kmers_list_status, kmers_topN)
-
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
 
 
@@ -665,8 +692,7 @@ def test_percent_exposed_error():
     kmer_names = rng.integers(0, 9, size=10)
     kmer_names = [str(n) for n in kmer_names]
 
-    syn_status = rng.choice(2, 10)
-    syn_status = np.where(syn_status, "yes", "no")
+    syn_status = rng.choice(["yes", "no"], size=10)
 
     with pytest.raises(ValueError, match="kmer feature name missing prefix."):
-        _ = workflow.percent_surface_exposed(kmer_names, syn_status)
+        workflow.percent_surface_exposed(kmer_names, syn_status)

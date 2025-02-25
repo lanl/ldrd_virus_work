@@ -471,12 +471,8 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["NC_001563.2"],
             1,
             ["WNV"] * 1,
-            [
-                "LVFGGIT",
-            ],
-            [
-                "nonstructural protein NS2A",
-            ],
+            ["LVFGGIT"],
+            ["nonstructural protein NS2A"],
             "jurgen_schmidt",
         ),
         # this test checks that nothing is returned for accession records
@@ -532,12 +528,12 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
     ],
 )
 def test_get_kmer_info(
-    accession: list,
-    exp: int,
-    exp_viruses: list[str],
-    exp_kmers: list[str],
-    exp_proteins: list[str],
-    mapping_method: str,
+    accession,
+    exp,
+    exp_viruses,
+    exp_kmers,
+    exp_proteins,
+    mapping_method,
 ):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]

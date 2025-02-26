@@ -24,7 +24,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List
+from typing import Dict, Any, Sequence, List, Union
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -101,12 +101,11 @@ class kmer_data:
         self.kmer_names = kmer_data
 
 
-def find_matching_kmers(target_column, mapping_methods=None):
-    # TODO: check logic for IoU comparison of matching kmers
+def find_matching_kmers(target_column: str, mapping_methods: list):
     # check to see if the necessary files are available and, if so, load them and perform kmer matching
     try:
         print(
-            f"Will try to load topN kmer files for {mapping_methods[0]} and {mapping_methods[1]} mapping schemes..."
+            f"Will try to load topN kmer files for {mapping_methods} mapping schemes..."
         )
         topN_files = []
         for mm in mapping_methods:
@@ -275,7 +274,7 @@ def get_kmer_info(
 
 def match_kmers(
     topN_files: list, mapping_methods: list, save_dir: str = "kmer_maps"
-) -> dict:
+) -> Union[None, dict]:
     """
     check the mappings from AA to PC kmers for the topN classifer kmers using each
     mapping method and return the overlapping instances of corresponding AA kmers
@@ -343,32 +342,35 @@ def match_kmers(
     # save the df of matching PC and AA kmers for each mapping method
     matching_kmers_df.to_csv("topN_PC_AA_kmer_mappings.csv", index=False)
 
-    # find matching PC kmers from different mapping schemes
-    kmer_matches: Dict = defaultdict(list)
-    for kmer1 in matching_kmers_df.columns:
-        for kmer2 in matching_kmers_df.columns:
-            if kmer1 != kmer2:
-                kmer_match = matching_kmers_df[kmer1].dropna()[
-                    matching_kmers_df[kmer1]
-                    .dropna()
-                    .isin(matching_kmers_df[kmer2].dropna())
-                ]
-                if not kmer_match.empty:
-                    # check if tuple exists in dict already
-                    # first see if the AA kmer key is in the dictionary already
-                    kmer_pair_exist = False
-                    if kmer_match.item() in kmer_matches:
-                        # then check if the current tuple exists in the
-                        # list of tuples contained in kmer_matches already
-                        kmer_matches_list = kmer_matches[kmer_match.item()]
-                        kmer_pair_exist = any(
-                            set((kmer1, kmer2)).issubset(set(k))
-                            for k in kmer_matches_list
-                        )
-                    if not kmer_pair_exist:
-                        kmer_matches[kmer_match.item()].append((kmer1, kmer2))
+    # if comparing more than one mapping method, find and return matches, if any
+    if len(topN_files) > 1:
+        # find matching PC kmers from different mapping schemes
+        kmer_matches: Dict = defaultdict(list)
+        for kmer1 in matching_kmers_df.columns:
+            for kmer2 in matching_kmers_df.columns:
+                if kmer1 != kmer2:
+                    kmer_match = matching_kmers_df[kmer1].dropna()[
+                        matching_kmers_df[kmer1]
+                        .dropna()
+                        .isin(matching_kmers_df[kmer2].dropna())
+                    ]
+                    if not kmer_match.empty:
+                        # check if tuple exists in dict already
+                        # first see if the AA kmer key is in the dictionary already
+                        kmer_pair_exist = False
+                        if kmer_match.item() in kmer_matches:
+                            # then check if the current tuple exists in the
+                            # list of tuples contained in kmer_matches already
+                            kmer_matches_list = kmer_matches[kmer_match.item()]
+                            kmer_pair_exist = any(
+                                set((kmer1, kmer2)).issubset(set(k))
+                                for k in kmer_matches_list
+                            )
+                        if not kmer_pair_exist:
+                            kmer_matches[kmer_match.item()].append((kmer1, kmer2))
 
-    return kmer_matches
+        return kmer_matches
+    return None
 
 
 def label_surface_exposed(
@@ -2052,6 +2054,6 @@ if __name__ == "__main__":
 
         # perform IoU matching of AA analogues for topN kmers from each mapping method
         matching_kmers = find_matching_kmers(
-            target_column, mapping_methods=["shen_2007", "jurgen_schmidt"]
+            target_column, mapping_methods=["jurgen_schmidt"]  # "shen_2007",
         )
         print(matching_kmers)

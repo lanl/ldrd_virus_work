@@ -9,6 +9,7 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
+import os
 
 
 def test_optimization_plotting(tmpdir):
@@ -864,122 +865,154 @@ def test_print_pos_con(
         assert captured.out == exp_output
 
 
-def test_match_kmers(tmpdir):
-    kmer_matches_mm1 = {
-        "0": {
-            0: "kmer_AA_MSLQGIH",
-            1: "kmer_AA_SLQGIHL",
-            2: "kmer_AA_LQGIHLS",
-            3: "kmer_AA_QGIHLSD",
-            4: "kmer_AA_GIHLSDL",
-            5: "kmer_AA_IHLSDLS",
-            6: "kmer_AA_HLSDLSY",
-            7: "kmer_AA_LSDLSYK",
-            8: "kmer_AA_SDLSYKH",
-            9: "kmer_AA_DLSYKHA",
-        },
-        "1": {
-            0: "kmer_PC_6263063",
-            1: "kmer_PC_2630636",
-            2: "kmer_PC_6306362",
-            3: "kmer_PC_3063624",
-            4: "kmer_PC_0636246",
-            5: "kmer_PC_6362462",
-            6: "kmer_PC_3624622",
-            7: "kmer_PC_6246225",
-            8: "kmer_PC_2462253",
-            9: "kmer_PC_4622530",
-        },
-    }
-    kmer_matches_mm2 = {
-        "0": {
-            0: "kmer_AA_MSLQGIH",
-            1: "kmer_AA_SLQGIHL",
-            2: "kmer_AA_LQGIHLS",
-            3: "kmer_AA_QGIHLSD",
-            4: "kmer_AA_GIHLSDL",
-            5: "kmer_AA_IHLSDLS",
-            6: "kmer_AA_HLSDLSY",
-            7: "kmer_AA_LSDLSYK",
-            8: "kmer_AA_SDLSYKH",
-            9: "kmer_AA_DLSYKHA",
-        },
-        "1": {
-            0: "kmer_PC_DDCEACA",
-            1: "kmer_PC_DCEACEA",
-            2: "kmer_PC_CEACECG",
-            3: "kmer_PC_EACECDC",
-            4: "kmer_PC_ACECDFD",
-            5: "kmer_PC_CECDFFG",
-            6: "kmer_PC_ECDFCDC",
-            7: "kmer_PC_CDFCDDA",
-            8: "kmer_PC_DFCDDGG",
-            9: "kmer_PC_FCDDGEE",
-        },
-    }
-
-    syn_topN = [
-        {
-            "0": {
-                0: "kmer_PC_DDCEACA",
-                1: "kmer_PC_DCEACEA",
-                2: "kmer_PC_CEACECG",
-                3: "kmer_PC_EACECDC",
-                4: "kmer_PC_ACECDFD",
-                5: "kmer_PC_CECDFFG",
-                6: "kmer_PC_ECDFCDC",
-                7: "kmer_PC_CDFCDDA",
-                8: "kmer_PC_DFCDDGG",
-                9: "kmer_PC_FCDDGEE",
-            }
-        },
-        {
-            "0": {
-                0: "kmer_PC_6263063",
-                1: "kmer_PC_2630636",
-                2: "kmer_PC_6306362",
-                3: "kmer_PC_3063624",
-                4: "kmer_PC_0636246",
-                5: "kmer_PC_6362462",
-                6: "kmer_PC_3624622",
-                7: "kmer_PC_6246225",
-                8: "kmer_PC_2462253",
-                9: "kmer_PC_4622530",
-            }
-        },
-    ]
-
-    kmer_matches_exp = {
-        "kmer_AA_MSLQGIH": [("kmer_PC_DDCEACA", "kmer_PC_6263063")],
-        "kmer_AA_SLQGIHL": [("kmer_PC_DCEACEA", "kmer_PC_2630636")],
-        "kmer_AA_LQGIHLS": [("kmer_PC_CEACECG", "kmer_PC_6306362")],
-        "kmer_AA_QGIHLSD": [("kmer_PC_EACECDC", "kmer_PC_3063624")],
-        "kmer_AA_GIHLSDL": [("kmer_PC_ACECDFD", "kmer_PC_0636246")],
-        "kmer_AA_IHLSDLS": [("kmer_PC_CECDFFG", "kmer_PC_6362462")],
-        "kmer_AA_HLSDLSY": [("kmer_PC_ECDFCDC", "kmer_PC_3624622")],
-        "kmer_AA_LSDLSYK": [("kmer_PC_CDFCDDA", "kmer_PC_6246225")],
-        "kmer_AA_SDLSYKH": [("kmer_PC_DFCDDGG", "kmer_PC_2462253")],
-        "kmer_AA_DLSYKHA": [("kmer_PC_FCDDGEE", "kmer_PC_4622530")],
-    }
-
+@pytest.mark.parametrize(
+    "kmer_matches, syn_topN, kmer_matches_exp, mapping_methods",
+    [
+        (
+            # this case tests that the function produces matches when two mapping methods are compared
+            [
+                {
+                    "0": {
+                        0: "kmer_AA_MSLQGIH",
+                        1: "kmer_AA_SLQGIHL",
+                        2: "kmer_AA_LQGIHLS",
+                    },
+                    "1": {
+                        0: "kmer_PC_6263063",
+                        1: "kmer_PC_2630636",
+                        2: "kmer_PC_6306362",
+                    },
+                },
+                {
+                    "0": {
+                        0: "kmer_AA_MSLQGIH",
+                        1: "kmer_AA_SLQGIHL",
+                        2: "kmer_AA_LQGIHLS",
+                    },
+                    "1": {
+                        0: "kmer_PC_DDCEACA",
+                        1: "kmer_PC_DCEACEA",
+                        2: "kmer_PC_CEACECG",
+                    },
+                },
+            ],
+            [
+                {
+                    "0": {
+                        0: "kmer_PC_DDCEACA",
+                        1: "kmer_PC_DCEACEA",
+                        2: "kmer_PC_CEACECG",
+                    }
+                },
+                {
+                    "0": {
+                        0: "kmer_PC_6263063",
+                        1: "kmer_PC_2630636",
+                        2: "kmer_PC_6306362",
+                    }
+                },
+            ],
+            {
+                "kmer_AA_MSLQGIH": [("kmer_PC_DDCEACA", "kmer_PC_6263063")],
+                "kmer_AA_SLQGIHL": [("kmer_PC_DCEACEA", "kmer_PC_2630636")],
+                "kmer_AA_LQGIHLS": [("kmer_PC_CEACECG", "kmer_PC_6306362")],
+            },
+            ["mm1", "mm2"],
+        ),
+        # this case tests that nothing is returned when only a single mapping method is used
+        # to generate AA kmer matches.
+        (
+            [
+                {
+                    "0": {
+                        0: "kmer_AA_MSLQGIH",
+                        1: "kmer_AA_SLQGIHL",
+                        2: "kmer_AA_LQGIHLS",
+                    },
+                    "1": {
+                        0: "kmer_PC_6263063",
+                        1: "kmer_PC_2630636",
+                        2: "kmer_PC_6306362",
+                    },
+                },
+            ],
+            [
+                {
+                    "0": {
+                        0: "kmer_PC_DDCEACA",
+                        1: "kmer_PC_DCEACEA",
+                        2: "kmer_PC_CEACECG",
+                    }
+                },
+            ],
+            None,
+            ["mm1"],
+        ),
+    ],
+)
+def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_methods):
+    # make and save a temporary file containing the matching kmer dataframe
     syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
-    pd.DataFrame(kmer_matches_mm1).to_parquet(f"{tmpdir}/kmer_maps_k7_mm1.parquet.gzip")
-    pd.DataFrame(kmer_matches_mm2).to_parquet(f"{tmpdir}/kmer_maps_k7_mm2.parquet.gzip")
-    mapping_methods = ["mm1", "mm2"]
+    for i, kmer_matches_N in enumerate(kmer_matches):
+        pd.DataFrame(kmer_matches_N).to_parquet(
+            f"{tmpdir}/kmer_maps_k7_{mapping_methods[i]}.parquet.gzip"
+        )
+    # run the function to generate the matches
     with tmpdir.as_cwd():
         kmer_matches_out = workflow.match_kmers(syn_topN_df, mapping_methods, tmpdir)
     kmer_matches_out_df = pd.DataFrame(kmer_matches_out)
     kmer_matches_exp_df = pd.DataFrame(kmer_matches_exp)
-
+    # assert that the output looks as expected and that a csv file was generated containig the dataframe
     assert_frame_equal(kmer_matches_out_df, kmer_matches_exp_df)
+    assert os.path.exists(os.path.join(tmpdir, "topN_PC_AA_kmer_mappings.csv"))
 
 
-def test_find_matching_kmers(tmpdir):
+@pytest.mark.parametrize(
+    "kmer_matches, syn_topN, mapping_method, output",
+    [
+        (
+            None,
+            None,
+            ["mm1", "mm2"],
+            "Must run workflow using both mapping methods before performing kmer mapping.",
+        ),
+        (
+            {
+                "0": {
+                    0: "kmer_AA_MSLQGIH",
+                    1: "kmer_AA_SLQGIHL",
+                    2: "kmer_AA_LQGIHLS",
+                },
+                "1": {
+                    0: "kmer_PC_6263063",
+                    1: "kmer_PC_2630636",
+                    2: "kmer_PC_6306362",
+                },
+            },
+            {
+                "0": {
+                    0: "kmer_PC_DDCEACA",
+                    1: "kmer_PC_DCEACEA",
+                    2: "kmer_PC_CEACECG",
+                }
+            },
+            ["mm1"],
+            "No matching AA kmers found in TopN.",
+        ),
+    ],
+)
+def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, output):
     with tmpdir.as_cwd():
+        # check that the function still runs properly when only
+        # generating output files for a single mapping method
+        if kmer_matches is not None:
+            syn_topN_df = pd.DataFrame(syn_topN)
+            syn_topN_df.to_parquet(f"topN_kmers_test_{mapping_method[0]}.parquet.gzip")
+            os.mkdir("kmer_maps")
+            pd.DataFrame(kmer_matches).to_parquet(
+                f"kmer_maps/kmer_maps_k7_{mapping_method[0]}.parquet.gzip"
+            )
         result = workflow.find_matching_kmers(
-            target_column="test", mapping_methods=["mm1", "mm2"]
+            target_column="test", mapping_methods=mapping_method
         )
-    assert (
-        result
-        == "Must run workflow using both mapping methods before performing kmer mapping."
-    )
+    assert result == output

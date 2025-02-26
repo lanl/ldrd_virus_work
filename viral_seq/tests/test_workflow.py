@@ -452,7 +452,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         # this test checks that the correct virus-protein pairs are found
         # when using the shen_2007 mapping scheme.
         (
-            "NC_001563.2",
+            ["NC_001563.2"],
             5,
             ["WNV"] * 5,
             ["AFDAEF", "FCCGDA", "EADAAC", "DGACFC", "LVFGGIT"],
@@ -468,9 +468,9 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         # this test checks that the correct virus-protein products are found
         # when using the "jurgen_schmidt" mapping scheme
         (
-            "NC_001563.2",
+            ["NC_001563.2"],
             1,
-            ["WNV"],
+            ["WNV"] * 1,
             ["LVFGGIT"],
             ["nonstructural protein NS2A"],
             "jurgen_schmidt",
@@ -478,7 +478,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         # this test checks that nothing is returned for accession records
         # that do not contain instances of the topN kmers
         (
-            "AC_000008.1",
+            ["AC_000008.1"],
             0,
             [],
             [],
@@ -487,7 +487,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         ),
         # this test checks that the function finds single polyprotein gene products
         (
-            "NC_039210.1",
+            ["NC_039210.1"],
             1,
             ["FMDV"],
             ["300840"],
@@ -501,28 +501,48 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
         # This test asserts that only the mature protein
         # products are found when calling get_kmer_info
         (
-            "NC_075016.1",
+            ["NC_075016.1"],
             2,
             ["Ross River virus (RR)", "Ross River virus (RR)"],
             ["60837226", "45724566"],
             ["nsP3 protein", "E2 protein"],
             "jurgen_schmidt",
         ),
+        # this case utilizes the PC kmer '6203664', which is the longest kmer shared between the viral sequences
+        # stored in the multi-cassette accession for PHV, which recapitulates the bug described in issue #107
+        # TODO: the observance of both precursor ('G1 and G2 proteins') and mature
+        # protein products('envelope surface glycoprotein G2') in this accession has
+        # been noted in #102 and needs to be dealt with in a separate MR
+        (
+            ["NC_038939.1", "NC_038940.1"],
+            3,
+            ["Prospect hill hantavirus (PHV)"] * 3,
+            ["6203664"] * 3,
+            [
+                "RNA-dependent RNA polymerase",
+                "G1 and G2 proteins",
+                "envelope surface glycoprotein G1",
+            ],
+            "jurgen_schmidt",
+        ),
     ],
 )
 def test_get_kmer_info(
-    accession: str,
-    exp: int,
-    exp_viruses: list[str],
-    exp_kmers: list[str],
-    exp_proteins: list[str],
-    mapping_method: str,
+    accession,
+    exp,
+    exp_viruses,
+    exp_kmers,
+    exp_proteins,
+    mapping_method,
 ):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
     records = sp.load_from_cache(
-        accessions=[accession], cache=cache_str, verbose=True, filter=False
+        accessions=accession, cache=cache_str, verbose=True, filter=False
     )
+    # 'data_table' is used to look up the information associated with the
+    # viral protein in which the kmer feature is found. Only those entries that
+    # contain the appropriate accessions are necessary for the testing data_table
     data_table = {
         "Species": {
             0: "hMPV",
@@ -535,8 +555,8 @@ def test_get_kmer_info(
             7: "type_1_reovirus",
             8: "JEV",
             9: "BKPyV human polyomavirus",
-            10: "FMDV",
-            11: "Ross River virus (RR)",
+            10: "Ross River virus (RR)",
+            11: "Prospect hill hantavirus (PHV)",
         },
         "Accessions": {
             0: "NC_039199.1",
@@ -549,8 +569,8 @@ def test_get_kmer_info(
             7: "MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1",
             8: "NC_001437.1",
             9: "NC_001538.1",
-            10: "NC_039210.1",
-            11: "NC_075016.1",
+            10: "NC_075016.1",
+            11: "NC_038939.1 NC_038940.1 NC_038938.1",
         },
     }
     tbl = pd.DataFrame(data_table)
@@ -558,10 +578,10 @@ def test_get_kmer_info(
     kmers = [
         "ADMAHD",
         "DFFKSG",
-        "HKFLVP",
         "NGTGGI",
         "NGAPEA",
         "SRGLDP",
+        "MYGQLIE",  # using the jurgen_schmidt mapping scheme, this translates to '6203664' and is the longest PC kmer shared between the two accessions corresponding to PHV
         "YDTIPI",
         "VGPNFSTV",  # this AA kmer is found in RR "non-structural polyprotein" and "nsP3 protein"
         "DKFSERII",  # this AA kemr is found in RR "structual polyprotein" and "E2 protein"

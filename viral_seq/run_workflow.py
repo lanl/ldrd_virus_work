@@ -636,14 +636,22 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tr",
         "--train-file",
-        choices=["Mollentze_Training.csv", "Mollentze_Training_Fixed.csv"],
+        choices=[
+            "Mollentze_Training.csv",
+            "Mollentze_Training_Fixed.csv",
+            "Mollentze_Training_Shuffled.csv",
+        ],
         default="Mollentze_Training.csv",
         help="File to be used corresponding to training data.",
     )
     parser.add_argument(
         "-ts",
         "--test-file",
-        choices=["Mollentze_Holdout.csv", "Mollentze_Holdout_Fixed.csv"],
+        choices=[
+            "Mollentze_Holdout.csv",
+            "Mollentze_Holdout_Fixed.csv",
+            "Mollentze_Holdout_Shuffled.csv",
+        ],
         default="Mollentze_Holdout.csv",
         help="File to be used corresponding to test data.",
     )

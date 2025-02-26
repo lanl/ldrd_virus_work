@@ -38,6 +38,40 @@ def get_bad_indexes(df, cache, train_accessions=None):
     }
 
 
+def shuffle(
+    df_train: pd.DataFrame, df_test: pd.DataFrame, random_state: int = 2930678936
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Combine data and shuffle into a new train & test set.
+    Algorithm preserves:
+        - Number of samples in train & test
+        - Number of 'Human Host' in train & test
+    """
+    train_human_count = df_train["Human Host"].sum()
+    train_non_human_count = df_train.shape[0] - train_human_count
+
+    # combine and shuffle data
+    all_data = pd.concat([df_train, df_test])
+    all_data = all_data.sample(frac=1, random_state=random_state)
+
+    # select appropriate number of human viruses for each set
+    human_data = all_data.loc[all_data["Human Host"]]
+    non_human_data = all_data.loc[~all_data["Human Host"]]
+    df_train_new = pd.concat(
+        [
+            human_data.iloc[:train_human_count],
+            non_human_data.iloc[:train_non_human_count],
+        ]
+    ).reset_index(drop=True)
+    df_test_new = pd.concat(
+        [
+            human_data.iloc[train_human_count:],
+            non_human_data.iloc[train_non_human_count:],
+        ]
+    ).reset_index(drop=True)
+
+    return df_train_new, df_test_new
+
+
 if __name__ == "__main__":
     data = files("viral_seq.data")
     train_data = str(data.joinpath("Mollentze_Training.csv"))
@@ -48,6 +82,8 @@ if __name__ == "__main__":
     cache_viral = Path("data_external/cache_viral")
     train_fixed_data = Path("Mollentze_Training_Fixed.csv")
     test_fixed_data = Path("Mollentze_Holdout_Fixed.csv")
+    train_shuffled_data = Path("Mollentze_Training_Shuffled.csv")
+    test_shuffled_data = Path("Mollentze_Holdout_Shuffled.csv")
     train_accessions: set[str] = set()
 
     with tarfile.open(cache_file, "r") as tar:
@@ -80,4 +116,17 @@ if __name__ == "__main__":
         "Generated 'fixed' datasets with no partials, no genomes without 'good' CDS, and duplicates dropped from test data:",
         train_fixed_data,
         test_fixed_data,
+    )
+
+    train_data_shuffled, test_data_shuffled = shuffle(
+        df_train_fixed, df_test_fixed, random_state=2930678936
+    )
+    train_data_shuffled.to_csv(train_shuffled_data)
+    test_data_shuffled.to_csv(test_shuffled_data)
+
+    print(
+        "Generated 'shuffled' datasets from 'fixed' datasets:\n",
+        train_shuffled_data,
+        test_shuffled_data,
+        "\nData from fixed datasets was combined and randomly assigned to train and test. Algorithm preserves:\n - Number of samples in train & test\n - Number of 'Human Host' in train & test",
     )

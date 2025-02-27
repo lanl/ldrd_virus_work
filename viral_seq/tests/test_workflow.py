@@ -700,7 +700,7 @@ def test_percent_exposed_error():
 
 
 @pytest.mark.parametrize(
-    "pos_con_dict, kmer_prefix, mapping_method, dataset_name",
+    "pos_con_dict, kmer_prefix, mapping_method, dataset_name, exp_output",
     [
         (
             {
@@ -720,11 +720,12 @@ def test_percent_exposed_error():
             "PC",
             "jurgen_schmidt",
             "Test",
+            "Count of Positive Control PC k-mers in Test Dataset:\n 110  410  0440 0011 007 1041 000\n  3  0.0   0.0    1   1    1   1\n",
         ),
     ],
 )
 def test_print_pos_con(
-    capsys, tmpdir, pos_con_dict, kmer_prefix, mapping_method, dataset_name
+    capsys, tmpdir, pos_con_dict, kmer_prefix, mapping_method, dataset_name, exp_output
 ):
     pos_con_df = pd.DataFrame(pos_con_dict)
     with tmpdir.as_cwd():
@@ -736,7 +737,4 @@ def test_print_pos_con(
             )
         )
         captured = capsys.readouterr()
-        assert (
-            captured.out
-            == f"Count of Positive Control {kmer_prefix} k-mers in {dataset_name} Dataset:\n {pos_con_df.tail(1).to_string(index=False)}\n"
-        )
+        assert captured.out == exp_output

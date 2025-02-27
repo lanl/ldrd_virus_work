@@ -545,7 +545,7 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             ["NC_038939.1", "NC_038940.1"],
             3,
             ["Prospect hill hantavirus (PHV)"] * 3,
-            ["6203664"] * 3,
+            ["kmer_PC_6203664"] * 3,
             [
                 "RNA-dependent RNA polymerase",
                 "G1 and G2 proteins",

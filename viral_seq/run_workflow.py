@@ -325,6 +325,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                     "--similarity-genomic",
                     "--similarity-cache",
                     cache_isg + " " + cache_hk,
+                    "--target-column",
+                    target_column,
                 ],
                 standalone_mode=False,
             )
@@ -353,6 +355,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                             f"--features-kmers{kmer_suff}",
                             f"--kmer-k{kmer_suff}",
                             str(k),
+                            "--target-column",
+                            target_column,
                         ],
                         standalone_mode=False,
                     )
@@ -371,7 +375,9 @@ def feature_selection_rfc(
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
         train_files = tuple(glob(table_loc_train + "/*gzip"))
-        X, y = sp.get_training_columns(table_filename=train_files)
+        X, y = sp.get_training_columns(
+            table_filename=train_files, class_column=target_column
+        )
         if feature_selection == "none":
             print(
                 "All training features will be used as X_train in the following steps."
@@ -560,7 +566,9 @@ def get_test_features(
             )
     print("Loading all feature tables for test...")
     test_files = tuple(glob(table_loc_test + "/*gzip"))
-    X_test, y_test = sp.get_training_columns(table_filename=test_files)
+    X_test, y_test = sp.get_training_columns(
+        table_filename=test_files, class_column=target_column
+    )
     X_test = X_test.reindex(columns=X_train.columns, fill_value=0)
     print("Saving X_test to", table_loc_test_saved)
     X_test.to_parquet(table_loc_test_saved)
@@ -683,6 +691,7 @@ if __name__ == "__main__":
             "Mollentze_Training.csv",
             "Mollentze_Training_Fixed.csv",
             "Mollentze_Training_Shuffled.csv",
+            "Relabeled_Train.csv",
         ],
         default="Mollentze_Training.csv",
         help="File to be used corresponding to training data.",
@@ -694,6 +703,7 @@ if __name__ == "__main__":
             "Mollentze_Holdout.csv",
             "Mollentze_Holdout_Fixed.csv",
             "Mollentze_Holdout_Shuffled.csv",
+            "Relabeled_Test.csv",
         ],
         default="Mollentze_Holdout.csv",
         help="File to be used corresponding to test data.",
@@ -701,7 +711,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Human Host"],
+        choices=["Human Host", "human", "mammal", "primate"],
         default="Human Host",
         help="Target column to be used for binary classification.",
     )

@@ -208,14 +208,14 @@ def get_kmer_info(
                             protein_names.append(
                                 str(feature.qualifiers.get("product"))[2:-2]
                             )
-                            kmer_features.append(k_mer)
+                            kmer_features.append(item)
 
     return virus_names, kmer_features, protein_names
 
 
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
-) -> tuple:
+) -> list:
     """
     Creates lists of kmers denoting whether or not they are
     surface exposed ambiguous of PC or AA kmer status
@@ -232,25 +232,17 @@ def label_surface_exposed(
 
     Returns:
     --------
-    is_exposed, not_exposed, found_kmers: tuple
-        ordered lists of protein kmers that are either positively labeled as 'surface_exposed',
-        negatively labeled as 'surface_exposed' or all kmers without PC/AA prefix in kmers_topN
+    is_exposed: list
+        ordered list of protein kmers that are positively labeled as 'surface_exposed'
 
     """
 
-    # make lists 'is_exposed', 'not_exposed', found_kmers by cross-
-    # referencing surface exposed status with protein kmers list
+    # make lists 'is_exposed' by cross-referencing surface exposed status with protein kmers list
+    # and re-order list to align with the list of found kmers
     is_exposed = [x[0] for x in list_of_kmers if x[1] == "Yes"]
-    not_exposed = [x[0] for x in list_of_kmers if x[1] == "No"]
-    found_kmers = [
-        x.replace("kmer_PC_", "").replace("kmer_AA_", "") for x in kmers_topN
-    ]
+    is_exposed = [s if s in is_exposed else "" for s in kmers_topN]
 
-    # and re-order lists to align with the list of found kmers
-    is_exposed = [s if s in is_exposed else "" for s in found_kmers]
-    not_exposed = [s if s in not_exposed else "" for s in found_kmers]
-
-    return is_exposed, not_exposed, found_kmers
+    return is_exposed
 
 
 def FIC_plot(
@@ -312,7 +304,7 @@ def FIC_plot(
 
     for kmer_idx, p in enumerate(bars):
         # calculate corresponding surface exposure %
-        kmer_name = topN_kmers[kmer_idx][8:]
+        kmer_name = topN_kmers[kmer_idx]
         percent_exposed = surface_exposed_dict[kmer_name]
         percent_lbl = f"{percent_exposed:.2f}%"
 
@@ -418,19 +410,19 @@ def percent_surface_exposed(
         proteins containing each kmer
     """
 
-    # TODO: modify function to error out when no prefix present after closing #93
-    # i.e. add value error assertion
-
     surface_exposed_dict = {}
     all_kmers = zip(k_mers_in, surface_exposed_status)
-    for kmer_status in all_kmers:
+    for kmer, kmer_status in all_kmers:
+        if kmer[:8] not in ["kmer_PC_", "kmer_AA_"]:
+            raise ValueError("kmer feature name missing prefix.")
+
         # check if kmer exists in dictionary already
-        if kmer_status[0] not in surface_exposed_dict:
-            surface_exposed_dict[kmer_status[0]] = [0, 0]
-        if kmer_status[1] == "Yes":
-            surface_exposed_dict[kmer_status[0]][0] += 1
-        elif kmer_status[1] == "No":
-            surface_exposed_dict[kmer_status[0]][1] += 1
+        if kmer not in surface_exposed_dict:
+            surface_exposed_dict[kmer] = [0, 0]
+        if kmer_status == "Yes":
+            surface_exposed_dict[kmer][0] += 1
+        elif kmer_status == "No":
+            surface_exposed_dict[kmer][1] += 1
 
     # calculate final percentage values based on ratio of "Yes" and "No" counts
     percent_exposed_dict = {
@@ -1873,12 +1865,10 @@ if __name__ == "__main__":
 
         temp5 = list(set(zip(kmer_features, surface_exposed_status)))
 
-        is_exposed, not_exposed, found_kmers = label_surface_exposed(temp5, array2)
+        is_exposed = label_surface_exposed(temp5, array2)
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
-        # TODO (#93): fix 'kmer_features' variable to reflect true contents of kmers
-        # list, which could contain mix of PC and AA kmers, not just PC kmers
         surface_exposed_dict = percent_surface_exposed(
             kmer_features, surface_exposed_status
         )

@@ -585,7 +585,7 @@ def _plot_confusion_matrices(
         classifier.plot_confusion_matrix(
             y_test,
             predictions_ensemble_hard_eer[name],
-            title=f"Confusion Matrix for Test Dataset\n{name} predictions at EER threshold",
+            title=f"Confusion Matrix for Test Dataset\n{name}\npredictions at EER threshold",
             filename=str(plots_path / f"{name}_confusion_matrix.png"),
         )
     copies = len(predictions_group[group])
@@ -595,7 +595,7 @@ def _plot_confusion_matrices(
             classifier.plot_confusion_matrix_mean(
                 y_test,
                 predictions_group[group],
-                title=f"Average Confusion Matrix for Test Dataset\n{group} predictions at EER thresholds across {copies} seeds",
+                title=f"Average Confusion Matrix for Test Dataset\n{group}\npredictions at EER thresholds across {copies} seeds",
                 filename=str(plots_path / f"{group}_confusion_matrix.png"),
             )
     # ensembles

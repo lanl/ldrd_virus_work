@@ -63,3 +63,51 @@ def test_get_test_features(extract, tmpdir):
         )["Human Host"]
         assert_frame_equal(X_test, X_expected)
         assert_series_equal(y_test, y_expected)
+
+
+def test_plot_confusion_matrices(tmpdir):
+    # minimum number of images to test for full coverage
+    exp_model0_plot = files("viral_seq.tests.expected").joinpath(
+        "test_Model_0_confusion_matrix.png"
+    )
+    exp_model1_plot = files("viral_seq.tests.expected").joinpath(
+        "test_Model_1_confusion_matrix.png"
+    )
+    exp_group_plot = files("viral_seq.tests.expected").joinpath(
+        "test_Group_confusion_matrix.png"
+    )
+    exp_ensemble_plot = files("viral_seq.tests.expected").joinpath(
+        "test_Ensemble_confusion_matrix.png"
+    )
+    rng = np.random.default_rng(123)
+    y_test = rng.integers(2, size=10)
+    model_arguments = {f"Model {i}": {"group": "Group"} for i in range(2)}
+    predictions_ensemble_hard_eer = {
+        name: rng.integers(2, size=10) for name in model_arguments
+    }
+    comp_names_ensembles = ["Ensemble"]
+    comp_preds_ensembles = [rng.integers(2, size=10)]
+    workflow._plot_confusion_matrices(
+        y_test,
+        model_arguments,
+        predictions_ensemble_hard_eer,
+        comp_names_ensembles,
+        comp_preds_ensembles,
+        tmpdir,
+    )
+    with tmpdir.as_cwd():
+        assert (
+            compare_images(exp_model0_plot, "Model_0_confusion_matrix.png", 0.001)
+            is None
+        )
+        assert (
+            compare_images(exp_model1_plot, "Model_1_confusion_matrix.png", 0.001)
+            is None
+        )
+        assert (
+            compare_images(exp_group_plot, "Group_confusion_matrix.png", 0.001) is None
+        )
+        assert (
+            compare_images(exp_ensemble_plot, "Ensemble_confusion_matrix.png", 0.001)
+            is None
+        )

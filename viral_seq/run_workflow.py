@@ -122,6 +122,7 @@ def feature_signs(
     """
     signs_dict = {}
     # add sign of surface exposure based on comparison between lists of exposure status
+    # reverted to using `topN` in this function for building dictionary of feature signs
     for i, kmer_name in enumerate(topN):
         if kmer_name in is_exposed:
             surface_exposed_sign = "+"
@@ -256,15 +257,11 @@ def label_surface_exposed(
     Parameters:
     -----------
     kmer_info_df: pd.DataFrame
+        dataframe containing kmer feature names and correspoding virus-protein pairs
+        found in dataset
     surface_exposed_df: pd.Dataframe
-
-    list_of_kmers: list
-        list containing kmers and corresponding status of surface exposure as
-        determined by cross-referencing top-N kmers with list of known surface
-        exposed proteins
-
-    kmers_topN: list
-        list containing topN kmers from classifier
+        data structure containing all virus-protein pairs in the dataset and their corresponding
+        surface exposures status
 
     Returns:
     --------

@@ -88,42 +88,95 @@ def test_csv_conversion():
     assert postprocessed_df.sum().Is_Both == 4
 
 
-def test_label_surface_exposed():
-    kmers_status = ["yes", "no", "no", "no", "yes"]
-
-    kmers_topN = [
-        "kmer_PC_CADAFFE",
-        "kmer_AA_CCABDAC",
-        "kmer_PC_CCAACDA",
-        "kmer_AA_CADAFFE",
-        "kmer_PC_085173",
-    ]
-
-    exposed_kmers_exp = ["kmer_PC_CADAFFE", "kmer_AA_CADAFFE"]
-    surface_exposed_exp = {
-        "virus_names": {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
-        "protein_names": {0: "F", 1: "G", 2: "H", 3: "I", 4: "J"},
-        "surface_exposed_status": {0: "yes", 1: "no", 2: "no", 3: "no", 4: "yes"},
-        "kmer_names": {
-            0: "kmer_PC_CADAFFE",
-            1: "kmer_AA_CCABDAC",
-            2: "kmer_PC_085173",
-            3: "kmer_PC_CCAACDA",
-            4: "kmer_AA_CADAFFE",
-        },
-        "_merge": {0: "both", 1: "both", 2: "both", 3: "both", 4: "both"},
-    }
+@pytest.mark.parametrize(
+    "kmers_topN, surface_exposed_exp, exposed_kmers_exp",
+    [
+        # this test case checks the output of the function when using the
+        # 'shen_2007' mapping method. This includes a fix for the bug in
+        # issue #93, which was incorrectly mapping the kmer 'kmer_AA_CADAFFE'
+        # as surface exposed due to the lack of 'kmer_' prefixes causing double
+        # counting of "kmer_status = 'yes'" for both (PC and AA) versions of the kmer
+        (
+            [
+                "kmer_PC_CADAFFE",
+                "kmer_AA_CCABDAC",
+                "kmer_PC_CCAACDA",
+                "kmer_AA_CADAFFE",
+                "kmer_PC_ECDGDE",
+            ],
+            {
+                "virus_names": {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
+                "protein_names": {0: "F", 1: "F", 2: "H", 3: "I", 4: "J"},
+                "surface_exposed_status": {
+                    0: "yes",
+                    1: "no",
+                    2: "no",
+                    3: "no",
+                    4: "yes",
+                },
+                "kmer_names": {
+                    0: "kmer_PC_CADAFFE",
+                    1: "kmer_AA_CCABDAC",
+                    2: "kmer_PC_ECDGDE",
+                    3: "kmer_PC_CCAACDA",
+                    4: "kmer_AA_CADAFFE",
+                },
+                "_merge": {0: "both", 1: "both", 2: "both", 3: "both", 4: "both"},
+            },
+            ["kmer_PC_CADAFFE", "kmer_AA_CADAFFE"],
+        ),
+        # this test case checks the output of the function when using the 'jurgen_schmidt'
+        # mapping method.
+        (
+            [
+                "kmer_PC_01234",
+                "kmer_AA_ABCDE",
+                "kmer_PC_1234567",
+                "kmer_AA_HIJKL",
+                "kmer_PC_040556",
+            ],
+            {
+                "virus_names": {0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
+                "protein_names": {0: "F", 1: "F", 2: "H", 3: "I", 4: "J"},
+                "surface_exposed_status": {
+                    0: "yes",
+                    1: "no",
+                    2: "no",
+                    3: "no",
+                    4: "yes",
+                },
+                "kmer_names": {
+                    0: "kmer_PC_01234",
+                    1: "kmer_AA_ABCDE",
+                    2: "kmer_PC_040556",
+                    3: "kmer_PC_1234567",
+                    4: "kmer_AA_HIJKL",
+                },
+                "_merge": {0: "both", 1: "both", 2: "both", 3: "both", 4: "both"},
+            },
+            ["kmer_PC_01234", "kmer_AA_HIJKL"],
+        ),
+    ],
+)
+def test_label_surface_exposed(kmers_topN, surface_exposed_exp, exposed_kmers_exp):
+    # recapituale `surface_exposed_df` which is the file containing all the
+    # virus-protein pairs and their corresponding surface exposed status
     surface_exposed_exp = pd.DataFrame(surface_exposed_exp)
     virus_names_surface = np.array(["A", "B", "C", "D", "E"])
-    protein_names_surface = np.array(["F", "G", "H", "I", "J"])
+    # repeated protein name "F" simulates a shared protein name amongst different viruses
+    protein_names_surface = np.array(["F", "F", "H", "I", "J"])
+    # shuffle the virus and protein names associated with each kmer to simulate variability
+    # in virus-protein pairs (where protein names can be shared amongst multiple proteins)
     virus_names_info = virus_names_surface[np.asarray([0, 1, 3, 4, 2])]
     protein_names_info = protein_names_surface[np.asarray([0, 1, 3, 4, 2])]
-
+    # store info in dataframe with similar structure to `surface_exposed_df`
     surface_exposed_df = pd.DataFrame()
     surface_exposed_df["virus_names"] = virus_names_surface
     surface_exposed_df["protein_names"] = protein_names_surface
-    surface_exposed_df["surface_exposed_status"] = kmers_status
+    surface_exposed_df["surface_exposed_status"] = ["yes", "no", "no", "no", "yes"]
 
+    # recapitualte kmer_info data structure which is the output of
+    # the `get_kmer_info` function
     kmer_info_df = pd.DataFrame()
     kmer_info_df["kmer_names"] = kmers_topN
     kmer_info_df["virus_names"] = virus_names_info
@@ -447,6 +500,8 @@ def test_feature_sign(
                 "kmer_AA_ILGNMCS",
             ],
             ["no", "no", "yes", "no", "no", "yes", "no"],
+            # order of values has changed here and below because the
+            # function sorts the kmer features alphabetically/numerically
             [33.333333, 33.333333, 0.0],
         ],
         [

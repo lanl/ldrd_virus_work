@@ -150,6 +150,13 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
 @pytest.mark.parametrize(
     "syn_kmers, mapping_method, mode, target_column, expected_dict",
     [
+        # `syn_kmers` inputs have been modified (here and below) to include instances of
+        # known positive controls to test that the function finds these
+        # positive controls within PC-kmers for different mapping methods
+        #
+        # TODO: the `shen_2007` mapping method is still using alphabetic
+        # representations for PC kmers in the DTRA workflow as noted in
+        # issue #109 (as opposed to numerical representations like in LDRD workflow)
         (
             [
                 "kmer_PC_621166",
@@ -238,6 +245,81 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "2055": {0: None, 1: None, 2: 0},
                 "83253": {0: None, 1: None, 2: 0},
                 "2662065": {0: None, 1: None, 2: 0},
+            },
+        ),
+        # the two test cases below check that the function correctly aggregates and checks
+        # the appropriate lists of positive controls when more looking at more than one binding target
+        (
+            [
+                "kmer_PC_454464",
+                "kmer_PC_007404",
+                "kmer_PC_110744",
+                "kmer_PC_6465646",
+                "kmer_PC_764610",
+                "kmer_PC_0000",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AAFDAE",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDCCCA",
+                "kmer_AA_FGGCCA",
+                "kmer_AA_AAAA",
+            ],
+            "jurgen_schmidt",
+            "PC",
+            "IN_SA",
+            {
+                "504": {0: None, 1: None, 2: 0},
+                "646": {0: "kmer_PC_6465646", 1: "kmer_PC_764610", 2: 2},
+                "4040": {0: None, 1: None, 2: 0},
+                "5446": {0: "kmer_PC_454464", 1: None, 2: 1},
+                "2055": {0: None, 1: None, 2: 0},
+                "83253": {0: None, 1: None, 2: 0},
+                "2662065": {0: None, 1: None, 2: 0},
+                "50045823408": {0: None, 1: None, 2: 0},
+                "54003243408": {0: None, 1: None, 2: 0},
+                "54006625428": {0: None, 1: None, 2: 0},
+                "656": {0: "kmer_PC_6465646", 1: None, 2: 1},
+                "3408": {0: None, 1: None, 2: 0},
+                "5400": {0: None, 1: None, 2: 0},
+                "3232625": {0: None, 1: None, 2: 0},
+                "3232623": {0: None, 1: None, 2: 0},
+            },
+        ),
+        (
+            [
+                "kmer_PC_454464",
+                "kmer_PC_007404",
+                "kmer_PC_110744",
+                "kmer_PC_6465646",
+                "kmer_PC_764610",
+                "kmer_PC_0000",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AQDAP",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDKGEA",
+                "kmer_AA_FGLRMA",
+                "kmer_AA_AAAA",
+            ],
+            "jurgen_schmidt",
+            "AA",
+            "IN_SA",
+            {
+                "RGD": {0: None, 1: 0},
+                "KGE": {0: "kmer_AA_CGDKGEA", 1: 1},
+                "LDV": {0: None, 1: 0},
+                "DGEA": {0: None, 1: 0},
+                "REDV": {0: None, 1: 0},
+                "YGRK": {0: None, 1: 0},
+                "PHSRN": {0: None, 1: 0},
+                "SVVYGLR": {0: None, 1: 0},
+                "RAGDRPYQDAP": {0: None, 1: 0},
+                "REGANTDQDAP": {0: None, 1: 0},
+                "REGAIISRDSP": {0: None, 1: 0},
+                "LRM": {0: "kmer_AA_FGLRMA", 1: 1},
+                "QDAP": {0: "kmer_AA_AQDAP", 1: 1},
+                "REGA": {0: None, 1: 0},
+                "NYNYLYK": {0: None, 1: 0},
+                "NYNYLYQ": {0: None, 1: 0},
             },
         ),
     ],

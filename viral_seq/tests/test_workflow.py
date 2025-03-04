@@ -10,6 +10,9 @@ from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from collections import defaultdict
+from viral_seq.analysis.spillover_predict import _append_recs
+from viral_seq.analysis.get_features import get_kmers
+import os
 
 
 def test_optimization_plotting(tmpdir):
@@ -754,7 +757,7 @@ def test_get_kmer_info(
             new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
         else:
             new_kmers.append("kmer_AA_" + topN_kmer)
-    data_in = workflow.kmerData(mapping_method, new_kmers)
+    data_in = workflow.KmerData(mapping_method, new_kmers)
 
     viruses, kmers, protein_name = workflow.get_kmer_info(
         data_in, records, tbl, mapping_method
@@ -800,7 +803,7 @@ def test_get_kmer_info_error(
         },
     }
     tbl = pd.DataFrame(data_table)
-    data_in = workflow.kmerData(mapping_method, kmer)
+    data_in = workflow.KmerData(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)
 
@@ -869,7 +872,7 @@ def test_get_kmer_viruses():
     protein_names = [f"protein{n}" for n in range(10)]
     kmer_info = defaultdict(list)
     for kmer, virus, protein in zip(kmer_names, virus_names, protein_names):
-        kmer_info[kmer].append(workflow.kmerData(None, [kmer], virus, protein))
+        kmer_info[kmer].append(workflow.KmerData(None, [kmer], virus, protein))
 
     virus_pairs_exp = {
         "kmer_PC_0": [("virus0", "protein0")],
@@ -884,7 +887,121 @@ def test_get_kmer_viruses():
         "kmer_PC_9": [("virus9", "protein9")],
     }
     kmer_info_df = pd.DataFrame.from_dict(kmer_info, orient="index", columns=["Info"])
-    kmer_info_df["Info"] = kmer_info_df.apply(lambda row: [x for x in row], axis=1)
     virus_pairs = workflow.get_kmer_viruses(kmer_names, kmer_info_df)
 
     assert virus_pairs == virus_pairs_exp
+
+
+@pytest.mark.parametrize(
+    "accessions, kmer_type, mapping_method",
+    [
+        (["AC_000008.1", "NC_001563.2", "NC_039210.1"], "PC", "jurgen_schmidt"),
+    ],
+)
+def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
+    kmer_info = defaultdict(dict)
+    all_kmer_info = []
+    test_records = []
+    # make a dataframe that looks like all_kmer_info
+    for accession in accessions:
+        tests_dir = files("viral_seq") / "tests" / "cache_test" / accession
+        test_records.append(_append_recs(tests_dir))
+
+    kmer_info, _ = get_kmers(
+        test_records,
+        kmer_type=kmer_type,
+        mapping_method=mapping_method,
+        kmer_info=kmer_info,
+    )
+    all_kmer_info.append(pd.DataFrame.from_dict(kmer_info, orient="index"))
+
+    # save and load the file
+    with tmpdir.as_cwd():
+        workflow.save_kmer_info(all_kmer_info, "all_kmer_info_test.parquet.gzip")
+        kmer_info_load = workflow.load_kmer_info("all_kmer_info_test.parquet.gzip")
+
+    # recapitulate save_kmer_info dataframe handling
+    all_kmer_info_df = pd.concat(all_kmer_info)
+
+    # because the object hashes are different between save and load dataframes
+    # open up the objects and check the contents are the same for some random kmers
+    rng = np.random.default_rng(seed=2024)
+    random_idx = rng.integers(0, len(kmer_info_load), 10)
+    for idx in random_idx:
+        save_protein = all_kmer_info_df.iloc[idx][0].protein_name
+        load_protein = kmer_info_load.iloc[idx][0].protein_name
+        save_virus = all_kmer_info_df.iloc[idx][0].virus_name
+        load_virus = kmer_info_load.iloc[idx][0].virus_name
+        save_kmer = all_kmer_info_df.iloc[idx][0].kmer_names
+        load_kmer = kmer_info_load.iloc[idx][0].kmer_names
+        assert save_protein == load_protein
+        assert save_virus == load_virus
+        assert save_kmer == load_kmer
+
+    # assert that, if the kmer has > 1 entry, that they are not the same virus-protein pairs but still map to the same kmer_name
+    all_kmer_info_multiple_entries = all_kmer_info_df[
+        all_kmer_info_df.notna().all(axis=1)
+    ]
+    random_idx = rng.integers(0, len(all_kmer_info_multiple_entries), 10)
+    for idx in random_idx:
+        first_kmer_name = all_kmer_info_multiple_entries.iloc[idx][0].kmer_names[0]
+        second_kmer_name = all_kmer_info_multiple_entries.iloc[idx][1].kmer_names[0]
+        first_entry = (
+            all_kmer_info_multiple_entries.iloc[idx][0].virus_name,
+            all_kmer_info_multiple_entries.iloc[idx][0].protein_name,
+        )
+        second_entry = (
+            all_kmer_info_multiple_entries.iloc[idx][1].virus_name,
+            all_kmer_info_multiple_entries.iloc[idx][1].protein_name,
+        )
+        assert first_kmer_name == second_kmer_name
+        assert first_entry != second_entry
+
+
+@pytest.mark.parametrize(
+    "accessions, kmer_type, mapping_method",
+    [
+        (["AC_000008.1"], "PC", "jurgen_schmidt"),
+    ],
+)
+def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
+    kmer_info = defaultdict(dict)
+    all_kmer_info = []
+    test_records = []
+    # make a dataframe that looks like all_kmer_info
+    for accession in accessions:
+        tests_dir = files("viral_seq") / "tests" / "cache_test" / accession
+        test_records.append(_append_recs(tests_dir))
+
+    kmer_info, _ = get_kmers(
+        test_records,
+        kmer_type=kmer_type,
+        mapping_method=mapping_method,
+        kmer_info=kmer_info,
+    )
+    all_kmer_info.append(pd.DataFrame.from_dict(kmer_info, orient="index"))
+    all_kmer_info_df = pd.concat(all_kmer_info)
+
+    # save and load the file
+    with tmpdir.as_cwd():
+        workflow.save_kmer_info(all_kmer_info, "all_kmer_info_test.parquet.gzip")
+        assert os.path.exists("all_kmer_info_test.parquet.gzip")
+
+    # get information from kmer_info for sanity check
+    assert all_kmer_info_df.iloc[0][0].protein_name == "E1A"
+    assert all_kmer_info_df.iloc[0][0].virus_name == "Human adenovirus 5"
+    assert all_kmer_info_df.iloc[0][0].kmer_names == ["kmer_PC_6536613006"]
+    assert all_kmer_info_df.shape == (10890, 2)
+
+
+def test_load_all_kmer_info():
+    load_file = files("viral_seq.tests.expected").joinpath(
+        "all_kmer_info_test.parquet.gzip"
+    )
+    kmer_info_load_df = workflow.load_kmer_info(load_file)
+
+    # get information from kmer_info for sanity check
+    assert kmer_info_load_df.iloc[0][0].protein_name == "E1A"
+    assert kmer_info_load_df.iloc[0][0].virus_name == "Human adenovirus 5"
+    assert kmer_info_load_df.iloc[0][0].kmer_names == ["kmer_PC_6536613006"]
+    assert kmer_info_load_df.shape == (10890, 2)

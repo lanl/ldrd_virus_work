@@ -7,7 +7,8 @@ from typing import Any
 import pandas as pd
 import numpy as np
 import scipy.stats
-from viral_seq import run_workflow as wf
+from typing import Optional
+from viral_seq import run_workflow as workflow
 
 codontab = standard_dna_table.forward_table.copy()
 for codon in standard_dna_table.stop_codons:
@@ -36,16 +37,26 @@ def get_similarity_features(
     return df_features.join(df_simfeats, rsuffix=suffix)
 
 
-def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None):
+def get_kmers(
+    records, k=10, kmer_type="AA", mapping_method=None, kmer_info: Optional[dict] = None
+):
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
     if kmer_type == "PC" and mapping_method is None:
         raise ValueError("Please specify mapping method for PC-kmers.")
-    kmers = defaultdict(int)
+    kmers: dict = defaultdict(int)
     for record in records:
         single_polyprotein = False
         for feature in record.features:
-            if feature.type == "CDS":
+            if kmer_info is not None:
+                all_products = [
+                    feat.qualifiers["product"][0]
+                    for feat in record.features
+                    if feat.type in ["CDS", "mat_peptide"]
+                ]
+                if len(all_products) == 1 and all_products[0] == "polyprotein":
+                    single_polyprotein = True
+            if feature.type in ["CDS", "mat_peptide"]:
                 nuc_seq = feature.location.extract(record.seq)
                 if len(nuc_seq) % 3 != 0:
                     # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
@@ -58,45 +69,29 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None, kmer_info=None
                     this_seq = new_seq
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmer_name = "kmer_" + kmer_type + "_" + str(kmer)
-                    kmers[kmer_name] += 1
-            # if gathering all_kmer_info, check all the record features
-            # TODO: potentially this could be its own, tested function
-            # but it also makes sense to do this concurrently with data table generation
-            if kmer_info is not None:
-                all_products = [
-                    feat.qualifiers["product"][0]
-                    for feat in record.features
-                    if feat.type in ["CDS", "mat_peptide"]
-                ]
-                if len(all_products) == 1 and all_products[0] == "polyprotein":
-                    single_polyprotein = True
-                if feature.type == "CDS" or feature.type == "mat_peptide":
-                    # only skip the polyprotein accessions if there are other gene products in the record features
-                    if (
-                        "polyprotein" not in feature.qualifiers["product"][0]
-                        or single_polyprotein
-                    ):
-                        nuc_seq = feature.location.extract(record.seq)
-                        if len(nuc_seq) % 3 != 0:
-                            continue
-                        this_seq = nuc_seq.translate()
-                        if kmer_type == "PC":
-                            new_seq = ""
-                            for each in this_seq:
-                                new_seq += aa_map(each, method=mapping_method)
-                            this_seq = new_seq
-                        for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                            kmer_name = "kmer_" + kmer_type + "_" + str(kmer)
+                    if feature.type == "CDS":
+                        kmers[kmer_name] += 1
+                    # if gathering all_kmer_info, check all the record features
+                    if kmer_info is not None:
+                        # only skip the polyprotein accessions if there are other gene products in the record features
+                        if (
+                            "polyprotein" not in feature.qualifiers["product"][0]
+                            or single_polyprotein
+                        ):
                             mm = (
                                 mapping_method if mapping_method is not None else "None"
                             )
-                            kmer_out = wf.kmerData(
+                            kmer_out = workflow.KmerData(
                                 mm,
                                 [kmer_name],
                                 record.annotations["organism"],
                                 feature.qualifiers["product"][0],
                             )
-                            kmer_info[kmer_name].append(kmer_out)
+                            if kmer_info:
+                                current_length = len(kmer_info[kmer_name])
+                            else:
+                                current_length = 0
+                            kmer_info[kmer_name].update({current_length: kmer_out})
 
     return kmer_info, kmers
 

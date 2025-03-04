@@ -271,7 +271,7 @@ def calculate_table(
     mapping_method,
 ):
     """Build a data table from given viral species and selected features."""
-    kmer_info = defaultdict(list)
+    kmer_info = defaultdict(dict)
     df = pd.read_csv(file)
     rfc = None
     if rfc_file is not None:

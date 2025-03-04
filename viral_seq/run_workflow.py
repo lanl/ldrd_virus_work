@@ -77,7 +77,7 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     topN_kmers: list
         list of kmer features for which to find associated virus-protein pairs
     all_kmer_info: pd.DataFrame
-        dataframe holding objects with kmerData information for kmers
+        dataframe holding objects with KmerData information for kmers
 
     Returns:
     --------
@@ -86,19 +86,20 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     """
     kmer_viruses = defaultdict(list)
     for kmer in topN_kmers:
-        all_kmer_data = all_kmer_info.loc[kmer].Info
+        all_kmer_data = all_kmer_info.loc[kmer]
         for kmer_object in all_kmer_data:
-            kmer_viruses[kmer].append(
-                (kmer_object.virus_name, kmer_object.protein_name)
-            )
+            if kmer_object is not None:
+                kmer_viruses[kmer].append(
+                    (kmer_object.virus_name, kmer_object.protein_name)
+                )
 
     return kmer_viruses
 
 
-def load_kmer_info(file_name: str):
+def load_kmer_info(file_name: str) -> pd.DataFrame:
     """
     load parquet file containing 'all_kmer_info' and convert
-    dictionary data back to kmerData class
+    dictionary data back to KmerData class
 
     Parameters:
     -----------
@@ -107,35 +108,30 @@ def load_kmer_info(file_name: str):
 
     Return:
     -------
-    all_kmer_info: pd.DataFrame
-        dataframe containing kmerData class objects
+    all_kmer_info_df: pd.DataFrame
+        dataframe containing KmerData class objects
     """
-
+    print("Loading 'all_kmer_info.parquet.gzip'...")
     all_kmer_info = pd.read_parquet(file_name)
-    all_kmer_info["Info"] = all_kmer_info["Info"].apply(
-        lambda x: [kmerData(**json.loads(obj)) for obj in x]
-    )
+    all_kmer_info_df = all_kmer_info.applymap(
+        lambda x: KmerData(**x) if x is not None else x
+    )  # type: ignore
+    return all_kmer_info_df
 
-    return all_kmer_info
 
-
-def save_kmer_info(all_kmer_info: list, save_file: str):
+def save_kmer_info(all_kmer_info: list, save_file: str) -> None:
     """
     save dataframe containing 'all_kmer_info' to parquet file
 
     Parameters:
     -----------
     all_kmer_info: list
-        list of dataframes containing kmerData class objects
+        list of dataframes containing KmerData class objects
     """
     all_kmer_info_df = pd.concat(all_kmer_info)
-    all_kmer_info_df["Info"] = all_kmer_info_df.apply(
-        lambda row: [x for x in row if x is not None and not pd.isna(x)], axis=1
-    )
-    all_kmer_info_df = all_kmer_info_df["Info"]
-    kmer_info_df = all_kmer_info_df.to_frame()
-    kmer_info_df["Info"] = kmer_info_df["Info"].apply(
-        lambda x: [json.dumps(obj.__dict__) for obj in x]
+    # TODO: DataFrame.applymap deprecated in 2.1.0, consider adjusting `ci/requirements_low.txt`
+    kmer_info_df = all_kmer_info_df.applymap(
+        lambda x: x.__dict__ if not pd.isna(x) else x
     )
     kmer_info_df.to_parquet(save_file, engine="pyarrow", compression="gzip")
 
@@ -163,7 +159,7 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
         )
 
 
-# the kmerData class is used to organize information associated with a list of kmer features
+# the KmerData class is used to organize information associated with a list of kmer features
 # this class should return:
 #     1. kmer feature
 #     2. mapping_method
@@ -172,7 +168,7 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 # ...and should
 #     a. use the kmers as dictionary keys that store the associated information
 #     b. be used to lookup the virus/protein names associated with a specific kmer
-class kmerData:
+class KmerData:
     def __init__(
         self,
         mapping_method: str,
@@ -234,7 +230,7 @@ def feature_signs(
 
 
 def get_kmer_info(
-    kmer_data: kmerData,
+    kmer_data: KmerData,
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
@@ -1951,7 +1947,7 @@ if __name__ == "__main__":
         )
         print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
-        kmer_info = kmerData(mapping_method, array2)
+        kmer_info = KmerData(mapping_method, array2)
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(

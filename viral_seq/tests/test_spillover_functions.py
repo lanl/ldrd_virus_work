@@ -10,6 +10,7 @@ import numpy as np
 import numpy.testing as npt
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
+from collections import defaultdict
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -636,3 +637,26 @@ def test_issue_15():
 def test_check_cache_tarball(wf, tar_file):
     with pytest.raises(ValueError, match="Extracted cache file"):
         sp.check_cache_tarball(wf, tar_file)
+
+
+def test_build_table_kmer_info(tmpdir):
+    with tmpdir.as_cwd():
+        this_cache = files("viral_seq.tests") / "cache"
+        cache_str = str(this_cache.resolve())
+        df = pd.read_csv(csv_train)
+        df_test, kmer_info = sp.build_table(
+            df=df,
+            cache=cache_str,
+            save=False,
+            genomic=False,
+            kmers=True,
+            kmer_k=[2],
+            kmers_pc=True,
+            kmer_k_pc=[2],
+            gc=False,
+            uni_select=True,
+            num_select=10,
+            mapping_method="jurgen_schmidt",
+            kmer_info=defaultdict(dict),
+        )
+        assert len(kmer_info) == 510

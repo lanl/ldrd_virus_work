@@ -82,10 +82,10 @@ def print_pos_con(
 
 def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     """
-    sort dataframe containing kmer feature ranking information by the sum
-    of the counts of important features from classifier and shap feature
-    importances. Average values across estimators and append proportions
-    of each count to be used in FIC plot
+    sort dataframe containing kmer feature ranking information by:
+        1. the sum of the counts of important features from classifier and shap feature importances
+        2. the absolute value of the Pearson R coefficient of shap importance
+    Average values across estimators and append proportions of each count to be used in FIC plot
 
     Parameters:
     -----------
@@ -106,7 +106,13 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     feature_df_sorted["Sum"] = feature_df_sorted[["Clfr", "SHAP"]].sum(
         numeric_only=True, axis=1
     )
-    feature_df_sorted.sort_values(by=["Sum"], ascending=True, inplace=True)
+    # first sort by "Sum", then sort by absolute value of "Pearson R"
+    # such that when features have equal "Sum" values, the feature with
+    # higher SHAP correlation will be ranked higher, i.e. greater "weight"
+    # on relative SHAP importance
+    feature_df_sorted.sort_values(
+        by=["Sum", "Pearson R"], key=lambda x: abs(x), ascending=True, inplace=True
+    )
 
     # divide total counts by number of feature types that we are aggregating over
     # to give true proportions
@@ -152,7 +158,7 @@ class kmer_data:
 
 def feature_signs(
     is_exposed: list,
-    found_kmers: list,
+    # found_kmers: list,
     feature_count: pd.DataFrame,
 ) -> tuple:
     """
@@ -177,6 +183,7 @@ def feature_signs(
     """
     response_effect = []
     surface_exposed_sign = []
+    top_kmers = list(feature_count["Features"][-len(is_exposed) :])
     # add sign of surface exposure based on comparison between lists of exposure status
     for i in range(len(is_exposed)):
         if is_exposed[i]:
@@ -187,7 +194,7 @@ def feature_signs(
         surface_exposed_sign.append(sign)
 
         # add sign of response effect based on pearson correllation coefficient
-        pearson_r = feature_count.loc[feature_count["Features"] == found_kmers[i]][
+        pearson_r = feature_count.loc[feature_count["Features"] == top_kmers[i]][
             "Pearson R"
         ].values[0]
 
@@ -500,8 +507,8 @@ def FIC_plot(
     for idx, (_, row) in enumerate(df_plot.iterrows()):
         feature_name = feature_count["Features"].iloc[idx]
         percent = (
-            surface_exposed_dict[feature_name[8:]]
-            if feature_name[8:] in surface_exposed_dict.keys()
+            surface_exposed_dict[feature_name]
+            if feature_name in surface_exposed_dict.keys()
             else 0.0
         )
         response_sign = response_effect_sign[idx]
@@ -2159,7 +2166,6 @@ if __name__ == "__main__":
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
             X, y, classifier_parameters, n_folds, max_features, random_state
         )
-
         # plot roc curve from cv consensus
         plot_cv_roc(clfr_preds, target_column, paths[-1])
 
@@ -2213,7 +2219,9 @@ if __name__ == "__main__":
 
         temp5 = list(set(zip(kmer_features, surface_exposed_status)))
 
-        is_exposed = label_surface_exposed(temp5, top_features_array)
+        is_exposed = label_surface_exposed(
+            temp5, feature_count["Features"][-max_features:]
+        )
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
@@ -2234,7 +2242,6 @@ if __name__ == "__main__":
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            top_features_array,
             feature_count,
         )
 

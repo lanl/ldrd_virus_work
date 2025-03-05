@@ -500,7 +500,7 @@ def test_feature_sign(
     feature_count["Pearson R"] = pearson_values
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, found_kmers, feature_count
+        is_exposed, feature_count
     )
 
     assert_array_equal(response_effect_out, response_effect_exp)
@@ -1064,11 +1064,12 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
         y,
         classifier_parameters,
         n_folds=2,
-        max_features=3,
+        max_features=10,
         random_state=random_state,
     )
+
     feature_rank = feature_count["Features"]
-    count_rank = feature_count["Counts"]
+    count_rank = feature_count["Sum"]
     pearson_rank = feature_count["Pearson R"]
 
     feature_rank_exp = kmer_names[feature_rank_array]

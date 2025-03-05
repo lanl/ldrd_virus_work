@@ -9,7 +9,6 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
-import os
 
 
 def test_optimization_plotting(tmpdir):
@@ -730,11 +729,16 @@ def test_print_pos_con(
     pos_con_df = pd.DataFrame(pos_con_dict)
     with tmpdir.as_cwd():
         workflow.print_pos_con(pos_con_df, kmer_prefix, mapping_method, dataset_name)
-        assert os.path.exists(
-            os.path.join(
-                tmpdir,
-                f"{dataset_name}_data_{kmer_prefix}_kmer_positive_controls_{mapping_method}.csv",
-            )
-        )
+
+        fname = f"{dataset_name}_data_{kmer_prefix}_kmer_positive_controls_{mapping_method}.csv"
+        actual = pd.read_csv(fname)
+        assert actual.shape == (4, 7)
+        assert list(actual.iloc[:, 0]) == [
+            "kmer_PC_110744",
+            "kmer_PC_1041110",
+            "kmer_PC_700110",
+            "3",
+        ]
+
         captured = capsys.readouterr()
         assert captured.out == exp_output

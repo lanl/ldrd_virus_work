@@ -987,6 +987,7 @@ def feature_selection_rfc(
     wf=None,
     mapping_method=None,
     positive_controls=None,
+    target_column="Human Host",
 ):
     """Sub-select features using best performing from a trained random forest classifier"""
     if feature_selection == "yes" or feature_selection == "none":
@@ -997,23 +998,15 @@ def feature_selection_rfc(
         )
         # if running DTRA workflow, check for presence of positive controls in unfiltered training dataset
         if wf == "DTRA":
-            # count of PC positive controls in pre-feature selection dataset
-            pos_con_all_PC = check_positive_controls(
-                positive_controls=positive_controls[target_column],
-                kmers_list=list(X.columns),
-                mapping_method=mapping_method,
-                mode="PC",
-            )
-            print_pos_con(pos_con_all_PC, "PC", mapping_method, dataset_name="Full")
-
-            # count of AA positive controls in pre-feature selection dataset
-            pos_con_all_AA = check_positive_controls(
-                positive_controls=positive_controls[target_column],
-                kmers_list=list(X.columns),
-                mapping_method=mapping_method,
-                mode="AA",
-            )
-            print_pos_con(pos_con_all_AA, "AA", mapping_method, dataset_name="Full")
+            for mode in ["PC", "AA"]:
+                # count of PC and AA positive controls in pre-feature selection dataset
+                pos_con_all_PC = check_positive_controls(
+                    positive_controls=positive_controls[target_column],
+                    kmers_list=list(X.columns),
+                    mapping_method=mapping_method,
+                    mode=mode,
+                )
+                print_pos_con(pos_con_all_PC, mode, mapping_method, dataset_name="Full")
 
         if feature_selection == "none":
             print(
@@ -1423,12 +1416,23 @@ if __name__ == "__main__":
             "SVVYGLR",
         ],
         "Is_Sialic_Acid": [
-            "RAGDRPYQDAP",
-            "REGANTDQDAP",
-            "REGAIISRDSP",
-            "LRM",
-            "QDAP",
-            "REGA",
+            "RAGDRPYQDAP",  # https://doi.org/10.1016/j.csbj.2023.08.014
+            "REGANTDQDAP",  # https://doi.org/10.1016/j.csbj.2023.08.014
+            "REGAIISRDSP",  # https://doi.org/10.1016/j.csbj.2023.08.014
+            "LRM",  # https://doi.org/10.1038/s41467-017-00836-6
+            "QDAP",  # conserved residues from larger kmers above
+            "REGA",  # conserved residues from larger kmers above
+            # NA and HA binding sites are subject to antigenic drift (resulting in drug resistance)
+            # and are not highly conserved across mutated variants
+            # https://doi.org/10.1016/j.antiviral.2013.09.018
+            # https://doi.org/10.1111/irv.12047
+            #
+            # binding pocket of NA with multiple binding sites often
+            # targeted with small molecules i.e. DFSA (https://doi.org/10.1126/science.1232552)
+            "ILRTQESEC",  # highly conserved sequence between NA 223-231 (https://doi.org/10.1016/j.antiviral.2013.09.018)            "NYNYLYQ", # high affinity neuraminic acid binder
+            "NYNYLYR",  # high affinity neuraminic acid binder https://doi.org/10.1016/j.heliyon.2022.e09222
+            "NYNYLYQ",  # high affinity neuraminic acid binder https://doi.org/10.1016/j.heliyon.2022.e09222
+            "NYNYLY",  # low affinity sialic acid binder
         ],
     }
     pos_controls["Is_Both"] = (
@@ -1443,6 +1447,7 @@ if __name__ == "__main__":
         wf=workflow,
         mapping_method=mapping_method,
         positive_controls=pos_controls,
+        target_column=target_column,
     )
     if workflow == "DR":
         X_test, y_test = get_test_features(

@@ -340,26 +340,26 @@ def test_feature_sign(
     surface_exposed_exp,
 ):
     response_effect_exp = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
+    # TODO: this test should be updated to include a mix of PC and AA kmers
     found_kmers = [
-        "CDDEEC",
-        "CCGDEA",
-        "CCCFCF",
-        "CCAAACD",
-        "CACDGA",
-        "CFCEDD",
-        "GCECFD",
-        "ECDGDE",
-        "CCACAD",
-        "FECAEA",
+        "kmer_PC_CDDEEC",
+        "kmer_PC_CCGDEA",
+        "kmer_PC_CCCFCF",
+        "kmer_PC_CCAAACD",
+        "kmer_PC_CACDGA",
+        "kmer_PC_CFCEDD",
+        "kmer_PC_GCECFD",
+        "kmer_PC_ECDGDE",
+        "kmer_PC_CCACAD",
+        "kmer_PC_FECAEA",
     ]
     is_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
 
-    prefix_kmers = ["kmer_PC_" + kmer for kmer in found_kmers]
     pearson_values = [0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5]
     feature_count = pd.DataFrame()
-    feature_count["Features"] = prefix_kmers
+    feature_count["Features"] = found_kmers
     feature_count["Pearson R"] = pearson_values
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(

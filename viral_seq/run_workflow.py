@@ -11,13 +11,12 @@ import polars as pl
 import ast
 import numpy as np
 from glob import glob
-from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.base import ClassifierMixin
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Literal, Optional
+from typing import Dict, Any
 import matplotlib
 import matplotlib.pyplot as plt
 from time import perf_counter
@@ -609,59 +608,6 @@ def _plot_confusion_matrices(
         )
 
 
-def _plot_logistic_stacked_weights(
-    stacked_logistic: StackingClassifier, estimator_names: list[str], file_name: str
-):
-    final_stacked_log_estimator = stacked_logistic.final_estimator_
-    heights = final_stacked_log_estimator.coef_.ravel()
-    colors = np.empty_like(heights, dtype=object)
-    colors[heights >= 0] = "blue"
-    colors[heights < 0] = "red"
-    fig, ax = plt.subplots(1, 1)
-    ax.bar(estimator_names, height=heights, color=colors)
-    ax.set_ylabel("Log Odds")
-    ax.set_xlabel("Stacked Estimators")
-    plt.xticks(rotation=90)
-    ax.set_title("Logistic Regression Coefficient used for Model Stacking")
-    fig.tight_layout()
-    fig.savefig(file_name, dpi=300)
-
-
-def _ensemble_stacking_logistic(
-    models: list[tuple[str, ClassifierMixin]],
-    X_train: pd.DataFrame,
-    y_train: np.ndarray,
-    X_test: pd.DataFrame,
-    y_test: np.ndarray,
-    test_file: str,
-    predictions_path: Path,
-    plots_path: Path,
-    cv: Literal["prefit", 5] = "prefit",
-    plot_weights: bool = False,
-    estimator_names: Optional[list[str]] = None,
-):
-    clf = StackingClassifier(models, cv=cv)
-    clf.fit(X_train, y_train)
-    y_proba = clf.predict_proba(X_test)[..., 1]
-    fpr, tpr, _ = roc_curve(y_test, y_proba)
-    df_out = pd.DataFrame(y_proba, columns=[f"StackingClassifier LR CV={cv}"])
-    df_out["Species"] = pd.read_csv(test_file)["Species"]
-    df_out.to_csv(
-        str(predictions_path / f"StackingClassifier_LR_predictions_cv_{cv}.csv")
-    )
-    if plot_weights:
-        if estimator_names is None:
-            raise ValueError(
-                "Must provide `estimator_names` if `plot_weights` is True."
-            )
-        _plot_logistic_stacked_weights(
-            clf,
-            estimator_names,
-            str(plots_path / f"StackingClassifier_LR_weights_cv_{cv}.png"),
-        )
-    return fpr, tpr
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1099,7 +1045,7 @@ if __name__ == "__main__":
         else "ROC Curve\nEnsemble Models"
     )
     models_for_ensembles = [(k, v) for k, v in models_fitted.items()]
-    fpr_stack, tpr_stack = _ensemble_stacking_logistic(
+    fpr_stack, tpr_stack = classifier._ensemble_stacking_logistic(
         models_for_ensembles,
         X_train,
         y_train,

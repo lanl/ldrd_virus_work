@@ -137,9 +137,9 @@ def feature_signs(
         surface_exposed_sign.append(sign)
 
         # add sign of response effect based on pearson correllation coefficient
-        pearson_r = feature_count.loc[
-            feature_count["Features"] == f"kmer_PC_{found_kmers[i]}"
-        ]["Pearson R"].values[0]
+        pearson_r = feature_count.loc[feature_count["Features"] == found_kmers[i]][
+            "Pearson R"
+        ].values[0]
 
         if pearson_r > 0:
             response_effect.append("+")
@@ -642,7 +642,7 @@ def FIC_plot(
 
     for kmer_idx, p in enumerate(bars):
         # calculate corresponding surface exposure %
-        kmer_name = topN_kmers[kmer_idx]
+        kmer_name = top_features[kmer_idx]
         percent_exposed = surface_exposed_dict[kmer_name]
         percent_lbl = f"{percent_exposed:.2f}%"
 
@@ -2107,7 +2107,7 @@ if __name__ == "__main__":
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            found_kmers,
+            top_features_array,
             feature_count,
         )
 

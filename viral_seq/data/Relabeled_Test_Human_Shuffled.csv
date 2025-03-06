@@ -1,0 +1,737 @@
+,Species,Accessions,human
+0,Guama orthobunyavirus,KP792666.1  KP792665.1  KP792664.1,True
+1,Torque teno virus 20,NC_038340.1,True
+2,Marituba orthobunyavirus,NC_034495.1  NC_034504.1  NC_034496.1,True
+3,Dhori thogotovirus,NC_034261.1  NC_034263.1  NC_034254.1  NC_034255.1  NC_034262.1  NC_034256.1,True
+4,Chikungunya virus,HM045787.1,True
+5,Influenza A virus,CY216614.1  CY216615.1  CY216616.1  CY216617.1  CY216618.1  CY216619.1  CY216620.1  CY216621.1,True
+6,Mammalian 2 orthobornavirus,NC_030701.1,True
+7,Thogoto thogotovirus,NC_006508.1  NC_006495.1  NC_006496.1  NC_006506.1  NC_006507.1  NC_006504.1,True
+8,Mayaro virus,NC_003417.1,True
+9,Rift Valley fever phlebovirus,NC_014397.1  NC_014396.1  NC_014395.1,True
+10,Aroa virus,NC_009026.2,True
+11,Gammapapillomavirus 6,NC_008189.1,True
+12,Human associated gemyvongvirus 1,NC_028459.1,True
+13,Torque teno virus 10,NC_014076.1,True
+14,Oropouche orthobunyavirus,NC_005776.1  NC_005775.1  NC_005777.1,True
+15,Khujand lyssavirus,NC_025385.1,True
+16,Mammalian orthorubulavirus 5,NC_006430.1,True
+17,Rotavirus A,EF554137.1  EF554138.1  EF554139.1  EF554140.1  EF554143.1  EF554141.1  EF554145.1  EF554142.1  EF554144.1  EF554146.1  EF554147.1,True
+18,Orthohepevirus A,M73218.1,True
+19,Cosavirus E,NC_012798.1,True
+20,Tacaiuma orthobunyavirus,MF497779.1  MF497777.1  MF497772.1,True
+21,Medjerda phlebovirus,KU255114.1 KU255115.1 KU297253.1,True
+22,Gammapapillomavirus 10,NC_014185.1,True
+23,Human betaherpesvirus 5,NC_006273.2,True
+24,Gammapapillomavirus 3,NC_001691.1,True
+25,Sepik virus,NC_008719.1,True
+26,Lagos bat lyssavirus,NC_020807.1,True
+27,Ilesha orthobunyavirus,NC_043587.1 NC_043586.1 NC_043585.1,True
+28,Lymphocytic choriomeningitis mammarenavirus,NC_004291.1  NC_004294.1,True
+29,Gammapapillomavirus 15,NC_017993.1,True
+30,Human betaherpesvirus 7,NC_001716.2,True
+31,Gammapapillomavirus 9,NC_013035.1,True
+32,Primate T-lymphotropic virus 1,NC_001436.1,True
+33,Nupapillomavirus 1,NC_001354.1,True
+34,Hendra henipavirus,NC_001906.3,True
+35,Human coronavirus NL63,NC_005831.2,True
+36,Torque teno virus 27,NC_014074.1,True
+37,Hepatitis B virus,AJ344115.1,True
+38,Human mastadenovirus A,AC_000005.1,True
+39,Colorado tick fever virus,NC_004181.1  NC_004182.1  NC_004183.1  NC_004184.1  NC_004185.1  NC_004186.1  NC_004187.1  NC_004188.1  NC_004180.1  NC_004189.1  NC_004191.1  NC_004190.1,True
+40,Mammalian 1 orthobornavirus,NC_001607.1,True
+41,Gammapapillomavirus 20,NC_028125.1,True
+42,Human polyomavirus 1,NC_001538.1,True
+43,Japanese encephalitis virus,GQ902058.1,True
+44,Human polyomavirus 11,NC_020106.1,True
+45,Human associated cyclovirus 2,NC_036877.1,True
+46,Chandipura vesiculovirus,NC_020805.1,True
+47,Primate erythroparvovirus 1,NC_000883.2,True
+48,Torque teno midi virus 13,NC_038360.1,True
+49,Alphapapillomavirus 5,NC_001583.1,True
+50,Zaire ebolavirus,NC_002549.1,True
+51,Human associated cyclovirus 7,NC_038417.1,True
+52,Macaca mulatta polyomavirus 1,NC_001669.1,True
+53,Mamastrovirus 6,NC_011400.1,True
+54,Gammapapillomavirus 26,NC_039086.1,True
+55,Kokobera virus,NC_032088.1,True
+56,Ntaya virus,NC_018705.3,True
+57,Human associated cyclovirus 1,NC_038412.1,True
+58,Cardiovirus A,NC_001479.1,True
+59,Bovine papular stomatitis virus,NC_005337.1,True
+60,Torque teno mini virus 6,NC_014095.1,True
+61,Tensaw orthobunyavirus,NC_043546.1 NC_043548.1 NC_043547.1,True
+62,Morreton vesiculovirus,NC_034508.1,True
+63,Lloviu cuevavirus,NC_016144.1,True
+64,Bagaza virus,NC_012534.1,True
+65,Parechovirus A,NC_001897.1,True
+66,Tai Forest ebolavirus,NC_014372.1,True
+67,Primate T-lymphotropic virus 2,Y13051.1,True
+68,Snowshoe hare orthobunyavirus,EU203678.2 EU262553.1 EU294510.1,True
+69,Madrid orthobunyavirus,NC_034497.1  NC_034505.1  NC_034498.1,True
+70,Uukuniemi phlebovirus,NC_005214.1  NC_005220.1  NC_005221.1,True
+71,Torque teno midi virus 5,NC_038352.1,True
+72,Enterovirus A,KU254596.1,True
+73,Klamath tupavirus,NC_034549.1,True
+74,Hepacivirus B,NC_038426.1,True
+75,Candiru phlebovirus,NC_015374.1  NC_015373.1  NC_015375.1,True
+76,Mokola lyssavirus,NC_006429.1,True
+77,Ikoma lyssavirus,NC_018629.1,True
+78,Human associated gemykibivirus 5,NC_030448.1,True
+79,Schmallenberg orthobunyavirus,NC_018463.1  NC_018467.1  NC_018464.1,True
+80,Gammapapillomavirus 27,NC_027528.1,True
+81,Human orthopneumovirus,NC_001781.1,True
+82,Rhinovirus B,FJ445188.1,True
+83,Venezuelan equine encephalitis virus,KC344449.1,True
+84,Shimoni bat lyssavirus,NC_025365.1,True
+85,Lassa mammarenavirus,NC_004297.1  NC_004296.1,True
+86,Sapporo virus,NC_006554.1,True
+87,Human polyomavirus 13,NC_024118.1,True
+88,Chapare mammarenavirus,NC_010563.1  NC_010562.1,True
+89,Primate bocaparvovirus 1,JQ923422.1,True
+90,Human associated cyclovirus 9,NC_021568.1,True
+91,Grey sealpox virus,NC_035188.1,True
+92,Human respirovirus 3,NC_001796.2,True
+93,Puumala orthohantavirus,NC_005225.1  NC_005223.1  NC_005224.1,True
+94,Tembusu virus,NC_015843.2,True
+95,Betapapillomavirus 4,NC_004500.1,True
+96,Australian bat lyssavirus,NC_003243.1,True
+97,Platyrrhini mastadenovirus A,NC_020487.1,True
+98,Human associated cyclovirus 4,NC_038414.1,True
+99,Keystone orthobunyavirus,NC_043629.1 NC_043627.1 NC_043628.1,True
+100,Pseudocowpox virus,NC_013804.1,True
+101,Human picobirnavirus,NC_007026.1  NC_007027.1,True
+102,Human alphaherpesvirus 2,NC_001798.2,True
+103,European bat 2 lyssavirus,NC_009528.2,True
+104,Bundibugyo ebolavirus,NC_014373.1,True
+105,Gammapapillomavirus 11,NC_016157.1,True
+106,Punta Toro phlebovirus,NC_027203.1  NC_027201.1  NC_027202.1,True
+107,Argentinian mammarenavirus,NC_005080.1  NC_005081.1,True
+108,Bahia barhavirus,KM205018.1,True
+109,Isfahan vesiculovirus,NC_020806.1,True
+110,Louping ill virus,NC_001809.1,True
+111,Influenza B virus,MH245265.1  MH245264.1  MH245263.1  MH245262.1  MH245261.1  MH245260.1  MH245259.1  MH245258.1,True
+112,Heartland bandavirus,KJ740148.1 KJ740147.1 KJ740146.1,True
+113,Sosuga pararubulavirus,NC_025343.1,True
+114,Aravan lyssavirus,NC_020808.1,True
+115,Gammapapillomavirus 7,NC_012485.1,True
+116,Royal Farm virus,NC_006947.1,True
+117,Kasokero orthonairovirus,NC_036636.1  NC_029933.1  NC_029932.1,True
+118,Brazilian mammarenavirus,NC_006313.1  NC_006317.1,True
+119,Barmah Forest virus,NC_001786.1,True
+120,Torque teno midi virus 4,NC_038351.1,True
+121,Pegivirus H,NC_027998.2,True
+122,Simian orthorubulavirus,NC_006428.1,True
+123,Guaroa orthobunyavirus,NC_034487.1  NC_034506.1  NC_034486.1,True
+124,Human mastadenovirus E,NC_003266.2,True
+125,Mupapillomavirus 3,NC_038525.1,True
+126,Grivet simian foamy virus,NC_010820.1,True
+127,Choclo orthohantavirus,NC_038374.1  NC_038373.1,True
+128,Betapapillomavirus 2,NC_001596.1,True
+129,Human coronavirus HKU1,NC_006577.2,True
+130,Pegivirus C,NC_001710.1,True
+131,Bunyamwera orthobunyavirus,NC_001925.1  NC_001926.1  NC_001927.1,True
+132,Langat virus,NC_003690.1,True
+133,Macaua orthobunyavirus,JN572068.1 JN572069.1 JN572070.1,True
+134,Bayou orthohantavirus,NC_038299.1  NC_038300.1  NC_038298.1,True
+135,Lumbo orthbunyavirus,NC_043632.1 NC_043630.1 NC_043631.1,True
+136,Torque teno midi virus 2,NC_014093.1,True
+137,Caraparu orthobunyavirus,NC_034489.1  NC_034477.1  NC_034478.1,True
+138,Human associated cyclovirus 10,NC_023874.2,True
+139,Gammapapillomavirus 24,NC_023891.1,True
+140,Gray Lodge hapavirus,NC_034541.1,False
+141,Artibeus planirostris polyomavirus 3,NC_038556.1,False
+142,Lambdapapillomavirus 2,NC_001619.1,False
+143,Ateline alphaherpesvirus 1,NC_034446.1,False
+144,Pegivirus B,NC_030291.1,False
+145,Walkabout sunrhavirus,NC_028232.1,False
+146,Sweetwater Branch tibrovirus,NC_034546.1,False
+147,Bruges orthohantavirus,NC_034402.1  NC_034395.1  NC_034394.1,False
+148,Pteropus associated gemycircularvirus 3,NC_038486.1,False
+149,Mermet orthobunyavirus,NC_043591.1 NC_043592.1 NC_043593.1,False
+150,Betaarterivirus sheoin,KY369968.1,False
+151,Buenaventura phlebovirus,KP272001.1 KP272002.1 KP272003.1,False
+152,Zahedan zarhavirus,NC_040664.1,False
+153,Luna mammarenavirus,NC_016153.1  NC_016152.1,False
+154,Sripur sripuvirus,NC_034542.1,False
+155,Thailand orthohantavirus,NC_034556.1  NC_034563.1  NC_034555.1,False
+156,Anhembi orthobunyavirus,NC_043564.1 NC_043565.1 NC_043566.1,False
+157,Turuna phlebovirus,HM119431.1 HM119432.1 HM119433.1,False
+158,Influenza D virus,NC_036616.1  NC_036615.1  NC_036619.1  NC_036618.1  NC_036617.1  NC_036620.1  NC_036621.1,False
+159,Sonchus yellow net nucleorhabdovirus,NC_001615.3,False
+160,Psipapillomavirus 3,NC_033745.1,False
+161,Ampivirus A,NC_027214.1,False
+162,Mamastrovirus 13,NC_002469.1,False
+163,Avian orthoavulavirus 21,MF594598.1,False
+164,Avisivirus A,NC_038304.1,False
+165,Wenzhou mammarenavirus,NC_026019.1  NC_026018.1,False
+166,Saimiriine gammaherpesvirus 2,NC_001350.1,False
+167,Chlorocebus pygerythrus polyomavirus 3,NC_025898.1,False
+168,Bat associated circovirus 5,NC_038387.1,False
+169,Crahelivirus A,KY312540.1,False
+170,Penguinpox virus,NC_024446.1,False
+171,Chicken associated gemycircularvirus 1,NC_030141.1,False
+172,Cardioderma cor polyomavirus 1,NC_020067.1,False
+173,Rosavirus B,NC_031105.1,False
+174,Leporid alphaherpesvirus 4,NC_029311.1,False
+175,Bat Hp-betacoronavirus Zhejiang2013,NC_025217.1,False
+176,Simian mastadenovirus D,NC_028103.1,False
+177,Jembrana disease virus,U21603.1,False
+178,Zetapapillomavirus 1,NC_003748.1,False
+179,Bovine mastadenovirus C,AF027599.2,False
+180,Dyoiotapapillomavirus 1,NC_017862.1,False
+181,Kadam virus,NC_033724.1,False
+182,Bat associated circovirus 7,NC_038389.1,False
+183,Massilia phlebovirus,EU725771.1 EU725772.1 EU725773.1,False
+184,Porcine type-C oncovirus,GU980187.1,False
+185,Hazara orthonairovirus,NC_038709.1  NC_038710.1  NC_038711.1,False
+186,Aichivirus B,NC_004421.1,False
+187,Anadyr orthobunyavirus,KU159766.1 KU159765.1 KU159764.1,False
+188,Rousettus bat coronavirus HKU9,NC_009021.1,False
+189,Pteropus associated gemygorvirus 1,NC_038495.1,False
+190,Megrivirus C,NC_039235.1,False
+191,Taupapillomavirus 4,NC_022253.1,False
+192,Cadicivirus A,NC_021178.1,False
+193,Cedar henipavirus,NC_025351.1,False
+194,Bat mastadenovirus I,MG551742.1,False
+195,Bat associated circovirus 8,NC_038390.1,False
+196,Monodontid alphaherpesvirus 1,MF678601.1,False
+197,Dashli phlebovirus,KP771821.1 KP771822.1 KP771823.1,False
+198,Capim orthobunyavirus,NC_034482.1  NC_034493.1  NC_034483.1,False
+199,Aichivirus F,KJ641694.1,False
+200,Hepacivirus L,NC_031916.1,False
+201,Avian metaavulavirus 14,NC_039015.1,False
+202,Rhinolophus bat coronavirus HKU2,NC_009988.1,False
+203,Pestivirus G,NC_003678.1,False
+204,Coot Bay almendravirus,NC_031957.1,False
+205,Tylonycteris bat coronavirus HKU4,NC_009019.1,False
+206,Witwatersrand orthobunyavirus,NC_043674.1 NC_043675.1 NC_043673.1,False
+207,Enhydra lutris polyomavirus 1,NC_025259.1,False
+208,Drosophina B birnavirus,GQ342962.1 GQ342963.1,False
+209,Enterovirus F,NC_021220.1,False
+210,Sango orthobunyavirus,NC_043556.1 NC_043555.1 NC_043557.1,False
+211,Mycoreovirus 3,NC_007535.1  NC_007533.1  NC_007536.1  NC_007524.1  NC_007534.1  NC_007525.1  NC_007526.1  NC_007527.1  NC_007528.1  NC_007529.1  NC_007531.1  NC_007532.1,False
+212,Equine infectious anemia virus,NC_001450.1,False
+213,Cardiovirus F,KY432929.1,False
+214,Manitoba hapavirus,NC_034531.1,False
+215,Megrivirus D,NC_034617.1,False
+216,Chipapillomavirus 3,NC_016014.1,False
+217,Mamastrovirus 3,NC_025379.1,False
+218,Turkey aviadenovirus D,NC_022613.1,False
+219,Corriparta virus,KC853042.1  KC853043.1  KC853044.1  KC853045.1  KC853046.1  KC853047.1  KC853048.1  KC853049.1  KC853050.1  KC853051.1,False
+220,Dyosigmapapillomavirus 1,NC_023178.1,False
+221,Desmodus rotundus polyomavirus 1,NC_028122.1,False
+222,Bat mastadenovirus F,NC_034626.1,False
+223,African swine fever virus,NC_001659.2,False
+224,Blackbird associated gemykibivirus 1,NC_025731.1,False
+225,Jugra virus,NC_033699.1,False
+226,Pegivirus K,NC_034442.1,False
+227,Bat associated cyclovirus 11,NC_038400.1,False
+228,Iaco orthobunyavirus,NC_043568.1 NC_043567.1 NC_043569.1,False
+229,Bovine fever ephemerovirus,NC_002526.1,False
+230,Porcine mastadenovirus C,NC_002702.1,False
+231,Mamastrovirus 2,NC_024701.1,False
+232,Anser anser polyomavirus 1,NC_004800.1,False
+233,Chipapillomavirus 2,NC_010226.1,False
+234,Guajara orthobunyavirus,NC_038734.1  NC_038733.1  NC_038732.1,False
+235,Miniopterus schreibersii polyomavirus 2,NC_034221.1,False
+236,Cercopithecus erythrotis polyomavirus 1,NC_025892.1,False
+237,Hepacivirus E,KC815310.1,False
+238,Bat associated cyclovirus 3,NC_038394.1,False
+239,Mallard associated gemycircularvirus 1,NC_025733.1,False
+240,Rabovirus C,NC_040605.1,False
+241,Qalyub orthonairovirus,NC_034511.1 NC_034522.1 NC_034512.1,False
+242,Taupapillomavirus 2,NC_023852.1,False
+243,Bowe orthohantavirus,NC_034407.1  NC_034406.1  NC_034405.1,False
+244,Mammalian orthorubulavirus 6,MH972568.1,False
+245,Toros phlebovirus,NC_029903.1 NC_037614.1 NC_037615.1,False
+246,Nilaparvata lugens reovirus,NC_003654.1  NC_003655.1  NC_003656.1  NC_003657.1  NC_003658.1  NC_003659.1  NC_003660.1  NC_003653.1  NC_003661.1  NC_003652.1,False
+247,Avian sarcoma virus CT10,NC_038922.1,False
+248,Rodent associated circovirus 2,KY370042.1,False
+249,Sorex araneus coronavirus T14,NC_046955.1,False
+250,Bat associated cyclovirus 12,NC_025791.1,False
+251,Turkey aviadenovirus B,NC_014564.2,False
+252,Mason-Pfizer monkey virus,NC_001550.1,False
+253,Cypovirus 2,NC_023491.1  NC_023486.1  NC_023492.1  NC_023487.1  NC_023488.1  NC_023493.1  NC_023489.1  NC_023494.1  NC_023490.1  NC_023495.1,False
+254,Yellowtail ascites virus,NC_004168.1  NC_004176.1,False
+255,Ippy mammarenavirus,NC_007906.1  NC_007905.1,False
+256,Merino Walk mammarenavirus,NC_023763.1  NC_023764.1,False
+257,Mukawa phlebovirus,NC_043510.1 NC_043509.1 NC_043511.1,False
+258,Rodent associated circovirus 7,MF497827.1,False
+259,Khabarovsk orthohantavirus,NC_034519.1  NC_034518.1  NC_034527.1,False
+260,Bat associated cyclovirus 16,NC_038404.1,False
+261,Simian mastadenovirus G,NC_020485.1,False
+262,Sakobuvirus A,NC_022802.1,False
+263,Hepatovirus B,NC_027818.1,False
+264,Batama orthobunyavirus,NC_038722.1,False
+265,Pegivirus D,NC_038433.1,False
+266,Zebra finch circovirus,NC_026945.1,False
+267,Duck associated cyclovirus 1,NC_034977.1,False
+268,Aotine betaherpesvirus 1,NC_016447.1,False
+269,Flamingopox virus,NC_036582.1,False
+270,Orivirus A,NC_025432.1,False
+271,Rotterdam reptarenavirus,NC_018484.1  NC_018481.1,False
+272,Thimiri orthobunyavirus,MH484336.1  MH484337.1  MH484338.1,False
+273,Avian metaavulavirus 8,NC_039195.1,False
+274,Gouleako goukovirus,HQ541738.1  HQ541737.1  HQ541736.1,False
+275,Maize stripe tenuivirus,NC_038751.1  NC_038754.1  NC_038752.1  NC_038753.1,False
+276,Pomona bat hepatitis B virus,NC_038503.1,False
+277,Sangassou orthohantavirus,NC_034517.1  NC_034516.1  NC_034526.1,False
+278,Tremovirus A,NC_003990.1,False
+279,Muarterivirus afrigant,NC_035127.1,False
+280,Torque teno sus virus k2a,NC_014092.2,False
+281,Piliocolobus rufomitratus polyomavirus 1,NC_019850.1,False
+282,Porcine circovirus 1,NC_001792.2,False
+283,Bat mastadenovirus B,NC_015932.1,False
+284,Goatpox virus,NC_004003.1,False
+285,Bovine orthopneumovirus,NC_001989.1,False
+286,Penguin siadenovirus A,NC_030116.1,False
+287,Parapoxvirus of red deer in New Zealand,NC_025963.1,False
+288,Pteropus associated gemycircularvirus 10,NC_038493.1,False
+289,Kamese hapavirus,NC_034450.1,False
+290,Limnipivirus C,NC_023437.1,False
+291,Bat mastadenovirus D,NC_030860.1,False
+292,Drosophila X virus,NC_004177.1  NC_004169.1,False
+293,Wongabel hapavirus,NC_011639.1,False
+294,Torque teno felis virus 2,NC_038349.1,False
+295,Jonchet jonvirus,KP710232.1  KP710240.1  KP710243.1,False
+296,Yunnan orbivirus,NC_007656.1  NC_007657.1  NC_007658.1  NC_007659.1  NC_007660.1  NC_007661.1  NC_007662.1  NC_007663.1  NC_007664.1  NC_007665.1,False
+297,Chickadee associated gemycircularvirus 1,NC_027776.1,False
+298,Hepacivirus N,NC_038432.1,False
+299,Salmon isavirus,NC_006503.1  NC_006505.1  NC_006502.1  NC_006501.1  NC_006500.2  NC_006499.1  NC_006498.1  NC_006497.1,False
+300,Feline leukemia virus,NC_001940.1,False
+301,Parrot hepatitis B virus,NC_016561.1,False
+302,Kolente ledantevirus,NC_025342.1,False
+303,Papio cynocephalus polyomavirus 2,NC_025897.1,False
+304,Pteropox virus,NC_030656.1,False
+305,Equid alphaherpesvirus 3,NC_024771.1,False
+306,Fujinami sarcoma virus,NC_001403.1,False
+307,Avian metaavulavirus 7,NC_025347.1,False
+308,Patois orthobunyavirus,NC_043690.1  NC_043691.1  NC_043689.1,False
+309,Solwezi mammarenavirus,NC_038366.1  NC_038367.1,False
+310,Ludopivirus A,NC_040684.1,False
+311,Mossuril hapavirus,NC_038275.1,False
+312,Torque teno equus virus 1,NC_040668.1,False
+313,Zalophus californianus polyomavirus 1,NC_013796.1,False
+314,Mosqueiro hapavirus,NC_034448.1,False
+315,Hart Park hapavirus,NC_034447.1,False
+316,Bovine atadenovirus D,NC_002685.2,False
+317,Turlock orthobunyavirus,MK514125.1  MK514122.1  MK514119.1,False
+318,Keterah orthonairovirus,NC_034392.1  NC_034388.1  NC_034389.1,False
+319,Mapuera orthorubulavirus,NC_009489.1,False
+320,Columbid alphaherpesvirus 1,NC_034266.1,False
+321,Coastal Plains tibrovirus,NC_025397.1,False
+322,Rice yellow stunt nucleorhabdovirus,NC_003746.1,False
+323,Pteropus associated gemykibivirus 1,NC_038498.1,False
+324,Boosepivirus C,LR216006.1,False
+325,Odrenisrou phlebovirus,HM566174.1 HM566173.1 HM566175.1,False
+326,Porcine circovirus 3,NC_031753.1,False
+327,Rhopapillomavirus 1,NC_006563.1,False
+328,Ngaingan hapavirus,NC_013955.1,False
+329,Psittacid alphaherpesvirus 1,NC_005264.1,False
+330,Aquareovirus E,NC_038640.1  NC_038634.1  NC_038635.1  NC_038641.1  NC_038636.1  NC_038637.1  NC_038643.1  NC_038639.1  NC_038638.1  NC_038642.1  NC_038644.1,False
+331,Pteropus associated gemykolovirus 1,NC_038501.1,False
+332,Myxoma virus,NC_001132.2,False
+333,Skua siadenovirus A,NC_016437.1,False
+334,Deltapapillomavirus 4,NC_001522.1,False
+335,Luxi orthohantavirus,NC_038529.1  NC_038528.1  NC_038530.1,False
+336,Dobsonia moluccensis polyomavirus 1,NC_026768.1,False
+337,Bat mastadenovirus H,AP018374.1,False
+338,Cadicivirus B,NC_040611.1,False
+339,Nique phlebovirus,HM119425.1 HM119426.1 HM119427.1,False
+340,Ungulate bocaparvovirus 8,NC_035185.1,False
+341,Treiszetapapillomavirus 1,NC_024300.1,False
+342,Avastrovirus 1,NC_002470.1,False
+343,Dyoepsilonpapillomavirus 1,NC_013117.1,False
+344,Muir barhavirus,KM204990.1,False
+345,Cracticus torquatus polyomavirus 1,NC_023008.1,False
+346,Pteropus associated gemycircularvirus 5,NC_038488.1,False
+347,Canary circovirus,NC_003410.1,False
+348,Dyotaupapillomavirus 1,NC_038519.1,False
+349,Macacine gammaherpesvirus 10,KP676001.1,False
+350,Bubaline alphaherpesvirus 1,KU936049.1,False
+351,Oscivirus A,NC_014412.1,False
+352,Treisepsilonpapillomavirus 1,NC_023894.1,False
+353,Panine alphaherpesvirus 3,NC_023677.1,False
+354,Chipapillomavirus 1,NC_008297.1,False
+355,Mallard associated gemygorvirus 1,NC_030138.1,False
+356,Ostrich associated gemytondvirus 1,NC_025728.1,False
+357,Saimiriine alphaherpesvirus 1,NC_014567.1,False
+358,Drosophila immigrans sigmavirus,NC_038280.1,False
+359,Megrivirus A,NC_023858.1,False
+360,Mus musculus polyomavirus 2,NC_001505.2,False
+361,Cano Delgadito orthohantavirus,NC_034515.1  NC_034525.1  NC_034528.1,False
+362,Beihai picobirnavirus,NC_032498.1 NC_032502.1,False
+363,Anseriform dependoparvovirus 1,NC_006147.2,False
+364,Kismaayo bandavirus,KM114252.1 KM114253.1 KM114254.1,False
+365,Balsa almendravirus,NC_039200.1,False
+366,Bat mastadenovirus C,NC_029898.1,False
+367,Tuhoko pararubulavirus 1,NC_025410.1,False
+368,Torque teno tupaia virus,NC_038348.1,False
+369,Sapelovirus B,NC_004451.1,False
+370,Pteropus associated gemycircularvirus 8,NC_038491.1,False
+371,Skunkpox virus,NC_031038.1,False
+372,Rinderpest morbillivirus,NC_006296.2,False
+373,Hepacivirus D,NC_031950.1,False
+374,Corvus monedula polyomavirus 1,NC_007922.1,False
+375,Psittacine aviadenovirus B,NC_039032.1,False
+376,Xipapillomavirus 2,NC_028126.1,False
+377,Ungulate protoparvovirus 1,NC_001718.1,False
+378,Macacine betaherpesvirus 8,JN227533.1,False
+379,Dyorhopapillomavirus 1,NC_020500.1,False
+380,Recovirus A,NC_043512.1,False
+381,Kigluaik phantom orthophasmavirus,NC_034462.1 NC_034469.1 NC_034463.1,False
+382,Maize mosaic nucleorhabdovirus,NC_005975.1,False
+383,Pipapillomavirus 2,NC_008519.1,False
+384,Rice hoja blanca tenuivirus,NC_036597.1  NC_036598.1  NC_036602.1  NC_036599.1,False
+385,Galliform aveparvovirus 1,NC_038534.1,False
+386,Sturnira lilium polyomavirus 1,NC_038557.1,False
+387,Fowl aviadenovirus E,NC_038332.1,False
+388,Dyokappapapillomavirus 5,NC_039037.1,False
+389,Curionopolis curiovirus,NC_025354.1,False
+390,Northern cereal mosaic cytorhabdovirus,NC_002251.1,False
+391,Raven circovirus,NC_008375.1,False
+392,Sunguru sunrhavirus,NC_025401.1,False
+393,Equine foamy virus,NC_002201.1,False
+394,Maize fine streak nucleorhabdovirus,NC_005974.1,False
+395,Chenuda virus,KP268794.1  KP268795.1  KP268796.1  KP268797.1  KP268798.1  KP268799.1  KP268800.1  KP268801.1  KP268802.1  KP268803.1,False
+396,Porcine associated gemycircularvirus 1,NC_030145.1,False
+397,Miniopterus schreibersii polyomavirus 1,NC_034220.1,False
+398,Canis familiaris polyomavirus 1,NC_034456.1,False
+399,Bat associated cyclovirus 9,NC_038399.1,False
+400,Dabieshan orthohantavirus,NC_038383.1  NC_038384.1,False
+401,Simian mastadenovirus E,NC_028105.1,False
+402,Murine orthopneumovirus,NC_006579.1,False
+403,Torque teno douroucouli virus,NC_014087.1,False
+404,Potosi orthobunyavirus,NC_043646.1 NC_043645.1 NC_043647.1,False
+405,Torque teno virus 4,NC_014069.1,False
+406,Carnivore amdoparvovirus 5,NC_031751.1,False
+407,Spheniscid alphaherpesvirus 1,NC_033464.1,False
+408,Rockport orthohantavirus,NC_038695.1  NC_038694.1  NC_038696.1,False
+409,Beluga whale coronavirus SW1,NC_010646.1,False
+410,Cao Bang orthohantavirus,NC_034485.1  NC_034474.1  NC_034484.1,False
+411,Equine associated gemycircularvirus 1,NC_030143.1,False
+412,Cypovirus 1,NC_003016.1  NC_003017.1  NC_003018.1  NC_003019.1  NC_003020.1  NC_003021.1  NC_003022.1  NC_003023.1  NC_003024.1  NC_003025.1,False
+413,Arumowot phlebovirus,MF593931.1 MF593932.1 MF593933.1,False
+414,Kappaarterivirus wobum,NC_026811.2,False
+415,Equine mastadenovirus B,NC_027705.1,False
+416,Modoc virus,NC_003635.1,False
+417,Torque teno tamarin virus,NC_014085.1,False
+418,Tick associated circovirus 1,NC_030199.1,False
+419,Panine betaherpesvirus 2,NC_003521.1,False
+420,Leticia phlebovirus,HM566152.1 HM566154.1 HM566153.1,False
+421,Tupaia belangeri polyomavirus 1,MK443498.1,False
+422,Avihepatovirus A,NC_008250.2,False
+423,Island sawgrhavirus,NC_025340.1,False
+424,Carollia perspicillata polyomavirus 1,NC_028120.1,False
+425,African horse sickness virus,NC_006021.1  NC_005996.1  NC_006017.1  NC_006012.1  NC_006020.1  NC_006018.1  NC_006011.1  NC_006019.1  NC_006016.1  NC_006009.1,False
+426,Passerivirus B,NC_036588.1,False
+427,Mongoose associated gemykibivirus 1,NC_026808.1,False
+428,Bat associated circovirus 3,NC_038386.1,False
+429,Lettuce yellow mottle cytorhabdovirus,NC_011532.1,False
+430,Sewage derived gemycircularvirus 1,NC_026164.1,False
+431,Bovine mastadenovirus B,AC_000002.1,False
+432,Enterovirus I,KP345887.1,False
+433,Torque teno seal virus 4,NC_026138.1,False
+434,Otomops martiensseni polyomavirus 2,NC_020066.1,False
+435,Mouse mammary tumor virus,NC_001503.1,False
+436,Piscine orthoreovirus,NC_036468.1  NC_036477.1  NC_036476.1  NC_036471.1  NC_036469.1  NC_036470.1  NC_036473.1  NC_036474.1  NC_036472.1  NC_036475.1,False
+437,Oakvale sunrhavirus,NC_025399.1,False
+438,Fort Morgan virus,NC_013528.1,False
+439,Avian orthoavulavirus 13,NC_030231.1,False
+440,Pigeonpox virus,NC_024447.1,False
+441,Nova mobatvirus,NC_034465.1  NC_034470.1  NC_034464.1,False
+442,Sheep associated gemycircularvirus 1,NC_030144.1,False
+443,Ovine atadenovirus D,NC_004037.2,False
+444,Rotavirus F,NC_021625.1  NC_021626.1  NC_021631.1  NC_021630.1  NC_021632.1  NC_021635.1  NC_021633.1  NC_021628.1  NC_021627.1  NC_021629.1  NC_021634.1,False
+445,Elephantid betaherpesvirus 4,NC_028379.1,False
+446,Porcine orthorubulavirus,NC_009640.1,False
+447,Insect shangavirus,NC_031221.1  NC_031222.1  NC_031223.1,False
+448,Lettuce necrotic yellows cytorhabdovirus,NC_007642.1,False
+449,Sewage derived gemycircularvirus 3,NC_026162.1,False
+450,Rotavirus J,KX756624.1 KX756625.1 KX756627.1 KX756626.1 KX756619.1 KX756628.1 KX756621.1 KX756620.1 KX756629.1 KX756622.1 KX756623.1,False
+451,Teschovirus B,MG875515.1,False
+452,Blackbird associated gemycircularvirus 1,NC_025741.1,False
+453,Drosophila affinis sigmavirus,NC_038278.1,False
+454,Sewage derived gemykibivirus 1,NC_026168.1,False
+455,Macacine betaherpesvirus 9,NC_030200.1,False
+456,Dyonupapillomavirus 1,NC_015325.1,False
+457,Duck coronavirus 2714,KM454473.1,False
+458,Puma lentivirus,U03982.1,False
+459,Taupapillomavirus 3,NC_021472.1,False
+460,Bat associated circovirus 11,KX756996.1,False
+461,Murine mastadenovirus C,NC_012584.1,False
+462,Infectious pancreatic necrosis virus,NC_001915.1  NC_001916.1,False
+463,Alcube phlebovirus,KR363190.1 KR363191.1 KR363192.1,False
+464,Cypovirus 15,NC_002557.1  NC_002558.1  NC_002559.1  NC_002567.1  NC_002560.1  NC_002561.1  NC_002562.1  NC_002563.1  NC_002564.1  NC_002565.1  NC_002566.1,False
+465,Wuhan mosquito orthophasmavirus 2,NC_031312.1 NC_031309.1 NC_031311.1,False
+466,Felipivirus A,NC_016156.1,False
+467,Avian paraavulavirus 3,NC_025373.1,False
+468,Chaco sripuvirus,NC_034550.1,False
+469,Fugong orthohantavirus,NC_034467.1  NC_034466.1  NC_034473.1,False
+470,Serra do Navio orthobunyavirus,NC_043641.1 NC_043639.1 NC_043640.1,False
+471,Pestivirus B,NC_002032.1,False
+472,Squirrel associated cyclovirus 1,NC_027530.1,False
+473,Deltapapillomavirus 6,NC_015267.1,False
+474,Carnivore bocaparvovirus 2,NC_020499.1,False
+475,Bujaru phlebovirus,NC_033830.1  NC_033847.1  NC_033831.1,False
+476,Bozo orthobunyavirus,NC_043655.1 NC_043653.1 NC_043654.1,False
+477,Cercopithecine betaherpesvirus 5,NC_012783.2,False
+478,Parechovirus E,NC_035779.1,False
+479,Orchid fleck dichorhavirus,NC_009608.1  NC_009609.1,False
+480,Avastrovirus 2,NC_003790.1,False
+481,Nyctalus velutinus alphacoronavirus SC-2013,NC_028833.1,False
+482,Kairi orthobunyavirus,KR260738.1  KR260739.1  KR260740.1,False
+483,Bovine rhinitis A virus,NC_038303.1,False
+484,Upsilonpapillomavirus 3,NC_018075.1,False
+485,Pegivirus E,NC_020902.1,False
+486,Bovine associated gemycircularvirus 1,NC_030146.1,False
+487,Maraba vesiculovirus,NC_025255.1,False
+488,Meleagrid alphaherpesvirus 1,NC_002641.1,False
+489,Kadipiro virus,NC_004210.1  NC_004212.1  NC_004213.1  NC_004214.1  NC_004215.1  NC_004216.1  NC_004209.1  NC_004208.1  NC_004207.1  NC_004206.1  NC_004205.1  NC_004199.1,False
+490,Boosepivirus B,LC036579.1,False
+491,Tai Forest hepatitis B virus,MK620908.1,False
+492,Psittacine atadenovirus A,NC_025962.1,False
+493,Reptile sunshinevirus 1,NC_025345.1,False
+494,Frijoles phlebovirus,KX611391.1  KX611392.1  KX611393.1,False
+495,Swan circovirus,NC_025247.1,False
+496,Hepacivirus H,KJ950939.1,False
+497,Psittaciform 1 orthobornavirus,NC_030688.1,False
+498,Felid alphaherpesvirus 1,NC_013590.2,False
+499,Murine coronavirus,NC_012936.1,False
+500,Murid gammaherpesvirus 4,NC_001826.2,False
+501,Sea otterpox virus,NC_037656.1,False
+502,Macacine gammaherpesvirus 11,AY528864.1,False
+503,Caviid betaherpesvirus 2,NC_020231.1,False
+504,Gammaarterivirus lacdeh,NC_001639.1,False
+505,Avian paraavulavirus 4,NC_019531.1,False
+506,Anatid alphaherpesvirus 1,JF999965.1,False
+507,Rattus norvegicus polyomavirus 1,NC_027531.1,False
+508,Parabovirus A,MF352412.1,False
+509,Pan troglodytes polyomavirus 3,NC_025370.1,False
+510,Nishimuro ledantevirus,NC_038276.1,False
+511,Anguillid perhabdovirus,NC_022581.1,False
+512,Southern elephant seal virus,NC_016960.1,False
+513,Meaban virus,NC_033721.1,False
+514,Sapelovirus A,NC_003987.1,False
+515,Mosavirus B,KY855435.1,False
+516,Avian orthoavulavirus 12,NC_025363.1,False
+517,Tupaiid betaherpesvirus 1,NC_002794.1,False
+518,Newbury 1 virus,NC_007916.1,False
+519,Duck atadenovirus A,NC_001813.1,False
+520,Cumuto goukovirus,KF543244.1  KF543245.1  KF543246.1,False
+521,Erythrura gouldiae polyomavirus 1,NC_039052.1,False
+522,Laibin mobatvirus,NC_038515.1  NC_038513.1  NC_038514.1,False
+523,Rosavirus C,KX783424.1,False
+524,Barur ledantevirus,NC_034535.1,False
+525,Hepatovirus G,NC_038316.1,False
+526,Yokapox virus,NC_015960.1,False
+527,Badger associated gemykibivirus 1,NC_026806.1,False
+528,Vicugna pacos polyomavirus 1,NC_034251.1,False
+529,Herbert herbevirus,JQ659256.1  JQ659257.1  JQ659258.1,False
+530,Boosepivirus A,LC006971.1,False
+531,Gibbon ape leukemia virus,KT724048.1,False
+532,Grand Arbaud uukuvirus,JF838327.1 JF838328.1 JF838329.1,False
+533,Deltaarterivirus pejah,NC_027124.1,False
+534,Sorex minutus polyomavirus 1,MF401583.1,False
+535,Dipteran brevihamaparvovirus 2,NC_004285.1,False
+536,Rio Preto da Eva pacuvirus,NC_043605.1 NC_043603.1 NC_043604.1,False
+537,Murine respirovirus,NC_001552.1,False
+538,Sakhalin orthonairovirus,KU925494.1  KU925495.1  KU925496.1,False
+539,Papiine alphaherpesvirus 2,NC_007653.1,False
+540,Feline foamy virus,NC_001871.1,False
+541,Pan troglodytes polyomavirus 6,NC_019857.1,False
+542,Gallid alphaherpesvirus 1,JN596962.1,False
+543,Macacine betaherpesvirus 3,NC_006150.1,False
+544,Bat associated cyclovirus 13,NC_038401.1,False
+545,Durania phlebovirus,HM566155.1 HM566157.1 HM566156.1,False
+546,Torque teno seal virus 8,KY246582.1,False
+547,Fusong orthohantavirus,NC_038447.1  NC_038446.1,False
+548,Gruiform aveparvovirus 1,NC_040603.1,False
+549,Allpahuayo mammarenavirus,NC_010249.1  NC_010253.1,False
+550,Pteropus associated gemycircularvirus 7,NC_038490.1,False
+551,Parabovirus B,KY432927.1,False
+552,Aalivirus A,NC_023985.1,False
+553,Artibeus planirostris polyomavirus 2,NC_038555.1,False
+554,Lonchura maja polyomavirus 1,NC_039053.1,False
+555,Ixcanal phlebovirus,HM566162.2 HM566163.1 HM566161.1,False
+556,Hepatovirus H,NC_028365.1,False
+557,Artibeus planirostris polyomavirus 1,NC_038558.1,False
+558,Almpiwar sripuvirus,NC_025391.1,False
+559,Pestivirus E,NC_024018.2,False
+560,Lunk mammarenavirus,NC_018711.1  NC_018710.1,False
+561,Dyoxipapillomavirus 1,NC_007612.1,False
+562,Torque teno seal virus 2,NC_024891.1,False
+563,Avian dependoparvovirus 1,NC_004828.1,False
+564,Taupapillomavirus 1,NC_006564.1,False
+565,Yata ephemerovirus,NC_028241.1,False
+566,Otomops martiensseni polyomavirus 1,NC_020071.1,False
+567,Dyoomegapapillomavirus 1,NC_038517.1,False
+568,Torque teno virus 25,NC_014083.1,False
+569,Oliveros mammarenavirus,NC_010250.1  NC_010248.1,False
+570,Snakehead novirhabdovirus,NC_000903.1,False
+571,Aguacate phlebovirus,NC_015451.1 NC_015450.1 NC_015452.1,False
+572,Bat associated circovirus 2,NC_021206.1,False
+573,Tibrogargan tibrovirus,NC_020804.1,False
+574,Ailuropoda melanoleuca polyomavirus 1,NC_035181.1,False
+575,Bat associated circovirus 1,NC_038385.1,False
+576,Kunsagivirus A,NC_038317.1,False
+577,Treisetapapillomavirus 1,NC_038531.1,False
+578,Tailam jeilongvirus,NC_025355.1,False
+579,Enterovirus L,NC_029905.1,False
+580,Bat mastadenovirus E,NC_030874.1,False
+581,Myotis lucifugus polyomavirus 1,NC_011310.1,False
+582,Deltapapillomavirus 3,NC_001789.1,False
+583,Akabane orthobunyavirus,NC_009894.1  NC_009895.1  NC_009896.1,False
+584,Tree shrew mastadenovirus A,AC_000190.1,False
+585,Rohelivirus A,KX156153.1,False
+586,Pestivirus J,NC_025677.1,False
+587,Treisdeltapapillomavirus 1,NC_038527.1,False
+588,Thetapapillomavirus 1,NC_003973.1,False
+589,Rhinolophus associated gemykibivirus 1,NC_038499.1,False
+590,Fly wubeivirus,NC_031298.1  NC_031295.1  NC_031297.1,False
+591,Sena Madureira sripuvirus,NC_034529.1,False
+592,Tupaia tupavirus,NC_007020.1,False
+593,Rice gall dwarf virus,NC_009245.1  NC_009241.1  NC_009248.1  NC_009242.1  NC_009249.1  NC_009243.1  NC_009250.1  NC_009244.1  NC_009251.1  NC_009252.1  NC_009246.1  NC_009247.1,False
+594,Torque teno canis virus,NC_014071.1,False
+595,Reptilian ferlavirus,NC_005084.2,False
+596,Upsilonpapillomavirus 2,NC_008184.1,False
+597,Murid gammaherpesvirus 7,GQ169129.1,False
+598,Baboon orthoreovirus,NC_015877.1  NC_015878.1  NC_015879.1  NC_015880.1  NC_015881.1  NC_015882.1  NC_015883.1  NC_015884.1  NC_015886.1  NC_015885.1,False
+599,Cervid alphaherpesvirus 2,MH036943.1,False
+600,Kenkeme orthohantavirus,NC_034560.1  NC_034565.1  NC_034559.1,False
+601,Pestivirus I,NC_018713.1,False
+602,Bulbul coronavirus HKU11,NC_011547.1,False
+603,Oita ledantevirus,NC_034548.1,False
+604,Taiwan bat lyssavirus,MF472710.1,False
+605,Itaituba phlebovirus,HM119416.2 HM119417.1 HM119418.2,False
+606,Ball python nidovirus 1,NC_024709.1,False
+607,Hepacivirus M,NC_038431.1,False
+608,Whataroa virus,NC_016961.1,False
+609,Chiropteran artiparvovirus 1,NC_016752.1,False
+610,Dyokappapapillomavirus 3,NC_030796.1,False
+611,Black robin associated gemykibivirus 1,NC_025732.1,False
+612,Simian mastadenovirus B,NC_015225.1,False
+613,Wolkberg orthobunyavirus,NC_034633.1 NC_034631.1 NC_034632.1,False
+614,Rodent associated circovirus 4,KY370029.1,False
+615,Ailurivirus A,MF327529.1,False
+616,Mesocricetus auratus polyomavirus 1,NC_001663.2,False
+617,Radi vesiculovirus,NC_038287.1,False
+618,Hepacivirus I,NC_038428.1,False
+619,Maize rough dwarf virus,NC_037570.1  NC_037578.1  NC_037572.1  NC_037571.1  NC_028465.1  NC_037573.1  NC_037574.1  NC_037575.1  NC_037576.1  NC_037577.1,False
+620,Puerto Almendras almendravirus,NC_025395.1,False
+621,Aquareovirus A,NC_007582.1  NC_007583.1  NC_007584.1  NC_007586.1  NC_007592.1  NC_007585.1  NC_007587.1  NC_007588.1  NC_007589.1  NC_007590.1  NC_007591.1,False
+622,Aichivirus D,NC_027919.1,False
+623,Golden reptarenavirus,NC_018482.1  NC_018483.1,False
+624,Jatobal orthobunyavirus,NC_043578.1 NC_043577.1 NC_043576.1,False
+625,Chimpanzee associated cyclovirus 1,NC_038407.1,False
+626,Dyoiotapapillomavirus 2,NC_020085.1,False
+627,Taro vein chlorosis nucleorhabdovirus,NC_006942.1,False
+628,Koongol orthobunyavirus,KP792669.1  KP792668.1  KP792667.1,False
+629,Ferak feravirus,KP710246.1  KP710264.1  KP710267.1,False
+630,Alajuela orthobunyavirus,NC_038717.1  NC_038715.1  NC_038716.1,False
+631,Deltaarterivirus hemfev,NC_003092.2,False
+632,Dyopipapillomavirus 1,NC_018076.1,False
+633,Mus musculus polyomavirus 3,MF175082.1,False
+634,Drosophila obscura sigmavirus,NC_022580.1,False
+635,Canid alphaherpesvirus 1,NC_030117.1,False
+636,Bovine rhinitis B virus,NC_010354.1,False
+637,Kibale herbevirus,NC_034460.1  NC_034468.1  NC_034458.1,False
+638,Pirital mammarenavirus,NC_005897.1  NC_005894.1,False
+639,Mamastrovirus 5,KY765684.1,False
+640,Mopeia mammarenavirus,NC_006574.1  NC_006575.1,False
+641,Rio Chico almendravirus,NC_031958.1,False
+642,Myodes narmovirus,MF943130.1,False
+643,Meles meles polyomavirus 1,NC_026473.1,False
+644,Porcine respirovirus 1,NC_025402.1,False
+645,Ungulate copiparvovirus 6,MG136722.1,False
+646,Precarious Point uukuvirus,HM566181.1 HM566179.1 HM566180.1,False
+647,Turkeypox virus,NC_028238.1,False
+648,Dobsonia moluccensis polyomavirus 3,NC_026769.1,False
+649,Ateles paniscus polyomavirus 1,NC_019853.1,False
+650,Rodent protoparvovirus 2,AF036710.1,False
+651,Chinook salmon nidovirus 1,NC_026812.1,False
+652,Gannoruwa bat lyssavirus,NC_031988.1,False
+653,Pipistrellus bat coronavirus HKU5,NC_009020.1,False
+654,Piliocolobus badius polyomavirus 1,NC_039051.1,False
+655,Bat mastadenovirus G,NC_031948.1,False
+656,Carnivore protoparvovirus 1,NC_001539.1,False
+657,Ungulate bocaparvovirus 7,KY640430.1,False
+658,Simbu orthobunyavirus,NC_018476.1  NC_018478.1  NC_018477.1,False
+659,White-eye coronavirus HKU16,NC_016991.1,False
+660,Thetaarterivirus mikelba 1,NC_025112.1,False
+661,Simian mastadenovirus H,NC_025678.1,False
+662,Torque teno mini virus 4,NC_014090.1,False
+663,Tuhoko pararubulavirus 3,NC_025350.1,False
+664,Ryukyu mammarenavirus,NC_039010.1 NC_039009.1,False
+665,San Angelo orthobunyavirus,NC_043637.1 NC_043638.1 NC_043636.1,False
+666,Deltapapillomavirus 1,NC_001524.1,False
+667,Torque teno seal virus 3,NC_024890.1,False
+668,Equid alphaherpesvirus 1,NC_001491.2,False
+669,Mischivirus A,NC_034381.1,False
+670,Latino mammarenavirus,NC_010760.1  NC_010758.1,False
+671,Bluetongue virus,NC_006023.1  NC_006013.2  NC_006014.1  NC_006024.2  NC_006025.1  NC_006010.1  NC_006022.1  NC_006007.1  NC_006008.1  NC_006015.1,False
+672,Mariental mammarenavirus,NC_027136.1 NC_027134.1,False
+673,Bat associated cyclovirus 4,NC_038395.1,False
+674,Rotavirus D,NC_014511.1  NC_014512.1  NC_014513.1  NC_014514.1  NC_014515.1  NC_014516.1  NC_014517.1  NC_014518.1  NC_014519.1  NC_014520.1  NC_014521.1,False
+675,Malagasivirus B,NC_026316.1,False
+676,Achimota pararubulavirus 2,NC_025404.1,False
+677,Myodes jeilongvirus,MG516455.1,False
+678,Yongjia ledantevirus,NC_031305.1,False
+679,Mobala mammarenavirus,NC_007904.1  NC_007903.1,False
+680,Squirrel mastadenovirus A,NC_035207.1,False
+681,Feline morbillivirus,NC_025264.1,False
+682,Wad Medani virus,NC_027533.1  NC_027539.1  NC_027540.1  NC_027541.1  NC_027542.1  NC_027543.1  NC_027544.1  NC_027545.1  NC_027546.1  NC_027547.1,False
+683,Procyon lotor polyomavirus 1,NC_023845.1,False
+684,Equid gammaherpesvirus 5,NC_026421.1,False
+685,Enseada orthobunyavirus,NC_043614.1 NC_043612.1 NC_043613.1,False
+686,Itacaiunas curiovirus,NC_034536.1,False
+687,Pegivirus J,KC815311.1,False
+688,Mouse associated cyclovirus 1,NC_031755.1,False
+689,Rodent associated circovirus 3,KY370039.1,False
+690,Hunnivirus A,NC_018668.1,False
+691,Caimito pacuvirus,MK330759.1 MK330760.1 MK330761.1,False
+692,Starling associated gemygorvirus 1,NC_025730.1,False
+693,Rice dwarf virus,NC_003760.1  NC_003761.1  NC_003762.1  NC_003763.1  NC_003764.1  NC_003765.1  NC_003766.1  NC_003767.1  NC_003768.1  NC_003772.1  NC_003773.1  NC_003774.1,False
+694,Bat associated circovirus 10,NC_035799.1,False
+695,Starling circovirus,NC_008033.1,False
+696,Birao orthobunyavirus,NC_043651.1 NC_043652.1 NC_043650.1,False
+697,Domestic cat hepatitis B virus,NC_040719.1,False
+698,Coffee ringspot dichorhavirus,NC_038756.1  NC_038755.1,False
+699,Saboya virus,NC_033697.1,False
+700,Sabo orthobunyavirus,NC_043553.1 NC_043552.1 NC_043554.1,False
+701,Upsilonpapillomavirus 1,NC_011109.1,False
+702,Cardiovirus C,NC_038305.1,False
+703,Umatilla virus,NC_024503.1  NC_024504.1  NC_024505.1  NC_024506.1  NC_024507.1  NC_024508.1  NC_024509.1  NC_024510.1  NC_024499.1  NC_024500.1,False
+704,Mycoreovirus 1,NC_010743.1  NC_010744.1  NC_010745.1  NC_038657.1  NC_010746.1  NC_010747.1  NC_010748.1  NC_010749.1  NC_010750.1  NC_010751.1  NC_010752.1  NC_010753.1,False
+705,Ghanaian bat henipavirus,NC_025256.1,False
+706,Yichang insect goukovirus,NC_031320.1  NC_031321.1  NC_031322.1,False
+707,Rabbit associated gemykroznavirus 1,NC_025729.1,False
+708,Cebus albifrons polyomavirus 1,NC_019854.2,False
+709,Tupaia narmovirus,NC_002199.1,False
+710,Primate loriparvovirus 1,NC_025891.1,False
+711,Hepatovirus E,NC_038314.1,False
+712,Dipteran brevihamaparvovirus 1,NC_011317.1,False
+713,Keuraliba ledantevirus,NC_034540.1,False
+714,Lambdaarterivirus afriporav,NC_026439.1,False
+715,Dyoomikronpapillomavirus 1,NC_023496.1,False
+716,Sorex coronatus polyomavirus 1,MF374999.1,False
+717,Torque teno felis virus,NC_014072.1,False
+718,Carnivore bocaparvovirus 1,NC_004442.1,False
+719,Chobar Gorge virus,NC_027553.1  NC_027554.1  NC_027555.1  NC_027556.1  NC_027557.1  NC_027558.1  NC_027559.1  NC_027560.1  NC_027561.1  NC_027562.1,False
+720,Bovine associated cyclovirus 1,NC_038405.1,False
+721,Murine mastadenovirus B,NC_014899.1,False
+722,Tioman pararubulavirus,NC_004074.1,False
+723,Pan troglodytes polyomavirus 5,NC_019856.1,False
+724,Rousettus aegyptiacus polyomavirus 1,NC_034219.1,False
+725,Jun jeilongvirus,NC_007454.1,False
+726,Squirrelpox virus,NC_022563.1,False
+727,Lambdapapillomavirus 1,NC_004765.1,False
+728,Pteronotus parnellii polyomavirus 1,NC_028121.1,False
+729,Ndumu virus,NC_016959.1,False
+730,Pegivirus F,NC_038434.1,False
+731,Kotonkan ephemerovirus,NC_017714.1,False
+732,Serinus canaria polyomavirus 1,NC_017085.1,False
+733,Dera Ghazi Khan orthonairovirus,KU925437.1  KU925438.1  KU925439.1,False
+734,Pasivirus A,NC_018226.1,False
+735,Hepatovirus I,NC_028364.1,False

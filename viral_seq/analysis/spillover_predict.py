@@ -309,7 +309,7 @@ def _populate_kmer_dict(
     features,
     kmer_type="AA",
     mapping_method=None,
-    kmer_info: Optional[dict] = None,
+    kmer_info: Optional[list] = None,
 ):
     for this_k in kmer:
         kmer_info, this_res = get_kmers(
@@ -336,7 +336,7 @@ def _grab_features(
     kmers_pc,
     kmer_k_pc,
     mapping_method,
-    kmer_info: Optional[dict] = None,
+    kmer_info: Optional[list] = None,
 ):
     feat_genomic = None
     feat_gc = None
@@ -406,7 +406,7 @@ def build_table(
     random_state: int = 123456789,
     target_column: str = "Human Host",
     mapping_method: str = "shen_2007",
-    kmer_info: Optional[dict] = None,
+    kmer_info: Optional[list] = None,
 ):
     if kmer_k is None:
         kmer_k = [10]

@@ -77,7 +77,7 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     topN_kmers: list
         list of kmer features for which to find associated virus-protein pairs
     all_kmer_info: pd.DataFrame
-        dataframe holding objects with KmerData information for kmers
+        dataframe holding virus-protein information for kmers
 
     Returns:
     --------
@@ -86,11 +86,13 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     """
     kmer_viruses = defaultdict(list)
     for kmer in topN_kmers:
-        all_kmer_data = all_kmer_info.loc[kmer]
-        for kmer_object in all_kmer_data:
-            if kmer_object is not None:
+        all_kmer_data = all_kmer_info[
+            all_kmer_info["kmer_names"].apply(lambda x: x[0]) == kmer
+        ]
+        for i, kmer_data in all_kmer_data.iterrows():
+            if kmer_data is not None:
                 kmer_viruses[kmer].append(
-                    (kmer_object.virus_name, kmer_object.protein_name)
+                    (kmer_data.virus_name, kmer_data.protein_name)
                 )
 
     return kmer_viruses
@@ -98,8 +100,7 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
 
 def load_kmer_info(file_name: str) -> pd.DataFrame:
     """
-    load parquet file containing 'all_kmer_info' and convert
-    dictionary data back to KmerData class
+    load parquet file containing 'all_kmer_info'
 
     Parameters:
     -----------
@@ -112,11 +113,8 @@ def load_kmer_info(file_name: str) -> pd.DataFrame:
         dataframe containing KmerData class objects
     """
     print("Loading 'all_kmer_info.parquet.gzip'...")
-    all_kmer_info = pd.read_parquet(file_name)
-    all_kmer_info_df = all_kmer_info.applymap(
-        lambda x: KmerData(**x) if x is not None else x
-    )  # type: ignore
-    return all_kmer_info_df
+    all_kmer_info = pl.read_parquet(file_name).to_pandas()
+    return all_kmer_info
 
 
 def save_kmer_info(all_kmer_info: list, save_file: str) -> None:
@@ -126,14 +124,10 @@ def save_kmer_info(all_kmer_info: list, save_file: str) -> None:
     Parameters:
     -----------
     all_kmer_info: list
-        list of dataframes containing KmerData class objects
+        list of KmerData class objects
     """
-    all_kmer_info_df = pd.concat(all_kmer_info)
-    # TODO: DataFrame.applymap deprecated in 2.1.0, consider adjusting `ci/requirements_low.txt`
-    kmer_info_df = all_kmer_info_df.applymap(
-        lambda x: x.__dict__ if not pd.isna(x) else x
-    )
-    kmer_info_df.to_parquet(save_file, engine="pyarrow", compression="gzip")
+    kmer_info_df = pd.DataFrame([k.__dict__ for k in all_kmer_info])
+    kmer_info_df.to_parquet(save_file)
 
 
 def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
@@ -172,7 +166,7 @@ class KmerData:
     def __init__(
         self,
         mapping_method: str,
-        kmer_names: list[str],
+        kmer_names: list,
         virus_name: str = "",
         protein_name: str = "",
     ):
@@ -1123,9 +1117,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                             ],
                             standalone_mode=False,
                         )
-                        all_kmer_info.append(
-                            pd.DataFrame.from_dict(kmer_info, orient="index")
-                        )
+                        all_kmer_info.extend(kmer_info)
                         this_checkpoint -= 1
 
             # save kmer info as parquet file

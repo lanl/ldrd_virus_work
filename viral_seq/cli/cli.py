@@ -3,7 +3,6 @@ import viral_seq.analysis.spillover_predict as sp
 import viral_seq.analysis.get_features as gf
 import pandas as pd
 import pickle
-from collections import defaultdict
 import os
 
 
@@ -271,7 +270,7 @@ def calculate_table(
     mapping_method,
 ):
     """Build a data table from given viral species and selected features."""
-    kmer_info = defaultdict(dict)
+    kmer_info = []
     df = pd.read_csv(file)
     rfc = None
     if rfc_file is not None:

@@ -10,7 +10,6 @@ import numpy as np
 import numpy.testing as npt
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
-from collections import defaultdict
 
 csv_train = files("viral_seq.tests").joinpath("TrainingSet.csv")
 csv_test = files("viral_seq.tests").joinpath("TestSet.csv")
@@ -657,6 +656,6 @@ def test_build_table_kmer_info(tmpdir):
             uni_select=True,
             num_select=10,
             mapping_method="jurgen_schmidt",
-            kmer_info=defaultdict(dict),
+            kmer_info=[],
         )
-        assert len(kmer_info) == 510
+        assert len(kmer_info) == 52166

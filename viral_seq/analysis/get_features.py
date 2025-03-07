@@ -38,7 +38,11 @@ def get_similarity_features(
 
 
 def get_kmers(
-    records, k=10, kmer_type="AA", mapping_method=None, kmer_info: Optional[dict] = None
+    records,
+    k=10,
+    kmer_type="AA",
+    mapping_method=None,
+    kmer_info: Optional[list] = None,
 ):
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
@@ -81,17 +85,14 @@ def get_kmers(
                             mm = (
                                 mapping_method if mapping_method is not None else "None"
                             )
-                            kmer_out = workflow.KmerData(
-                                mm,
-                                [kmer_name],
-                                record.annotations["organism"],
-                                feature.qualifiers["product"][0],
+                            kmer_info.append(
+                                workflow.KmerData(
+                                    mm,
+                                    [kmer_name],
+                                    record.annotations["organism"],
+                                    feature.qualifiers["product"][0],
+                                )
                             )
-                            if kmer_info:
-                                current_length = len(kmer_info[kmer_name])
-                            else:
-                                current_length = 0
-                            kmer_info[kmer_name].update({current_length: kmer_out})
 
     return kmer_info, kmers
 

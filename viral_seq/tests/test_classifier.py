@@ -534,7 +534,6 @@ def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_pred, exp_
     )
     y_test = rng.choice(2, n_samples)
     models = []
-    random_state = 2025
     for i, model in enumerate(
         [RandomForestClassifier, ExtraTreesClassifier, LGBMClassifier, XGBClassifier]
     ):

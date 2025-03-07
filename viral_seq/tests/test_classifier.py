@@ -1,6 +1,10 @@
 from sklearn.datasets import make_classification
 from viral_seq.analysis import classifier
-from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    ExtraTreesClassifier,
+    StackingClassifier,
+)
 from sklearn.model_selection import train_test_split
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
@@ -11,6 +15,8 @@ from pathlib import Path
 from importlib.resources import files
 from sklearn.utils.validation import check_is_fitted
 from matplotlib.testing.compare import compare_images
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 
 @pytest.mark.parametrize(
@@ -458,8 +464,7 @@ def test_plot_logistic_stacked_weights(tmpdir):
     X = rng.random(size=(10, 10))
     y = rng.choice(2, 10)
     models = [
-        (f"RF {i}", RandomForestClassifier(random_state=2025).fit(X, y))
-        for i in range(2)
+        (f"RF {i}", RandomForestClassifier(random_state=i).fit(X, y)) for i in range(2)
     ]
     stacked_logistic = StackingClassifier(models, cv="prefit").fit(X, y)
     estimator_names = [f"Name {i}" for i in range(2)]
@@ -476,62 +481,40 @@ def test_plot_logistic_stacked_weights(tmpdir):
     [
         (
             5,
-            np.array([0.0, 0.0, 0.0, 0.0, 0.33333333, 0.33333333, 1.0, 1.0]),
+            np.array([0.0] * 2 + [2 / 3] * 2 + [1.0] * 2),
+            np.array([0.0, 1 / 7, 2 / 7, 5 / 7, 6 / 7, 1.0]),
             np.array(
                 [
-                    0.0,
-                    0.14285714,
-                    0.42857143,
-                    0.71428571,
-                    0.71428571,
-                    0.85714286,
-                    0.85714286,
-                    1.0,
-                ]
-            ),
-            np.array(
-                [
-                    0.5023331,
-                    0.50264211,
-                    0.50094257,
-                    0.49955203,
-                    0.50109708,
-                    0.50125158,
-                    0.498625,
-                    0.49800699,
-                    0.5023331,
-                    0.49924302,
+                    0.42008643,
+                    0.42008643,
+                    0.42021615,
+                    0.28240654,
+                    0.44251979,
+                    0.42008643,
+                    0.28240654,
+                    0.42021615,
+                    0.28229865,
+                    0.42021615,
                 ]
             ),
             "test_ensemble_stacking_logistic_5.png",
         ),
         (
             "prefit",
-            np.array([0.0, 0.0, 0.66666667, 0.66666667, 1.0, 1.0, 1.0, 1.0]),
+            np.array([0.0] + [1 / 3] * 2 + [1.0] * 3),
+            np.array([0.0, 1 / 7, 2 / 7, 3 / 7, 6 / 7, 1.0]),
             np.array(
                 [
-                    0.0,
-                    0.14285714,
-                    0.14285714,
-                    0.28571429,
-                    0.28571429,
-                    0.57142857,
-                    0.85714286,
-                    1.0,
-                ]
-            ),
-            np.array(
-                [
-                    0.43149058,
-                    0.42126726,
-                    0.47809721,
-                    0.52508833,
-                    0.47288467,
-                    0.46767804,
-                    0.55622149,
-                    0.57674934,
-                    0.43149058,
-                    0.53549986,
+                    0.64180405,
+                    0.64180405,
+                    0.64398981,
+                    0.7341501,
+                    0.37633148,
+                    0.64180405,
+                    0.7341501,
+                    0.64398981,
+                    0.73228778,
+                    0.64398981,
                 ]
             ),
             "test_ensemble_stacking_logistic_prefit.png",
@@ -551,18 +534,21 @@ def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_pred, exp_
     )
     y_test = rng.choice(2, n_samples)
     models = []
-    for i in range(2):
-        this_model = RandomForestClassifier(random_state=2025)
+    random_state = 2025
+    for i, model in enumerate(
+        [RandomForestClassifier, ExtraTreesClassifier, LGBMClassifier, XGBClassifier]
+    ):
+        this_model = model(random_state=2025, n_estimators=1)
         if cv == "prefit":
             this_model.fit(X_train, y_train)
-        models.append((f"RF {i}", this_model))
+        models.append((f"Model {i}", this_model))
     test_file = tmpdir / "test_file.csv"
     pd.DataFrame({"Species": [f"Species {i}" for i in range(n_samples)]}).to_csv(
         test_file
     )
     predictions_path = tmpdir
     plots_path = tmpdir
-    estimator_names = [f"Name {i}" for i in range(2)]
+    estimator_names = [f"Name {i}" for i in range(len(models))]
     fpr, tpr = classifier._ensemble_stacking_logistic(
         models,
         X_train,

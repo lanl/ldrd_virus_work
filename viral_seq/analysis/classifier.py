@@ -708,7 +708,10 @@ def _plot_confusion_matrix(
 
 
 def _plot_logistic_stacked_weights(
-    stacked_logistic: StackingClassifier, estimator_names: list[str], file_name: str
+    stacked_logistic: StackingClassifier,
+    estimator_names: list[str],
+    file_name: str,
+    title: str = "Logistic Regression Coefficient used for Model Stacking",
 ):
     final_stacked_log_estimator = stacked_logistic.final_estimator_
     heights = final_stacked_log_estimator.coef_.ravel()
@@ -720,7 +723,7 @@ def _plot_logistic_stacked_weights(
     ax.set_ylabel("Log Odds")
     ax.set_xlabel("Stacked Estimators")
     plt.xticks(rotation=90)
-    ax.set_title("Logistic Regression Coefficient used for Model Stacking")
+    ax.set_title(title)
     fig.tight_layout()
     fig.savefig(file_name, dpi=300)
     plt.close()
@@ -757,5 +760,6 @@ def _ensemble_stacking_logistic(
             clf,
             estimator_names,
             str(plots_path / f"StackingClassifier_LR_weights_cv_{cv}.png"),
+            f"Logistic Regression Coefficient used for Model Stacking\ncv={cv}",
         )
     return fpr, tpr

@@ -47,6 +47,15 @@ for start_idx, end_idx in sels_of_interest:
 kmer_match = residues[2492:2500]
 # kmer representation:
 kmer_mol = ggmv.molecule(kmer_match, lens=80, material="default", color="red")
+# lambda 1 representation:
+lambda_1 = protein.select_atoms("chainID H I B")
+ggmv.molecule(lambda_1, lens=80, material="default", color="blue")
+# lambda 2 representation:
+lambda_2 = protein.select_atoms("chainID A")
+ggmv.molecule(lambda_2, lens=80, material="default", color="green")
+# sigma 2 representation:
+sigma_2 = protein.select_atoms("chainID Q R")
+ggmv.molecule(sigma_2, lens=80, material="default", color="violet")
 # protein representation:
 protein_mol = ggmv.molecule(protein, lens=80, material="default")
 

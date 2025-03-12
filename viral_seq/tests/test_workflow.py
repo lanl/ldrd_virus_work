@@ -383,26 +383,26 @@ def test_pos_con_columns(target_column, len_exp_keys):
 
 
 @pytest.mark.parametrize(
-    "shap_counts, clfr_counts, n_folds, plot_title",
+    "shap_props, clfr_props, n_folds, plot_title",
     # fractional values of shap and clfr counts are used to check that
     # thresholds for plotting percent surface exposure values are appropriate
     # for deciding when to plot inside the bar vs outside the bar
     [
         (
-            np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
-            np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+            np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0]),
+            np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0]),
             2,
             "test_1",
         ),
         (
-            np.array([10.0, 9.0, 0.0, 2.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0]),
-            np.array([5.0, 1.0, 9.0, 5.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0]),
+            np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0]),
+            np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0]),
             10,
             "test_2",
         ),
     ],
 )
-def test_fic_plot(tmp_path, shap_counts, clfr_counts, n_folds, plot_title):
+def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, plot_title):
     kmer_features = [
         "kmer_PC_FECAEA",
         "kmer_PC_CCACAD",
@@ -434,8 +434,6 @@ def test_fic_plot(tmp_path, shap_counts, clfr_counts, n_folds, plot_title):
 
     n_classifiers = 1
     df_in = pd.DataFrame()
-    clfr_props = clfr_counts / (n_folds * 2) * 100
-    shap_props = shap_counts / (n_folds * 2) * 100
     df_in["Features"] = kmer_features
     df_in["Classifier Proportion"] = clfr_props
     df_in["SHAP Proportion"] = shap_props

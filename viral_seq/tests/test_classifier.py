@@ -477,7 +477,7 @@ def test_plot_logistic_stacked_weights(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "cv, exp_fpr, exp_tpr, exp_pred, exp_plot",
+    "cv, exp_fpr, exp_tpr, exp_proba, exp_plot",
     [
         (
             5,
@@ -521,7 +521,7 @@ def test_plot_logistic_stacked_weights(tmpdir):
         ),
     ],
 )
-def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_pred, exp_plot):
+def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_proba, exp_plot):
     expected_plot = files("viral_seq.tests.expected").joinpath(exp_plot)
     rng = np.random.default_rng(seed=2025)
     n_samples = 10
@@ -548,7 +548,7 @@ def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_pred, exp_
     predictions_path = tmpdir
     plots_path = tmpdir
     estimator_names = [f"Name {i}" for i in range(len(models))]
-    fpr, tpr = classifier._ensemble_stacking_logistic(
+    pred, fpr, tpr = classifier._ensemble_stacking_logistic(
         models,
         X_train,
         y_train,
@@ -561,12 +561,13 @@ def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_pred, exp_
         plot_weights=True,
         estimator_names=estimator_names,
     )
-    pred = pd.read_csv(
+    proba = pd.read_csv(
         predictions_path / f"StackingClassifier_LR_predictions_cv_{cv}.csv"
     )[f"StackingClassifier LR CV={cv}"].values
+    assert_allclose(pred, exp_proba > 0.5)
     assert_allclose(fpr, exp_fpr)
     assert_allclose(tpr, exp_tpr)
-    assert_allclose(pred, exp_pred)
+    assert_allclose(proba, exp_proba)
     assert (
         compare_images(
             expected_plot, tmpdir / f"StackingClassifier_LR_weights_cv_{cv}.png", 0.001

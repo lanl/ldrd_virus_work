@@ -745,6 +745,7 @@ def _ensemble_stacking_logistic(
     clf = StackingClassifier(models, cv=cv)
     clf.fit(X_train, y_train)
     y_proba = clf.predict_proba(X_test)[..., 1]
+    y_pred = clf.predict(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_proba)
     df_out = pd.DataFrame(y_proba, columns=[f"StackingClassifier LR CV={cv}"])
     df_out["Species"] = pd.read_csv(test_file)["Species"]
@@ -762,4 +763,4 @@ def _ensemble_stacking_logistic(
             str(plots_path / f"StackingClassifier_LR_weights_cv_{cv}.png"),
             f"Logistic Regression Coefficient used for Model Stacking\ncv={cv}",
         )
-    return fpr, tpr
+    return y_pred, fpr, tpr

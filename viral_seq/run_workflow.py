@@ -599,7 +599,9 @@ def _plot_confusion_matrices(
                 filename=str(plots_path / f"{group}_confusion_matrix.png"),
             )
     # ensembles
-    for this_name, this_ensemble in zip(comp_names_ensembles, comp_preds_ensembles):
+    for this_name, this_ensemble in zip(
+        comp_names_ensembles, comp_preds_ensembles, strict=True
+    ):
         classifier.plot_confusion_matrix(
             y_test,
             this_ensemble,
@@ -1045,7 +1047,7 @@ if __name__ == "__main__":
         else "ROC Curve\nEnsemble Models"
     )
     models_for_ensembles = [(k, v) for k, v in models_fitted.items()]
-    fpr_stack, tpr_stack = classifier._ensemble_stacking_logistic(
+    pred_stack, fpr_stack, tpr_stack = classifier._ensemble_stacking_logistic(
         models_for_ensembles,
         X_train,
         y_train,
@@ -1059,6 +1061,7 @@ if __name__ == "__main__":
         estimator_names=list(predictions.keys()),
     )
     comp_names_ensembles.append("StackingClassifier")
+    comp_preds_ensembles.append(pred_stack)
     comp_fprs_ensembles.append(fpr_stack)
     comp_tprs_ensembles.append(tpr_stack)
     classifier.plot_roc_curve_comparison(

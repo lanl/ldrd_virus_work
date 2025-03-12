@@ -18,6 +18,7 @@ from sklearn.ensemble import (
     RandomForestClassifier,
     ExtraTreesClassifier,
     StackingClassifier,
+    VotingClassifier,
 )
 from sklearn.base import ClassifierMixin
 import ray
@@ -36,6 +37,7 @@ class CV_data(NamedTuple):
     y_tests: list[np.ndarray]
     y_preds: list[np.ndarray]
     scores: npt.NDArray[np.floating[Any]]
+    y_proba: np.ndarray
 
 
 class CV_ROC_data(NamedTuple):
@@ -262,7 +264,10 @@ def cross_validation(
         y_tests.append(res[0])
         y_preds.append(res[1])
         scores[i] = res[2]
-    return CV_data(y_tests, y_preds, scores)
+    y_proba = np.zeros(len(X))
+    for i, (train, test) in enumerate(cv.split(X, y)):
+        y_proba[test] = y_preds[i]
+    return CV_data(y_tests, y_preds, scores, y_proba)
 
 
 def cv_score(
@@ -763,4 +768,36 @@ def _ensemble_stacking_logistic(
             str(plots_path / f"StackingClassifier_LR_weights_cv_{cv}.png"),
             f"Logistic Regression Coefficient used for Model Stacking\ncv={cv}",
         )
+    return y_pred, fpr, tpr
+
+
+def entropy(y: np.ndarray) -> float:
+    # see section 3.2.3 of Kunapuli's "Ensemble Methods for Machine
+    # Learning" (2023)
+    # count 0 & 1 regardless of if they are present to avoid ent = 0
+    counts = np.array([np.count_nonzero(y == 0), np.count_nonzero(y == 1)])
+    # calculate frequency with additive smoothing to avoid frequency = 0
+    p = (np.array(counts.astype(np.float64)) + 0.5) / (len(y) + 1.0)
+    ent = -p.T @ np.log2(p)
+    return ent
+
+
+def _ensemble_entropy(
+    models: list[tuple[str, ClassifierMixin]],
+    weights: list[float],
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    X_test: pd.DataFrame,
+    y_test: np.ndarray,
+    test_file: str,
+    predictions_path: Path,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    clf = VotingClassifier(models, voting="soft", weights=weights)
+    clf.fit(X_train, y_train)
+    y_proba = clf.predict_proba(X_test)[..., 1]
+    y_pred = clf.predict(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_proba)
+    df_out = pd.DataFrame(y_proba, columns=["Entropy Weighted Ensemble"])
+    df_out["Species"] = pd.read_csv(test_file)["Species"]
+    df_out.to_csv(str(predictions_path / "Entropy_predictions.csv"))
     return y_pred, fpr, tpr

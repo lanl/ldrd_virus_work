@@ -17,6 +17,9 @@ from sklearn.utils.validation import check_is_fitted
 from matplotlib.testing.compare import compare_images
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+from hypothesis import given, example, strategies as st
+from hypothesis.extra import numpy as hnp
+import math
 
 
 @pytest.mark.parametrize(
@@ -251,7 +254,7 @@ def test_plot_roc_curve_comparison(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "random_state, y_tests, y_preds, scores",
+    "random_state, y_tests, y_preds, scores, y_proba",
     [
         (
             123456,
@@ -262,6 +265,7 @@ def test_plot_roc_curve_comparison(tmpdir):
                 np.array([0.3, 0.3, 0.3]),
             ],
             [0.625, 0.5, 0.5],
+            [0.2, 0.6, 0.5, 0.4, 0.6, 0.3, 0.5, 0.3, 0.3, 0.3],
         ),
         (
             159758,
@@ -272,6 +276,7 @@ def test_plot_roc_curve_comparison(tmpdir):
                 np.array([0.7, 0.1, 0.2]),
             ],
             [1.0, 1.0, 1.0],
+            [0.8, 0.8, 0.2, 0.2, 0.8, 0.4, 0.6, 0.7, 0.1, 0.2],
         ),
         (
             654987,
@@ -282,10 +287,11 @@ def test_plot_roc_curve_comparison(tmpdir):
                 np.array([0.3, 0.3, 1.0]),
             ],
             [1.0, 1.0, 1.0],
+            [0.9, 0.1, 0.6, 0.5, 0.1, 0.3, 0.8, 0.9, 0.3, 1.0],
         ),
     ],
 )
-def test_cross_validation(random_state, y_tests, y_preds, scores):
+def test_cross_validation(random_state, y_tests, y_preds, scores, y_proba):
     X, y = make_classification(n_samples=10, n_features=10, random_state=random_state)
     X = pd.DataFrame(X)
     cv_data = classifier.cross_validation(
@@ -299,6 +305,7 @@ def test_cross_validation(random_state, y_tests, y_preds, scores):
     assert_allclose(np.hstack(cv_data.y_tests), np.hstack(y_tests))
     assert_allclose(np.hstack(cv_data.y_preds), np.hstack(y_preds))
     assert_allclose(cv_data.scores, scores)
+    assert_allclose(cv_data.y_proba, y_proba)
 
 
 def test_get_roc_curve_cv():
@@ -614,3 +621,92 @@ def test_roc_intersection_bug(tmpdir):
         classifier.plot_roc_curve_comparison(
             ["Test"], fprs, tprs, eer_data_list=[eer_data]
         )
+
+
+@pytest.mark.parametrize(
+    "y_test, expected_entropy",
+    [
+        (np.append(np.zeros(1), np.ones(9)), 0.5746356978376793),
+        (np.append(np.zeros(2), np.ones(8)), 0.7732266742876346),
+        (np.append(np.zeros(3), np.ones(7)), 0.9023932827949788),
+        (np.append(np.zeros(4), np.ones(6)), 0.9760206482366149),
+        (np.append(np.zeros(5), np.ones(5)), 1.0),
+    ],
+)
+def test_entropy(y_test, expected_entropy):
+    entropy = classifier.entropy(y_test)
+    assert entropy == pytest.approx(expected_entropy)
+
+
+@given(
+    hnp.arrays(
+        dtype=np.int32,
+        elements=st.sampled_from([0, 1]),
+        shape=st.integers(min_value=10, max_value=2_000),
+    ),
+)
+@example(np.zeros(10))
+@example(np.ones(10))
+def test_entropy_not_zero_or_nan(y_test):
+    """Protect against nan or zero values for entropy which break the workflow."""
+    entropy = classifier.entropy(y_test)
+    assert entropy != 0.0 and not math.isnan(entropy)
+
+
+def test_ensemble_entropy(tmpdir):
+    rng = np.random.default_rng(seed=2025)
+    exp_fpr = np.array([0.0] + 2 * [1 / 3] + 3 * [1])
+    exp_tpr = np.array([0.0, 1 / 7, 2 / 7, 3 / 7, 6 / 7, 1.0])
+    exp_proba = np.array(
+        [
+            0.52522748,
+            0.52522748,
+            0.55593207,
+            0.83657937,
+            0.44406794,
+            0.52522748,
+            0.83657937,
+            0.55593207,
+            0.80587477,
+            0.55593207,
+        ]
+    )
+    n_samples = 10
+    X_train = pd.DataFrame(
+        rng.random(size=(n_samples, 10)), columns=[f"Feature {i}" for i in range(10)]
+    )
+    y_train = rng.choice(2, n_samples)
+    X_test = pd.DataFrame(
+        rng.random(size=(n_samples, 10)), columns=[f"Feature {i}" for i in range(10)]
+    )
+    y_test = rng.choice(2, n_samples)
+    models = []
+    for i, model in enumerate(
+        [RandomForestClassifier, ExtraTreesClassifier, LGBMClassifier, XGBClassifier]
+    ):
+        this_model = model(random_state=2025, n_estimators=1)
+        this_model.fit(X_train, y_train)
+        models.append((f"Model {i}", this_model))
+    weights = list(rng.random(len(models)))
+    test_file = tmpdir / "test_file.csv"
+    pd.DataFrame({"Species": [f"Species {i}" for i in range(n_samples)]}).to_csv(
+        test_file
+    )
+    predictions_path = tmpdir
+    pred, fpr, tpr = classifier._ensemble_entropy(
+        models,
+        weights,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        test_file,
+        predictions_path,
+    )
+    proba = pd.read_csv(predictions_path / "Entropy_predictions.csv")[
+        "Entropy Weighted Ensemble"
+    ].values
+    assert_allclose(pred, exp_proba > 0.5)
+    assert_allclose(fpr, exp_fpr)
+    assert_allclose(tpr, exp_tpr)
+    assert_allclose(proba, exp_proba)

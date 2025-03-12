@@ -864,6 +864,7 @@ if __name__ == "__main__":
     test_folds: list = []
     predictions_cv = defaultdict(list)
     model_eer_threshold: dict[str, np.float64] = defaultdict(np.float64)
+    model_entropy_weights: list[float] = []
     for name, val in model_arguments.items():
         these_params = {
             k: v for k, v in best_params[name].items() if k not in val["predict"]
@@ -905,6 +906,9 @@ if __name__ == "__main__":
             title=f"ROC Curve\n{name}\nCross Validation on Training",
             eer_data_list=eer_data_cv,
         )
+        # get entropy data
+        cv_pred_hard = cv_data.y_proba >= 0.5
+        model_entropy_weights.append(1 / classifier.entropy(cv_pred_hard))
     assert int(len(model_arguments) / copies) == len(
         predictions_cv
     ), f"Number of cross-validation predictions doesn't match number of model types: {len(predictions_cv)} != {int(len(model_arguments)/copies)}"
@@ -1066,6 +1070,21 @@ if __name__ == "__main__":
     comp_preds_ensembles.append(pred_stack)
     comp_fprs_ensembles.append(fpr_stack)
     comp_tprs_ensembles.append(tpr_stack)
+    pred_entropy, fpr_entropy, tpr_entropy = classifier._ensemble_entropy(
+        models_for_ensembles,
+        model_entropy_weights,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        test_file,
+        predictions_path,
+    )
+    comp_names_ensembles.append("Entropy Weighted Ensemble")
+    comp_names_thresh_ensembles.append("Entropy Weighted Ensemble at 0.5 Threshold")
+    comp_preds_ensembles.append(pred_entropy)
+    comp_fprs_ensembles.append(fpr_entropy)
+    comp_tprs_ensembles.append(tpr_entropy)
     classifier.plot_roc_curve_comparison(
         comp_names_ensembles,
         comp_fprs_ensembles,

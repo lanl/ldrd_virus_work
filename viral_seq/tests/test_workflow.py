@@ -435,8 +435,8 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, plot_title):
     n_classifiers = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
-    df_in["Classifier Proportion"] = clfr_props
-    df_in["SHAP Proportion"] = shap_props
+    df_in["Classifier proportion"] = clfr_props
+    df_in["SHAP proportion"] = shap_props
     workflow.FIC_plot(
         df_in,
         n_folds,
@@ -985,13 +985,13 @@ def test_feature_count_consensus():
     shap_importances_df["Importances"] = shap_importances
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_columns
-    feature_count["Clfr"] = 0
-    feature_count["SHAP"] = 0
+    feature_count["Clfr_test"] = 0
+    feature_count["SHAP_test"] = 0
 
     feature_count_out_exp = pd.DataFrame()
     feature_count_out_exp["Features"] = train_columns
-    feature_count_out_exp["Clfr"] = [1, 0, 0, 0, 0, 1, 1, 0, 1, 1]
-    feature_count_out_exp["SHAP"] = [0, 0, 1, 0, 1, 1, 1, 0, 1, 0]
+    feature_count_out_exp["Clfr_test"] = [1, 0, 0, 0, 0, 1, 1, 0, 1, 1]
+    feature_count_out_exp["SHAP_test"] = [0, 0, 1, 0, 1, 1, 1, 0, 1, 0]
 
     feature_count_exp = feature_count.copy()
 
@@ -1002,7 +1002,11 @@ def test_feature_count_consensus():
     shap_importances_df.reset_index(inplace=True)
 
     feature_count_out = workflow.feature_count_consensus(
-        clfr_importances_df, shap_importances_df, feature_count, n_features=5
+        clfr_importances_df,
+        shap_importances_df,
+        feature_count,
+        n_features=5,
+        clfr_name="test",
     )
 
     assert_frame_equal(feature_count_out, feature_count_out_exp)

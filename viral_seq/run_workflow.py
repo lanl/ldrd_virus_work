@@ -1335,6 +1335,7 @@ if __name__ == "__main__":
     train_file = str(data.joinpath(train_file))
     test_file = str(data.joinpath(test_file))
     cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
+    cache_dtra = str(data.joinpath("dtra_cache.tar.gz"))
     viral_files = (
         [train_file, test_file]
         if test_file != str(data.joinpath("none"))

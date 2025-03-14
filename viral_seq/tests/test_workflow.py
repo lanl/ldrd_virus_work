@@ -897,7 +897,7 @@ def test_get_kmer_viruses():
 )
 def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
     kmer_info = []
-    all_kmer_info = []
+    kmer_info_list = []
     test_records = []
     # make a dataframe that looks like all_kmer_info
     for accession in accessions:
@@ -910,81 +910,17 @@ def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
         mapping_method=mapping_method,
         kmer_info=kmer_info,
     )
-    all_kmer_info.extend(kmer_info)
+    kmer_info_list.extend(kmer_info)
+
+    # recapitulate save_kmer_info dataframe handling
+    all_kmer_info_df = pd.DataFrame([k.__dict__ for k in kmer_info_list])
 
     # save and load the file
     with tmpdir.as_cwd():
-        workflow.save_kmer_info(all_kmer_info, "all_kmer_info_test.parquet.gzip")
+        workflow.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
         kmer_info_load = workflow.load_kmer_info("all_kmer_info_test.parquet.gzip")
 
-    # recapitulate save_kmer_info dataframe handling
-    all_kmer_info_df = pd.DataFrame([k.__dict__ for k in all_kmer_info])
-
-    # because the object hashes are different between save and load dataframes
-    # open up the objects and check the contents are the same for some random kmers
-    rng = np.random.default_rng(seed=2024)
-    random_idx = rng.integers(0, len(kmer_info_load), 10)
-    for idx in random_idx:
-        save_protein = all_kmer_info_df.iloc[idx].protein_name
-        load_protein = kmer_info_load.iloc[idx].protein_name
-        save_virus = all_kmer_info_df.iloc[idx].virus_name
-        load_virus = kmer_info_load.iloc[idx].virus_name
-        save_kmer = all_kmer_info_df.iloc[idx].kmer_names
-        load_kmer = kmer_info_load.iloc[idx].kmer_names
-        assert save_protein == load_protein
-        assert save_virus == load_virus
-        assert save_kmer == load_kmer
-
-    # assert that, if the kmer has > 1 entry, that they are not the same virus-protein pairs but still map to the same kmer_name
-    all_kmer_info_multiple_entries = all_kmer_info_df[
-        all_kmer_info_df["kmer_names"].duplicated()
-    ]
-    duplicated_kmers = np.array(
-        list(set(all_kmer_info_multiple_entries["kmer_names"].apply(lambda x: x[0])))
-    )
-    random_idx = rng.integers(0, len(all_kmer_info_multiple_entries), 10)
-    random_kmers = duplicated_kmers[random_idx]
-    for random_kmer in random_kmers:
-        first_kmer_name = (
-            all_kmer_info_df.loc[
-                all_kmer_info_df["kmer_names"].apply(lambda x: x[0]) == random_kmer
-            ]
-            .iloc[0]
-            .kmer_names
-        )
-        second_kmer_name = (
-            all_kmer_info_df.loc[
-                all_kmer_info_df["kmer_names"].apply(lambda x: x[0]) == random_kmer
-            ]
-            .iloc[1]
-            .kmer_names
-        )
-        first_entry = (
-            all_kmer_info_df.loc[
-                all_kmer_info_df["kmer_names"].apply(lambda x: x[0]) == random_kmer
-            ]
-            .iloc[0]
-            .virus_name,
-            all_kmer_info_df.loc[
-                all_kmer_info_df["kmer_names"].apply(lambda x: x[0]) == random_kmer
-            ]
-            .iloc[0]
-            .protein_name,
-        )
-        second_entry = (
-            all_kmer_info_df.loc[
-                all_kmer_info_df["kmer_names"].apply(lambda x: x[0]) == random_kmer
-            ]
-            .iloc[1]
-            .virus_name,
-            all_kmer_info_df.loc[
-                all_kmer_info_df["kmer_names"].apply(lambda x: x[0]) == random_kmer
-            ]
-            .iloc[1]
-            .protein_name,
-        )
-        assert first_kmer_name == second_kmer_name
-        assert first_entry != second_entry
+    assert_frame_equal(all_kmer_info_df, kmer_info_load)
 
 
 @pytest.mark.parametrize(
@@ -1013,7 +949,7 @@ def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
 
     # save and load the file
     with tmpdir.as_cwd():
-        workflow.save_kmer_info(all_kmer_info, "all_kmer_info_test.parquet.gzip")
+        workflow.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
         assert os.path.exists("all_kmer_info_test.parquet.gzip")
 
     # get information from kmer_info for sanity check
@@ -1034,3 +970,46 @@ def test_load_all_kmer_info():
     assert kmer_info_load_df.iloc[0].virus_name == "Human adenovirus 5"
     assert kmer_info_load_df.iloc[0].kmer_names == "kmer_PC_6536613006"
     assert kmer_info_load_df.shape == (11037, 4)
+
+
+def test_transform_kmer_data():
+    # make a list of KmerData objects
+    values = list(range(5))
+    kmer_names = ["kmer_" + str(v) for v in values]
+    viruses = ["virus_" + str(v) for v in values]
+    proteins = ["proteins_" + str(v) for v in values]
+
+    kmer_data_list = []
+    for i in range(len(values)):
+        kmer_data_list.append(
+            workflow.KmerData("test", [kmer_names[i]], viruses[i], proteins[i])
+        )
+    # expected dictionary
+    df_exp = pd.DataFrame(
+        {
+            "mapping_method": {0: "test", 1: "test", 2: "test", 3: "test", 4: "test"},
+            "kmer_names": {
+                0: ["kmer_0"],
+                1: ["kmer_1"],
+                2: ["kmer_2"],
+                3: ["kmer_3"],
+                4: ["kmer_4"],
+            },
+            "virus_name": {
+                0: "virus_0",
+                1: "virus_1",
+                2: "virus_2",
+                3: "virus_3",
+                4: "virus_4",
+            },
+            "protein_name": {
+                0: "proteins_0",
+                1: "proteins_1",
+                2: "proteins_2",
+                3: "proteins_3",
+                4: "proteins_4",
+            },
+        }
+    )
+    df_out = workflow.transform_kmer_data(kmer_data_list)
+    assert_frame_equal(df_out, df_exp)

@@ -68,6 +68,26 @@ def print_pos_con(
     )
 
 
+def transform_kmer_data(kmer_list: list) -> pd.DataFrame:
+    """
+    convert list of KmerData objects to dataframe by
+    casting each object in the list to a dictionary
+
+    Parameters:
+    -----------
+    kmer_list: list
+        list of KmerData objects
+
+    Returns:
+    --------
+    kmer_dict_df: pd.DataFrame
+        converted and transformed dataframe
+    """
+
+    kmer_dict_df = pd.DataFrame([k.__dict__ for k in kmer_list])
+    return kmer_dict_df
+
+
 def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     """
     Lookup and store the virus-protein pairs associated with a list of kmers
@@ -112,21 +132,20 @@ def load_kmer_info(file_name: str) -> pd.DataFrame:
     all_kmer_info_df: pd.DataFrame
         dataframe containing KmerData class objects
     """
-    print("Loading 'all_kmer_info.parquet.gzip'...")
+    print(f"Loading {file_name}...")
     all_kmer_info = pl.read_parquet(file_name).to_pandas()
     return all_kmer_info
 
 
-def save_kmer_info(all_kmer_info: list, save_file: str) -> None:
+def save_kmer_info(kmer_info_df: pd.DataFrame, save_file: str) -> None:
     """
     save dataframe containing 'all_kmer_info' to parquet file
 
     Parameters:
     -----------
-    all_kmer_info: list
+    kmer_info_df: pd.DataFrame
         list of KmerData class objects
     """
-    kmer_info_df = pd.DataFrame([k.__dict__ for k in all_kmer_info])
     kmer_info_df.to_parquet(save_file)
 
 
@@ -155,10 +174,11 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 
 # the KmerData class is used to organize information associated with a list of kmer features
 # this class should return:
-#     1. kmer feature
-#     2. mapping_method
-#     3. virus name
-#     4. TODO: other important information
+#     1. a list of kmer names (kmer_names)
+#     2. the mapping method used to translate AA-PC kmers (mapping_method)
+#     3. the name of the virus associated with a given kmer (virus_name)
+#     4. the name of the protein in which the kmer sequence is found (protein_name)
+#     5. TODO: other important information
 # ...and should
 #     a. use the kmers as dictionary keys that store the associated information
 #     b. be used to lookup the virus/protein names associated with a specific kmer
@@ -1120,8 +1140,9 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                         all_kmer_info.extend(kmer_info)
                         this_checkpoint -= 1
 
-            # save kmer info as parquet file
-            save_kmer_info(all_kmer_info, "all_kmer_info.parquet.gzip")
+            # transform all_kmer_info and save as parquet file
+            all_kmer_info_df = transform_kmer_data(all_kmer_info)
+            save_kmer_info(all_kmer_info_df, "all_kmer_info.parquet.gzip")
 
 
 def feature_selection_rfc(

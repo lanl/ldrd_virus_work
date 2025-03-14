@@ -389,16 +389,32 @@ def test_pos_con_columns(target_column, len_exp_keys):
     # for deciding when to plot inside the bar vs outside the bar
     [
         (
-            np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0]),
-            np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0]),
+            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
+            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
             2,
             "test_1",
         ),
         (
-            np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0]),
-            np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0]),
+            [np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0])],
+            [np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0])],
             10,
             "test_2",
+        ),
+        (
+            [
+                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
+                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
+                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
+                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
+            ],
+            [
+                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
+                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
+                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
+                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
+            ],
+            2,
+            "test_3",
         ),
     ],
 )
@@ -435,8 +451,9 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, plot_title):
     n_classifiers = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
-    df_in["Classifier proportion"] = clfr_props
-    df_in["SHAP proportion"] = shap_props
+    for i in range(len(shap_props)):
+        df_in[f"Classifier proportion {i}"] = clfr_props[i]
+        df_in[f"SHAP proportion {i}"] = shap_props[i]
     workflow.FIC_plot(
         df_in,
         n_folds,

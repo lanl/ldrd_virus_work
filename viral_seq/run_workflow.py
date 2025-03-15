@@ -904,7 +904,7 @@ def FIC_plot(
     # grab topN features from bottom of df because
     # plotting happens from bottom to top
     df_plot = feature_count[-20:]
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(8, 10))
     plot_columns = list(
         feature_count.columns[feature_count.columns.str.contains("proportion")]
     )

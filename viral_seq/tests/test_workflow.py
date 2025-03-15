@@ -383,7 +383,7 @@ def test_pos_con_columns(target_column, len_exp_keys):
 
 
 @pytest.mark.parametrize(
-    "shap_props, clfr_props, n_folds, plot_title",
+    "shap_props, clfr_props, n_folds, n_feats, plot_title",
     # fractional values of shap and clfr counts are used to check that
     # thresholds for plotting percent surface exposure values are appropriate
     # for deciding when to plot inside the bar vs outside the bar
@@ -392,60 +392,233 @@ def test_pos_con_columns(target_column, len_exp_keys):
             [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
             [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
             2,
+            10,
             "test_1",
         ),
         (
             [np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0])],
             [np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0])],
             10,
+            10,
             "test_2",
         ),
+        # test case for the upper bound of the current workflow in terms of
+        # number of classifiers and number of plotted features
         (
             [
-                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
-                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
-                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
-                np.array([1.25, 1.25, 0.0, 1.25, 1.25, 1.25, 2.5, 0.0, 11.25, 12.5]),
+                np.array(
+                    [
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        2.5,
+                        2.5,
+                        11.25,
+                        11.25,
+                        12.5,
+                        20.5,
+                    ]
+                ),
+                np.array(
+                    [
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        2.5,
+                        2.5,
+                        11.25,
+                        11.25,
+                        12.5,
+                        12.5,
+                    ]
+                ),
+                np.array(
+                    [
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        2.5,
+                        2.5,
+                        11.25,
+                        11.25,
+                        12.5,
+                        12.5,
+                    ]
+                ),
+                np.array(
+                    [
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        1.25,
+                        1.25,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        2.5,
+                        2.5,
+                        11.25,
+                        11.25,
+                        12.5,
+                        12.5,
+                    ]
+                ),
             ],
             [
-                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
-                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
-                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
-                np.array([0.0, 0.0, 1.25, 0.0, 0.0, 1.25, 6.25, 11.25, 1.25, 6.25]),
+                np.array(
+                    [
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        6.25,
+                        6.25,
+                        11.25,
+                        11.25,
+                        11.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                        10.25,
+                    ]
+                ),
+                np.array(
+                    [
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        6.25,
+                        6.25,
+                        11.25,
+                        11.25,
+                        11.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                    ]
+                ),
+                np.array(
+                    [
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        6.25,
+                        6.25,
+                        11.25,
+                        11.25,
+                        11.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                    ]
+                ),
+                np.array(
+                    [
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.25,
+                        0.0,
+                        0.0,
+                        1.25,
+                        6.25,
+                        6.25,
+                        11.25,
+                        11.25,
+                        11.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                        6.25,
+                    ]
+                ),
             ],
             2,
+            20,
             "test_3",
         ),
     ],
 )
-def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, plot_title):
-    kmer_features = [
-        "kmer_PC_FECAEA",
-        "kmer_PC_CCACAD",
-        "kmer_PC_ECDGDE",
-        "kmer_PC_GCECFD",
-        "kmer_PC_CFCEDD",
-        "kmer_PC_CACDGA",
-        "kmer_PC_CCAAACD",
-        "kmer_PC_CCCFCF",
-        "kmer_PC_CCGDEA",
-        "kmer_PC_CDDEEC",
-    ]
+def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title):
+    feature_values = list(range(n_feats))
+    kmer_features = ["kmer_PC_" + str(f) for f in feature_values]
+
     target_column = "IN"
+    rng = np.random.default_rng(seed=123)
 
-    response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
+    percent_exposed = np.round(rng.uniform(1, 100, n_feats), 2)
 
+    response_effect_sign = ["+" if p > 0 else "-" for p in percent_exposed]
     surface_exposed_dict = {
-        "kmer_PC_CDDEEC": 42.86,
-        "kmer_PC_CCGDEA": 0.00,
-        "kmer_PC_CCCFCF": 0.00,
-        "kmer_PC_CCAAACD": 21.15,
-        "kmer_PC_CACDGA": 13.04,
-        "kmer_PC_CFCEDD": 25.53,
-        "kmer_PC_GCECFD": 17.86,
-        "kmer_PC_ECDGDE": 100.0,
-        "kmer_PC_CCACAD": 17.24,
-        "kmer_PC_FECAEA": 14.29,
+        kmer_features[i]: percent_exposed[i] for i in range(n_feats)
     }
 
     n_classifiers = 1
@@ -454,6 +627,7 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, plot_title):
     for i in range(len(shap_props)):
         df_in[f"Classifier proportion {i}"] = clfr_props[i]
         df_in[f"SHAP proportion {i}"] = shap_props[i]
+
     workflow.FIC_plot(
         df_in,
         n_folds,
@@ -1155,11 +1329,13 @@ def test_sort_feature_counts():
     feature_df = pd.DataFrame()
     kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_GCAFGDG", "kmer_PC_0134657"])
     feature_df["Features"] = kmer_features
-    feature_df["Clfr"] = [5, 1, 5]
-    feature_df["SHAP"] = [4, 1, 1]
+    feature_df["Clfr_0"] = [5, 1, 5]
+    feature_df["SHAP_0"] = [4, 1, 1]
+    feature_df["Clfr_1"] = [1, 6, 3]
+    feature_df["SHAP_1"] = [1, 0, 4]
     feature_df["Pearson R"] = [0.99, -0.99, -0.41]
 
     out_df = workflow.sort_feature_counts(feature_df, n_folds=5)
     out_features = np.asarray(out_df["Features"])
-    out_exp = kmer_features[np.asarray([1, 2, 0])]
+    out_exp = kmer_features[np.asarray([1, 0, 2])]
     assert_array_equal(out_exp, out_features)

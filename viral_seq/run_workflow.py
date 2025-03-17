@@ -1000,13 +1000,15 @@ def feature_selection_rfc(
         if wf == "DTRA":
             for mode in ["PC", "AA"]:
                 # count of PC and AA positive controls in pre-feature selection dataset
-                pos_con_all_PC = check_positive_controls(
+                pos_con_all_data = check_positive_controls(
                     positive_controls=positive_controls[target_column],
                     kmers_list=list(X.columns),
                     mapping_method=mapping_method,
                     mode=mode,
                 )
-                print_pos_con(pos_con_all_PC, mode, mapping_method, dataset_name="Full")
+                print_pos_con(
+                    pos_con_all_data, mode, mapping_method, dataset_name="Full"
+                )
 
         if feature_selection == "none":
             print(
@@ -1416,10 +1418,18 @@ if __name__ == "__main__":
             "SVVYGLR",
         ],
         "Is_Sialic_Acid": [
-            "RAGDRPYQDAP",  # https://doi.org/10.1016/j.csbj.2023.08.014
-            "REGANTDQDAP",  # https://doi.org/10.1016/j.csbj.2023.08.014
-            "REGAIISRDSP",  # https://doi.org/10.1016/j.csbj.2023.08.014
-            "LRM",  # https://doi.org/10.1038/s41467-017-00836-6
+            "RAGDRPYQDAP",  # CC' loop of siglec-8
+            "REGANTDQDAP",  # CC' loop of siglec-9
+            "REGAIISRDSP",  # CC' loop of siglec-3
+            # taken from Fig. 1. B in https://doi.org/10.1016/j.csbj.2023.08.014
+            # siglec: sialic-acid-binding immunoglobulin like lectin
+            # the CC' loop of  has been shown to be involved in sialic-acid binding of immune cells
+            #
+            # siglec-3 (CD33) has been shown to be ivolved with immunosupressive response to hepatitis B virus
+            # siglec-8 has been shown to play a role in the inflammatory response of COVID-19 infected patients
+            # and siglec-9 has been shown to bind viral spike proteins and supress NK cell activity
+            # ref: https://doi.org/10.1016/j.mam.2022.101113
+            "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding, https://doi.org/10.1038/s41467-017-00836-6
             "QDAP",  # conserved residues from larger kmers above
             "REGA",  # conserved residues from larger kmers above
             # NA and HA binding sites are subject to antigenic drift (resulting in drug resistance)
@@ -1429,10 +1439,13 @@ if __name__ == "__main__":
             #
             # binding pocket of NA with multiple binding sites often
             # targeted with small molecules i.e. DFSA (https://doi.org/10.1126/science.1232552)
-            "ILRTQESEC",  # highly conserved sequence between NA 223-231 (https://doi.org/10.1016/j.antiviral.2013.09.018)            "NYNYLYQ", # high affinity neuraminic acid binder
-            "NYNYLYR",  # high affinity neuraminic acid binder https://doi.org/10.1016/j.heliyon.2022.e09222
-            "NYNYLYQ",  # high affinity neuraminic acid binder https://doi.org/10.1016/j.heliyon.2022.e09222
-            "NYNYLY",  # low affinity sialic acid binder
+            "ILRTQESEC",  # highly conserved sequence between NA 223-231 (https://doi.org/10.1016/j.antiviral.2013.09.018)
+            "NYNYLY",  # low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder
+            # TODO: ask jurgen for reference to NYNYLY
+            # https://doi.org/10.1016/j.heliyon.2022.e09222 and https://doi.org/10.1016/j.chom.2021.06.006 discuss
+            # peptide 'NYNY-' in the context of SARS-CoV-2 spike receptor binding motif, evasion of human leukocyte antigen (HLA)
+            # regulated immunity and affinity towards ACE2 mediated host cell entry, which may be initially stabilized via
+            # sialic acid binding as reported in https://doi.org/10.1093/glycob/cwab032
         ],
     }
     pos_controls["Is_Both"] = (

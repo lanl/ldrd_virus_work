@@ -1307,6 +1307,14 @@ if __name__ == "__main__":
         default="8-12",
         help="Range of kmer lengths for building feature dataset (must be a string in the format 'start-end' or a single kmer length value)",
     )
+    parser.add_argument(
+        "-ct",
+        "--cache-tarball",
+        type=str,
+        choices=["cache_mollentze.tar.gz", "dtra_cache.tar.gz"],
+        default="cache_mollentze.tar.gz",
+        help="Cached accession files for running workflow with cli flag '--cache extract'",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1324,6 +1332,12 @@ if __name__ == "__main__":
     workflow = args.workflow
     mapping_method = args.mapping_method
     kmer_range = args.kmer_range
+    cache_tarball = args.cache_tarball
+
+    # check to make sure the correct `cache-tarball` is being used
+    # for the given workflow when calling '--cache-checkpoint extract'
+    if cache_checkpoint == "extract":
+        sp.check_cache_tarball(workflow, cache_tarball)
 
     kmer_range_list = kmer_range.split("-")
     if len(kmer_range_list) > 2:
@@ -1334,8 +1348,7 @@ if __name__ == "__main__":
     data = files("viral_seq.data")
     train_file = str(data.joinpath(train_file))
     test_file = str(data.joinpath(test_file))
-    cache_file = str(data.joinpath("cache_mollentze.tar.gz"))
-    cache_dtra = str(data.joinpath("dtra_cache.tar.gz"))
+    cache_file = str(data.joinpath(cache_tarball))
     viral_files = (
         [train_file, test_file]
         if test_file != str(data.joinpath("none"))

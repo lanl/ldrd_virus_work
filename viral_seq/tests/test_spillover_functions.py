@@ -624,3 +624,12 @@ def test_issue_15():
     )
     # prior to fix this will only return a row for HM119401.1; post fix a row for each is returned
     assert_frame_equal(df_feats, df_expected)
+
+
+def test_check_cache_tarball():
+    for wf, tar_file in [
+        ("DR", "dtra_cache.tar.gz"),
+        ("DTRA", "cache_mollentze.tar.gz"),
+    ]:
+        with pytest.raises(ValueError, match="Extracted cache file"):
+            sp.check_cache_tarball(wf, tar_file)

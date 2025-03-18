@@ -1,9 +1,10 @@
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from typing import Union, Any, Optional, NamedTuple
+from typing import Union, Any, Optional, NamedTuple, Literal
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
+from pathlib import Path
 from sklearn.metrics import (
     get_scorer,
     roc_curve,
@@ -13,7 +14,12 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay,
 )
 from sklearn.model_selection import StratifiedKFold
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    ExtraTreesClassifier,
+    StackingClassifier,
+)
+from sklearn.base import ClassifierMixin
 import ray
 from ray import tune
 from ray.tune.search.optuna import OptunaSearch
@@ -699,3 +705,62 @@ def _plot_confusion_matrix(
     fig.tight_layout()
     fig.savefig(filename.replace(" ", "_"), dpi=300)
     plt.close()
+
+
+def _plot_logistic_stacked_weights(
+    stacked_logistic: StackingClassifier,
+    estimator_names: list[str],
+    file_name: str,
+    title: str = "Logistic Regression Coefficient used for Model Stacking",
+):
+    final_stacked_log_estimator = stacked_logistic.final_estimator_
+    heights = final_stacked_log_estimator.coef_.ravel()
+    colors = np.empty_like(heights, dtype=object)
+    colors[heights >= 0] = "blue"
+    colors[heights < 0] = "red"
+    fig, ax = plt.subplots(1, 1)
+    ax.bar(estimator_names, height=heights, color=colors)
+    ax.set_ylabel("Log Odds")
+    ax.set_xlabel("Stacked Estimators")
+    plt.xticks(rotation=90)
+    ax.set_title(title)
+    fig.tight_layout()
+    fig.savefig(file_name, dpi=300)
+    plt.close()
+
+
+def _ensemble_stacking_logistic(
+    models: list[tuple[str, ClassifierMixin]],
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    X_test: pd.DataFrame,
+    y_test: np.ndarray,
+    test_file: str,
+    predictions_path: Path,
+    plots_path: Path,
+    cv: Literal["prefit", 5] = "prefit",
+    plot_weights: bool = False,
+    estimator_names: Optional[list[str]] = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    clf = StackingClassifier(models, cv=cv)
+    clf.fit(X_train, y_train)
+    y_proba = clf.predict_proba(X_test)[..., 1]
+    y_pred = clf.predict(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_proba)
+    df_out = pd.DataFrame(y_proba, columns=[f"StackingClassifier LR CV={cv}"])
+    df_out["Species"] = pd.read_csv(test_file)["Species"]
+    df_out.to_csv(
+        str(predictions_path / f"StackingClassifier_LR_predictions_cv_{cv}.csv")
+    )
+    if plot_weights:
+        if estimator_names is None:
+            raise ValueError(
+                "Must provide `estimator_names` if `plot_weights` is True."
+            )
+        _plot_logistic_stacked_weights(
+            clf,
+            estimator_names,
+            str(plots_path / f"StackingClassifier_LR_weights_cv_{cv}.png"),
+            f"Logistic Regression Coefficient used for Model Stacking\ncv={cv}",
+        )
+    return y_pred, fpr, tpr

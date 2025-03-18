@@ -1,6 +1,10 @@
 from sklearn.datasets import make_classification
 from viral_seq.analysis import classifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    ExtraTreesClassifier,
+    StackingClassifier,
+)
 from sklearn.model_selection import train_test_split
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
@@ -11,6 +15,8 @@ from pathlib import Path
 from importlib.resources import files
 from sklearn.utils.validation import check_is_fitted
 from matplotlib.testing.compare import compare_images
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 
 @pytest.mark.parametrize(
@@ -448,3 +454,152 @@ def test_plot_confusion_matrix_mean(tmpdir):
     with tmpdir.as_cwd():
         classifier.plot_confusion_matrix_mean(y_test, y_preds)
         assert compare_images(expected_plot, "confusion_matrix_mean.png", 0.001) is None
+
+
+def test_plot_logistic_stacked_weights(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_logistic_stacked_weights.png"
+    )
+    rng = np.random.default_rng(2025)
+    X = rng.random(size=(10, 10))
+    y = rng.choice(2, 10)
+    models = [
+        (f"RF {i}", RandomForestClassifier(random_state=i).fit(X, y)) for i in range(2)
+    ]
+    stacked_logistic = StackingClassifier(models, cv="prefit").fit(X, y)
+    estimator_names = [f"Name {i}" for i in range(2)]
+    file_name = "Test.png"
+    with tmpdir.as_cwd():
+        classifier._plot_logistic_stacked_weights(
+            stacked_logistic, estimator_names, file_name
+        )
+        assert compare_images(expected_plot, "Test.png", 0.001) is None
+
+
+@pytest.mark.parametrize(
+    "cv, exp_fpr, exp_tpr, exp_proba, exp_plot",
+    [
+        (
+            5,
+            np.array([0.0] * 2 + [2 / 3] * 2 + [1.0] * 2),
+            np.array([0.0, 1 / 7, 2 / 7, 5 / 7, 6 / 7, 1.0]),
+            np.array(
+                [
+                    0.42008643,
+                    0.42008643,
+                    0.42021615,
+                    0.28240654,
+                    0.44251979,
+                    0.42008643,
+                    0.28240654,
+                    0.42021615,
+                    0.28229865,
+                    0.42021615,
+                ]
+            ),
+            "test_ensemble_stacking_logistic_5.png",
+        ),
+        (
+            "prefit",
+            np.array([0.0] + [1 / 3] * 2 + [1.0] * 3),
+            np.array([0.0, 1 / 7, 2 / 7, 3 / 7, 6 / 7, 1.0]),
+            np.array(
+                [
+                    0.64180405,
+                    0.64180405,
+                    0.64398981,
+                    0.7341501,
+                    0.37633148,
+                    0.64180405,
+                    0.7341501,
+                    0.64398981,
+                    0.73228778,
+                    0.64398981,
+                ]
+            ),
+            "test_ensemble_stacking_logistic_prefit.png",
+        ),
+    ],
+)
+def test_ensemble_stacking_logistic(tmpdir, cv, exp_fpr, exp_tpr, exp_proba, exp_plot):
+    expected_plot = files("viral_seq.tests.expected").joinpath(exp_plot)
+    rng = np.random.default_rng(seed=2025)
+    n_samples = 10
+    X_train = pd.DataFrame(
+        rng.random(size=(n_samples, 10)), columns=[f"Feature {i}" for i in range(10)]
+    )
+    y_train = rng.choice(2, n_samples)
+    X_test = pd.DataFrame(
+        rng.random(size=(n_samples, 10)), columns=[f"Feature {i}" for i in range(10)]
+    )
+    y_test = rng.choice(2, n_samples)
+    models = []
+    for i, model in enumerate(
+        [RandomForestClassifier, ExtraTreesClassifier, LGBMClassifier, XGBClassifier]
+    ):
+        this_model = model(random_state=2025, n_estimators=1)
+        if cv == "prefit":
+            this_model.fit(X_train, y_train)
+        models.append((f"Model {i}", this_model))
+    test_file = tmpdir / "test_file.csv"
+    pd.DataFrame({"Species": [f"Species {i}" for i in range(n_samples)]}).to_csv(
+        test_file
+    )
+    predictions_path = tmpdir
+    plots_path = tmpdir
+    estimator_names = [f"Name {i}" for i in range(len(models))]
+    pred, fpr, tpr = classifier._ensemble_stacking_logistic(
+        models,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        test_file,
+        predictions_path,
+        plots_path,
+        cv=cv,
+        plot_weights=True,
+        estimator_names=estimator_names,
+    )
+    proba = pd.read_csv(
+        predictions_path / f"StackingClassifier_LR_predictions_cv_{cv}.csv"
+    )[f"StackingClassifier LR CV={cv}"].values
+    assert_allclose(pred, exp_proba > 0.5)
+    assert_allclose(fpr, exp_fpr)
+    assert_allclose(tpr, exp_tpr)
+    assert_allclose(proba, exp_proba)
+    assert (
+        compare_images(
+            expected_plot, tmpdir / f"StackingClassifier_LR_weights_cv_{cv}.png", 0.001
+        )
+        is None
+    )
+
+
+def test_ensemble_stacking_logistic_value_error(tmpdir):
+    rng = np.random.default_rng(seed=2025)
+    X_train = pd.DataFrame(
+        np.zeros((10, 10)), columns=[f"Feature {i}" for i in range(10)]
+    )
+    y_train = rng.choice(2, 10)
+    X_test = X_train
+    y_test = y_train
+    models = [("RF", RandomForestClassifier().fit(X_train, y_train))]
+    test_file = tmpdir / "test_file.csv"
+    pd.DataFrame({"Species": [f"Species {i}" for i in range(10)]}).to_csv(test_file)
+    predictions_path = tmpdir
+    plots_path = tmpdir
+    with pytest.raises(ValueError, match="estimator_names"):
+        classifier._ensemble_stacking_logistic(
+            models,
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            test_file,
+            predictions_path,
+            plots_path,
+            cv="prefit",
+            plot_weights=True,
+            estimator_names=None,
+        )

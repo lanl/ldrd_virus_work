@@ -111,3 +111,23 @@ def test_plot_confusion_matrices(tmpdir):
             compare_images(exp_ensemble_plot, "Ensemble_confusion_matrix.png", 0.001)
             is None
         )
+
+
+def test_plot_confusion_matrices_strict(tmpdir):
+    """Ensure errors if len(comp_names_ensembles) != len(comp_preds_ensembles)."""
+    y_test = np.ones(10)
+    model_arguments = {f"Model {i}": {"group": "Group"} for i in range(2)}
+    predictions_ensemble_hard_eer = {name: np.zeros(10) for name in model_arguments}
+    comp_names_ensembles = [f"Ensemble {i}" for i in range(2)]
+    comp_preds_ensembles = [np.zeros(10) for i in range(3)]
+    with pytest.raises(
+        ValueError, match=r"zip\(\) argument 2 is longer than argument 1"
+    ):
+        workflow._plot_confusion_matrices(
+            y_test,
+            model_arguments,
+            predictions_ensemble_hard_eer,
+            comp_names_ensembles,
+            comp_preds_ensembles,
+            tmpdir,
+        )

@@ -741,7 +741,7 @@ def _ensemble_stacking_logistic(
     cv: Literal["prefit", 5] = "prefit",
     plot_weights: bool = False,
     estimator_names: Optional[list[str]] = None,
-):
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     clf = StackingClassifier(models, cv=cv)
     clf.fit(X_train, y_train)
     y_proba = clf.predict_proba(X_test)[..., 1]

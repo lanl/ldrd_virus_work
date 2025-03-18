@@ -1681,11 +1681,9 @@ if __name__ == "__main__":
             "SVVYGLR",
         ]
 
-        # TODO: determine why there is a mismatch in the number of rows
-        # between tbl and X
-        X = X_train
+        X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
-        y = y_train
+        y = tbl[target_column]
 
         # check that none of the features in tbl have kmers outside of the range
         # of given kmer lengths from command line option '--kmer-range'

@@ -1658,32 +1658,8 @@ if __name__ == "__main__":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        # Here is a list of common integrin-binding motifs. These motifs interact with
-        # specific integrins, playing critical roles in cell adhesion, signaling, and
-        # interaction with the extracellular matrix:
-        # RGD (Arg-Gly-Asp)
-        # KGE (Lys-Gly-Glu)
-        # LDV (Leu-Asp-Val)
-        # DGEA (Asp-Gly-Glu-Ala)
-        # REDV (Arg-Glu-Asp-Val)
-        # YGRK (Tyr-Gly-Arg-Lys)
-        # PHSRN (Pro-His-Ser-Arg-Asn)
-        # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
-
-        pos_controls = [
-            "RGD",
-            "KGE",
-            "LDV",
-            "DGEA",
-            "REDV",
-            "YGRK",
-            "PHSRN",
-            "SVVYGLR",
-        ]
-
-        X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
-        y = tbl[target_column]
+        y = y_train
 
         # check that none of the features in tbl have kmers outside of the range
         # of given kmer lengths from command line option '--kmer-range'

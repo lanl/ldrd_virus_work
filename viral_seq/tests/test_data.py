@@ -1,8 +1,11 @@
 from viral_seq.data.fix_virus_names import fix_virus_names
 from pandas.testing import assert_frame_equal
 import pandas as pd
+import pytest
 
 
+@pytest.mark.slow
+# TODO: implement mocker for `load_results` inside function call
 def test_fix_virus_names():
     virus_data = {
         "Virus_Name": {0: "ross river virus", 1: "hMPV"},

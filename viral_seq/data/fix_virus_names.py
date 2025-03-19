@@ -5,7 +5,7 @@ from pathlib import Path
 
 def fix_virus_names(df: pd.DataFrame, column_name: str):
     # load all accessions
-    accessions_dict = accessions_dict = {
+    accessions_dict = {
         s.split(" ")[0]: i for i, s in enumerate(df["Accessions"].values)
     }
     records_unordered = load_results(

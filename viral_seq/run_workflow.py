@@ -1335,7 +1335,7 @@ if __name__ == "__main__":
     cache_tarball = args.cache_tarball
 
     # check to make sure the correct `cache-tarball` is being used
-    # for the given workflow when calling '--cache-checkpoint extract'
+    # for the given workflow when calling '--cache extract'
     if cache_checkpoint == "extract":
         sp.check_cache_tarball(workflow, cache_tarball)
 

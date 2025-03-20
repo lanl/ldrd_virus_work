@@ -31,6 +31,14 @@ from operator import itemgetter
 matplotlib.use("Agg")
 
 
+def check_cache_tarball(workflow: str, cache_tarball: str) -> None:
+    err_msg = f"Extracted cache file '{cache_tarball}' does not match {workflow} workflow dataset."
+    if workflow == "DR" and cache_tarball != "cache_mollentze.tar.gz":
+        raise ValueError(err_msg)
+    if workflow == "DTRA" and cache_tarball != "dtra_cache.tar.gz":
+        raise ValueError(err_msg)
+
+
 def _append_recs(record_folder):
     # genbank format has more metadata we can use so
     # focus on that for now; eventually we might assert

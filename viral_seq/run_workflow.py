@@ -33,6 +33,34 @@ import matplotlib.patches as mpatches
 matplotlib.use("Agg")
 
 
+def print_pos_con(
+    pos_con_df: pd.DataFrame, kmer_prefix: str, mapping_method: str, dataset_name: str
+) -> None:
+    """
+    print and save the dataframe resulting from calling `check_positive_controls`
+
+    Parameters
+    ----------
+    pos_con_df: pd.DataFrame
+        dataframe containing positive controls with corresponding kmer features and count of total occurrences
+    kmer_prefix: str
+        kmer-prefix ("AA"  or "PC") that was used for translating positive controls
+    mapping_method: str
+        mapping method used to translate AA to PC kmers
+    dataset_name: str
+        name of dataset for which positive controls were checked (for saving file), i.e. "Train", "TopN", "Full"
+    """
+    print(
+        f"Count of Positive Control {kmer_prefix} k-mers in {dataset_name} Dataset:\n",
+        pos_con_df.tail(1).to_string(index=False),
+    )
+    pos_con_df.to_csv(
+        f"{dataset_name}_data_{kmer_prefix}_kmer_positive_controls_{mapping_method}.csv",
+        na_rep="",
+        index=False,
+    )
+
+
 def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
     """
     check that the lengths of features in the dataset 'X' are within
@@ -951,7 +979,16 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                         this_checkpoint -= 1
 
 
-def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
+def feature_selection_rfc(
+    feature_selection,
+    debug,
+    n_jobs,
+    random_state,
+    wf=None,
+    mapping_method=None,
+    positive_controls=None,
+    target_column="Human Host",
+):
     """Sub-select features using best performing from a trained random forest classifier"""
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
@@ -959,6 +996,20 @@ def feature_selection_rfc(feature_selection, debug, n_jobs, random_state):
         X, y = sp.get_training_columns(
             table_filename=train_files, class_column=target_column
         )
+        # if running DTRA workflow, check for presence of positive controls in unfiltered training dataset
+        if wf == "DTRA":
+            for mode in ["PC", "AA"]:
+                # count of PC and AA positive controls in pre-feature selection dataset
+                pos_con_all_data = check_positive_controls(
+                    positive_controls=positive_controls[target_column],
+                    kmers_list=list(X.columns),
+                    mapping_method=mapping_method,
+                    mode=mode,
+                )
+                print_pos_con(
+                    pos_con_all_data, mode, mapping_method, dataset_name="Full"
+                )
+
         if feature_selection == "none":
             print(
                 "All training features will be used as X_train in the following steps."
@@ -1342,11 +1393,50 @@ if __name__ == "__main__":
     build_tables(
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
+
+    # Here is a list of common integrin-binding motifs. These motifs interact with
+    # specific integrins, playing critical roles in cell adhesion, signaling, and
+    # interaction with the extracellular matrix:
+    # RGD (Arg-Gly-Asp)
+    # KGE (Lys-Gly-Glu)
+    # LDV (Leu-Asp-Val)
+    # DGEA (Asp-Gly-Glu-Ala)
+    # REDV (Arg-Glu-Asp-Val)
+    # YGRK (Tyr-Gly-Arg-Lys)
+    # PHSRN (Pro-His-Ser-Arg-Asn)
+    # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
+
+    pos_controls = {
+        "Is_Integrin": [
+            "RGD",
+            "KGE",
+            "LDV",
+            "DGEA",
+            "REDV",
+            "YGRK",
+            "PHSRN",
+            "SVVYGLR",
+        ],
+        "Is_Sialic_Acid": [
+            "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding (https://doi.org/10.1038/s41467-017-00836-6)
+            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with corboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
+            # primary and secondary sialic acid binding sites of NA composed of non-linear binding motifs (https://doi.org/10.3389/fmicb.2019.00039)
+            "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
+        ],
+    }
+    pos_controls["Is_Both"] = (
+        pos_controls["Is_Integrin"] + pos_controls["Is_Sialic_Acid"]
+    )
+
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
         n_jobs=n_jobs,
         random_state=random_state,
+        wf=workflow,
+        mapping_method=mapping_method,
+        positive_controls=pos_controls,
+        target_column=target_column,
     )
     if workflow == "DR":
         X_test, y_test = get_test_features(
@@ -1553,29 +1643,6 @@ if __name__ == "__main__":
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
-        # Here is a list of common integrin-binding motifs. These motifs interact with
-        # specific integrins, playing critical roles in cell adhesion, signaling, and
-        # interaction with the extracellular matrix:
-        # RGD (Arg-Gly-Asp)
-        # KGE (Lys-Gly-Glu)
-        # LDV (Leu-Asp-Val)
-        # DGEA (Asp-Gly-Glu-Ala)
-        # REDV (Arg-Glu-Asp-Val)
-        # YGRK (Tyr-Gly-Arg-Lys)
-        # PHSRN (Pro-His-Ser-Arg-Asn)
-        # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
-
-        pos_controls = [
-            "RGD",
-            "KGE",
-            "LDV",
-            "DGEA",
-            "REDV",
-            "YGRK",
-            "PHSRN",
-            "SVVYGLR",
-        ]
-
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
         y = tbl[target_column]
@@ -1681,71 +1748,39 @@ if __name__ == "__main__":
 
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls[target_column],
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="PC",
         )
-        print(
-            "Count of Positive Control PC k-mers in Train Dataset:\n",
-            pos_con_train_PC.tail(1).to_string(index=False),
-        )
-        pos_con_train_PC.to_csv(
-            f"train_data_PC_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_train_PC, "PC", mapping_method, dataset_name="Train")
 
         # count of PC positive controls in topN (array2)
         pos_con_topN_PC = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls[target_column],
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="PC",
         )
-        print(
-            "Count of Positive Control PC k-mers in topN:\n",
-            pos_con_topN_PC.tail(1).to_string(index=False),
-        )
-        pos_con_topN_PC.to_csv(
-            f"topN_PC_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_topN_PC, "PC", mapping_method, dataset_name="TopN")
 
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls[target_column],
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="AA",
         )
-        print(
-            "Count of Positive Control AA k-mers in Train Dataset:\n",
-            pos_con_train_AA.tail(1).to_string(index=False),
-        )
-        pos_con_train_AA.to_csv(
-            f"train_data_AA_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_train_AA, "AA", mapping_method, dataset_name="Train")
 
         # count of AA positive controls in topN (array2)
         pos_con_topN_AA = check_positive_controls(
-            positive_controls=pos_controls,
+            positive_controls=pos_controls[target_column],
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="AA",
         )
-        print(
-            "Count of Positive Control AA k-mers in TopN:\n",
-            pos_con_topN_AA.tail(1).to_string(index=False),
-        )
-        pos_con_train_AA.to_csv(
-            f"topN_AA_kmer_positive_controls_{mapping_method}.csv",
-            na_rep="",
-            index=False,
-        )
+        print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
         kmer_info = kmer_data(mapping_method, array2)
 

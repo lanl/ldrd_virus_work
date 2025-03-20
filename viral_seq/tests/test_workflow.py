@@ -696,3 +696,49 @@ def test_percent_exposed_error():
 
     with pytest.raises(ValueError, match="kmer feature name missing prefix."):
         workflow.percent_surface_exposed(kmer_names, syn_status)
+
+
+@pytest.mark.parametrize(
+    "pos_con_dict, kmer_prefix, mapping_method, dataset_name, exp_output",
+    [
+        (
+            {
+                "110": {
+                    0: "kmer_PC_110744",
+                    1: "kmer_PC_1041110",
+                    2: "kmer_PC_700110",
+                    3: 3,
+                },
+                "410": {0: None, 1: None, 2: None, 3: 0},
+                "0440": {0: None, 1: None, 2: None, 3: 0},
+                "0011": {0: "kmer_PC_700110", 1: None, 2: None, 3: 1},
+                "007": {0: "kmer_PC_007404", 1: None, 2: None, 3: 1},
+                "1041": {0: "kmer_PC_1041110", 1: None, 2: None, 3: 1},
+                "000": {0: "kmer_PC_0000", 1: None, 2: None, 3: 1},
+            },
+            "PC",
+            "jurgen_schmidt",
+            "Test",
+            "Count of Positive Control PC k-mers in Test Dataset:\n 110  410  0440 0011 007 1041 000\n  3  0.0   0.0    1   1    1   1\n",
+        ),
+    ],
+)
+def test_print_pos_con(
+    capsys, tmpdir, pos_con_dict, kmer_prefix, mapping_method, dataset_name, exp_output
+):
+    pos_con_df = pd.DataFrame(pos_con_dict)
+    with tmpdir.as_cwd():
+        workflow.print_pos_con(pos_con_df, kmer_prefix, mapping_method, dataset_name)
+
+        fname = f"{dataset_name}_data_{kmer_prefix}_kmer_positive_controls_{mapping_method}.csv"
+        actual = pd.read_csv(fname)
+        assert actual.shape == (4, 7)
+        assert list(actual.iloc[:, 0]) == [
+            "kmer_PC_110744",
+            "kmer_PC_1041110",
+            "kmer_PC_700110",
+            "3",
+        ]
+
+        captured = capsys.readouterr()
+        assert captured.out == exp_output

@@ -1,36 +1,36 @@
 Citation_for_receptor,Virus_Name,Receptor_Type,Whole_Genome,Accessions,Human_Host,Mammal_Host,Primate_Host
-https://doi.org/10.1016/S0092-8674(01)00231-8,type_1_reovirus,IgSF,True,MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1,False,True,False
-https://doi.org/10.1128/jvi.80.9.4482-4490.2006,feline calicivirus,IgSF,True,NC_075569.1,False,True,False
-https://doi.org/10.1016/0092-8674(89)90688-0,human rhinovirus,IgSF,True,MT157224.1,True,True,True
-https://doi.org/10.1128/jvi.72.9.7181-7190.1998,rabies virus,IgSF,True,NC_001542.1,True,True,True
-https://doi.org/10.1073/pnas.91.9.3872,human herpesvirus 7,IgSF,True,NC_001716.2,True,True,True
-https://doi.org/10.1016/j.cyto.2019.154830,human immunodeficiency virus 1,IgSF,True,NC_001802.1,True,True,True
-https://doi.org/10.1097/00002030-198804000-00005,human immunodeficiency virus 2,IgSF,True,NC_001722.1,True,True,True
-https://doi.org/10.1097/00002030-198804000-00005,simian immunodeficiency virus,IgSF,True,NC_001549.1,False,True,True
-https://doi.org/10.1371/journal.ppat.1003520,rhinovirus B,IgSF,True,NC_038312.1,True,True,True
-https://doi.org/10.1006/bbrc.2000.4093,respiratory syncytial virus,IgSF,True,NC_001803.1,True,True,True
-https://doi.org/10.1128/jvi.71.1.785-789.1997,coxsackievirus A21,IgSF,True,D00538.1,True,True,True
-https://doi.org/10.1128/jvi.01227-21,varicella-zoster virus,IgSF,True,NC_001348.1,True,True,True
-https://doi.org/10.1128/jvi.00041-12,herpes B virus,IgSF,True,NC_076165.1,False,True,True
-https://doi.org/10.1126/science.280.5369.1618,herpes simplex virus 1,IgSF,True,NC_001806.2,True,True,True
-https://doi.org/10.1126/science.280.5369.1618,herpes simplex virus 2,IgSF,True,NC_001798.2,True,True,True
-https://doi.org/10.1126/science.280.5369.1618,porcine pseudorabies virus (PRV),IgSF,True,NC_075689.1,False,True,False
-https://doi.org/10.1126/science.280.5369.1618,bovine herpesvirus 1 (BHV-1),IgSF,True,NC_063268.1,True,True,True
-https://doi.org/10.3390/v14010160,human herpesvirus 6B (HHV-6B),IgSF,True,NC_000898.1,True,True,True
+https://doi.org/10.1016/S0092-8674(01)00231-8,Mammalian orthoreovirus 1,IgSF,True,MW198704.1 MW198707.1 MW198708.1 MW198709.1 MW198710.1 MW198711.1 MW198712.1 MW198713.1 MW198705.1 MW198706.1,False,True,False
+https://doi.org/10.1128/jvi.80.9.4482-4490.2006,Feline calicivirus,IgSF,True,NC_075569.1,False,True,False
+https://doi.org/10.1016/0092-8674(89)90688-0,Human rhinovirus sp.,IgSF,True,MT157224.1,True,True,True
+https://doi.org/10.1128/jvi.72.9.7181-7190.1998,Lyssavirus rabies,IgSF,True,NC_001542.1,True,True,True
+https://doi.org/10.1073/pnas.91.9.3872,Human betaherpesvirus 7,IgSF,True,NC_001716.2,True,True,True
+https://doi.org/10.1016/j.cyto.2019.154830,Human immunodeficiency virus 1,IgSF,True,NC_001802.1,True,True,True
+https://doi.org/10.1097/00002030-198804000-00005,Human immunodeficiency virus 2,IgSF,True,NC_001722.1,True,True,True
+https://doi.org/10.1097/00002030-198804000-00005,Simian immunodeficiency virus,IgSF,True,NC_001549.1,False,True,True
+https://doi.org/10.1371/journal.ppat.1003520,rhinovirus B3,IgSF,True,NC_038312.1,True,True,True
+https://doi.org/10.1006/bbrc.2000.4093,Human respiratory syncytial virus A,IgSF,True,NC_001803.1,True,True,True
+https://doi.org/10.1128/jvi.71.1.785-789.1997,Human coxsackievirus A21 Coe,IgSF,True,D00538.1,True,True,True
+https://doi.org/10.1128/jvi.01227-21,Human alphaherpesvirus 3,IgSF,True,NC_001348.1,True,True,True
+https://doi.org/10.1128/jvi.00041-12,Macacine alphaherpesvirus 1,IgSF,True,NC_076165.1,False,True,True
+https://doi.org/10.1126/science.280.5369.1618,Human alphaherpesvirus 1,IgSF,True,NC_001806.2,True,True,True
+https://doi.org/10.1126/science.280.5369.1618,Human alphaherpesvirus 2,IgSF,True,NC_001798.2,True,True,True
+https://doi.org/10.1126/science.280.5369.1618,Suid alphaherpesvirus 1,IgSF,True,NC_075689.1,False,True,False
+https://doi.org/10.1126/science.280.5369.1618,Bovine herpesvirus type 1.1,IgSF,True,NC_063268.1,True,True,True
+https://doi.org/10.3390/v14010160,Human betaherpesvirus 6B,IgSF,True,NC_000898.1,True,True,True
 https://doi.org/10.1128/jvi.00824-12,canine distemper virus,IgSF,True,NC_001921.1,False,True,False
-https://doi.org/10.1371/journal.ppat.1002240,measles virus,IgSF,True,NC_001498.1,True,True,True
-https://doi.org/10.1371/journal.pone.0106281,phocine distemper virus,IgSF,True,NC_028249.1,False,True,False
-https://doi.org/10.1128/jvi.02792-12,peste des petits ruminants virus,IgSF,True,NC_006383.2,False,True,False
-https://doi.org/10.1128/jvi.68.6.3453-3458.1994,encephalomyocarditis virus,IgSF,True,NC_001479.1,False,True,False
-https://doi.org/10.1128/jvi.00299-14,coxsackievirus B3,IgSF,True,NC_038307.1,True,True,True
-https://doi.org/10.1038/s41598-018-37224-z,bat mastadenovirus a,IgSF,True,NC_016895.2,False,True,False
-https://doi.org/10.1128/jvi.74.22.10639-10649.2000,canine adenovirus type 2,IgSF,True,AC_000020.1,False,True,False
-https://doi.org/10.1128/jvi.00869-19,rhesus macaque recovirus,IgSF,True,NC_043512.1,False,True,True
-https://doi.org/10.3390/v14071503,feline morbillivirus,IgSF,True,NC_039196.1,False,True,False
-https://doi.org/10.1016/0092-8674(89)90690-9,poliovirus,IgSF,True,NC_002058.3,True,True,True
-https://doi.org/10.1128/jvi.00465-14,saimiriine alphaherpesvirus 1,IgSF,True,NC_014567.1,False,True,True
-https://doi.org/10.1091/mbc.8.1.47,simian virus 40,IgSF,True,NC_001669.1,False,True,True
-https://doi.org/10.1128/jvi.00287-10,equine herpesvirus type 1,IgSF,True,NC_001491.2,False,True,False
-https://doi.org/10.1099/vir.0.066407-0,equine herpesvirus type 4,IgSF,True,NC_001844.1,False,True,False
-https://doi.org/10.1128/jvi.71.6.4657-4662.1997,Epstein-Barr virus,IgSF,True,NC_007605.1,True,True,True
-https://doi.org/10.1038/s41586-019-0955-3,bat influenza A virus,IgSF,True,PQ109491.1 PQ109490.1 PQ109489.1 PQ109488.1 PQ109487.1 PQ109486.1 PQ109485.1 PQ109484.1,False,True,False
+https://doi.org/10.1371/journal.ppat.1002240,Measles morbillivirus,IgSF,True,NC_001498.1,True,True,True
+https://doi.org/10.1371/journal.pone.0106281,Phocine morbillivirus,IgSF,True,NC_028249.1,False,True,False
+https://doi.org/10.1128/jvi.02792-12,peste-des-petits-ruminants virus,IgSF,True,NC_006383.2,False,True,False
+https://doi.org/10.1128/jvi.68.6.3453-3458.1994,Encephalomyocarditis virus,IgSF,True,NC_001479.1,False,True,False
+https://doi.org/10.1128/jvi.00299-14,Coxsackievirus B3,IgSF,True,NC_038307.1,True,True,True
+https://doi.org/10.1038/s41598-018-37224-z,bat adenovirus 3,IgSF,True,NC_016895.2,False,True,False
+https://doi.org/10.1128/jvi.74.22.10639-10649.2000,Canine adenovirus 2,IgSF,True,AC_000020.1,False,True,False
+https://doi.org/10.1128/jvi.00869-19,Tulane virus,IgSF,True,NC_043512.1,False,True,True
+https://doi.org/10.3390/v14071503,Feline morbillivirus,IgSF,True,NC_039196.1,False,True,False
+https://doi.org/10.1016/0092-8674(89)90690-9,Enterovirus C,IgSF,True,NC_002058.3,True,True,True
+https://doi.org/10.1128/jvi.00465-14,Saimiriine alphaherpesvirus 1,IgSF,True,NC_014567.1,False,True,True
+https://doi.org/10.1091/mbc.8.1.47,Betapolyomavirus macacae,IgSF,True,NC_001669.1,False,True,True
+https://doi.org/10.1128/jvi.00287-10,Equid alphaherpesvirus 1,IgSF,True,NC_001491.2,False,True,False
+https://doi.org/10.1099/vir.0.066407-0,Equid alphaherpesvirus 4,IgSF,True,NC_001844.1,False,True,False
+https://doi.org/10.1128/jvi.71.6.4657-4662.1997,Human gammaherpesvirus 4,IgSF,True,NC_007605.1,True,True,True
+https://doi.org/10.1038/s41586-019-0955-3,Influenza A virus,IgSF,True,PQ109491.1 PQ109490.1 PQ109489.1 PQ109488.1 PQ109487.1 PQ109486.1 PQ109485.1 PQ109484.1,False,True,False

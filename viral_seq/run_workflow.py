@@ -1659,7 +1659,7 @@ if __name__ == "__main__":
 
         X = pl.read_parquet(table_loc_train_best).to_pandas()
         tbl = csv_conversion(train_file)
-        y = tbl[target_column]
+        y = y_train
 
         # check that none of the features in tbl have kmers outside of the range
         # of given kmer lengths from command line option '--kmer-range'

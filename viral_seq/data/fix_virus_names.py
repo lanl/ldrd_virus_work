@@ -3,7 +3,7 @@ from viral_seq.analysis.spillover_predict import load_results
 from pathlib import Path
 
 
-def fix_virus_names(df: pd.DataFrame, column_name: str):
+def fix_virus_names(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
     # load all accessions
     accessions_dict = {
         s.split(" ")[0]: i for i, s in enumerate(df["Accessions"].values)

@@ -526,7 +526,7 @@ def FIC_plot(
             mean_fpr,
             mean_tpr,
             color="b",
-            label=f"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
+            label=f"Mean ROC (AUC = {mean_auc:0.2f} $\\pm$ {std_auc:0.2f})",
             lw=2,
             alpha=0.8,
         )

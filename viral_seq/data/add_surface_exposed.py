@@ -1,15 +1,29 @@
 import pandas as pd
+from typing import List
 
 
-def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: list):
+def add_surface_exposed(
+    surface_exposed_df: pd.DataFrame, surface_exposed_list: list, save_file: str
+) -> None:
     """
     add "surface_exposure_status" values to entries in dataframe containing
     virus and protein names from dataset and save dataframe with new entries
+
+    Parameters:
+    -----------
+    surface_exposed_df: pd.DataFrame
+        dataframe containing corresponding virus-protein pairs as well as surface exposed (yes/no) status
+        and reference for decision if not determined from known lists of (not) surface-exposed proteins
+    surface_exposed_list: list
+        list of known surface exposed proteins from original curated entries in DTRA workflow
+    save_file: str
+        file name for saving modified dataframe as csv
     """
+
     response_list = {}
     reference_list = {}
     # non-exhaustive list of non-structural protein names, parts of names (i.e. 'ase' as in protease)
-    not_exposed = [
+    not_exposed: List[str] = [
         "ase",
         "nonstructural",
         "RNA",
@@ -44,12 +58,12 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
         "small t antigen",
         "large t antigen",
     ]
-    not_exposed_exceptions = [
+    not_exposed_exceptions: List[str] = [
         "hemagglutinin-neuraminidase",
         "hemagglutinin-esterase",
         "neuraminidase",
     ]
-    exposed = [
+    exposed: List[str] = [
         "membrane",
         "glycoprotein",
         "structural",
@@ -70,24 +84,26 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
     remaining = surface_exposed_df["surface_exposed_status"].isna().sum()
     for i, row in enumerate(surface_exposed_df.itertuples()):
         if pd.isna(row.surface_exposed_status):
-            if any(s in row.protein_names for s in not_exposed) and not any(
-                s in row.protein_names for s in not_exposed_exceptions
+            if isinstance(row.protein_names, str):
+                protein_query: str = row.protein_names
+            else:
+                raise TypeError("Invalid protein query type: expected 'str' value.")
+            if any(s in protein_query for s in not_exposed) and not any(
+                s in protein_query for s in not_exposed_exceptions
             ):
                 response_list[i] = "no"
                 reference_list[i] = "None"
                 remaining -= 1
                 continue
-            if any(s in row.protein_names for s in exposed) or any(
-                s in row.protein_names for s in surface_exposed_list
+            if any(s in protein_query for s in exposed) or any(
+                s in protein_query for s in surface_exposed_list
             ):
                 response_list[i] = "yes"
                 reference_list[i] = "None"
                 remaining -= 1
                 continue
             else:
-                print(
-                    f"{row.Index}, ({remaining}), {row.virus_names}, {row.protein_names}"
-                )
+                print(f"{row.Index}, ({remaining}), {row.virus_names}, {protein_query}")
                 response_1 = input("surface exposure status:")
                 if response_1 == "exit":
                     surface_exposed_df.loc[
@@ -96,7 +112,7 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
                     surface_exposed_df.loc[
                         list(reference_list.keys()), "reference"
                     ] = list(reference_list.values())
-                    surface_exposed_df.to_csv(df_file, index=False)
+                    surface_exposed_df.to_csv(save_file, index=False)
                     break
                 else:
                     response_2 = input("reference:")
@@ -112,140 +128,140 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, surface_exposed_list: 
     surface_exposed_df.loc[list(reference_list.keys()), "reference"] = list(
         reference_list.values()
     )
-    surface_exposed_df.to_csv(df_file, index=False)
+    surface_exposed_df.to_csv(save_file, index=False)
 
 
-surface_exposed_list = [
-    "1B(VP2)",
-    "1C(VP3)",
-    "1D(VP1)",
-    "Envelope surface glycoprotein gp120",
-    "Envelope surface glycoprotein gp160, precursor",
-    "PreM protein",
-    "VP1",
-    "VP1 protein",
-    "VP2",
-    "VP2 protein",
-    "VP3",
-    "VP3 protein",
-    "envelope glycoprotein E1",
-    "envelope glycoprotein E2",
-    "envelope protein",
-    "envelope protein E",
-    "membrane glycoprotein M",
-    "membrane glycoprotein precursor prM",
-    "membrane protein M",
-    "hemagglutinin-neuraminidase",
-    "envelope glycoprotein 150",
-    "envelope glycoprotein B",
-    "envelope glycoprotein E",
-    "envelope glycoprotein G",
-    "envelope glycoprotein H",
-    "envelope glycoprotein M",
-    "envelope glycoprotein UL37",
-    "envelope protein",
-    "envelope protein E",
-    "envelope protein UL20",
-    "envelope protein UL43",
-    "membrane glycoprotein",
-    "membrane glycoprotein UL16",
-    "membrane glycoprotein UL40",
-    "membrane protein UL120",
-    "membrane protein UL124",
-    "membrane protein UL20",
-    "membrane protein UL45",
-    "membrane protein UL56",
-    "membrane protein US12",
-    "membrane protein US15",
-    "membrane protein US30",
-    "membrane protein V1",
-    "hexon",
-    "hexon protein",
-    "3A",
-    "3A protein",
-    "Asp",  # HIV-1 Antisense Protein
-    "CR1-beta",
-]
+if __name__ == "__main__":
+    surface_exposed_list = [
+        "1B(VP2)",
+        "1C(VP3)",
+        "1D(VP1)",
+        "Envelope surface glycoprotein gp120",
+        "Envelope surface glycoprotein gp160, precursor",
+        "PreM protein",
+        "VP1",
+        "VP1 protein",
+        "VP2",
+        "VP2 protein",
+        "VP3",
+        "VP3 protein",
+        "envelope glycoprotein E1",
+        "envelope glycoprotein E2",
+        "envelope protein",
+        "envelope protein E",
+        "membrane glycoprotein M",
+        "membrane glycoprotein precursor prM",
+        "membrane protein M",
+        "hemagglutinin-neuraminidase",
+        "envelope glycoprotein 150",
+        "envelope glycoprotein B",
+        "envelope glycoprotein E",
+        "envelope glycoprotein G",
+        "envelope glycoprotein H",
+        "envelope glycoprotein M",
+        "envelope glycoprotein UL37",
+        "envelope protein",
+        "envelope protein E",
+        "envelope protein UL20",
+        "envelope protein UL43",
+        "membrane glycoprotein",
+        "membrane glycoprotein UL16",
+        "membrane glycoprotein UL40",
+        "membrane protein UL120",
+        "membrane protein UL124",
+        "membrane protein UL20",
+        "membrane protein UL45",
+        "membrane protein UL56",
+        "membrane protein US12",
+        "membrane protein US15",
+        "membrane protein US30",
+        "membrane protein V1",
+        "hexon",
+        "hexon protein",
+        "3A",
+        "3A protein",
+        "Asp",  # HIV-1 Antisense Protein, https://doi.org/10.1128/jvi.00574-19
+        "CR1-beta",
+    ]
 
-# TODO: add these references to dataframe
-references = [
-    "membrane protein M",
-    "1B(VP2)",
-    "1C(VP3)",
-    "1D(VP1)",
-    "Envelope surface glycoprotein gp120",
-    "3C",
-    "3C protein",
-    "3D",
-    "3D protein",
-    "3D-POL protein",
-    "Hel protein",
-    "Lab protein",
-    "Lb protein",
-    "1A(VP4)",
-    "nucleocapsid",
-    "p1",
-    "p2",
-    "p6",
-    "p66 subunit",
-    "p7 protein",
-    "pre-membrane protein prM",
-    "protein VP0",
-    "protein pr",
-    "protien 3A",
-    "protein 1A",
-    "protein 1B",
-    "protein 1C",
-    "protein 1D",
-    "protein 2A",
-    "protein 2B",
-    "protein 2C",
-    "protien 2K",
-    "protein 3A",
-    "protein 3AB",
-    "protein 3C",
-    "protein 3D",
-]
-urls = [
-    "https://doi.org/10.1099/0022-1317-69-5-1105",
-    "https://doi.org/10.3389/fmicb.2020.562768",
-    "https://doi.org/10.3389/fmicb.2020.562768",
-    "https://doi.org/10.3389/fmicb.2020.562768",
-    "https://doi.org/10.1038/31405",
-    "https://doi.org/10.3390/v15122413",
-    "https://doi.org/10.3390/v15122413",
-    "https://doi.org/10.3389/fimmu.2024.1365521",
-    "https://doi.org/10.3389/fimmu.2024.1365521",
-    "https://doi.org/10.3389/fimmu.2024.1365521",
-    "https://doi.org/10.1016/j.virusres.2024.199401",
-    "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
-    "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
-    "https://doi.org/10.3389/fmicb.2020.562768",
-    "https://doi.org/10.1007/s11904-011-0107-3",
-    "https://doi.org/10.1007/s11904-011-0107-3",
-    "https://doi.org/10.1007/s11904-011-0107-3",
-    "https://doi.org/10.1007/s11904-011-0107-3",
-    "https://doi.org/10.1002/cbic.202000263",
-    "https://doi.org/10.1038/s41598-019-44413-x",
-    "https://doi.org/10.1016/0042-6822(92)90267-S",
-    "https://doi.org/10.1128/jvi.73.11.9072-9079.1999",
-    "https://doi.org/10.1042/BJ20061136",
-    "https://doi.org/10.1128/jvi.00791-17",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-    "https://viralzone.expasy.org/99",
-]
+    # TODO: these values (i.e. "references", "urls") are left over previous surface exposed list, consider purging
+    references = [
+        "membrane protein M",
+        "1B(VP2)",
+        "1C(VP3)",
+        "1D(VP1)",
+        "Envelope surface glycoprotein gp120",
+        "3C",
+        "3C protein",
+        "3D",
+        "3D protein",
+        "3D-POL protein",
+        "Hel protein",
+        "Lab protein",
+        "Lb protein",
+        "1A(VP4)",
+        "nucleocapsid",
+        "p1",
+        "p2",
+        "p6",
+        "p66 subunit",
+        "p7 protein",
+        "pre-membrane protein prM",
+        "protein VP0",
+        "protein pr",
+        "protien 3A",
+        "protein 1A",
+        "protein 1B",
+        "protein 1C",
+        "protein 1D",
+        "protein 2A",
+        "protein 2B",
+        "protein 2C",
+        "protien 2K",
+        "protein 3A",
+        "protein 3AB",
+        "protein 3C",
+        "protein 3D",
+    ]
+    urls = [
+        "https://doi.org/10.1099/0022-1317-69-5-1105",
+        "https://doi.org/10.3389/fmicb.2020.562768",
+        "https://doi.org/10.3389/fmicb.2020.562768",
+        "https://doi.org/10.3389/fmicb.2020.562768",
+        "https://doi.org/10.1038/31405",
+        "https://doi.org/10.3390/v15122413",
+        "https://doi.org/10.3390/v15122413",
+        "https://doi.org/10.3389/fimmu.2024.1365521",
+        "https://doi.org/10.3389/fimmu.2024.1365521",
+        "https://doi.org/10.3389/fimmu.2024.1365521",
+        "https://doi.org/10.1016/j.virusres.2024.199401",
+        "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
+        "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
+        "https://doi.org/10.3389/fmicb.2020.562768",
+        "https://doi.org/10.1007/s11904-011-0107-3",
+        "https://doi.org/10.1007/s11904-011-0107-3",
+        "https://doi.org/10.1007/s11904-011-0107-3",
+        "https://doi.org/10.1007/s11904-011-0107-3",
+        "https://doi.org/10.1002/cbic.202000263",
+        "https://doi.org/10.1038/s41598-019-44413-x",
+        "https://doi.org/10.1016/0042-6822(92)90267-S",
+        "https://doi.org/10.1128/jvi.73.11.9072-9079.1999",
+        "https://doi.org/10.1042/BJ20061136",
+        "https://doi.org/10.1128/jvi.00791-17",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+        "https://viralzone.expasy.org/99",
+    ]
 
-
-df_file = "surface_exposed_df.csv"
-surface_exposed_df = pd.read_csv("surface_exposed_df.csv")
-add_surface_exposed(surface_exposed_df, surface_exposed_list)
+    df_file = "surface_exposed_df.csv"
+    surface_exposed_df = pd.read_csv("surface_exposed_df.csv")
+    add_surface_exposed(surface_exposed_df, surface_exposed_list, save_file=df_file)

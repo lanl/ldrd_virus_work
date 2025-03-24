@@ -681,14 +681,10 @@ def check_positive_controls(
             "SVVYGLR",
         ],
         "Sialic_Acid": [
-            "RAGDRPYQDAP",
-            "REGANTDQDAP",
-            "REGAIISRDSP",
-            "LRM",
-            "QDAP",
-            "REGA",
-            "NYNYLYK",
-            "NYNYLYQ",
+            "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding (https://doi.org/10.1038/s41467-017-00836-6)
+            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with corboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
+            # primary and secondary sialic acid binding sites of NA composed of non-linear binding motifs (https://doi.org/10.3389/fmicb.2019.00039)
+            "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
         ],
         "IgSF": [
             "DEDGYITLN",
@@ -1169,7 +1165,6 @@ def feature_selection_rfc(
     random_state,
     wf=None,
     mapping_method=None,
-    positive_controls=None,
     target_column="Human Host",
 ):
     """Sub-select features using best performing from a trained random forest classifier"""
@@ -1597,11 +1592,6 @@ if __name__ == "__main__":
             },
         )
 
-    build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(
-        feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
-    )
-
     if workflow == "DTRA":
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             igsf_path = str(data.joinpath("igsf_training.csv"))
@@ -1621,7 +1611,6 @@ if __name__ == "__main__":
         random_state=random_state,
         wf=workflow,
         mapping_method=mapping_method,
-        positive_controls=pos_controls,
         target_column=target_column,
     )
     if workflow == "DR":

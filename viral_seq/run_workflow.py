@@ -370,6 +370,8 @@ def feature_count_consensus(
     return feature_count_out
 
 
+# this function and the aggregation of shap values within 'shap_clfr_consensus'
+# by the function 'train_clfr' should be reviewed within this MR
 def plot_shap_consensus(
     shap_clfr_consensus: np.ndarray,
     train_data: pd.DataFrame,

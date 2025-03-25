@@ -176,7 +176,7 @@ def test_plot_shap_meanabs(tmpdir):
 
 
 @pytest.mark.skip(
-    reason="Temporary SHAP implementation causes unrelated errors. Remove before merge."
+    reason="SHAP 'summary_plot' expects explanation to have value 'base_values'."
 )
 @pytest.mark.parametrize("interference", [False, True])
 def test_plot_shap_beeswarm(tmpdir, interference):

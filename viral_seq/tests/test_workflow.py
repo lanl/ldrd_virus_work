@@ -312,6 +312,35 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "NYNYLY": {0: None, 1: 0},
             },
         ),
+        # this test case checks for the presence of igsf positive controls in
+        # PC kmers. Individual kmer sequences have been modified to include
+        # each of the igsf positive controls.
+        (
+            [
+                "kmer_PC_484464",
+                "kmer_PC_007204",
+                "kmer_PC_110744",
+                "kmer_PC_6433602",
+                "kmer_PC_764332",
+                "kmer_PC_00235",
+                "kmer_AA_ECVGDE",
+                "kmer_AA_AQDAP",
+                "kmer_AA_CCAFEE",
+                "kmer_AA_CGDKGEA",
+                "kmer_AA_FGLRMA",
+                "kmer_AA_AAAA",
+            ],
+            "jurgen_schmidt",
+            "PC",
+            "IG",
+            {
+                "484": {0: "kmer_PC_484464", 1: 1},
+                "204": {0: "kmer_PC_007204", 1: 1},
+                "33602": {0: "kmer_PC_6433602", 1: 1},
+                "332": {0: "kmer_PC_764332", 1: 1},
+                "0235": {0: "kmer_PC_00235", 1: 1},
+            },
+        ),
     ],
 )
 def test_positive_controls(
@@ -334,11 +363,11 @@ def test_positive_controls(
     [
         ("IN", 7),
         ("SA", 3),
-        ("IG", 8),
-        ("SA_IG", 11),
-        ("IN_IG", 15),
+        ("IG", 5),
+        ("SA_IG", 8),
+        ("IN_IG", 12),
         ("IN_SA", 10),
-        ("IN_SA_IG", 18),
+        ("IN_SA_IG", 15),
     ],
 )
 def test_pos_con_columns(target_column, len_exp_keys):

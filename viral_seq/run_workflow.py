@@ -687,14 +687,11 @@ def check_positive_controls(
             "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
         ],
         "IgSF": [
-            "DEDGYITLN",
-            "EEEIYTSLQ",
-            "DEERYMTLN",
-            "DEDGYTQL",
-            "ISYTTL",
-            "VTYSAL",
-            "IHYSEL",
-            "VDYVIL",
+            "DPE",  # residues of conserved C3 region important for binding of gp120 to CD4, https://doi.org/10.1128/jvi.64.12.5701-5707.1990
+            "TGD",  # mutations in this region significantly reduced sigma-1 binding to JAM-A, https://doi.org/10.1371/journal.ppat.1000235
+            "NNMGT",  # (here and below) binding footprint of coxsackievirus-3 VP1 and VP2 capsid proteins with CAR D1 extracellular domain, https://doi.org/10.1128/jvi.00299-14
+            "NNT",
+            "GSNK",
         ],
     }
 

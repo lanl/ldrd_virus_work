@@ -639,6 +639,12 @@ def test_check_cache_tarball(wf, tar_file):
 
 
 def test_build_table_kmer_info(tmpdir):
+    exp_kmer_info = {
+        "mapping_method": "None",
+        "kmer_names": ["kmer_AA_MA"],
+        "virus_name": "Karshi virus",
+        "protein_name": "polyprotein",
+    }
     with tmpdir.as_cwd():
         this_cache = files("viral_seq.tests") / "cache"
         cache_str = str(this_cache.resolve())
@@ -658,4 +664,5 @@ def test_build_table_kmer_info(tmpdir):
             mapping_method="jurgen_schmidt",
             kmer_info=[],
         )
+        assert kmer_info[0].__dict__ == exp_kmer_info
         assert len(kmer_info) == 52166

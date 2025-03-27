@@ -78,13 +78,13 @@ def test_aa_map_wrong_input():
 @pytest.mark.parametrize(
     "method, aa_in, aa_expected",
     [
-        ("shen_2007", "A", "A"),
-        ("shen_2007", "C", "B"),
-        ("shen_2007", "P", "C"),
-        ("shen_2007", "M", "D"),
-        ("shen_2007", "Q", "E"),
-        ("shen_2007", "E", "F"),
-        ("shen_2007", "K", "G"),
+        ("shen_2007", "A", "1"),
+        ("shen_2007", "C", "2"),
+        ("shen_2007", "P", "3"),
+        ("shen_2007", "M", "4"),
+        ("shen_2007", "Q", "5"),
+        ("shen_2007", "E", "6"),
+        ("shen_2007", "K", "7"),
         ("shen_2007", "Z", "*"),
         ("jurgen_schmidt", "A", "0"),
         ("jurgen_schmidt", "S", "2"),
@@ -117,7 +117,7 @@ def test_error_get_kmers():
     "accession, kmer_type, mapping_method, exp_kmer, exp_len",
     [
         ("NC_007620.1", "AA", None, "kmer_AA_MSSVFRAFEL", 4489),
-        ("NC_007620.1", "PC", "shen_2007", "kmer_PC_DDDACGACFC", 4489),
+        ("NC_007620.1", "PC", "shen_2007", "kmer_PC_4441371363", 4489),
         ("NC_007620.1", "PC", "jurgen_schmidt", "kmer_PC_6226750746", 4489),
     ],
 )

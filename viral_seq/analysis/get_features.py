@@ -241,19 +241,19 @@ def aa_map(explicit_aa: str, *, method: str) -> str:
     if method == "shen_2007":
         # Categories defined in https://doi.org/10.1073/pnas.0607879104
         if explicit_aa in "AGV":
-            return "A"
+            return "1"
         elif explicit_aa in "C":
-            return "B"
-        elif explicit_aa in "FLIP":
-            return "C"
+            return "2"
+        elif explicit_aa in "FLIPJ":
+            return "3"
         elif explicit_aa in "MSTY":
-            return "D"
+            return "4"
         elif explicit_aa in "HNQW":
-            return "E"
+            return "5"
         elif explicit_aa in "DE":
-            return "F"
+            return "6"
         elif explicit_aa in "KR":
-            return "G"
+            return "7"
         else:
             return "*"
     elif method == "jurgen_schmidt":

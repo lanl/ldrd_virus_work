@@ -772,11 +772,11 @@ def _ensemble_stacking_logistic(
 
 
 def entropy(y: np.ndarray) -> float:
-    # see section 3.2.3 of Kunapuli's "Ensemble Methods for Machine
-    # Learning" (2023)
+    # see section 3.2.3 of Kunapuli's "Ensemble Methods for Machine Learning" (2023) ISBN 9781617297137
+    # https://github.com/gkunapuli/ensemble-methods-notebooks/blob/master/Ch3.2-combining-predictions-by-weighting.ipynb
     # count 0 & 1 regardless of if they are present to avoid ent = 0
     counts = np.array([np.count_nonzero(y == 0), np.count_nonzero(y == 1)])
-    # calculate frequency with additive smoothing to avoid frequency = 0
+    # calculate frequency with moderate additive smoothing (https://en.wikipedia.org/wiki/Additive_smoothing) to avoid frequency = 0
     p = (np.array(counts.astype(np.float64)) + 0.5) / (len(y) + 1.0)
     ent = -p.T @ np.log2(p)
     return ent

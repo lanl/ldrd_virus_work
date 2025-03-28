@@ -634,6 +634,7 @@ def test_roc_intersection_bug(tmpdir):
     ],
 )
 def test_entropy(y_test, expected_entropy):
+    """Regression test entropy values."""
     entropy = classifier.entropy(y_test)
     assert entropy == pytest.approx(expected_entropy)
 
@@ -710,3 +711,48 @@ def test_ensemble_entropy(tmpdir):
     assert_allclose(fpr, exp_fpr)
     assert_allclose(tpr, exp_tpr)
     assert_allclose(proba, exp_proba)
+
+
+@given(
+    y_test=hnp.arrays(
+        dtype=np.int32,
+        elements=st.sampled_from([0, 1]),
+        shape=st.integers(min_value=10, max_value=2_000),
+    ),
+    random_state=hnp.from_dtype(np.dtype(np.uint32)),
+)
+def test_entropy_func_order(y_test, random_state):
+    """Test property that input order does not affect entropy."""
+    ent = classifier.entropy(y_test)
+    rng = np.random.default_rng(random_state)
+    y_shuff = rng.permutation(y_test)
+    ent_shuff = classifier.entropy(y_shuff)
+    assert ent == pytest.approx(ent_shuff)
+
+
+@given(
+    hnp.arrays(
+        dtype=np.int32,
+        elements=st.sampled_from([0, 1]),
+        shape=st.integers(min_value=10, max_value=2_000),
+    ),
+)
+def test_entropy_func_invert(y_test):
+    """Test property that inverse of input has same entropy."""
+    ent = classifier.entropy(y_test)
+    y_inv = 1 - y_test
+    ent_inv = classifier.entropy(y_inv)
+    assert ent == pytest.approx(ent_inv)
+
+
+@given(
+    random_state=hnp.from_dtype(np.dtype(np.uint32)),
+    half_size=st.integers(min_value=5, max_value=1_000),
+)
+def test_entropy_func_equal(random_state, half_size):
+    """Test property that equal number of each class has entropy 1."""
+    rng = np.random.default_rng(random_state)
+    y_test = np.array([0] * half_size + [1] * half_size)
+    rng.shuffle(y_test)
+    entropy = classifier.entropy(y_test)
+    assert entropy == 1.0

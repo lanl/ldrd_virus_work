@@ -275,14 +275,11 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     feature_df_sorted["Sum"] = feature_df_sorted[sort_columns].sum(
         numeric_only=True, axis=1
     )
-    # first sort by "Sum", then sort by absolute value of "Pearson R"
-    # such that when features have equal "Sum" values, the feature with
-    # higher SHAP correlation will be ranked higher, i.e. greater "weight"
-    # on relative SHAP importance.
-    # TODO: filter out negatively effecting features based on pearson R
-    feature_df_sorted.sort_values(
-        by=["Sum", "Pearson R"], key=lambda x: abs(x), ascending=True, inplace=True
-    )
+    # first sort by "Sum", then sort by "Pearson R" such that when features have
+    # equal "Sum" values, the feature with greater positive SHAP correlation will be ranked
+    # higher, i.e. greater "weight" on relative SHAP importance.
+    # TODO: filter out negatively effecting features based on pearson R #118
+    feature_df_sorted.sort_values(by=["Sum", "Pearson R"], ascending=True, inplace=True)
 
     # divide total counts by number of feature types that we are aggregating over
     # to give true proportions

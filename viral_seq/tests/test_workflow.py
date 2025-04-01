@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
-from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
+from numpy.testing import assert_array_equal, assert_allclose
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier

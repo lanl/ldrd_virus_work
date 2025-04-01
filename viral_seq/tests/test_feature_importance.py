@@ -231,3 +231,25 @@ def test_plot_shap_consensus(tmp_path):
         )
         is None
     )
+
+
+def test_sort_feature_counts():
+    feature_df = pd.DataFrame()
+    kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_1045928", "kmer_PC_0134657"])
+    feature_df["Features"] = kmer_features
+    feature_df["Clfr_0"] = [5, 1, 5]
+    feature_df["SHAP_0"] = [4, 1, 1]
+    feature_df["Clfr_1"] = [1, 6, 3]
+    feature_df["SHAP_1"] = [1, 0, 4]
+    feature_df["Pearson R"] = [0.99, -0.99, -0.41]
+
+    out_df = fi.sort_feature_counts(feature_df, n_folds=5)
+    out_features = np.asarray(out_df["Features"])
+    out_exp = kmer_features[np.asarray([1, 0, 2])]
+
+    assert out_df.shape == (3, 11)
+    assert out_df.dtypes["Features"] is np.dtype(object)
+    assert out_df.dtypes["Clfr_0"] == np.int64
+    assert out_df.dtypes["Pearson R"] == np.float64
+    assert_array_equal(np.array(out_df.SHAP_0_proportion), np.array([10, 40, 10]))
+    assert_array_equal(out_features, out_exp)

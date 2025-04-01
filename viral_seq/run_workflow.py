@@ -80,53 +80,6 @@ def print_pos_con(
     )
 
 
-def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
-    """
-    sort dataframe containing kmer feature ranking information by:
-        1. the sum of the counts of important features from classifier and shap feature importances
-        2. the absolute value of the Pearson R coefficient of shap importance
-    Average values across estimators and append proportions of each count to be used in FIC plot
-
-    Parameters:
-    -----------
-    feature_df: pd.DataFrame
-        dataframe containing kmer features with corresponding feature counts
-        and pearson correlation coefficients
-    n_folds: int
-        number of folds over which to average counts
-
-    Returns:
-    --------
-    feature_df_sorted: pd.DataFrame
-        feature dataframe sorted in ascending order by total count of important
-        features and absolute value of pearson correlation coefficient
-
-    """
-    feature_df_sorted = feature_df.copy()
-    sort_columns = feature_df_sorted.columns[
-        feature_df_sorted.columns.str.contains("Clfr|SHAP")
-    ]
-    feature_df_sorted["Sum"] = feature_df_sorted[sort_columns].sum(
-        numeric_only=True, axis=1
-    )
-    # first sort by "Sum", then sort by absolute value of "Pearson R"
-    # such that when features have equal "Sum" values, the feature with
-    # higher SHAP correlation will be ranked higher, i.e. greater "weight"
-    # on relative SHAP importance
-    feature_df_sorted.sort_values(
-        by=["Sum", "Pearson R"], key=lambda x: abs(x), ascending=True, inplace=True
-    )
-
-    # divide total counts by number of feature types that we are aggregating over
-    # to give true proportions
-    for col in sort_columns:
-        feature_df_sorted[f"{col}_proportion"] = (
-            np.array(feature_df_sorted[col].values) / (n_folds * 2) * 100
-        )
-
-    return feature_df_sorted
-
-
 def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> None:
     """
     check that the lengths of features in the dataset 'X' are within
@@ -319,7 +272,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     target_column: str
         training column from dataset
     path: Path
-        file path for saving figure
+        file path for saving figures
     """
     for clfr_name, clfr_pred in clfr_preds.items():
         mean_fpr = np.linspace(0, 1, 100)
@@ -685,7 +638,7 @@ def train_clfr(
 
     cv = StratifiedKFold(n_splits=n_folds)
     clfr_preds_all = {}
-    shap_values_all: List[float] = []
+    shap_values_all: list[float] = []
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
 
@@ -755,7 +708,7 @@ def train_clfr(
     feature_count["Pearson R"] = pearsonr(shap_values_clfr, shap_data_clfr)[0]
     # sort feature counts by total number of votes between
     # classifier and shap importance rankings
-    feature_count = sort_feature_counts(feature_count, n_folds)
+    feature_count = feature_importance.sort_feature_counts(feature_count, n_folds)
     # normalize feature count proportions by the number of classifiers
     count_columns = feature_count.columns[
         feature_count.columns.str.contains("proportion")
@@ -813,10 +766,11 @@ def FIC_plot(
 ):
     """
     Create Feature Importance Consensus (FIC) plot using SHAP explainer values and
-    Native Classifier Feature Imortances of topN kmers found during ML classification.
+    native classifier feature importances of topN kmers found during ML classification.
     Include the following information for each kmer as labels on the plot:
-        1. the sign of the pearson correlation coefficient for the SHAP feature importance values (+/-)
-        2. the percent of found kmers that are surface exposed based on the dataset of viral proteins
+        1. the sign (+/-) of the pearson correlation coefficient between the SHAP feature importance values and the model data
+        2. the percentage of kmers that are found in the sequences of surface exposed proteins
+           (does not take into account how many times the kmer appears in the sequence)
 
     Parameters:
     -----------
@@ -829,8 +783,8 @@ def FIC_plot(
     response_effect_sign: list
         list of +/- symbols denoting response effect from shap importance pearson-r correlation
     surface_exposed_dict: dict
-        dictionary containing found kmer and ratio of surface exposed
-        to not surface exposed viral proteins with given kmer
+        dictionary containing kmer features and ratio of surface exposed
+        to not surface exposed viral proteins for given kmer
     path: Path
         path to save files
     """
@@ -920,7 +874,7 @@ def FIC_plot(
         [
             "Positive effect on response",
             "Negative effect on response",
-            "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
+            "% value next to bar indicates percentage of viral proteins\n containing given kmer that are surface exposed",
         ]
     )
 

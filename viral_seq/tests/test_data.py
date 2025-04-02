@@ -237,3 +237,37 @@ def test_relative_entropy(tmpdir, data, expected):
         df.to_csv(fname)
         actual = data_summary.relative_entropy_viral_families(heatmap_csv=fname)
     assert_allclose(actual, expected)
+
+
+def test_relabel_dataset():
+    """test the output of relabeling the dataset from 'Human Host' to 'human', 'primate', and 'mammal'"""
+    # input datasets include relabeled data, train, and test files
+    train_data = files("viral_seq.tests") / "TrainingSet.csv"
+    test_data = files("viral_seq.tests") / "TestSet.csv"
+    relabeled_data = files("viral_seq.tests.expected") / "relabeled_data_exp.npz"
+    df_train = pd.read_csv(train_data, index_col=0)
+    df_test = pd.read_csv(test_data, index_col=0)
+    df_relabeled = np.load(relabeled_data)
+
+    relabeled_train_exp = (
+        files("viral_seq.tests.expected") / "relabeled_df_train_exp.csv"
+    )
+    relabeled_test_exp = files("viral_seq.tests.expected") / "relabeled_df_test_exp.csv"
+    relabeled_train_df_exp = pd.read_csv(relabeled_train_exp)
+    relabeled_test_df_exp = pd.read_csv(relabeled_test_exp)
+
+    # relabel input datasets
+    relabeled_df_train, relabeled_df_test = make_alts.make_relabeled_dataset(
+        df_relabeled, df_train, df_test
+    )
+
+    # sanity check to see if virus that flipped during relabeling labeled correctly in output
+    # Akhmeta virus: human -> mammal
+    assert (
+        relabeled_df_test[relabeled_df_test["Species"] == "Akhmeta virus"][
+            "human"
+        ].item()
+        is False
+    )
+    assert_frame_equal(relabeled_df_train, relabeled_train_df_exp)
+    assert_frame_equal(relabeled_df_test, relabeled_test_df_exp)

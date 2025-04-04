@@ -603,3 +603,14 @@ def test_ensemble_stacking_logistic_value_error(tmpdir):
             plot_weights=True,
             estimator_names=None,
         )
+
+
+def test_roc_intersection_bug(tmpdir):
+    fprs = [np.array([0.0, 0.17, 0.17, 0.2, 0.2, 1.0])]
+    tprs = [np.array([0.0, 0.0, 0.8, 0.8, 1.0, 1.0])]
+    eer_data = classifier.EER_Data(3, 0, 0)
+    with tmpdir.as_cwd():
+        # bug will cause AttributeError: 'LineString' object has no attribute 'x'
+        classifier.plot_roc_curve_comparison(
+            ["Test"], fprs, tprs, eer_data_list=[eer_data]
+        )

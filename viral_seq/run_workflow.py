@@ -2,6 +2,7 @@ from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import rfc_utils, classifier, feature_importance
 from viral_seq.cli import cli
+import viral_seq.data.make_data_summary_plots as data_summary
 import pandas as pd
 import re
 import argparse
@@ -704,6 +705,10 @@ if __name__ == "__main__":
         default="Human Host",
         help="Target column to be used for binary classification.",
     )
+    parser.add_argument(
+        "--no-summary",
+        action="store_true",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -719,6 +724,7 @@ if __name__ == "__main__":
     train_file = args.train_file
     test_file = args.test_file
     target_column = args.target_column
+    no_summary = args.no_summary
 
     if debug and (
         train_file != "Mollentze_Training.csv" or test_file != "Mollentze_Holdout.csv"
@@ -765,6 +771,8 @@ if __name__ == "__main__":
     paths.append(plots_path)
     feature_imp_consensus_plot_source = str(plots_path / "feat_imp_consensus.csv")
     feature_imp_consensus_plot_figure = str(plots_path / "feat_imp_consensus.png")
+    family_heatmap_plot_source = str(plots_path / "family_heatmap.csv")
+    family_heatmap_plot_figure = str(plots_path / "family_heatmap.png")
 
     for path in paths:
         path.mkdir(parents=True, exist_ok=True)
@@ -778,6 +786,15 @@ if __name__ == "__main__":
                 "Train_shape": ast.literal_eval,
                 "Test_shape": ast.literal_eval,
             },
+        )
+
+    if not no_summary:
+        data_summary.plot_family_heatmap(
+            train_file,
+            test_file,
+            target_column,
+            family_heatmap_plot_figure,
+            family_heatmap_plot_source,
         )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)

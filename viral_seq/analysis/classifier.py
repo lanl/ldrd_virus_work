@@ -29,6 +29,9 @@ from lightgbm import LGBMClassifier
 from matplotlib import pyplot as plt
 from xgboost import XGBClassifier
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from sklearn.svm import SVC
+from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.preprocessing import StandardScaler
 from shapely.geometry import LineString
 
 
@@ -219,6 +222,70 @@ def get_model_arguments(
             "random_state": random_state,
         },
     }
+    model_arguments["SVC Linear Seed:" + str(random_state)] = {
+        "model": SVC,
+        "suffix": "svc_lin_" + str(random_state),
+        "group": "SVC_Linear",
+        "optimize": {
+            "num_samples": 500,
+            "n_jobs_cv": 1,
+            "config": {
+                "kernel": "linear",
+                "probability": True,
+                "C": tune.loguniform(1e-4, 1e4),
+                "class_weight": tune.choice([None, "balanced"]),
+            },
+        },
+        "predict": {
+            "kernel": "linear",
+            "probability": True,
+            "random_state": random_state,
+        },
+    }
+    model_arguments["SVC Poly Seed:" + str(random_state)] = {
+        "model": SVC,
+        "suffix": "svc_poly_" + str(random_state),
+        "group": "SVC_Poly",
+        "optimize": {
+            "num_samples": 100,
+            "n_jobs_cv": 1,
+            "config": {
+                "kernel": "poly",
+                "probability": True,
+                "C": tune.loguniform(1e-4, 1e4),
+                "degree": tune.randint(2, 6),
+                "class_weight": tune.choice([None, "balanced"]),
+                "gamma": tune.loguniform(1e-4, 1e2),
+                "coef0": tune.uniform(0.0, 10.0),
+            },
+        },
+        "predict": {
+            "kernel": "poly",
+            "probability": True,
+            "random_state": random_state,
+        },
+    }
+    model_arguments["SVC RBF Seed:" + str(random_state)] = {
+        "model": SVC,
+        "suffix": "svc_rbf_" + str(random_state),
+        "group": "SVC_RBF",
+        "optimize": {
+            "num_samples": 500,
+            "n_jobs_cv": 1,
+            "config": {
+                "kernel": "rbf",
+                "probability": True,
+                "C": tune.loguniform(1e-4, 1e4),
+                "class_weight": tune.choice([None, "balanced"]),
+                "gamma": tune.loguniform(1e-4, 1e2),
+            },
+        },
+        "predict": {
+            "kernel": "rbf",
+            "probability": True,
+            "random_state": random_state,
+        },
+    }
     return model_arguments
 
 
@@ -230,7 +297,7 @@ def _cv_child(
     X_train = sp.drop_unshared_kmers(X_train)
     X_test = X.iloc[test]
     X_test = X_test[X_train.columns]
-    clf = model(**kwargs)
+    clf = setup_classifier(model, **kwargs)
     clf.fit(X_train, y[train])
     scorer = get_scorer(scoring)
     y_pred = clf.predict_proba(X_test)[..., 1]
@@ -392,7 +459,7 @@ def train_and_predict(
         "using the following parameters:",
     )
     print({**params_predict, **params_optimized})
-    clf = model(**params_predict, **params_optimized)
+    clf = setup_classifier(model, **params_predict, **params_optimized)
     clf.fit(X_train, y_train)
     y_pred = clf.predict_proba(X_test)[..., 1]
     this_auc = roc_auc_score(y_test, y_pred)
@@ -400,7 +467,7 @@ def train_and_predict(
     y_pred_calibrated = None
     if calibrate:
         print("Calibrating model with cross-validation")
-        clf_unfit = model(**params_predict, **params_optimized)
+        clf_unfit = setup_classifier(model, **params_predict, **params_optimized)
         clf_calibrated = CalibratedClassifierCV(clf_unfit)
         clf_calibrated.fit(X_train, y_train)
         y_pred_calibrated = clf_calibrated.predict_proba(X_test)[..., 1]
@@ -775,3 +842,24 @@ def _ensemble_stacking_logistic(
             f"Logistic Regression Coefficient used for Model Stacking\ncv={cv}",
         )
     return y_pred, fpr, tpr
+
+
+def setup_classifier(model, **kwargs):
+    clf = model(**kwargs)
+    if model == SVC:
+        return make_pipeline(StandardScaler(), clf)
+    return clf
+
+
+def is_SVC(clf: Union[Pipeline, CalibratedClassifierCV, ClassifierMixin]) -> bool:
+    if isinstance(clf, Pipeline):
+        base_classifier = clf[-1]
+    elif isinstance(clf, CalibratedClassifierCV) and isinstance(
+        clf.estimator, Pipeline
+    ):
+        base_classifier = clf.estimator[-1]
+    elif isinstance(clf, CalibratedClassifierCV):
+        base_classifier = clf.estimator
+    else:
+        base_classifier = clf
+    return isinstance(base_classifier, SVC)

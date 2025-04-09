@@ -2,9 +2,7 @@ import pandas as pd
 from typing import List
 
 
-def add_surface_exposed(
-    surface_exposed_df: pd.DataFrame, surface_exposed_list: list, save_file: str
-) -> None:
+def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> None:
     """
     add "surface_exposure_status" values to entries in dataframe containing
     virus and protein names from dataset and save dataframe with new entries
@@ -14,8 +12,6 @@ def add_surface_exposed(
     surface_exposed_df: pd.DataFrame
         dataframe containing corresponding virus-protein pairs as well as surface exposed (yes/no) status
         and reference for decision if not determined from known lists of (not) surface-exposed proteins
-    surface_exposed_list: list
-        list of known surface exposed proteins from original curated entries in DTRA workflow
     save_file: str
         file name for saving modified dataframe as csv
     """
@@ -95,9 +91,7 @@ def add_surface_exposed(
                 reference_list[i] = "None"
                 remaining -= 1
                 continue
-            if any(s in protein_query for s in exposed) or any(
-                s in protein_query for s in surface_exposed_list
-            ):
+            if any(s in protein_query for s in exposed):
                 response_list[i] = "yes"
                 reference_list[i] = "None"
                 remaining -= 1
@@ -132,58 +126,6 @@ def add_surface_exposed(
 
 
 if __name__ == "__main__":
-    surface_exposed_list = [
-        "1B(VP2)",
-        "1C(VP3)",
-        "1D(VP1)",
-        "Envelope surface glycoprotein gp120",
-        "Envelope surface glycoprotein gp160, precursor",
-        "PreM protein",
-        "VP1",
-        "VP1 protein",
-        "VP2",
-        "VP2 protein",
-        "VP3",
-        "VP3 protein",
-        "envelope glycoprotein E1",
-        "envelope glycoprotein E2",
-        "envelope protein",
-        "envelope protein E",
-        "membrane glycoprotein M",
-        "membrane glycoprotein precursor prM",
-        "membrane protein M",
-        "hemagglutinin-neuraminidase",
-        "envelope glycoprotein 150",
-        "envelope glycoprotein B",
-        "envelope glycoprotein E",
-        "envelope glycoprotein G",
-        "envelope glycoprotein H",
-        "envelope glycoprotein M",
-        "envelope glycoprotein UL37",
-        "envelope protein",
-        "envelope protein E",
-        "envelope protein UL20",
-        "envelope protein UL43",
-        "membrane glycoprotein",
-        "membrane glycoprotein UL16",
-        "membrane glycoprotein UL40",
-        "membrane protein UL120",
-        "membrane protein UL124",
-        "membrane protein UL20",
-        "membrane protein UL45",
-        "membrane protein UL56",
-        "membrane protein US12",
-        "membrane protein US15",
-        "membrane protein US30",
-        "membrane protein V1",
-        "hexon",
-        "hexon protein",
-        "3A",
-        "3A protein",
-        "Asp",  # HIV-1 Antisense Protein, https://doi.org/10.1128/jvi.00574-19
-        "CR1-beta",
-    ]
-
     # TODO: these values (i.e. "references", "urls") are left over previous surface exposed list, consider purging
     references = [
         "membrane protein M",
@@ -264,4 +206,4 @@ if __name__ == "__main__":
 
     df_file = "surface_exposed_df.csv"
     surface_exposed_df = pd.read_csv("surface_exposed_df.csv")
-    add_surface_exposed(surface_exposed_df, surface_exposed_list, save_file=df_file)
+    add_surface_exposed(surface_exposed_df, save_file=df_file)

@@ -1,5 +1,6 @@
 from viral_seq.data.fix_virus_names import fix_virus_names
 from viral_seq.data.add_surface_exposed import add_surface_exposed
+from viral_seq.data.check_entries import check_entries
 from pandas.testing import assert_frame_equal
 import pandas as pd
 import pytest
@@ -37,15 +38,13 @@ def test_fix_virus_names():
                     2: "Virus_3",
                     3: "Virus_4",
                     4: "Virus_5",
-                    5: "Virus_6",
                 },
                 "protein_names": {
                     0: "polymerase",
                     1: "RNA",
-                    2: "surface exposed protein 2",
-                    3: "neuraminidase",
-                    4: "surface exposed protein",
-                    5: "skip protein reference",
+                    2: "neuraminidase",
+                    3: "surface exposed protein",
+                    4: "skip protein reference",
                 },
                 "surface_exposed_status": {
                     0: pd.NA,
@@ -53,7 +52,6 @@ def test_fix_virus_names():
                     2: pd.NA,
                     3: pd.NA,
                     4: pd.NA,
-                    5: pd.NA,
                 },
                 "reference": {
                     0: pd.NA,
@@ -61,7 +59,6 @@ def test_fix_virus_names():
                     2: pd.NA,
                     3: pd.NA,
                     4: pd.NA,
-                    5: pd.NA,
                 },
             },
             {
@@ -71,25 +68,22 @@ def test_fix_virus_names():
                     2: "Virus_3",
                     3: "Virus_4",
                     4: "Virus_5",
-                    5: "Virus_6",
                 },
                 "protein_names": {
                     0: "polymerase",
                     1: "RNA",
-                    2: "surface exposed protein 2",
-                    3: "neuraminidase",
-                    4: "surface exposed protein",
-                    5: "skip protein reference",
+                    2: "neuraminidase",
+                    3: "surface exposed protein",
+                    4: "skip protein reference",
                 },
                 "surface_exposed_status": {
                     0: "no",
                     1: "no",
                     2: "yes",
                     3: "yes",
-                    4: "yes",
-                    5: "no",
+                    4: "no",
                 },
-                "reference": {0: None, 1: None, 2: None, 3: None, 4: "ref_1", 5: None},
+                "reference": {0: None, 1: None, 2: None, 3: "ref_1", 4: None},
             },
             ["yes", "ref_1", "no", None],
         ),
@@ -101,23 +95,20 @@ def test_fix_virus_names():
                     1: "Virus_2",
                     2: "Virus_3",
                     3: "Virus_4",
-                    4: "Virus_5",
                 },
                 "protein_names": {
                     0: "polymerase",
                     1: "RNA",
-                    2: "surface exposed protein 2",
-                    3: "neuraminidase",
-                    4: "surface exposed protein",
+                    2: "neuraminidase",
+                    3: "surface exposed protein",
                 },
                 "surface_exposed_status": {
                     0: pd.NA,
                     1: pd.NA,
                     2: pd.NA,
                     3: pd.NA,
-                    4: pd.NA,
                 },
-                "reference": {0: pd.NA, 1: pd.NA, 2: pd.NA, 3: pd.NA, 4: pd.NA},
+                "reference": {0: pd.NA, 1: pd.NA, 2: pd.NA, 3: pd.NA},
             },
             {
                 "virus_names": {
@@ -125,23 +116,20 @@ def test_fix_virus_names():
                     1: "Virus_2",
                     2: "Virus_3",
                     3: "Virus_4",
-                    4: "Virus_5",
                 },
                 "protein_names": {
                     0: "polymerase",
                     1: "RNA",
-                    2: "surface exposed protein 2",
-                    3: "neuraminidase",
-                    4: "surface exposed protein",
+                    2: "neuraminidase",
+                    3: "surface exposed protein",
                 },
                 "surface_exposed_status": {
                     0: "no",
                     1: "no",
                     2: "yes",
-                    3: "yes",
-                    4: pd.NA,
+                    3: pd.NA,
                 },
-                "reference": {0: None, 1: None, 2: None, 3: None, 4: np.nan},
+                "reference": {0: None, 1: None, 2: None, 3: np.nan},
             },
             ["exit"],
         ),
@@ -152,14 +140,13 @@ def test_add_surface_exposed(
 ):
     exp_df = pd.DataFrame(exp_out)
     surface_exposed_df = pd.DataFrame(surface_exposed_dict)
-    surface_exposed_list = ["surface exposed protein 2"]
     mocker.patch(
         "builtins.input",
         side_effect=side_effect_in,
     )
 
     with tmpdir.as_cwd():
-        add_surface_exposed(surface_exposed_df, surface_exposed_list, "test_df.csv")
+        add_surface_exposed(surface_exposed_df, "test_df.csv")
         # load saved file and check contents
         saved_df = pd.read_csv("test_df.csv")
 
@@ -184,4 +171,110 @@ def test_add_surface_exposed_type_error():
     with pytest.raises(
         TypeError, match="Invalid protein query type: expected 'str' value."
     ):
-        add_surface_exposed(surface_exposed_df, [], "test_df.csv")
+        add_surface_exposed(surface_exposed_df, "test_df.csv")
+
+
+@pytest.mark.parametrize(
+    "surface_exposed_dict, exp_out, side_effect_in",
+    (
+        # test adding a reference to the entry
+        [
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: pd.NA},
+            },
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: "reference_1"},
+            },
+            ["reference_1"],
+        ],
+        # test fixing a status and adding a reference
+        [
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: pd.NA},
+            },
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "yes",
+                },
+                "reference": {0: "reference_1"},
+            },
+            ["fix", "yes", "reference_1"],
+        ],
+        # test 'exit'
+        [
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: None},
+            },
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: np.nan},
+            },
+            ["exit"],
+        ],
+    ),
+)
+def test_check_entries(mocker, tmpdir, surface_exposed_dict, exp_out, side_effect_in):
+    exp_df = pd.DataFrame(exp_out)
+    surface_exposed_df = pd.DataFrame(surface_exposed_dict)
+    check_list = ["protein_1"]
+    mocker.patch(
+        "builtins.input",
+        side_effect=side_effect_in,
+    )
+
+    with tmpdir.as_cwd():
+        check_entries(surface_exposed_df, check_list, "check_entries.csv")
+        # load saved file and check contents
+        saved_df = pd.read_csv("check_entries.csv")
+
+    assert_frame_equal(saved_df, exp_df)

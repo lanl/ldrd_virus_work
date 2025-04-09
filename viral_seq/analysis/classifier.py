@@ -556,7 +556,7 @@ def plot_roc_curve_comparison(
             eer_y = tprs[i][eer_threshold_index]
             # assume point is below eer line
             next_idx = eer_threshold_index + 1
-            if eer_x + eer_y > 1.0:
+            if eer_x + eer_y >= 1.0:
                 # above eer line case
                 next_idx = eer_threshold_index - 1
             # find intercept between this line segment and eer line

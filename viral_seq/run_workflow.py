@@ -363,41 +363,6 @@ def feature_count_consensus(
     return feature_count_out
 
 
-def plot_shap_consensus(
-    shap_clfr_consensus: np.ndarray,
-    train_data: pd.DataFrame,
-    target_column: str,
-    path: Path,
-):
-    """
-    plots the shap beeswarm plot from the consensus over multiple cv folds
-
-    Parameters:
-    -----------
-    shap_clfr_consensus: array
-        shap explainer values averaged across all cross folds
-    train_data: pd.DataFrame
-        training dataset
-    target_column: str
-        training column from dataset
-    path: Path
-        path to file for saving figure
-    """
-
-    max_features = 20
-    shap.summary_plot(
-        shap_clfr_consensus,
-        train_data,
-        max_display=max_features,
-        feature_names=train_data.columns,
-        show=False,
-    )
-    plt.title(f"Effect of Top {max_features} Features\n Random Forest")
-    plt.tight_layout()
-    plt.savefig(str(path) + "/" + "SHAP_" + str(target_column) + ".png")
-    plt.close()
-
-
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
     """
     converts feature importances to a pandas dataframe during cross-
@@ -2164,7 +2129,16 @@ if __name__ == "__main__":
         df.to_csv("annotated_" + str(target_column) + ".csv", header=True, index=False)
 
         ### Production of the SHAP plot
-        plot_shap_consensus(shap_clfr_consensus, X, target_column, paths[-1])
+        shap.summary_plot(
+            shap_clfr_consensus,
+            X[: len(shap_clfr_consensus)],
+            max_display=20,
+            feature_names=X.columns,
+            show=False,
+        )
+        plt.title("Effect of Top 20 Features\n Random Forest")
+        plt.tight_layout()
+        plt.savefig(str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png")
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(

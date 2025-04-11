@@ -743,10 +743,10 @@ def test_importances_df():
     train_data = np.zeros([10, 10])
     train_fold = pd.DataFrame(train_data, columns=train_columns)
     important_features_exp = ["G", "J", "I", "F", "A", "H", "C", "D", "E", "B"]
+
     importances_out = workflow.importances_df(importances, train_fold.columns)
 
     assert importances_out.shape == (10, 3)
-
     np.testing.assert_array_equal(
         np.array(importances_out["Features"]), important_features_exp
     )
@@ -776,24 +776,6 @@ def test_plot_cv_roc(tmp_path):
         compare_images(
             files("viral_seq.tests.expected") / "ROC_cv_expected.png",
             str(tmp_path / "ROC_Test.png"),
-            0.001,
-        )
-        is None
-    )
-
-
-def test_plot_shap_consensus(tmp_path):
-    rng = np.random.default_rng(seed=123)
-    syn_shap_values = rng.uniform(-1, 1, (10, 10))
-    syn_data = rng.choice([0, 1], size=[10, 10])
-    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-    syn_df = pd.DataFrame(syn_data, columns=syn_features)
-
-    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path, rng=rng)
-    assert (
-        compare_images(
-            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
-            str(tmp_path / "SHAP_Test.png"),
             0.001,
         )
         is None

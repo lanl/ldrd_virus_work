@@ -7,6 +7,7 @@ from matplotlib.testing.compare import compare_images
 from importlib.resources import files
 import shap
 import pytest
+import pandas as pd
 
 
 matplotlib.use("Agg")
@@ -175,16 +176,16 @@ def test_plot_shap_meanabs(tmpdir):
         assert compare_images(expected_plot, "feat_shap_meanabs.png", 0.001) is None
 
 
-@pytest.mark.skip(
-    reason="SHAP 'summary_plot' expects explanation to have value 'base_values'."
-)
 @pytest.mark.parametrize("interference", [False, True])
 def test_plot_shap_beeswarm(tmpdir, interference):
     rng = np.random.default_rng(1984)
     values = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
     data = np.copy(values)  # feature values
+    base_values = np.full(
+        data.shape, 0.5
+    )  # synthetic base_values for passing to ``shap.Explanation`` because ``shap.summary_plot`` checks ``base_values.shape`` for multi-output explanations
     rng.shuffle(data)
-    explanation = shap.Explanation(values=values, data=data)
+    explanation = shap.Explanation(values=values, base_values=base_values, data=data)
     expected_plot = files("viral_seq.tests.expected").joinpath(
         "test_plot_shap_beeswarm.png"
     )
@@ -204,3 +205,24 @@ def test_plot_shap_beeswarm(tmpdir, interference):
     with tmpdir.as_cwd():
         fi.plot_shap_beeswarm(explanation)
         assert compare_images(expected_plot, "feat_shap_beeswarm.png", 0.001) is None
+
+
+def test_plot_shap_consensus(tmp_path):
+    rng = np.random.default_rng(seed=123)
+    syn_shap_values = rng.uniform(-1, 1, (10, 10))
+    syn_data = rng.choice([0, 1], size=[10, 10])
+    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    syn_df = pd.DataFrame(syn_data, columns=syn_features)
+    max_features = len(syn_data)
+
+    fi.plot_shap_consensus(
+        (syn_shap_values, syn_data), syn_df, "Test", max_features, tmp_path, rng=rng
+    )
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
+            str(tmp_path / "SHAP_Test.png"),
+            0.001,
+        )
+        is None
+    )

@@ -24,7 +24,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List, Optional
+from typing import Dict, Any, Sequence, List
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -370,48 +370,6 @@ def feature_count_consensus(
     return feature_count_out
 
 
-# this function and the aggregation of shap values within 'shap_clfr_consensus'
-# by the function 'train_clfr' should be reviewed within this MR
-def plot_shap_consensus(
-    shap_clfr_consensus: np.ndarray,
-    train_data: pd.DataFrame,
-    target_column: str,
-    path: Path,
-    rng: Optional[np.random.Generator] = None,
-):
-    """
-    plots the shap beeswarm plot from the consensus over multiple cv folds
-
-    Parameters:
-    -----------
-    shap_clfr_consensus: array
-        shap explainer values averaged across all cross folds
-    train_data: pd.DataFrame
-        training dataset
-    target_column: str
-        training column from dataset
-    path: Path
-        path to file for saving figure
-    rng: np.random.Generator
-        pseudorandom number generator for plotting shap
-    """
-
-    max_features = 20
-    shap.summary_plot(
-        shap_clfr_consensus,
-        train_data,
-        max_display=max_features,
-        feature_names=train_data.columns,
-        show=False,
-        rng=rng,
-    )
-
-    plt.title(f"Effect of Top {max_features} Features\n Random Forest")
-    plt.tight_layout()
-    plt.savefig(str(path) + "/" + "SHAP_" + str(target_column) + ".png")
-    plt.close()
-
-
 def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
     """
     converts feature importances to a pandas dataframe during cross-
@@ -476,8 +434,8 @@ def train_clfr(
     feature_count: pd.DataFrame
         data structure containing training features, corresponding
         feature consensus counts and pearsonr values
-    shap_clfr_consensus: np.ndarray
-        consensus shap values averaged over multiple cross-folds
+    shap_clfr_consensus: tuple
+        aggregated shap values and model target values over multiple cross-folds
     clfr_preds: dict
         dict containing fpr, tpr and auc's for cv folds
         for plotting the consensus ROC curve
@@ -491,11 +449,9 @@ def train_clfr(
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
-    pearson_r_clfr = []
     clfr_preds = {}
-    shap_values_clfr = np.full(
-        (n_folds, train_data.shape[0], train_data.shape[1]), np.nan
-    )
+    shap_values_all = []
+    shap_data_all = []
     for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
         # index training cv split
         train_fold = train_data.iloc[train]
@@ -522,14 +478,9 @@ def train_clfr(
             clfr_importances, shap_importances, feature_count, max_features
         )
 
-        # aggregate the raw shap values to be used in the beeswarm plot
-        shap_values_clfr[fold, train] = positive_shap_values.values
-
-        # aggregate the pearson R coefficients for all kmer features
-        pearson_out = pearsonr(positive_shap_values.values, positive_shap_values.data)[
-            0
-        ]
-        pearson_r_clfr.append(np.nan_to_num(pearson_out, nan=0))
+        # aggregate the raw shap values and associated data targets
+        shap_values_all.append(positive_shap_values.values)
+        shap_data_all.append(positive_shap_values.data)
 
         # aggregate classifier predictions for ROC plot
         test_score = clfr.predict_proba(test_fold)[:, 1]
@@ -537,19 +488,19 @@ def train_clfr(
         roc_auc = auc(fpr, tpr)
         clfr_preds[fold] = {"fpr": fpr, "tpr": tpr, "auc": roc_auc}
 
+    # aggregate shap values for calculating pearson R and for function return
+    shap_values_clfr = np.concatenate(shap_values_all, axis=0)
+    shap_data_clfr = np.concatenate(shap_data_all, axis=0)
+
     # sort feature counts and corresponding pearson coefficients by value and average
     # across two feature vectors i.e. classifier features and shap features counts
-    pearson_r_clfr = np.mean(pearson_r_clfr, axis=0)
-    feature_count["Pearson R"] = pearson_r_clfr
+    feature_count["Pearson R"] = pearsonr(shap_values_clfr, shap_data_clfr)[0]
     feature_count.sort_values(by=["Counts"], ascending=False, inplace=True)
     feature_count["Counts"] = feature_count["Counts"] / 2
 
-    # average the shap feature consensus values across all training folds
-    shap_clfr_consensus = np.nanmean(shap_values_clfr, axis=0)
-
     return (
         feature_count,
-        shap_clfr_consensus,
+        (shap_values_clfr, shap_data_clfr),
         clfr_preds,
     )
 
@@ -2109,7 +2060,13 @@ if __name__ == "__main__":
         )
 
         ### Production of the SHAP plot
-        plot_shap_consensus(shap_clfr_consensus, X, target_column, paths[-1])
+        feature_importance.plot_shap_consensus(
+            shap_clfr_consensus,
+            X,
+            target_column,
+            max_features,
+            paths[-1],
+        )
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(

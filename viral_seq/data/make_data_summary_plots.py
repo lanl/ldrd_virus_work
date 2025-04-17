@@ -18,13 +18,31 @@ def plot_family_heatmap(
     filename_plot: str = "plot_family_heatmap.png",
     filename_data: str = "plot_family_heatmap.csv",
 ):
+    """Generate a heatmap of viral family counts.
+
+    Viral family counts are shown separated by train, test, and value of `target_column`.
+    This plot allows viral family representation to be evaluated at a glance.
+
+    Parameters:
+    -----------
+    train_file: str
+        filepath of the train csv
+    test_file: str
+        filepath of the test csv
+    target_column: str
+        training column from dataset
+    filename_plot: str
+        filepath to output generated plot
+    filename_data: str
+        filepath to output generated plot's source data
+    """
     # get family counts
-    df = pd.read_csv(train_file, index_col=0)[["Species", target_column]]
-    train_true = _get_family_counts(df.loc[df[target_column]])
-    train_false = _get_family_counts(df.loc[~df[target_column]])
-    df = pd.read_csv(test_file, index_col=0)[["Species", target_column]]
-    test_true = _get_family_counts(df.loc[df[target_column]])
-    test_false = _get_family_counts(df.loc[~df[target_column]])
+    df_train = pd.read_csv(train_file, index_col=0)[["Species", target_column]]
+    train_true = _get_family_counts(df_train.loc[df_train[target_column]])
+    train_false = _get_family_counts(df_train.loc[~df_train[target_column]])
+    df_test = pd.read_csv(test_file, index_col=0)[["Species", target_column]]
+    test_true = _get_family_counts(df_test.loc[df_test[target_column]])
+    test_false = _get_family_counts(df_test.loc[~df_test[target_column]])
     # format DataFrame
     family_counts = pd.DataFrame(
         [train_true, train_false, test_true, test_false],
@@ -77,7 +95,10 @@ def _get_family_counts(df: pd.DataFrame) -> dict[str, int]:
                 continue
             # Documentation states multiple lineages could possibly returned https://github.com/linzhi2013/taxonomy_ranks/tree/master?tab=readme-ov-file#32-using-as-a-module
             # However, I cannot find an example of this
-            assert len(rank_taxon.lineages) == 1
+            if len(rank_taxon.lineages) != 1:
+                raise ValueError(
+                    f'Multiple lineages were returned for {species}. Please verify the name "{species}" is correct.'
+                )
             key = next(iter(rank_taxon.lineages))
             family = rank_taxon.lineages[key]["family"][0]
             if "viridae" in family.lower():

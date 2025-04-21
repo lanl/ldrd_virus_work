@@ -25,6 +25,7 @@ import tarfile
 import shap
 from collections import defaultdict
 import os
+from ray.tune.search.sample import Domain
 
 matplotlib.use("Agg")
 
@@ -476,13 +477,9 @@ def optimize_model(
             random_state=random_state,
         )
         print("Checking default score...")
+        default_config = {k: v for k, v in config.items() if not isinstance(v, Domain)}
         default_score = classifier.cv_score(
-            model,
-            X=X_train,
-            y=y_train,
-            random_state=random_state,
-            n_estimators=2_000,
-            n_jobs=n_jobs,
+            model, X=X_train, y=y_train, random_state=random_state, **default_config
         )
         print("ROC AUC with default settings:", default_score)
         res["targets"] = [default_score] + res["targets"]

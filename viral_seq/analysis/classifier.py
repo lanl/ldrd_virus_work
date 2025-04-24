@@ -70,6 +70,7 @@ def get_model_arguments(
             "config": {
                 "n_estimators": 2_000,
                 "n_jobs": 1,  # it's better to let ray handle parallelization
+                "random_state": random_state,
                 "max_samples": tune.uniform(one_sample, 1.0),
                 "min_samples_leaf": tune.uniform(
                     one_sample, np.min([1.0, 10 * one_sample])
@@ -90,7 +91,6 @@ def get_model_arguments(
         "predict": {
             "n_estimators": 10_000,
             "n_jobs": n_jobs,
-            "random_state": random_state,
         },
     }
     model_arguments["LGBMClassifier Boost Seed:" + str(random_state)] = {
@@ -105,6 +105,7 @@ def get_model_arguments(
                 "force_col_wise": True,
                 "n_estimators": 500,
                 "n_jobs": 1,  # it's better to let ray handle parallelization
+                "random_state": random_state,
                 "num_leaves": tune.randint(10, 100),
                 "learning_rate": tune.loguniform(1e-3, 0.01),
                 "subsample": tune.uniform(0.1, 1.0),
@@ -115,9 +116,7 @@ def get_model_arguments(
             },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/lightgbm-tuning.html#lightgbm-tunable-hyperparameters
         },
         "predict": {
-            "verbose": 1,
             "n_jobs": n_jobs,
-            "random_state": random_state,
         },
     }
     model_arguments["XGBClassifier Boost Seed:" + str(random_state)] = {
@@ -129,6 +128,7 @@ def get_model_arguments(
             "n_jobs_cv": 1,
             "config": {
                 "n_jobs": 1,  # it's better to let ray handle parallelization
+                "random_state": random_state,
                 "reg_alpha": tune.loguniform(0.001, 1000),
                 "learning_rate": tune.uniform(0.1, 0.5),
                 "min_child_weight": tune.loguniform(0.001, 120.0),
@@ -138,7 +138,6 @@ def get_model_arguments(
         },
         "predict": {
             "n_jobs": n_jobs,
-            "random_state": random_state,
         },
     }
     model_arguments["ExtraTreesClassifier Seed:" + str(random_state)] = {
@@ -152,6 +151,7 @@ def get_model_arguments(
                 "bootstrap": True,
                 "n_estimators": 2_000,
                 "n_jobs": 1,  # it's better to let ray handle parallelization
+                "random_state": random_state,
                 "max_samples": tune.uniform(one_sample, 1.0),
                 "min_samples_leaf": tune.uniform(
                     one_sample, np.min([1.0, 10 * one_sample])
@@ -172,7 +172,6 @@ def get_model_arguments(
         "predict": {
             "n_estimators": 10_000,
             "n_jobs": n_jobs,
-            "random_state": random_state,
         },
     }
     model_arguments["LGBMClassifier Dart Seed:" + str(random_state)] = {
@@ -188,6 +187,7 @@ def get_model_arguments(
                 "n_estimators": 500,
                 "n_jobs": 1,  # it's better to let ray handle parallelization
                 "boosting_type": "dart",
+                "random_state": random_state,
                 "num_leaves": tune.randint(10, 100),
                 "learning_rate": tune.loguniform(1e-3, 0.01),
                 "subsample": tune.uniform(0.1, 1.0),
@@ -200,11 +200,7 @@ def get_model_arguments(
             },  # Boost space with Dart specific drop_rate, skip_drop
         },
         "predict": {
-            "boosting_type": "dart",
-            "verbose": -1,
-            "force_col_wise": True,
             "n_jobs": n_jobs,
-            "random_state": random_state,
         },
     }
     return model_arguments
@@ -319,7 +315,6 @@ def get_hyperparameters(
             X=put_X,
             y=put_y,
             n_jobs_cv=n_jobs_cv,
-            random_state=random_state,
         ),
         search_alg=algo,
         metric="mean_roc_auc",

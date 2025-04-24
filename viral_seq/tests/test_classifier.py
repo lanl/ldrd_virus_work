@@ -50,6 +50,7 @@ def test_cv_score(random_state, score):
             {
                 "n_estimators": 10,
                 "n_jobs": 1,
+                "random_state": 0,
                 "max_samples": tune.uniform(0.1, 1.0),
                 "min_samples_leaf": tune.uniform(0.1, 1.0),
                 "min_samples_split": tune.uniform(0.1, 1.0),
@@ -62,6 +63,7 @@ def test_cv_score(random_state, score):
             {
                 "n_estimators": 10,
                 "n_jobs": 1,
+                "random_state": 0,
                 "max_samples": 0.8774700453309082,
                 "min_samples_leaf": 0.20577867036582978,
                 "min_samples_split": 0.5656411964387028,
@@ -75,6 +77,7 @@ def test_cv_score(random_state, score):
             {
                 "n_estimators": 10,
                 "n_jobs": 1,
+                "random_state": 0,
                 "max_samples": tune.uniform(0.0, 0.2),
                 "max_features": tune.uniform(0.1, 0.2),
             },
@@ -82,6 +85,7 @@ def test_cv_score(random_state, score):
             {
                 "n_estimators": 10,
                 "n_jobs": 1,
+                "random_state": 0,
                 "max_samples": 0.19273255210020587,
                 "max_features": 0.1383441518825778,
             },

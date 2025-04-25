@@ -56,6 +56,9 @@ def get_model_arguments(
     n_jobs: int, random_state: int, num_samples: int, num_features: int
 ):
     """A simple helper function to store model parameters"""
+    # numpy values can't be stored in json
+    if isinstance(random_state, np.integer):
+        random_state = random_state.item()
     one_sample = 1.0 / num_samples
     one_feature = 1.0 / num_features
     sqrt_feature = (num_features) ** 0.5 / num_features

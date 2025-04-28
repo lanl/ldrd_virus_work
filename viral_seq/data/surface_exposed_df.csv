@@ -795,10 +795,10 @@ Japanese encephalitis virus,non-structural protein NS4b,no,
 Vaccinia virus,RNA polymerase subunit,no,
 Tulane virus,minor structural protein VP2,yes,
 Vaccinia virus,ATP-dependent DNA ligase,no,
-Breda virus,hemagglutinin esterase,no,
-Porcine torovirus,hemagglutinin esterase,no,
-Bovine coronavirus,hemmaglutinin-esterase,no,
-Goat torovirus,hemagglutinin esterase,no,
+Breda virus,hemagglutinin esterase,yes,https://doi.org/10.1128/jvi.71.7.5277-5286.1997
+Porcine torovirus,hemagglutinin esterase,yes,https://doi.org/10.1073/pnas.0904266106
+Bovine coronavirus,hemmaglutinin-esterase,yes,https://doi.org/10.1128/jvi.64.4.1834-1838.1990
+Goat torovirus,hemagglutinin esterase,yes,https://doi.org/10.1128/jvi.71.7.5277-5286.1997
 Human immunodeficiency virus 1,p1,no,https://doi.org/10.1023/A:1021070512287
 Canine adenovirus 2,DBP,no,
 Equine rhinitis A virus,VP1,yes,https://viralzone.expasy.org/33

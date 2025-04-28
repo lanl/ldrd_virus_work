@@ -30,7 +30,7 @@ def check_entries(
         # check entries without references
         if pd.isna(row.reference):
             print(
-                f"Remaining: {remaining}, Row: {row.Index}, {row.virus_names}, {row.protein_names}"
+                f"Remaining: {remaining}, Row: {row.Index}, Status: {row.surface_exposed_status}, {row.virus_names}, {row.protein_names}"
             )
             reference = input("Reference: ")
             if reference == "exit":
@@ -52,7 +52,7 @@ def check_entries(
 
 
 if __name__ == "__main__":
-    purge_list = ["ORF"]
+    purge_list = ["esterase"]
 
     df_file = "surface_exposed_df.csv"
     surface_exposed_df = pd.read_csv("surface_exposed_df.csv")

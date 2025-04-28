@@ -50,9 +50,9 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         "large t antigen",  # referring to regulatory proteins of polyomaviruses https://doi.org/10.3390/ijms20163914
     ]
     not_exposed_exceptions: List[str] = [
-        "hemagglutinin-neuraminidase",
-        "hemagglutinin-esterase",
-        "neuraminidase",
+        "hemagglutinin-neuraminidase",  # surface exposed protein on paramyxoviridae https://viralzone.expasy.org/556
+        "hemagglutinin-esterase",  # surface exposed protein of influenza (https://doi.org/10.1007/s13238-015-0193-x), coronavirus (https://doi.org/10.1007/978-1-4899-1531-3_8), and torovirus (https://doi.org/10.1128/jvi.71.7.5277-5286.1997)
+        "neuraminidase",  # surface exposed protein of Influenza A (https://doi.org/10.3389/fmicb.2019.00039)
     ]
     exposed: List[str] = [
         "membrane",

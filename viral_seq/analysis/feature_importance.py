@@ -204,12 +204,12 @@ def plot_shap_beeswarm(
 
 
 def plot_shap_consensus(
-    shap_clfr_consensus: tuple,
+    shap_clfr_consensus: tuple[float, float],
     train_data: pd.DataFrame,
     target_column: str,
     max_features: int,
     path: Path,
-    rng: Optional[np.random.Generator] = None,
+    random_state: int = 123,
 ):
     """
     plots the shap beeswarm plot from the consensus of aggregated SHAP values over multiple cv folds
@@ -226,9 +226,11 @@ def plot_shap_consensus(
         maximum number of features to display on plot
     path: Path
         path to file for saving figure
-    rng: np.random.Generator
-        pseudorandom number generator for plotting shap
+    random_state: int
+        value for initializing pseudorandom number generator for plotting shap
     """
+    rng = np.random.default_rng(random_state)
+
     shap.summary_plot(
         shap_clfr_consensus[0],
         shap_clfr_consensus[1],

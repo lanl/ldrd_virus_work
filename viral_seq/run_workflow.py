@@ -2128,6 +2128,7 @@ if __name__ == "__main__":
             target_column,
             max_features,
             paths[-1],
+            random_state=random_state,
         )
 
         # build lists of feature exposure and response effect signs for FIC plotting

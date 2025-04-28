@@ -861,3 +861,39 @@ def test_train_clfr():
     # excluded from test, which is concerned with top feature ranks
     assert_array_equal(feature_rank[:8], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
+
+
+def test_pearson_aggregation():
+    # enforce Pearson aggregation behavior, avoid reduction across folds
+    random_state = 123
+    rng = np.random.default_rng(random_state)
+    kmer_data = rng.integers(0, 2, size=(1000, 12))
+    data_target = np.asarray([1, 0] * 500)
+    data_target[-1] = 1
+
+    kmer_names = np.array([f"kmer_{i}" for i in range(12)])
+
+    train_data = pd.DataFrame(kmer_data, columns=kmer_names)
+    y = pd.Series(data_target)
+
+    classifier_parameters = dict(
+        clfr_name=RandomForestClassifier, n_estimators=100, n_jobs=None
+    )
+    (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
+        train_data,
+        y,
+        classifier_parameters,
+        n_folds=2,
+        max_features=3,
+        random_state=random_state,
+    )
+
+    pearson_rank = feature_count["Pearson R"]
+    pearson_rank_exp = [
+        -0.11839685961062657,
+        -0.19111178312660876,
+        0.1441065507615085,
+        0.10391636402704744,
+    ]
+    # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
+    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)

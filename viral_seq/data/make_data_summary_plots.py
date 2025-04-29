@@ -126,9 +126,9 @@ def _get_family_counts(df: pd.DataFrame) -> dict[str, int]:
 
 
 def _plot_family_heatmap(
-    family_counts,
-    filename_plot="plot_family_heatmap.png",
-    filename_data="plot_family_heatmap.csv",
+    family_counts: pd.DataFrame,
+    filename_plot: str = "plot_family_heatmap.png",
+    filename_data: str = "plot_family_heatmap.csv",
 ):
     fig, ax = plt.subplots(figsize=(12, 4))
     cmap = plt.get_cmap("bwr")

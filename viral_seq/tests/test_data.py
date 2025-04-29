@@ -175,7 +175,7 @@ def test_add_surface_exposed_type_error():
 
 
 @pytest.mark.parametrize(
-    "surface_exposed_dict, exp_out, side_effect_in",
+    "surface_exposed_dict, exp_out, side_effect_in, reference_list",
     (
         # test adding a reference to the entry
         [
@@ -204,6 +204,7 @@ def test_add_surface_exposed_type_error():
                 "reference": {0: "reference_1"},
             },
             ["reference_1"],
+            None,
         ],
         # test fixing a status and adding a reference
         [
@@ -232,6 +233,7 @@ def test_add_surface_exposed_type_error():
                 "reference": {0: "reference_1"},
             },
             ["fix", "yes", "reference_1"],
+            None,
         ],
         # test 'exit'
         [
@@ -260,20 +262,65 @@ def test_add_surface_exposed_type_error():
                 "reference": {0: np.nan},
             },
             ["exit"],
+            None,
+        ],
+        [
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: None},
+            },
+            {
+                "virus_names": {
+                    0: "Virus_1",
+                },
+                "protein_names": {
+                    0: "protein_1",
+                },
+                "surface_exposed_status": {
+                    0: "no",
+                },
+                "reference": {0: "reference_1"},
+            },
+            [],
+            ["reference_1"],
         ],
     ),
 )
-def test_check_entries(mocker, tmpdir, surface_exposed_dict, exp_out, side_effect_in):
+def test_check_entries(
+    mocker, tmpdir, surface_exposed_dict, exp_out, side_effect_in, reference_list
+):
     exp_df = pd.DataFrame(exp_out)
     surface_exposed_df = pd.DataFrame(surface_exposed_dict)
     check_list = ["protein_1"]
-    mocker.patch(
-        "builtins.input",
-        side_effect=side_effect_in,
-    )
+
+    # only use mocker if provided a side effect
+    if side_effect_in:
+        mocker.patch(
+            "builtins.input",
+            side_effect=side_effect_in,
+        )
+    # set `explicit = True` if provided a reference list
+    if reference_list:
+        explicit = True
+    else:
+        explicit = False
 
     with tmpdir.as_cwd():
-        check_entries(surface_exposed_df, check_list, "check_entries.csv")
+        check_entries(
+            surface_exposed_df,
+            check_list,
+            "check_entries.csv",
+            reference_list,
+            explicit=explicit,
+        )
         # load saved file and check contents
         saved_df = pd.read_csv("check_entries.csv")
 

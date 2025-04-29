@@ -7,9 +7,9 @@ Murray Valley encephalitis virus,NS5,no,
 Japanese encephalitis virus,RNA-dependent RNA polymerase NS5,no,
 Zika virus,RNA-dependent RNA polymerase NS5,no,
 Enterovirus B,genome polyportein,no,
-Enterovirus B,3D,no,
+Enterovirus B,3D,no,https://doi.org/10.3389/fimmu.2024.1365521
 Echovirus 9 strain Barty,polymerase,no,
-Coxsackievirus A9,3D protein,no,
+Coxsackievirus A9,3D protein,no,https://doi.org/10.3389/fimmu.2024.1365521
 West Nile virus,nonstructural protein NS3,no,
 dengue virus type 2,nonstructural protein NS3,no,
 Murray Valley encephalitis virus,NS3,no,
@@ -44,7 +44,7 @@ Human adenovirus 5,hexon,yes,https://viralzone.expasy.org/4
 Murine adenovirus 3,hexon,yes,https://viralzone.expasy.org/4
 Canine adenovirus 2,hexon,yes,https://viralzone.expasy.org/4
 simian adenovirus 11,hexon,yes,https://viralzone.expasy.org/4
-Enterovirus B,protein 2C,no,
+Enterovirus B,protein 2C,no,https://viralzone.expasy.org/99
 Echovirus 9 strain Barty,2C,no,
 Foot-and-mouth disease virus O,polyprotein,no,
 Coxsackievirus A9,2C protein,no,
@@ -62,9 +62,9 @@ Porcine epidemic diarrhea virus,"putative coronavirus nsp10 (MB, NTPase/HEL)",no
 Middle East respiratory syndrome-related coronavirus,Hel,no,
 Human mastadenovirus D,hexon,yes,https://viralzone.expasy.org/183
 Enterovirus B,protease 3C,no,
-Coxsackievirus A24,3C,no,
+Coxsackievirus A24,3C,no,https://doi.org/10.3390/v15122413
 Echovirus 9 strain Barty,protease,no,
-Coxsackievirus A9,3C protein,no,
+Coxsackievirus A9,3C protein,no,https://doi.org/10.3390/v15122413
 Enterovirus D,protease 3C,no,
 dengue virus type 2,envelope protein E,yes,https://viralzone.expasy.org/43
 Human coronavirus OC43,3' to 5' exonuclease,no,
@@ -87,9 +87,9 @@ Enterovirus B,1B(VP2),yes, https://viralzone.expasy.org/97
 Echovirus 9 strain Barty,VP2,yes,https://viralzone.expasy.org/33
 Coxsackievirus A9,VP2 protein,yes,https://viralzone.expasy.org/97
 JC polyomavirus,hypothetical protein,no,
-Human adenovirus 5,III,yes,
-Canine adenovirus 2,III,yes,
-simian adenovirus 11,III,yes,
+Human adenovirus 5,III,yes,https://doi.org/10.3390/v4050847
+Canine adenovirus 2,III,yes,https://doi.org/10.3390/v4050847
+simian adenovirus 11,III,yes,https://doi.org/10.3390/v4050847
 Porcine epidemic diarrhea virus,RNA-dependent RNA polymerase,no,
 West Nile virus,nonstructural protein NS4A,no,
 dengue virus type 2,nonstructural protein NS4A,no,
@@ -107,7 +107,7 @@ Rat coronavirus Parker,2'-O-methyltransferase,no,
 Human coronavirus HKU1,nsp16,no,
 Porcine epidemic diarrhea virus,putative coronavirus nsp13,no,
 Mumps orthorubulavirus,large protein,no,https://doi.org/10.1128/jvi.00421-09
-Bovine coronavirus,spike structural protein,yes,
+Bovine coronavirus,spike structural protein,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_003045.1
 Human coronavirus OC43,spike surface glycoprotein,yes,
 Rat coronavirus Parker,spike protein,yes,
 Human coronavirus HKU1,spike glycoprotein,yes,
@@ -131,17 +131,17 @@ Human mastadenovirus D,encapsidation protein IVa2,no,
 Murine adenovirus 3,pIVa2,no,
 simian adenovirus 11,IVa2,no,https://www.uniprot.org/uniprotkb/P03272/entry
 Vaccinia virus,DNA polymerase,no,
-Transmissible gastroenteritis virus,membrane protein,yes,
+Transmissible gastroenteritis virus,membrane protein,yes,https://viralzone.expasy.org/30
 Bovine coronavirus,matrix protein,yes,https://doi.org/10.1128/jvi.64.6.3112-3118.1990
-Rat coronavirus Parker,membrane protein,yes,
+Rat coronavirus Parker,membrane protein,yes,https://viralzone.expasy.org/30
 Human coronavirus HKU1,membrane glycoprotein,yes,https://viralzone.expasy.org/30
-Porcine epidemic diarrhea virus,membrane protein,yes,
-Middle East respiratory syndrome-related coronavirus,membrane protein,yes,
-Porcine hemagglutinating encephalomyelitis virus,membrane protein,yes,
-Murine adenovirus 3,pIIIa,yes,
-Canine adenovirus 2,pIIIa,yes,
-Bovine adenovirus 3,IIIA,yes,
-simian adenovirus 11,pIIIa,yes,
+Porcine epidemic diarrhea virus,membrane protein,yes,https://viralzone.expasy.org/30
+Middle East respiratory syndrome-related coronavirus,membrane protein,yes,https://viralzone.expasy.org/30
+Porcine hemagglutinating encephalomyelitis virus,membrane protein,yes,https://viralzone.expasy.org/30
+Murine adenovirus 3,pIIIa,no,https://viralzone.expasy.org/4
+Canine adenovirus 2,pIIIa,no,https://viralzone.expasy.org/4
+Bovine adenovirus 3,IIIA,no,https://viralzone.expasy.org/4
+simian adenovirus 11,pIIIa,no,https://viralzone.expasy.org/4
 Human adenovirus 5,E1B 55K,no,https://doi.org/10.1002/1873-3468.13694
 Human adenovirus 5,pVII,no,https://doi.org/10.3390/v13030388
 Human adenovirus 5,33K,no,https://doi.org/10.1128/jvi.00652-13
@@ -151,7 +151,7 @@ Human mastadenovirus D,core protein precursor pVII,no,https://doi.org/10.3390/v1
 Canine adenovirus 2,52K,no,
 Human betaherpesvirus 5,protein UL31,no,https://doi.org/10.1016/j.chom.2018.05.007
 Human betaherpesvirus 5,DNA polymerase processivity subunit,no,
-Human betaherpesvirus 5,nuclear egress membrane protein,yes,
+Human betaherpesvirus 5,nuclear egress membrane protein,no,https://doi.org/10.1007/978-981-10-7230-7_9
 Human betaherpesvirus 5,envelope glycoprotein B,yes,https://www.uniprot.org/uniprotkb/F5HB53/entry
 Human betaherpesvirus 5,single-stranded DNA-binding protein,no,
 Human betaherpesvirus 5,tegument protein UL88,no,https://doi.org/10.1128/jvi.00474-20
@@ -167,11 +167,11 @@ Human gammaherpesvirus 4,tegument protein UL37,no,https://doi.org/10.1038/s41467
 Human gammaherpesvirus 4,capsid triplex subunit 1,no,https://doi.org/10.1128/jvi.01565-10
 Human gammaherpesvirus 4,tegument protein G48,no,
 Human gammaherpesvirus 4,nuclear antigen EBNA-1,no,
-Vaccinia virus,EEV membrane phosphoglycoprotein,yes,
+Vaccinia virus,EEV membrane phosphoglycoprotein,yes,https://doi.org/10.1016/j.virol.2010.09.021
 Human alphaherpesvirus 2,helicase-primase subunit,no,
 Human alphaherpesvirus 2,single-stranded DNA-binding protein,no,
 Human alphaherpesvirus 2,DNA packaging protein UL32,no,
-Human alphaherpesvirus 2,nuclear egress membrane protein,yes,
+Human alphaherpesvirus 2,nuclear egress membrane protein,no,https://doi.org/10.1007/978-981-10-7230-7_9
 Human alphaherpesvirus 2,envelope protein UL43,no,https://doi.org/10.3390/cells11223594
 Human alphaherpesvirus 2,membrane protein UL56,no,https://doi.org/10.1099/vir.0.80633-0
 Human alphaherpesvirus 2,transcriptional regulator ICP4,no,
@@ -180,13 +180,13 @@ Canine adenovirus 2,fiber,yes,https://doi.org/10.1007/s00705-023-05718-5
 Equid alphaherpesvirus 1,tegument protein VP13/14,yes,
 Human alphaherpesvirus 2,ubiquitin E3 ligase ICP0,no,
 Human alphaherpesvirus 2,tegument protein VP11/12,yes,
-Equid alphaherpesvirus 1,membrane protein US9,yes,
+Equid alphaherpesvirus 1,membrane protein US9,yes,https://doi.org/10.1128/jvi.72.6.4560-4570.1998
 Breda virus,spike glycoprotein,yes,
 Human betaherpesvirus 5,protein UL84,no,https://doi.org/10.3389/fviro.2022.1026452
 Goat torovirus,spike glycoprotein,yes,
 Human parvovirus B19,capsid protein 1,yes,https://doi.org/10.3390/v12121463
 Human parvovirus B19,capsid protein 2,yes,https://doi.org/10.3390/v12121463
-Bovine adenovirus 3,pVIII,yes,
+Bovine adenovirus 3,pVIII,no,https://viralzone.expasy.org/4
 Equid alphaherpesvirus 1,envelope glycoprotein H,yes,https://viralzone.expasy.org/15
 Equid alphaherpesvirus 1,transcriptional regulator ICP4,no,
 Human gammaherpesvirus 8,K9,no,https://doi.org/10.1038/sj.onc.1201571
@@ -208,11 +208,11 @@ simian adenovirus 11,IX,yes,https://doi.org/10.1007/s00109-022-02208-0
 Human adenovirus 5,V,no,
 Equid alphaherpesvirus 1,single-stranded DNA-binding protein,no,
 West Nile virus,nonstructural protein NS4B,no,
-Human gammaherpesvirus 4,membrane protein LMP-2A,yes,
-Human gammaherpesvirus 4,membrane protein LMP-2B,yes,
+Human gammaherpesvirus 4,membrane protein LMP-2A,no,https://doi.org/10.1016/j.vetmic.2005.11.008
+Human gammaherpesvirus 4,membrane protein LMP-2B,no,https://doi.org/10.1016/j.vetmic.2005.11.008
 simian adenovirus 11,52K,no,
-Human adenovirus 5,pVIII,yes,
-simian adenovirus 11,pVIII,yes,
+Human adenovirus 5,pVIII,no,https://viralzone.expasy.org/4
+simian adenovirus 11,pVIII,no,https://viralzone.expasy.org/4
 Hepatitis C virus (isolate H77),NS4B protein,no,
 Human gammaherpesvirus 8,K3,no,https://doi.org/10.1128/jvi.00873-14
 Human gammaherpesvirus 8,K5,no,
@@ -227,12 +227,12 @@ Human alphaherpesvirus 2,DNA packaging tegument protein UL17,no,
 Human alphaherpesvirus 2,large tegument protein,no,
 Human alphaherpesvirus 2,envelope glycoprotein C,yes,
 Human alphaherpesvirus 2,membrane protein UL45,yes,https://doi.org/10.1128/jvi.72.5.4430-4433.1998
-Human alphaherpesvirus 2,membrane protein US8A,yes,
+Human alphaherpesvirus 2,membrane protein US8A,no,https://doi.org/10.1128/jvi.67.7.3961-3968.1993
 simian adenovirus 11,E1A,no,https://doi.org/10.1016/j.chom.2017.11.008
 Transmissible gastroenteritis virus,replicase,no,
 Rat coronavirus Parker,nsp4,no,
-Human betaherpesvirus 5,membrane glycoprotein UL7,yes,
-Human betaherpesvirus 5,membrane protein US19,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL7,no,https://doi.org/10.1128/jvi.02799-14
+Human betaherpesvirus 5,membrane protein US19,no,https://doi.org/10.1073/pnas.2334032100
 Murray Valley encephalitis virus,NS2A,no,
 Human gammaherpesvirus 4,envelope glycoprotein L,yes,
 Human gammaherpesvirus 4,envelope glycoprotein B,yes,https://viralzone.expasy.org/176
@@ -255,10 +255,10 @@ Human gammaherpesvirus 8,ORF50,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333
 human metapneumovirus,small hydrophobic protein,yes,https://doi.org/10.1128/jvi.02848-13
 Human gammaherpesvirus 8,ORF22,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human gammaherpesvirus 4,DNA packaging tegument protein UL17,no,
-Murine adenovirus 3,pVIII,yes,
+Murine adenovirus 3,pVIII,no,https://viralzone.expasy.org/4
 Human papillomavirus 16,replication protein E1,no,https://doi.org/10.1128/jvi.06450-11
 Human immunodeficiency virus 1,"Envelope surface glycoprotein gp160, precursor",no,https://doi.org/10.1016/j.mpmed.2009.04.007
-Human immunodeficiency virus 1,Envelope transmembrane domain,yes,
+Human immunodeficiency virus 1,Envelope transmembrane domain,yes,https://doi.org/10.1111/febs.13954
 Human alphaherpesvirus 2,envelope glycoprotein K,yes,
 Human betaherpesvirus 5,tegument protein UL43,no,https://doi.org/10.1007/s13337-022-00799-3
 Human adenovirus 5,52K,no,https://doi.org/10.3390/v13030388
@@ -290,7 +290,7 @@ Equid alphaherpesvirus 1,envelope glycoprotein C,yes,
 Human gammaherpesvirus 4,envelope glycoprotein 150,yes,https://doi.org/10.1006/viro.1995.1235
 Human alphaherpesvirus 2,small capsid protein,no,
 Human gammaherpesvirus 4,protein UL49,no,https://doi.org/10.1016/j.isci.2022.105168
-Human adenovirus 5,pIIIa,yes,
+Human adenovirus 5,pIIIa,no,https://viralzone.expasy.org/4
 Human gammaherpesvirus 8,ORF40,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Canine adenovirus 2,V,no,
 Human alphaherpesvirus 2,envelope glycoprotein N,yes,
@@ -312,7 +312,7 @@ Hepatitis C virus (isolate H77),protein F,no,https://doi.org/10.1128/jvi.77.2.15
 Equid alphaherpesvirus 1,virion protein US10,no,
 Human gammaherpesvirus 8,ORF74,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human mastadenovirus D,single-stranded DNA-binding protein,no,
-Human mastadenovirus D,membrane glycoprotein E3 CR1-beta,yes,
+Human mastadenovirus D,membrane glycoprotein E3 CR1-beta,yes,https://doi.org/10.1093/clinids/2.1.40
 Classical swine fever virus,envelope glycoprotein E2,yes,https://viralzone.expasy.org/43
 Japanese encephalitis virus,non-structural protein NS2a,no,
 Ross River virus,6K protein,yes,https://doi.org/10.1128/jvi.03192-15
@@ -377,11 +377,11 @@ Equid alphaherpesvirus 1,capsid triplex subunit 2,no,
 Hepatitis C virus (isolate H77),E2 protein,yes,https://doi.org/0.1126/science.1243876
 Porcine torovirus,replicase,no,
 Human coronavirus HKU1,hemagglutinin-esterase glycoprotein,yes,
-Human betaherpesvirus 5,membrane glycoprotein UL144,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL144,yes,https://doi.org/10.1093/clinids/2.1.40
 Human gammaherpesvirus 4,nuclear antigen EBNA-2,no,https://doi.org/10.1099/0022-1317-76-11-2669
 Human gammaherpesvirus 4,protein LF3,no,https://doi.org/10.1128/jvi.01215-20
-Human gammaherpesvirus 4,membrane protein BILF1,yes,
-Vaccinia virus,phosphorylated IMV membrane protein,yes,
+Human gammaherpesvirus 4,membrane protein BILF1,yes,https://doi.org/10.1128/jvi.79.1.536-546.2005
+Vaccinia virus,phosphorylated IMV membrane protein,yes,https://doi.org/10.1128/jvi.79.11.6598-6609.2005
 Human alphaherpesvirus 2,ribonucleotide reductase subunit 1,no,
 Ross River virus,nsP3 protein,no,
 Vaccinia virus,ankyrin-like protein,no,https://doi.org/10.1128/jvi.01628-08
@@ -390,7 +390,7 @@ Canine adenovirus 2,100K,no,https://doi.org/10.1016/j.virusres.2017.06.024
 human metapneumovirus,matrix protein,no,http://www.doi.org/10.1016/j.str.2013.10.013
 Human gammaherpesvirus 8,ORF21,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human betaherpesvirus 5,protein UL150,no,
-Human betaherpesvirus 5,membrane protein US14,yes,
+Human betaherpesvirus 5,membrane protein US14,no,https://doi.org/10.1016/j.virol.2006.11.019
 Human betaherpesvirus 5,envelope glycoprotein UL33,yes,
 Enterovirus D,3D-POL,no,https://doi.org/10.3390/v7082832
 human metapneumovirus,phosphoprotein,no,https://doi.org/10.1038/s41598-017-14448-z
@@ -414,8 +414,8 @@ Equid alphaherpesvirus 1,tegument serine/threonine protein kinase,no,
 Human gammaherpesvirus 8,ORF45,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human gammaherpesvirus 4,multifunctional expression regulator,no,
 Vaccinia virus,hydroxysteroid dehydrogenase,no,
-Human betaherpesvirus 5,membrane protein US18,yes,
-Vaccinia virus,IMV membrane protein,yes,
+Human betaherpesvirus 5,membrane protein US18,no,https://doi.org/10.1016/j.virol.2006.11.019
+Vaccinia virus,IMV membrane protein,yes,https://doi.org/10.1128/jvi.79.11.6598-6609.2005
 simian adenovirus 11,E1B 19K,no,https://doi.org/10.1128/MCB.18.7.4012
 Middle East respiratory syndrome-related coronavirus,nsp2 protein,no,
 Equid alphaherpesvirus 1,envelope glycoprotein I,yes,
@@ -432,7 +432,7 @@ Equid alphaherpesvirus 1,capsid maturation protease,no,
 Vaccinia virus,ankyin-like protein,no,
 Human orthorubulavirus 2,matrix protein,no,
 porcine sapelovirus 1,polymerase,no,
-Human betaherpesvirus 5,membrane glycoprotein UL119,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL119,yes,https://www.uniprot.org/uniprotkb/D2W9Z3/entry
 dengue virus type 2,nonstructural protein NS2A,no,
 Human gammaherpesvirus 4,envelope glycoprotein M,yes,ISBN-10: 0397516932
 human metapneumovirus,nucleoprotein,no,
@@ -465,7 +465,7 @@ Human gammaherpesvirus 4,protein G49,no,https://www.ncbi.nlm.nih.gov/gene/378372
 Human betaherpesvirus 5,protein UL27,no,https://doi.org/10.1128/jvi.78.13.7124-7130.2004
 Murray Valley encephalitis virus,NS4B,no,
 Human gammaherpesvirus 8,K14,yes,https://doi.org/10.1128/jvi.76.10.4688-4698.2002
-Lyssavirus rabies,transmembrane glycoprotein G,yes,
+Lyssavirus rabies,transmembrane glycoprotein G,yes,https://doi.org/10.1093/clinids/2.1.40
 simian adenovirus 11,RID-beta,yes,https://doi.org/10.1186/1471-2164-10-557
 Human coronavirus OC43,nsp8,no,
 Rat coronavirus Parker,nsp8,no,
@@ -474,7 +474,7 @@ Middle East respiratory syndrome-related coronavirus,nsp8 protein,no,
 Human adenovirus 5,E3 RID-alpha,yes,
 West Nile virus,membrane glycoprotein precursor prM,no,https://viralzone.expasy.org/43
 West Nile virus,membrane glycoprotein M,no,https://viralzone.expasy.org/43
-Murray Valley encephalitis virus,pre-membrane protein prM,yes,
+Murray Valley encephalitis virus,pre-membrane protein prM,no,precursor protein
 Murray Valley encephalitis virus,membrane protein M,no,https://viralzone.expasy.org/43
 Zika virus,membrane glycoprotein precursor prM,no,https://viralzone.expasy.org/43
 Zika virus,membrane glycoprotein M,no,https://viralzone.expasy.org/43
@@ -487,16 +487,16 @@ Human alphaherpesvirus 2,helicase-primase primase subunit,no,
 Vaccinia virus,guanylate kinase,no,
 Ross River virus,nsP2 protein,no,
 Human betaherpesvirus 5,envelope glycoprotein UL132,yes,
-Human betaherpesvirus 5,membrane protein US17,yes,
+Human betaherpesvirus 5,membrane protein US17,no, https://doi.org/10.1016/j.virol.2006.11.019
 Severe acute respiratory syndrome coronavirus 2,envelope protein,yes,https://viralzone.expasy.org/764
 Human alphaherpesvirus 2,envelope glycoprotein J,yes,
 Human immunodeficiency virus 1,aspartic peptidase,no,
-Equid alphaherpesvirus 1,nuclear egress membrane protein,yes,
+Equid alphaherpesvirus 1,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 Human immunodeficiency virus 1,Pr55(Gag),no,https://doi.org/10.3390/v12080888
 Human immunodeficiency virus 1,capsid,no,
 Murine adenovirus 3,pV,no,https://doi.org/10.3390/v13030388
 Human betaherpesvirus 5,tegument protein pp150,no,
-Vaccinia virus,CD47-like putative membrane protein,yes,
+Vaccinia virus,CD47-like putative membrane protein,yes,https://doi.org/10.4049/jimmunol.1400663
 simian adenovirus 11,fiber-2,yes,https://doi.org/10.3201/eid1807.111665
 Human gammaherpesvirus 8,K8.1,yes,https://doi.org/10.1128/jvi.78.12.6389-6398.2004
 Severe acute respiratory syndrome coronavirus 2,ORF10 protein,no,https://doi.org/10.1101/2023.11.27.23298847
@@ -537,30 +537,30 @@ Human adenovirus 5,pVI,no,https://doi.org/10.1128/jvi.00356-24
 Human betaherpesvirus 5,envelope glycoprotein N,yes,
 Equid alphaherpesvirus 1,nuclear protein UL24,no,
 Porcine sapovirus,VP2,no,https://viralzone.expasy.org/32
-Encephalomyocarditis virus,protein 3C,no,
+Encephalomyocarditis virus,protein 3C,no,https://viralzone.expasy.org/99
 Human betaherpesvirus 5,protein UL29,no,https://doi.org/10.1128/jvi.00396-09
-Enterovirus B,protien 3A,yes,
+Enterovirus B,protien 3A,yes,https://doi.org/10.1128/jvi.00791-17
 Echovirus 9 strain Barty,3A,no,https://www.uniprot.org/uniprotkb/Q66577/entry
 Coxsackievirus A9,3A protein,no,https://www.uniprot.org/uniprotkb/P21404/entry
 Human coronavirus OC43,hemagglutinin-esterase,yes,
-Human betaherpesvirus 5,membrane protein US29,yes,
-Human gammaherpesvirus 4,latent membrane protein LMP-1,yes,
+Human betaherpesvirus 5,membrane protein US29,no,https://doi.org/10.3390/ijms23052768
+Human gammaherpesvirus 4,latent membrane protein LMP-1,no,https://doi.org/10.1128/jvi.78.15.8404-8410.2004
 Human gammaherpesvirus 4,DNA packaging protein UL33,no,
-Vaccinia virus,putative viral membrane protein,yes,
+Vaccinia virus,putative viral membrane protein,yes,https://doi.org/10.4049/jimmunol.1400663
 Porcine hemagglutinating encephalomyelitis virus,hemagglutinin-esterase protein,yes,
-Human mastadenovirus D,membrane glycoprotein E3 CR1-gamma,yes,
+Human mastadenovirus D,membrane glycoprotein E3 CR1-gamma,yes,https://doi.org/10.1093/clinids/2.1.40
 Human alphaherpesvirus 2,tegument protein VP22,yes,
 Human gammaherpesvirus 8,ORF8,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human gammaherpesvirus 8,ORF24,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
-Human coronavirus OC43,membrane protein,yes,
-Human mastadenovirus D,membrane glycoprotein E3 gp19K,yes,
-Human gammaherpesvirus 4,membrane protein BILF2,yes,
+Human coronavirus OC43,membrane protein,yes,https://viralzone.expasy.org/30
+Human mastadenovirus D,membrane glycoprotein E3 gp19K,yes,https://doi.org/10.1093/clinids/2.1.40
+Human gammaherpesvirus 4,membrane protein BILF2,yes,https://doi.org/10.1128/jvi.79.1.536-546.2005
 simian adenovirus 11,CR1-beta,no,https://doi.org/10.1128/jvi.01927-13
 Murine adenovirus 3,E1B 19k,no,https://doi.org/10.1016/0092-8674(94)90042-6
 Vaccinia virus,6kDa intracellular viral protein,no,https://doi.org/10.1099/0022-1317-83-4-873
 Equid alphaherpesvirus 1,envelope glycoprotein L,yes,
 Vaccinia virus,ribonucleotide reductase small subunit,no,
-Vaccinia virus,C-type lectin-like type-II membrane protein,yes,
+Vaccinia virus,C-type lectin-like type-II membrane protein,yes,https://doi.org/10.1128/jvi.70.6.3753-3762.1996
 Equid alphaherpesvirus 1,envelope glycoprotein N,yes,
 Transmissible gastroenteritis virus,spike protein,yes,
 Human betaherpesvirus 5,chemokine vCXCL1,yes,https://doi.org/10.1016/j.celrep.2016.04.042
@@ -587,13 +587,13 @@ Human betaherpesvirus 5,tegument protein UL35,no,
 Vaccinia virus,hemagglutinin,yes,
 Human betaherpesvirus 5,envelope glycoprotein L,yes,
 Human coronavirus HKU1,nsp3,no,
-Human betaherpesvirus 5,membrane glycoprotein UL142,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL142,yes,https://doi.org/10.1093/clinids/2.1.40
 Vaccinia virus,TNF-alpha-receptor-like protein,yes,https://doi.org/10.3390/v16060870
 simian adenovirus 11,fiber-1,yes,https://doi.org/10.3390/v15061371
 human metapneumovirus,matrix protein 2-2,no,https://doi.org/10.3389/fimmu.2022.970750
 Human gammaherpesvirus 8,ORF64,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human parvovirus B19,protein X,no,https://doi.org/10.1128/jvi.02430-05
-Enterovirus D,protein 3A,yes,
+Enterovirus D,protein 3A,yes,https://viralzone.expasy.org/99
 Human betaherpesvirus 5,envelope glycoprotein O,yes,
 adeno-associated virus 2,major coat protein VP1,yes,
 Breda virus,replicase,no,
@@ -619,7 +619,7 @@ Human alphaherpesvirus 2,tegument serine/threonine protein kinase,no,
 Vaccinia virus,p4b precursor of core protein 4b,no,https://doi.org/10.1128/jvi.56.3.830-838.1985
 Human alphaherpesvirus 2,deoxyuridine triphosphatase,no,
 Equid alphaherpesvirus 1,nuclear egress lamina protein,no,
-Human betaherpesvirus 5,membrane glycoprotein US8,yes,
+Human betaherpesvirus 5,membrane glycoprotein US8,yes,https://doi.org/10.1093/clinids/2.1.40
 Human immunodeficiency virus 1,matrix,no,https://doi.org/10.1128/jvi.72.2.1671-1676.1998
 Human respirovirus 1,F glycoprotein,yes,
 porcine sapelovirus 1,capsid protein 1C,yes,https://doi.org/10.3390/v14020349
@@ -658,7 +658,7 @@ Human gammaherpesvirus 8,ORF6,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.
 Vaccinia virus,cowpox A-type inclusion protein,no,https://doi.org/10.1128/jvi.70.6.3372-3377.1996
 Human gammaherpesvirus 8,ORF11,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Vaccinia virus,phospholipase-D-like protein,no,
-Murine adenovirus 3,fiber,yes,
+Murine adenovirus 3,fiber,yes,https://doi.org/10.1002/1873-3468.13699
 Human coronavirus OC43,PLpro,no,https://doi.org/10.1128/jvi.79.24.15189-15198.2005
 Human betaherpesvirus 5,envelope glycoprotein US27,yes,
 Equid alphaherpesvirus 1,DNA replication origin-binding helicase,no,
@@ -670,7 +670,7 @@ Murine polyomavirus strain BG,minor capsid protein VP2,yes,
 Murine polyomavirus strain BG,minor capsid protein VP3,yes,
 Canine adenovirus 2,IVa2,no,https://www.uniprot.org/uniprotkb/P03272/entry
 Human coronavirus HKU1,nucleocapsid phosphoprotein 2,no,
-Human betaherpesvirus 5,membrane protein UL14,yes,
+Human betaherpesvirus 5,membrane protein UL14,no,https://doi.org/10.1016/j.virol.2006.11.019
 Bovine adenovirus 3,DNA polymerase,no,
 Equid alphaherpesvirus 1,ribonucleotide reductase subunit 1,no,
 Human immunodeficiency virus 1,Rev,no,https://doi.org/10.1146/annurev.micro.52.1.491
@@ -678,7 +678,7 @@ Severe acute respiratory syndrome coronavirus 2,nucleocapsid phosphoprotein,no,
 Equid alphaherpesvirus 1,helicase-primase helicase subunit,no,
 Human betaherpesvirus 5,DNA packaging tegument protein UL17,no,
 human metapneumovirus,attachment glycoprotein,yes,
-Vaccinia virus,EEV membrane glycoprotein,yes,
+Vaccinia virus,EEV membrane glycoprotein,yes,https://doi.org/10.1093/clinids/2.1.40
 Human gammaherpesvirus 8,ORF2,yes,https://doi.org/10.1006/viro.2000.0196
 Bovine parvovirus,hypothetical protein,no,
 Human gammaherpesvirus 8,ORF25,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
@@ -696,7 +696,7 @@ Vaccinia virus,semaphorin-like protein,yes,https://doi.org/10.1016/s1074-7613(00
 adeno-associated virus 2,major coat protein VP2,yes,
 adeno-associated virus 2,major coat protein VP3,yes,
 Vaccinia virus,EEV maturation protein,no,https://doi.org/10.4049/jimmunol.1400663
-Human betaherpesvirus 5,membrane glycoprotein US9,yes,
+Human betaherpesvirus 5,membrane glycoprotein US9,yes,https://doi.org/10.1093/clinids/2.1.40
 simian adenovirus 11,protease,no,
 Human gammaherpesvirus 4,DNA packaging terminase subunit 2,no,
 Vaccinia virus,DNA helicase,no,
@@ -704,7 +704,7 @@ Enterovirus D,protein VP0,yes,https://doi.org/10.1371/journal.ppat.1012511
 Enterovirus D,capsid protein 1B,yes,https://www.ncbi.nlm.nih.gov/protein/NP_740413.1
 Human immunodeficiency virus 1,Vif,no,https://doi.org/10.1038/s41586-023-05779-1
 Tick-borne encephalitis virus,non-structural protein NS4b,no,
-Human betaherpesvirus 5,membrane protein UL121,yes,
+Human betaherpesvirus 5,membrane protein UL121,no,https://doi.org/10.3390/ijms23052768
 Human gammaherpesvirus 4,capsid triplex subunit 2,no,
 Human alphaherpesvirus 2,capsid triplex subunit 2,no,
 Human betaherpesvirus 5,tegument protein UL23,no,
@@ -740,14 +740,14 @@ Human gammaherpesvirus 8,vIRF-3,no,https://doi.org/10.1074/jbc.M309485200
 Human alphaherpesvirus 2,helicase-primase helicase subunit,no,
 Human gammaherpesvirus 8,ORF35,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Equid alphaherpesvirus 1,capsid portal protein,no,
-Human betaherpesvirus 5,membrane protein RL12,yes,
+Human betaherpesvirus 5,membrane protein RL12,yes,https://doi.org/10.3390/ijms23052768
 New Jersey polyomavirus-2013,alternative T antigen,no,https://doi.org/10.1128/jvi.00911-15
 Japanese encephalitis virus,non-structural protein NS2b,no,
 Human gammaherpesvirus 4,tegument serine/threonine protein kinase,no,
 Human gammaherpesvirus 8,ORF57,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
-Human betaherpesvirus 5,membrane glycoprotein UL9,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL9,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,protein UL135,no,https://doi.org/10.1128/jvi.00919-18
-Human betaherpesvirus 5,membrane protein US13,yes,
+Human betaherpesvirus 5,membrane protein US13,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,protein UL21A,no,https://doi.org/10.1128/jvi.01116-09
 Human gammaherpesvirus 8,ORF48,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human gammaherpesvirus 8,ORF53,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
@@ -761,7 +761,7 @@ Human betaherpesvirus 5,helicase-primase primase subunit,no,
 Human betaherpesvirus 5,protein US33A,yes,
 Bovine adenovirus 3,211R,no,https://www.uniprot.org/uniprotkb/Q64842/entry
 Vaccinia virus,IL-beta-binding protein,yes,https://doi.org/10.1016/0092-8674(92)90274-G
-Human betaherpesvirus 5,membrane protein US20,yes,
+Human betaherpesvirus 5,membrane protein US20,no,https://doi.org/10.3390/ijms23052768
 Equid alphaherpesvirus 1,membrane protein UL56,no,https://doi.org/10.1128/jvi.76.13.6718-6728.2002
 Human gammaherpesvirus 8,ORF26,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human adenovirus 5,E3 gp19K,no,https://doi.org/10.1006/smvy.1998.0156
@@ -793,7 +793,7 @@ Adeno-associated virus - 4,rep,no,https://doi.org/10.1128/jvi.71.9.6823-6833.199
 Human gammaherpesvirus 4,DNA packaging tegument protein UL25,no,
 Japanese encephalitis virus,non-structural protein NS4b,no,
 Vaccinia virus,RNA polymerase subunit,no,
-Tulane virus,minor structural protein VP2,yes,
+Tulane virus,minor structural protein VP2,no,https://viralzone.expasy.org/32
 Vaccinia virus,ATP-dependent DNA ligase,no,
 Breda virus,hemagglutinin esterase,yes,https://doi.org/10.1128/jvi.71.7.5277-5286.1997
 Porcine torovirus,hemagglutinin esterase,yes,https://doi.org/10.1073/pnas.0904266106
@@ -829,10 +829,10 @@ Human gammaherpesvirus 8,K4,no,https://doi.org/10.1128/jvi.01900-13
 Human gammaherpesvirus 8,ORF39,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human betaherpesvirus 5,protein US34,no,https://doi.org/10.3389/fmicb.2020.02104
 Transmissible gastroenteritis virus,non-structural protein 7,yes,
-Vaccinia virus,late 16kDa putative membrane protein,yes,
-Human betaherpesvirus 5,membrane glycoprotein UL8,yes,
+Vaccinia virus,late 16kDa putative membrane protein,yes,https://doi.org/10.4049/jimmunol.1400663
+Human betaherpesvirus 5,membrane glycoprotein UL8,yes,https://doi.org/10.1093/clinids/2.1.40
 Severe acute respiratory syndrome coronavirus 2,nsp8,no,
-Human betaherpesvirus 5,membrane glycoprotein UL141,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL141,yes,https://doi.org/10.1093/clinids/2.1.40
 Murine adenovirus 3,pVI,no,https://doi.org/10.3390/v13030388
 Severe acute respiratory syndrome coronavirus 2,nsp2,no,
 Human alphaherpesvirus 2,envelope glycoprotein L,yes,
@@ -840,10 +840,10 @@ Betapolyomavirus hominis,large T antigen,no,https://doi.org/10.1128/jvi.70.4.237
 Human betaherpesvirus 5,deoxyribonuclease,no,
 Vaccinia virus,viral DNA polymerase processivity factor,no,
 Human mastadenovirus D,terminal protein precursor pTP,no,
-Human betaherpesvirus 5,membrane protein UL10,yes,
-Human betaherpesvirus 5,membrane protein US21,yes,
+Human betaherpesvirus 5,membrane protein UL10,no,https://doi.org/10.3390/ijms23052768
+Human betaherpesvirus 5,membrane protein US21,no,https://doi.org/10.3390/ijms23052768
 Middle East respiratory syndrome-related coronavirus,nsp6 protein,no,
-Human mastadenovirus D,capsid protein precursor pIIIa,yes,
+Human mastadenovirus D,capsid protein precursor pIIIa,no,https://viralzone.expasy.org/4
 Human betaherpesvirus 5,membrane glycoprotein UL16,no,https://doi.org/10.1002/1521-4141(200105)31:5<1428::AID-IMMU1428>3.0.CO;2-4
 Vaccinia virus,Ser/Thr kinase,no,
 Transmissible gastroenteritis virus,envelope protein,yes,https://viralzone.expasy.org/30
@@ -856,7 +856,7 @@ Severe acute respiratory syndrome coronavirus 2,ORF6 protein,no,https://www.ncbi
 Human parvovirus B19,11 kDa protein,no,https://doi.org/10.1182/blood-2009-04-215756
 Vaccinia virus,putative ATPase,no,
 Echovirus 9 strain Barty,VP1,yes,https://viralzone.expasy.org/33
-Human mastadenovirus D,fiber,yes,
+Human mastadenovirus D,fiber,yes,https://viralzone.expasy.org/183
 Mumps orthorubulavirus,small hydrophobic protein,yes,https://doi.org/10.1128/jvi.80.4.1700-1709.2006
 Human adenovirus 5,E1B 19K,no,https://doi.org/10.1128/jvi.01608-06
 Human gammaherpesvirus 8,K4.2,no,
@@ -878,7 +878,7 @@ Human gammaherpesvirus 4,envelope glycoprotein 42,yes,
 Human betaherpesvirus 5,envelope glycoprotein UL4,yes,
 Bovine adenovirus 3,hexon protein,yes,https://viralzone.expasy.org/4
 Vaccinia virus,IMV protein,no,https://doi.org/10.1128/jvi.80.5.2127-2140.2006
-Vaccinia virus,IEV transmembrane phosphoprotein,yes,
+Vaccinia virus,IEV transmembrane phosphoprotein,yes,https://doi.org/10.4049/jimmunol.1400663
 Human betaherpesvirus 5,deoxyuridine triphosphatase,no,
 Vaccinia virus,palmitylprotein,no,https://doi.org/10.1128/jvi.74.22.10535-10550.2000
 Human betaherpesvirus 5,tegument protein UL7,no,
@@ -899,7 +899,7 @@ Echovirus 9 strain Barty,VP4,no,
 Coxsackievirus A9,VP4 protein,no,
 Human alphaherpesvirus 2,DNA packaging protein UL33,no,
 Equid alphaherpesvirus 1,DNA packaging protein UL33,no,
-Murine adenovirus 3,pIII,yes,
+Murine adenovirus 3,pIII,yes,https://doi.org/10.3390/v4050847
 Human respirovirus 1,C' protein,no,https://doi.org/10.1128/jvi.01373-08
 Vaccinia virus,DNA-dependent RNA polymerase rpo35,no,
 West Nile virus,anchored capsid protein ancC,no,
@@ -921,18 +921,18 @@ Human alphaherpesvirus 2,nuclear egress lamina protein,no,
 Equid alphaherpesvirus 1,small capsid protein,no,
 Human papillomavirus 16,transforming protein E7,no,https://doi.org/10.1126/science.2157286
 Merkel cell polyomavirus,capsid protein VP2,yes,
-Human alphaherpesvirus 2,membrane protein US9,yes,
+Human alphaherpesvirus 2,membrane protein US9,yes,https://doi.org/10.1128/jvi.72.6.4560-4570.1998
 Human gammaherpesvirus 8,K13,no,https://doi.org/10.1038/onc.2009.460
-Equid alphaherpesvirus 1,membrane protein US8A,yes,
+Equid alphaherpesvirus 1,membrane protein US8A,no,https://doi.org/10.1128/jvi.67.7.3961-3968.1993
 Tick-borne encephalitis virus,2K protein,no,https://doi.org/10.1186/s13071-021-04651-3
 Human gammaherpesvirus 4,helicase-primase primase subunit,no,
 Vaccinia virus,late transcription factor VLTF-2,no,
-Human betaherpesvirus 5,membrane glycoprotein US7,yes,
+Human betaherpesvirus 5,membrane glycoprotein US7,yes,https://doi.org/10.1093/clinids/2.1.40
 Human gammaherpesvirus 8,K6,no,https://doi.org/10.1016/j.celrep.2019.11.005
 Vaccinia virus,82kDa large subunit of early gene transcription factor VETF,no,
 Human betaherpesvirus 5,protein UL87,no,https://doi.org/10.1128/jvi.00384-11
 Vaccinia virus,ser/thr protein kinase-like protein,no,
-Human betaherpesvirus 5,membrane protein RL13,yes,
+Human betaherpesvirus 5,membrane protein RL13,yes,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,tegument protein UL14,no,
 Human gammaherpesvirus 8,ORF49,no,https://doi.org/10.1128/jvi.01947-16
 Vaccinia virus,A-type inclusion body protein,no,https://doi.org/10.1128/jvi.70.6.3372-3377.1996
@@ -945,7 +945,7 @@ Human gammaherpesvirus 8,ORF7,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.
 Human immunodeficiency virus 1,Tat,no,https://en.wikipedia.org/wiki/Tat_(HIV)
 Human adenovirus 5,E4 ORF6/7,no,https://doi.org/10.1016/j.bbrep.2023.101616
 Sapovirus Mc10,capsid protein,yes,https://doi.org/10.1086/315574
-Human betaherpesvirus 5,membrane protein US16,yes,
+Human betaherpesvirus 5,membrane protein US16,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,protein US26,no,https://doi.org/10.1128/jvi.02552-14
 Human immunodeficiency virus 1,Vpr,no,https://doi.org/10.1007/978-1-62703-670-2_11
 Human polyomavirus 12,large T antigen,no,https://doi.org/10.1016/j.tvr.2024.200306
@@ -981,11 +981,11 @@ Equine rhinitis A virus,VP3,yes,https://viralzone.expasy.org/33
 Human orthorubulavirus 2,nucleocapsid protein,no,
 Encephalomyocarditis virus,protein 1D,yes,https://doi.org/10.1038/s41598-023-27828-5
 Vaccinia virus,transcriptional elongation factor,no,
-Human betaherpesvirus 5,membrane protein UL6,yes,
+Human betaherpesvirus 5,membrane protein UL6,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,nuclear egress lamina protein,no,
 Human gammaherpesvirus 8,ORF33,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human respirovirus 3,D protein,no,https://doi.org/10.1006/viro.1999.9878
-Equine rhinitis A virus,3D,no,
+Equine rhinitis A virus,3D,no,https://doi.org/10.3389/fimmu.2024.1365521
 Vaccinia virus,39kDa core protein,no,https://doi.org/10.1006/viro.1999.0046
 Human alphaherpesvirus 2,nuclear protein UL24,no,
 Human mastadenovirus D,penton base,no,
@@ -997,7 +997,7 @@ Feline calicivirus,capsid precursor protein,yes,https://doi.org/10.1128/jvi.0248
 Encephalomyocarditis virus,protein 1C,yes,https://doi.org/10.1016/j.vetmic.2020.108664
 Vaccinia virus,70kDa small subunit of early gene transcription factor VETF,no,
 Human gammaherpesvirus 8,ORF72,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
-Human betaherpesvirus 5,membrane glycoprotein US3,yes,
+Human betaherpesvirus 5,membrane glycoprotein US3,yes,https://doi.org/10.1093/clinids/2.1.40
 Equid alphaherpesvirus 1,nuclear protein UL4,no,
 Human betaherpesvirus 5,envelope glycoprotein 24,yes,
 porcine sapelovirus 1,capsid protein 1B,yes,https://doi.org/10.1016/j.heliyon.2023.e14710
@@ -1023,7 +1023,7 @@ Vaccinia virus,late transcription factor VLTF-4,no,
 Equid alphaherpesvirus 1,nuclear protein UL55,no,
 Human alphaherpesvirus 2,tegument protein UL51,no,
 Enterovirus D,NTPase 2C,no,
-Human betaherpesvirus 5,membrane glycoprotein UL139,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL139,yes,https://doi.org/10.1093/clinids/2.1.40
 Human gammaherpesvirus 4,virion protein G52,no,unknown
 Human betaherpesvirus 5,protein UL148D,yes,https://doi.org/10.3389/fimmu.2023.1170300
 Equine rhinitis A virus,VP4,yes,https://doi.org/10.1128/jvi.02375-09
@@ -1052,9 +1052,9 @@ Enterovirus D,capsid protein 1A,yes,
 Human respirovirus 1,phosphoprotein,no,https://doi.org/10.1099/0022-1317-80-5-1199
 Vaccinia virus,S-S bond formation pathway,no,https://doi.org/10.1073/pnas.062163799
 Human betaherpesvirus 5,protein UL30A,no,https://doi.org/10.1128/jvi.02417-20
-Human betaherpesvirus 5,membrane glycoprotein US11,yes,
+Human betaherpesvirus 5,membrane glycoprotein US11,yes,https://doi.org/10.1093/clinids/2.1.40
 Vaccinia virus,large subunit of mRNA capping enzyme,no,
-Human gammaherpesvirus 4,nuclear egress membrane protein,yes,
+Human gammaherpesvirus 4,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 Human immunodeficiency virus 1,p6,no,https://doi.org/10.1128/jvi.76.1.105-117.2002
 Vaccinia virus,serine protease inhibitor-like protein,no,
 Human alphaherpesvirus 2,DNA packaging tegument protein UL25,no,
@@ -1063,7 +1063,7 @@ Human respirovirus 1,C protein,no,https://doi.org/10.1128/jvi.00853-08
 Human respirovirus 1,Y1 protein,no,https://doi.org/10.1016/j.vaccine.2005.10.047
 Human betaherpesvirus 5,regulatory protein IE1,no,
 Middle East respiratory syndrome-related coronavirus,NS4B protein,no,
-Equine rhinitis A virus,3C,no,
+Equine rhinitis A virus,3C,no,https://doi.org/10.3390/v15122413
 Vaccinia virus,soluble myristylprotein,yes,https://www.uniprot.org/uniprotkb/A0A2I6TDX2/entry
 Human gammaherpesvirus 8,K2,no,https://doi.org/10.1016/j.canlet.2009.07.004
 Human gammaherpesvirus 4,tegument protein UL16,no,
@@ -1117,7 +1117,7 @@ Bovine coronavirus,32 kDa non-structural protein,no,
 Bovine coronavirus,4.9 kDa non-structural protein,no,
 Bovine coronavirus,4.8 kDa non-structural protein,no,
 Bovine coronavirus,12.7 kDa non-structural protein,no,
-Bovine coronavirus,small membrane protein,yes,
+Bovine coronavirus,small membrane protein,no,https://www.uniprot.org/uniprotkb/P15775/entry
 Bovine coronavirus,internal protein,no,
 Tula virus,nucleocapsid protein,no,
 Human coronavirus OC43,leader protein,no,https://doi.org/10.1128/jvi.06927-11
@@ -1153,11 +1153,11 @@ Human mastadenovirus D,capsid protein precursor pVI,no,https://doi.org/10.1128/j
 Human mastadenovirus D,protease,no,
 Human mastadenovirus D,hexon assembly protein 100K,yes,
 Human mastadenovirus D,encapsidation protein 22K,no,https://doi.org/10.1128/jvi.00859-13
-Human mastadenovirus D,capsid protein precursor pVIII,yes,
+Human mastadenovirus D,capsid protein precursor pVIII,no,https://viralzone.expasy.org/4
 Human mastadenovirus D,control protein E3 12.5K,no,https://doi.org/10.1002/1873-3468.13848
-Human mastadenovirus D,membrane glycoprotein E3 CR1-alpha,yes,
-Human mastadenovirus D,membrane protein E3 RID-alpha,yes,
-Human mastadenovirus D,membrane protein E3 RID-beta,yes,
+Human mastadenovirus D,membrane glycoprotein E3 CR1-alpha,yes,https://doi.org/10.1093/clinids/2.1.40
+Human mastadenovirus D,membrane protein E3 RID-alpha,no,https://doi.org/10.1006/smvy.1998.0156
+Human mastadenovirus D,membrane protein E3 RID-beta,no,https://doi.org/10.1006/smvy.1998.0156
 Human mastadenovirus D,control protein E3 14.7K,no,https://doi.org/10.1110/ps.4180102
 Human mastadenovirus D,protein U,no,https://www.genome.jp/dbget-bin/www_bget?refseq:NC_001405
 Human mastadenovirus D,control protein E4orf6/7,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_010956.1
@@ -1191,7 +1191,7 @@ adeno-associated virus 2,Rep 40 protein,no,https://doi.org/10.1093/emboj/20.12.3
 Mammalian orthoreovirus 3 Dearing,lambda-1 protein,no,https://doi.org/10.1016/0042-6822(88)90051-7
 Canine adenovirus 2,pVII,no,https://doi.org/10.3390/v13030388
 Canine adenovirus 2,22K,no,https://doi.org/10.3390/v6093563
-Canine adenovirus 2,pVIII,yes,
+Canine adenovirus 2,pVIII,no,https://viralzone.expasy.org/4
 Canine adenovirus 2,E3 12.5K,no,
 Canine adenovirus 2,U exon,no,
 Canine adenovirus 2,E4 ORF6/7,no,https://doi.org/10.1128/jvi.79.4.2301-2308.2005
@@ -1207,11 +1207,11 @@ Human betaherpesvirus 5,protein RL1,no,https://doi.org/10.1073/pnas.2108173119
 Human betaherpesvirus 5,protein RL5A,no,https://doi.org/10.1099/vir.0.18856-0
 Human betaherpesvirus 5,protein RL6,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,protein RL9A,no,https://doi.org/10.3389/fmicb.2020.02104
-Human betaherpesvirus 5,membrane glycoprotein RL11,yes,
-Human betaherpesvirus 5,membrane protein UL1,yes,
-Human betaherpesvirus 5,membrane glycoprotein UL11,yes,
+Human betaherpesvirus 5,membrane glycoprotein RL11,yes,https://doi.org/10.1093/clinids/2.1.40
+Human betaherpesvirus 5,membrane protein UL1,yes,https://doi.org/10.3390/ijms23052768
+Human betaherpesvirus 5,membrane glycoprotein UL11,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,protein UL17,no,https://doi.org/10.1128/jvi.00384-16
-Human betaherpesvirus 5,membrane glycoprotein UL18,yes,
+Human betaherpesvirus 5,membrane glycoprotein UL18,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,glycoprotein UL22A,yes,
 Human betaherpesvirus 5,tegument protein UL26,no,
 Human betaherpesvirus 5,protein UL30,no,https://doi.org/10.1021/bi7002394
@@ -1225,16 +1225,16 @@ Human betaherpesvirus 5,interleukin-10,yes,https://doi.org/10.1073/pnas.97.4.169
 Human betaherpesvirus 5,uracil-DNA glycosylase,no,
 Human betaherpesvirus 5,protein UL116,no,https://doi.org/10.1128/jvi.02207-20
 Human betaherpesvirus 5,envelope protein UL131A,yes,
-Human betaherpesvirus 5,membrane protein UL148,yes,
-Human betaherpesvirus 5,membrane protein UL147A,yes,
+Human betaherpesvirus 5,membrane protein UL148,no,https://doi.org/10.3390/ijms23052768
+Human betaherpesvirus 5,membrane protein UL147A,no,https://doi.org/10.3390/ijms23052768
 Human betaherpesvirus 5,chemokine vCXCL2,yes,https://www.uniprot.org/uniprotkb/Q2IAA1/entry
 Human betaherpesvirus 5,protein UL148B,no,https://doi.org/10.1128/mbio.02110-19
 Human betaherpesvirus 5,protein UL148C,no,https://doi.org/10.3389/fmicb.2020.02104
 Human betaherpesvirus 5,protein UL150A,no,https://doi.org/10.1128/jvi.80.2.710-722.2006
 Human betaherpesvirus 5,protein US1,no,https://doi.org/10.1016/j.chom.2018.07.011
-Human betaherpesvirus 5,membrane glycoprotein US2,yes,
-Human betaherpesvirus 5,membrane glycoprotein US6,yes,
-Human betaherpesvirus 5,membrane glycoprotein US10,yes,
+Human betaherpesvirus 5,membrane glycoprotein US2,yes,https://doi.org/10.3390/ijms23052768
+Human betaherpesvirus 5,membrane glycoprotein US6,yes,https://doi.org/10.3390/ijms23052768
+Human betaherpesvirus 5,membrane glycoprotein US10,yes,https://doi.org/10.1093/clinids/2.1.40
 Human betaherpesvirus 5,protein US23,no,https://doi.org/10.1128/jvi.78.20.10960-10966.2004
 Human betaherpesvirus 5,tegument protein US24,no,
 Human betaherpesvirus 5,protein US31,no,https://doi.org/10.1038/s41419-017-0122-4
@@ -1268,7 +1268,7 @@ Orthohantavirus andesense,nucleocapsid protein,no,
 Orthohantavirus andesense,putative nonstructural protein,no,
 Mammalian orthoreovirus 1,mu-NS protein,no,
 Influenza D virus (D/swine/Oklahoma/1334/2011),polymerase PB2,no,
-Murray Valley encephalitis virus,protein pr,no,
+Murray Valley encephalitis virus,protein pr,no,https://doi.org/10.1042/BJ20061136
 Human gammaherpesvirus 4,interleukin-10 BCRF1,no,www.doi.org/10.1126/science.2173142
 Human gammaherpesvirus 4,nuclear antigen EBNA-LP,no,
 Human gammaherpesvirus 4,apoptosis regulator BHRF1,no,
@@ -1320,7 +1320,7 @@ Vaccinia virus,interferon resistance protein,no,https://www.uniprot.org/uniprotk
 Vaccinia virus,putative monoglyceride lipase,no,
 Vaccinia virus,unchracterized protein,no,
 Vaccinia virus,dUTPase,no,
-Vaccinia virus,palmytilated EEV membrane glycoprotein,yes,
+Vaccinia virus,palmytilated EEV membrane glycoprotein,yes,https://doi.org/10.1093/clinids/2.1.40
 Vaccinia virus,double-strand RNA-binding protein,no,
 Vaccinia virus,sulfhydryl oxidase,no,
 Vaccinia virus,glutaredoxin,no,https://doi.org/10.1128/jvi.74.19.9175-9183.2000
@@ -1334,11 +1334,11 @@ Vaccinia virus,contains mutT-like motif of NTP-phosphohydrolase for DNA repair,n
 Vaccinia virus,late transcription factor VLTF-3,no,
 Vaccinia virus,DNA-dependent RNA polymerase subunit rpo19,no,
 Vaccinia virus,core protein,no,
-Vaccinia virus,hydrophobic IMV membrane protein,yes,
+Vaccinia virus,hydrophobic IMV membrane protein,yes,https://doi.org/10.4049/jimmunol.1400663
 Vaccinia virus,IMV surface protein,yes,https://doi.org/10.1128/jvi.78.5.2357-2366.2004
-Vaccinia virus,IEV and EEV membrane glycoprotein,yes,
+Vaccinia virus,IEV and EEV membrane glycoprotein,yes,https://doi.org/10.1093/clinids/2.1.40
 Vaccinia virus,profilin-like protein,no,https://doi.org/10.1128/jvi.65.9.4598-4608.1991
-Vaccinia virus,putative type-I membrane glycoprotein,yes,
+Vaccinia virus,putative type-I membrane glycoprotein,yes,https://doi.org/10.1093/clinids/2.1.40
 Vaccinia virus,inactive Cu-Zn superoxide dismutase-like in virion,no,
 Vaccinia virus,Toll/IL-receptor-like protein,no,https://doi.org/10.1073/pnas.160027697
 Vaccinia virus,secreted TNF-receptor-like protein,yes,https://www.uniprot.org/uniprotkb/M9XKA5/entry
@@ -1348,7 +1348,7 @@ Vaccinia virus,zinc finger-like; apoptosis,no,
 Encephalomyocarditis virus,protein 1A,yes,https://doi.org/10.1007/s11262-011-0684-7
 Encephalomyocarditis virus,protein 2A,no,https://doi.org/10.1038/s41467-021-27400-7
 Encephalomyocarditis virus,protein 2B,no,https://doi.org/10.1080/21505594.2024.2383559
-Encephalomyocarditis virus,protein 3AB,yes,
+Encephalomyocarditis virus,protein 3AB,yes,https://viralzone.expasy.org/99
 Encephalomyocarditis virus,2B* protein,no,
 Sapovirus Mc10,hypothetical protein,no,
 Mammalian orthoreovirus 3 Dearing,sigma-3 protein,no,https://doi.org/10.1371/journal.ppat.1009494
@@ -1359,7 +1359,7 @@ Human alphaherpesvirus 2,tegument protein UL14,no,
 Human alphaherpesvirus 2,tegument protein UL16,no,
 Human alphaherpesvirus 2,tegument host shutoff protein,no,
 Human alphaherpesvirus 2,tegument protein US11,no,
-Japanese encephalitis virus,protein pr,no,
+Japanese encephalitis virus,protein pr,no,https://doi.org/10.1042/BJ20061136
 African green monkey polyomavirus,small t-antigen,no,
 Human respirovirus 3,C protein,no,https://doi.org/10.1128/jvi.01776-17
 Equine rhinitis A virus,Lab,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_039209.1
@@ -1388,7 +1388,7 @@ Influenza A virus (A/goose/Guangdong/1/1996(H5N1)),PB1-F2 protein,no,https://doi
 Influenza D virus (D/swine/Oklahoma/1334/2011),polymerase PB1,no,
 Mumps orthorubulavirus,phoshoprotein,no,https://doi.org/10.1128/jvi.01719-15
 Mumps orthorubulavirus,V protein,no,https://doi.org/10.1128/jvi.06019-11
-Mumps orthorubulavirus,membrane protein,yes,
+Mumps orthorubulavirus,membrane protein,no,https://viralzone.expasy.org/88
 Human papillomavirus 16,protein E6*,no,https://doi.org/10.1126/science.2157286
 Orthohantavirus andesense,G1 and G2 surface glycoprotein precursor,yes,
 Mammalian orthoreovirus 1,lambda-3 protein,no,https://doi.org/10.1038/nsb1009
@@ -1396,7 +1396,7 @@ Human respirovirus 1,putative Y2 protein,no,https://www.uniprot.org/uniprotkb/Q8
 Human rotavirus B,RNA dependent RNA polymerase,no,
 Influenza A virus (A/California/07/2009(H1N1)),polymerase PA,no,
 Influenza A virus (A/California/07/2009(H1N1)),PA-X protein,no,https://doi.org/10.1080/21505594.2022.2139474
-Zika virus,protein pr,no,
+Zika virus,protein pr,no,https://doi.org/10.1042/BJ20061136
 Zika virus,nonstructural protein NS2B,no,
 Orthohantavirus hantanense,envelope glycoprotein G1 (see comment),yes,
 Orthohantavirus hantanense,envelope glycoprotein G2 (see comment),yes,
@@ -1436,7 +1436,7 @@ Influenza D virus (D/swine/Oklahoma/1334/2011),P42,no,https://doi.org/10.1073/pn
 Tula virus,Glycoproteins G1 and G2 precursor,yes,
 Porcine hemagglutinating encephalomyelitis virus,envelope protein,yes,https://viralzone.expasy.org/30
 Enterovirus D,capsid protein 1D,no,https://doi.org/10.1128/jvi.00604-22
-Enterovirus D,protein 2B,no,
+Enterovirus D,protein 2B,no,https://viralzone.expasy.org/99
 Enterovirus D,VPg 3B,no,
 Orthohantavirus hantanense,putative polymerase,no,
 Mammalian orthoreovirus 1,sigma-1 protein,yes,"https://www.uniprot.org/uniprotkb/P03528/entry#:~:text=Fiber%2Dlike%20molecule%20that%20attaches,induce%20maximal%20levels%20of%20apoptosis."
@@ -1458,7 +1458,7 @@ bat adenovirus 3,IVa2 protein,no,
 bat adenovirus 3,DNA polymerase,no,
 bat adenovirus 3,DNA terminal protein pTP,no,
 bat adenovirus 3,encapsidation protein 52K,no,https://doi.org/10.1128/jvi.02497-09
-bat adenovirus 3,capsid protein precursor pIIIa,yes,
+bat adenovirus 3,capsid protein precursor pIIIa,no,https://viralzone.expasy.org/4
 bat adenovirus 3,penton base protein,no,
 bat adenovirus 3,core protein VII,no,
 bat adenovirus 3,minor core protein pV,no,
@@ -1470,10 +1470,10 @@ bat adenovirus 3,single stranded DNA-binding protein,no,
 bat adenovirus 3,hexon assembly protein 100K,yes,
 bat adenovirus 3,protein 33K,no,https://www.uniprot.org/uniprotkb/D3X7C6/entry
 bat adenovirus 3,encapsidation protein 22K,no,https://www.uniprot.org/uniprotkb/A0A163HJX4/entry
-bat adenovirus 3,capsid protein precursor pVIII,yes,
+bat adenovirus 3,capsid protein precursor pVIII,no,https://viralzone.expasy.org/4
 bat adenovirus 3,E3 ORFA,no,not enough evidence
 bat adenovirus 3,U exon protein,no,https://doi.org/10.1128/jvi.02497-09
-bat adenovirus 3,fiber protein,yes,
+bat adenovirus 3,fiber protein,yes,https://viralzone.expasy.org/183
 bat adenovirus 3,control protein E4 ORF6/7,no,https://doi.org/10.1128/jvi.79.4.2301-2308.2005
 bat adenovirus 3,protein E4 34K,no,https://doi.org/10.1006/viro.1999.9866
 bat adenovirus 3,E4 ORFD,no,not enough evidence
@@ -1495,9 +1495,9 @@ Human betaherpesvirus 7,protein U15,yes,https://www.uniprot.org/uniprotkb/Q69496
 Human betaherpesvirus 7,tegument protein vICA,no,
 Human betaherpesvirus 7,envelope glycoprotein UL37,no,https://doi.org/10.3390/v15102058
 Human betaherpesvirus 7,protein UL38,no,https://doi.org/10.1128/jvi.02124-06
-Human betaherpesvirus 7,membrane protein U20,yes,
-Human betaherpesvirus 7,membrane protein U21,yes,
-Human betaherpesvirus 7,membrane protein U23,yes,
+Human betaherpesvirus 7,membrane protein U20,yes,https://doi.org/10.1128/jvi.75.24.12347-12358.2001
+Human betaherpesvirus 7,membrane protein U21,yes,https://doi.org/10.1128/jvi.75.24.12347-12358.2001
+Human betaherpesvirus 7,membrane protein U23,yes,https://doi.org/10.1128/jvi.70.9.5975-5989.1996
 Human betaherpesvirus 7,protein U24,no,https://doi.org/10.1128/jvi.01775-09
 Human betaherpesvirus 7,protein U24A,no,
 Human betaherpesvirus 7,tegument protein UL43,no,
@@ -1509,7 +1509,7 @@ Human betaherpesvirus 7,tegument protein UL37,no,
 Human betaherpesvirus 7,large tegument protein,no,
 Human betaherpesvirus 7,small capsid protein,no,https://doi.org/10.1128/jvi.00437-24
 Human betaherpesvirus 7,protein UL49,no,https://doi.org/10.1038/s41467-024-54668-2
-Human betaherpesvirus 7,nuclear egress membrane protein,no,
+Human betaherpesvirus 7,nuclear egress membrane protein,no,https://www.uniprot.org/uniprotkb/P52466/entry
 Human betaherpesvirus 7,DNA packaging protein UL33,no,
 Human betaherpesvirus 7,DNA packaging protein UL32,no,
 Human betaherpesvirus 7,nuclear egress lamina protein,no,
@@ -1558,7 +1558,7 @@ Human betaherpesvirus 7,protein UL112,no,PMID: 21348071
 Human betaherpesvirus 7,uracil-DNA glycosylase,no,
 Human betaherpesvirus 7,envelope glycoprotein L,yes,
 Human betaherpesvirus 7,protein UL117,no,https://doi.org/10.1128/jvi.01964-07
-Human betaherpesvirus 7,membrane glycoprotein UL119,yes,
+Human betaherpesvirus 7,membrane glycoprotein UL119,yes,https://doi.org/10.1093/clinids/2.1.40
 Human betaherpesvirus 7,regulatory protein IE2,no,
 Human betaherpesvirus 7,regulatory protein IE1,no,
 Human betaherpesvirus 7,membrane protein UL124,no,not enough evidence
@@ -1599,7 +1599,7 @@ Macacine alphaherpesvirus 1,DNA polymerase catalytic subunit,no,
 Macacine alphaherpesvirus 1,nuclear egress lamina protein,no,
 Macacine alphaherpesvirus 1,DNA packaging protein UL32,no,
 Macacine alphaherpesvirus 1,DNA packaging protein UL33,no,
-Macacine alphaherpesvirus 1,nuclear egress membrane protein,no,
+Macacine alphaherpesvirus 1,nuclear egress membrane protein,no, https://doi.org/10.3390/v13122356
 Macacine alphaherpesvirus 1,small capsid protein,no,
 Macacine alphaherpesvirus 1,large tegument protein,no,
 Macacine alphaherpesvirus 1,tegument protein UL37,no,
@@ -1632,8 +1632,8 @@ Macacine alphaherpesvirus 1,envelope glycoprotein J,yes,
 Macacine alphaherpesvirus 1,envelope glycoprotein D,yes,
 Macacine alphaherpesvirus 1,envelope glycoprotein I,yes,
 Macacine alphaherpesvirus 1,envelope glycoprotein E,yes,https://doi.org/10.1128/mbio.01873-24
-Macacine alphaherpesvirus 1,membrane protein US8.5,yes,
-Macacine alphaherpesvirus 1,membrane protein US9,yes,
+Macacine alphaherpesvirus 1,membrane protein US8.5,no,https://doi.org/10.1128/jvi.67.7.3961-3968.1993
+Macacine alphaherpesvirus 1,membrane protein US9,yes,https://doi.org/10.1128/jvi.72.6.4560-4570.1998
 Macacine alphaherpesvirus 1,virion protein US10,no,https://doi.org/10.1371/journal.ppat.1010959
 Macacine alphaherpesvirus 1,tegument protein US11,no,
 Macacine alphaherpesvirus 1,TAP transporter inhibitor ICP47,no,
@@ -1748,8 +1748,8 @@ canine adenovirus type 2,IVa2,no,https://www.uniprot.org/uniprotkb/P03272/entry
 canine adenovirus type 2,pol,no,
 canine adenovirus type 2,pTP,no,
 canine adenovirus type 2,52K,no,https://www.uniprot.org/uniprotkb/P87555/entry
-canine adenovirus type 2,pIIIa,yes,
-canine adenovirus type 2,III,yes,
+canine adenovirus type 2,pIIIa,no,https://viralzone.expasy.org/4
+canine adenovirus type 2,III,yes,https://viralzone.expasy.org/4
 canine adenovirus type 2,pVII,no,https://www.uniprot.org/uniprotkb/P87558/entry
 canine adenovirus type 2,V,no,https://www.uniprot.org/uniprotkb/P68962/entry
 canine adenovirus type 2,pX,no,https://viralzone.expasy.org/4
@@ -1760,11 +1760,11 @@ canine adenovirus type 2,DBP,no,https://www.uniprot.org/uniprotkb/P87553/entry
 canine adenovirus type 2,100K,no,https://doi.org/10.1128/jvi.01415-06
 canine adenovirus type 2,33K,no,https://doi.org/10.1128/jvi.00652-13
 canine adenovirus type 2,22K,no,https://doi.org/10.1128/jvi.00859-13
-canine adenovirus type 2,pVIII,yes,
+canine adenovirus type 2,pVIII,no,https://viralzone.expasy.org/4
 canine adenovirus type 2,E3 12.5K,no,https://doi.org/10.1016/0042-6822(92)90502-G
 canine adenovirus type 2,E3 ORFA,no,not enough evidence
 canine adenovirus type 2,U exon,no,https://doi.org/10.1128/jvi.01531-07
-canine adenovirus type 2,fiber,yes,
+canine adenovirus type 2,fiber,yes,https://viralzone.expasy.org/183
 canine adenovirus type 2,E4 ORF6/7,no,https://doi.org/10.1128/jvi.79.4.2301-2308.2005
 canine adenovirus type 2,E4 34K,no,https://doi.org/10.1002/vms3.70163
 canine adenovirus type 2,E4 ORFD,no,not enough evidence
@@ -1772,7 +1772,7 @@ canine adenovirus type 2,E4 ORFC,no,not enough evidence
 canine adenovirus type 2,E4 ORFB,no,not enough evidence
 canine adenovirus type 2,E4 ORFA,no,not enough evidence
 rhesus macaque recovirus,capsid protein,yes,https://doi.org/10.1128/jvi.00070-08
-rhesus macaque recovirus,minor structural protein VP2,yes,
+rhesus macaque recovirus,minor structural protein VP2,no,https://viralzone.expasy.org/32
 human immunodeficiency virus 1,Gag-Pol,no,
 human immunodeficiency virus 1,Gag-Pol Transframe peptide,no,
 human immunodeficiency virus 1,Pol,no,
@@ -1784,7 +1784,7 @@ human immunodeficiency virus 1,Pr55(Gag),no,
 human immunodeficiency virus 1,matrix,no,https://doi.org/10.1073/pnas.93.7.3099
 human immunodeficiency virus 1,capsid,no,https://doi.org/10.1038/nrmicro3503
 human immunodeficiency virus 1,p2,no,https://doi.org/10.1128/jvi.68.12.8017-8027.1994
-human immunodeficiency virus 1,nucleocapsid,no,
+human immunodeficiency virus 1,nucleocapsid,no,https://doi.org/10.1007/s11904-011-0107-3
 human immunodeficiency virus 1,p1,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_001802.1
 human immunodeficiency virus 1,p6,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_001802.1
 human immunodeficiency virus 1,Vif,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_001802.1
@@ -1794,7 +1794,7 @@ human immunodeficiency virus 1,Rev,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_00
 human immunodeficiency virus 1,Vpu,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_001802.1
 human immunodeficiency virus 1,"Envelope surface glycoprotein gp160, precursor",no,https://viralzone.expasy.org/5182
 human immunodeficiency virus 1,Envelope surface glycoprotein gp120,yes,https://viralzone.expasy.org/5182
-human immunodeficiency virus 1,Envelope transmembrane domain,yes,
+human immunodeficiency virus 1,Envelope transmembrane domain,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_001802.1
 human immunodeficiency virus 1,Asp,yes,https://doi.org/10.1128/jvi.00574-19
 human immunodeficiency virus 1,Nef,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_001802.1
 feline calicivirus,nonstructural protein,no,
@@ -1820,7 +1820,7 @@ Saimiriine alphaherpesvirus 1,capsid triplex subunit 1,no,https://doi.org/10.100
 Saimiriine alphaherpesvirus 1,tegument protein UL37,no,
 Saimiriine alphaherpesvirus 1,large tegument protein,no,
 Saimiriine alphaherpesvirus 1,small capsid protein,no,
-Saimiriine alphaherpesvirus 1,nuclear egress membrane protein,no,
+Saimiriine alphaherpesvirus 1,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 Saimiriine alphaherpesvirus 1,DNA packaging protein UL33,no,
 Saimiriine alphaherpesvirus 1,DNA packaging protein UL32,no,
 Saimiriine alphaherpesvirus 1,nuclear egress lamina protein,no,
@@ -1866,7 +1866,7 @@ Saimiriine alphaherpesvirus 1,envelope glycoprotein J,yes,
 Saimiriine alphaherpesvirus 1,envelope glycoprotein D,yes,
 Saimiriine alphaherpesvirus 1,envelope glycoprotein I,yes,
 Saimiriine alphaherpesvirus 1,envelope glycoprotein E,yes,https://doi.org/10.1128/mbio.01873-24
-Saimiriine alphaherpesvirus 1,membrane protein US9,yes,
+Saimiriine alphaherpesvirus 1,membrane protein US9,yes,https://doi.org/10.1128/jvi.72.6.4560-4570.1998
 rhinovirus B3,1A (VP4),no,
 rhinovirus B3,1B (VP2),yes,
 rhinovirus B3,1C (VP3),yes,
@@ -1879,8 +1879,8 @@ rhinovirus B3,3B (VPg),no,
 rhinovirus B3,3C (P3-C),no,
 rhinovirus B3,3D (polymerase),no,
 Human rhinovirus sp.,polyprotein,no,
-Epstein-Barr virus,membrane protein LMP-2A,yes,
-Epstein-Barr virus,membrane protein LMP-2B,yes,
+Epstein-Barr virus,membrane protein LMP-2A,no,https://doi.org/10.1016/S1074-7613(00)80623-8
+Epstein-Barr virus,membrane protein LMP-2B,no,https://doi.org/10.1016/S1074-7613(00)80623-8
 Epstein-Barr virus,tegument protein G75,no,
 Epstein-Barr virus,interleukin-10 BCRF1,no,https://doi.org/10.1086/517260
 Epstein-Barr virus,protein BWRF1,no,https://doi.org/10.1098/rstb.2018.0299
@@ -1891,7 +1891,7 @@ Epstein-Barr virus,apoptosis regulator BHRF1,no,
 Epstein-Barr virus,nuclear egress lamina protein,no,
 Epstein-Barr virus,DNA packaging protein UL32,no,
 Epstein-Barr virus,DNA packaging protein UL33,no,
-Epstein-Barr virus,nuclear egress membrane protein,no,
+Epstein-Barr virus,nuclear egress membrane protein,no,https://doi.org/10.1371/journal.ppat.1002904
 Epstein-Barr virus,protein UL49,no,https://www.ebi.ac.uk/interpro/entry/InterPro/IPR004339/
 Epstein-Barr virus,small capsid protein,no,
 Epstein-Barr virus,large tegument protein,no,
@@ -1949,12 +1949,12 @@ Epstein-Barr virus,DNA packaging tegument protein UL25,no,
 Epstein-Barr virus,protein UL79,no,https://doi.org/10.1128/jvi.02139-14
 Epstein-Barr virus,capsid maturation protease,no,
 Epstein-Barr virus,capsid scaffold protein,no,
-Epstein-Barr virus,membrane protein BILF2,yes,
+Epstein-Barr virus,membrane protein BILF2,yes,https://www.uniprot.org/uniprotkb/P03218/entry
 Epstein-Barr virus,protein LF3,no,https://doi.org/10.1128/jvi.02175-10
 Epstein-Barr virus,virion protein G11,yes,
 Epstein-Barr virus,protein G10,yes,
 Epstein-Barr virus,protein RPMS1,no,"https://www.ncbi.nlm.nih.gov/gene/3783757#:~:text=RPMS1%20protein%20RPMS1%20[%20(Epstein%2DBarr%20virus)]%20*,important%20role%20in%20the%20development%20of%20NPC."
-Epstein-Barr virus,membrane protein BILF1,yes,
+Epstein-Barr virus,membrane protein BILF1,no,https://doi.org/10.1128/jvi.79.1.536-546.2005
 Epstein-Barr virus,DNA polymerase catalytic subunit,no,
 Epstein-Barr virus,envelope glycoprotein B,yes,https://viralzone.expasy.org/176
 Epstein-Barr virus,protein A73,no,https://doi.org/10.3389/fonc.2019.01120
@@ -1965,13 +1965,13 @@ Epstein-Barr virus,apoptosis regulator BALF1,no,
 Epstein-Barr virus,protein BARF1,no,https://doi.org/10.1128/jvi.73.9.7627-7632.1999
 Epstein-Barr virus,protein BNLF2b,no,https://doi.org/10.1128/mbio.01332-19
 Epstein-Barr virus,protein BNLF2a,no,
-Epstein-Barr virus,latent membrane protein LMP-1,yes,
+Epstein-Barr virus,latent membrane protein LMP-1,no,https://doi.org/10.1007/978-3-319-22834-1_4
 simian virus 40,hypothetical protein,no,
 simian virus 40,large T antigen,no,
 rabies virus,nucleoprotein N,no,
 rabies virus,phosphoprotein M1,no,https://doi.org/10.1016/j.jmb.2004.08.071
 rabies virus,M2 protein,yes,https://doi.org/10.1016/0147-9571(82)90010-8
-rabies virus,transmembrane glycoprotein G,yes,
+rabies virus,transmembrane glycoprotein G,yes,https://doi.org/10.1093/clinids/2.1.40
 rabies virus,L protein,no,https://doi.org/10.1016/0147-9571(82)90010-8
 Influenza A virus,neuraminidase,yes,
 Influenza A virus,hemagglutinin,yes,
@@ -2033,15 +2033,15 @@ Bovine herpesvirus type 1.1,glycoprotein E,yes,
 Coxsackievirus B3,polyprotein,no,
 encephalomyocarditis virus,hypothetical protein,no,
 encephalomyocarditis virus,protein 1A,yes,https://doi.org/10.4161/viru.20573
-encephalomyocarditis virus,protein 1B,yes,
-encephalomyocarditis virus,protein 1C,yes,
-encephalomyocarditis virus,protein 1D,no,
-encephalomyocarditis virus,protein 2A,no,
-encephalomyocarditis virus,protein 2B,no,
-encephalomyocarditis virus,protein 2C,no,
-encephalomyocarditis virus,protein 3AB,yes,
-encephalomyocarditis virus,protein 3C,no,
-encephalomyocarditis virus,protein 3D,no,
+encephalomyocarditis virus,protein 1B,yes,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 1C,yes,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 1D,no,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 2A,no,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 2B,no,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 2C,no,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 3AB,yes,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 3C,no,https://viralzone.expasy.org/99
+encephalomyocarditis virus,protein 3D,no,https://viralzone.expasy.org/99
 encephalomyocarditis virus,2B* protein,no,
 Human respiratory syncytial virus A,non-structural protein 1 (1C),no,
 Human respiratory syncytial virus A,non-structural protein 2 (1B),no,
@@ -2089,7 +2089,7 @@ herpes simplex virus 2,DNA polymerase catalytic subunit,no,
 herpes simplex virus 2,nuclear egress lamina protein,no,
 herpes simplex virus 2,DNA packaging protein UL32,no,
 herpes simplex virus 2,DNA packaging protein UL33,no,
-herpes simplex virus 2,nuclear egress membrane protein,no,
+herpes simplex virus 2,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 herpes simplex virus 2,small capsid protein,no,
 herpes simplex virus 2,large tegument protein,no,
 herpes simplex virus 2,tegument protein UL37,no,
@@ -2122,8 +2122,8 @@ herpes simplex virus 2,envelope glycoprotein J,yes,
 herpes simplex virus 2,envelope glycoprotein D,yes,
 herpes simplex virus 2,envelope glycoprotein I,yes,
 herpes simplex virus 2,envelope glycoprotein E,yes,https://doi.org/10.1128/mbio.01873-24
-herpes simplex virus 2,membrane protein US8A,yes,
-herpes simplex virus 2,membrane protein US9,yes,
+herpes simplex virus 2,membrane protein US8A,no,https://doi.org/10.1128/jvi.67.7.3961-3968.1993
+herpes simplex virus 2,membrane protein US9,yes,https://doi.org/10.1128/jvi.72.6.4560-4570.1998
 herpes simplex virus 2,virion protein US10,no,https://doi.org/10.1371/journal.ppat.1010959
 herpes simplex virus 2,tegument protein US11,no,
 herpes simplex virus 2,TAP transporter inhibitor ICP47,no,
@@ -2152,7 +2152,7 @@ Human alphaherpesvirus 3,capsid triplex subunit 1,no,
 Human alphaherpesvirus 3,tegument protein UL37,no,
 Human alphaherpesvirus 3,large tegument protein,no,
 Human alphaherpesvirus 3,small capsid protein,no,
-Human alphaherpesvirus 3,nuclear egress membrane protein,no,
+Human alphaherpesvirus 3,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 Human alphaherpesvirus 3,DNA packaging protein UL33,no,
 Human alphaherpesvirus 3,DNA packaging protein UL32,no,
 Human alphaherpesvirus 3,nuclear egress lamina protein,no,
@@ -2193,7 +2193,7 @@ Human alphaherpesvirus 3,ubiquitin E3 ligase ICP0,no,
 Human alphaherpesvirus 3,transcriptional regulator ICP4,no,
 Human alphaherpesvirus 3,regulatory protein ICP22,no,
 Human alphaherpesvirus 3,virion protein US10,no,https://doi.org/10.1007/82_2021_241
-Human alphaherpesvirus 3,membrane protein US9,yes,
+Human alphaherpesvirus 3,membrane protein US9,yes,https://doi.org/10.1128/jvi.72.6.4560-4570.1998
 Human alphaherpesvirus 3,serine/threonine protein kinase US3,no,
 Human alphaherpesvirus 3,envelope glycoprotein I,yes,
 Human alphaherpesvirus 3,envelope glycoprotein E,yes,https://pmc.ncbi.nlm.nih.gov/articles/PMC1212635/
@@ -2239,7 +2239,7 @@ Equid alphaherpesvirus 4,capsid triplex subunit 1,no,
 Equid alphaherpesvirus 4,tegument protein UL37,no,
 Equid alphaherpesvirus 4,large tegument protein,no,
 Equid alphaherpesvirus 4,small capsid protein,no,
-Equid alphaherpesvirus 4,nuclear egress membrane protein,no,
+Equid alphaherpesvirus 4,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 Equid alphaherpesvirus 4,DNA packaging protein UL33,no,
 Equid alphaherpesvirus 4,DNA packaging protein UL32,no,
 Equid alphaherpesvirus 4,nuclear egress lamina protein,no,
@@ -2288,17 +2288,17 @@ Equid alphaherpesvirus 4,envelope glycoprotein J,yes,
 Equid alphaherpesvirus 4,envelope glycoprotein D,yes,
 Equid alphaherpesvirus 4,envelope glycoprotein I,yes,
 Equid alphaherpesvirus 4,envelope glycoprotein E,yes,https://doi.org/10.3389/fmicb.2022.970545
-Equid alphaherpesvirus 4,membrane protein US8A,yes,
-Equid alphaherpesvirus 4,membrane protein US9,yes,
+Equid alphaherpesvirus 4,membrane protein US8A,no,https://www.uniprot.org/uniprotkb/G8HBI3/entry
+Equid alphaherpesvirus 4,membrane protein US9,no,https://doi.org/10.1128/jvi.01241-08
 Enterovirus C,capsid protein VP4,no,
 Enterovirus C,capsid protein VP2,yes,
 Enterovirus C,capsid protein VP3,yes,
 Enterovirus C,capsid protein VP1,yes,
 Enterovirus C,protease 2A,no,
-Enterovirus C,protein 2B,no,
-Enterovirus C,protein 2C,no,
-Enterovirus C,protein 3AB,yes,
-Enterovirus C,protein 3A,yes,
+Enterovirus C,protein 2B,no,https://viralzone.expasy.org/99
+Enterovirus C,protein 2C,no,https://viralzone.expasy.org/99
+Enterovirus C,protein 3AB,yes,https://viralzone.expasy.org/99
+Enterovirus C,protein 3A,yes,https://viralzone.expasy.org/99
 Enterovirus C,viral protein genome-linked,no,
 Enterovirus C,protein 3CD,no,
 Enterovirus C,protease 3C,no,
@@ -2341,7 +2341,7 @@ Human alphaherpesvirus 1,DNA polymerase catalytic subunit,no,
 Human alphaherpesvirus 1,nuclear egress lamina protein,no,
 Human alphaherpesvirus 1,DNA packaging protein UL32,no,
 Human alphaherpesvirus 1,DNA packaging protein UL33,no,
-Human alphaherpesvirus 1,nuclear egress membrane protein,no,
+Human alphaherpesvirus 1,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 Human alphaherpesvirus 1,small capsid protein,no,
 Human alphaherpesvirus 1,large tegument protein,no,
 Human alphaherpesvirus 1,tegument protein UL37,no,
@@ -2375,8 +2375,8 @@ Human alphaherpesvirus 1,envelope glycoprotein J,yes,
 Human alphaherpesvirus 1,envelope glycoprotein D,yes,
 Human alphaherpesvirus 1,envelope glycoprotein I,yes,
 Human alphaherpesvirus 1,envelope glycoprotein E,yes,https://doi.org/10.1093/emboj/cdg092
-Human alphaherpesvirus 1,membrane protein US8A,yes,
-Human alphaherpesvirus 1,membrane protein US9,yes,
+Human alphaherpesvirus 1,membrane protein US8A,no,https://www.uniprot.org/uniprotkb/G8HBI3/entry
+Human alphaherpesvirus 1,membrane protein US9,no,https://doi.org/10.1128/jvi.01241-08
 Human alphaherpesvirus 1,virion protein US10,no,
 Human alphaherpesvirus 1,tegument protein US11,no,
 Human alphaherpesvirus 1,TAP transporter inhibitor ICP47,no,
@@ -2405,7 +2405,7 @@ equine herpesvirus type 1,capsid triplex subunit 1,no,
 equine herpesvirus type 1,tegument protein UL37,no,
 equine herpesvirus type 1,large tegument protein,no,
 equine herpesvirus type 1,small capsid protein,no,
-equine herpesvirus type 1,nuclear egress membrane protein,no,
+equine herpesvirus type 1,nuclear egress membrane protein,no,https://doi.org/10.3390/v13122356
 equine herpesvirus type 1,DNA packaging protein UL33,no,
 equine herpesvirus type 1,DNA packaging protein UL32,no,
 equine herpesvirus type 1,nuclear egress lamina protein,no,
@@ -2454,8 +2454,8 @@ equine herpesvirus type 1,envelope glycoprotein J,yes,
 equine herpesvirus type 1,envelope glycoprotein D,yes,
 equine herpesvirus type 1,envelope glycoprotein I,yes,
 equine herpesvirus type 1,envelope glycoprotein E,yes,https://doi.org/10.3389/fmicb.2022.970545
-equine herpesvirus type 1,membrane protein US8A,yes,
-equine herpesvirus type 1,membrane protein US9,yes,
+equine herpesvirus type 1,membrane protein US8A,no,https://www.uniprot.org/uniprotkb/G8HBI3/entry
+equine herpesvirus type 1,membrane protein US9,no,https://www.uniprot.org/uniprotkb/G8HBI3/entry
 canine distemper virus,nucleocapsid protein N,no,
 canine distemper virus,phosphoprotein P,no,
 canine distemper virus,C protein,no,
@@ -2466,7 +2466,7 @@ canine distemper virus,large polymerase protein L,no,
 Human betaherpesvirus 6B,putative DNA-directed RNA polymerase II,no,
 Human betaherpesvirus 6B,hypothetical protein,no,
 Human betaherpesvirus 6B,transactivator,no,
-Human betaherpesvirus 6B,membrane protein,yes,
+Human betaherpesvirus 6B,membrane protein,no,non-specific membrane protein
 Human betaherpesvirus 6B,antigenic virion protein,no,
 Human betaherpesvirus 6B,G-protein coupled receptor,yes,https://doi.org/10.1128/jvi.79.18.11914-11924.2005
 Human betaherpesvirus 6B,G-protein coupled receptor fragment,yes,
@@ -2474,7 +2474,7 @@ Human betaherpesvirus 6B,transcription regulator,no,
 Human betaherpesvirus 6B,immediate-early protein 6,no,https://doi.org/10.1038/s44319-023-00035-z
 Human betaherpesvirus 6B,immediate-early protein 4,no,https://doi.org/10.1038/s44319-023-00035-z
 Human betaherpesvirus 6B,glycoprotein,yes,
-Human betaherpesvirus 6B,putative membrane glycoprotein,yes,
+Human betaherpesvirus 6B,putative membrane glycoprotein,yes,https://doi.org/10.1093/clinids/2.1.40
 Human betaherpesvirus 6B,Polymerase processivity factor,no,
 Human betaherpesvirus 6B,large ribonuclease reductase,no,
 Human betaherpesvirus 6B,capsid assembly and DNA maturation,no,
@@ -2490,7 +2490,7 @@ Human betaherpesvirus 6B,transport/capsid assembly,no,
 Human betaherpesvirus 6B,major DNA binding protein,no,
 Human betaherpesvirus 6B,helicase/primase complex,no,
 Human betaherpesvirus 6B,putative dUTPase,no,
-Human betaherpesvirus 6B,putative membrane /secreted protein,yes,
+Human betaherpesvirus 6B,putative membrane /secreted protein,no,non-specific putative protein
 Human betaherpesvirus 6B,glycoprotein O,yes,
 Human betaherpesvirus 6B,glycoprotein H,yes,
 Human betaherpesvirus 6B,putative fusion protein,yes,
@@ -2514,7 +2514,7 @@ Human betaherpesvirus 6B,Intercrine cytokine,yes,https://doi.org/10.1016/S1359-6
 Human betaherpesvirus 6B,putative glycoprotein,yes,
 Human betaherpesvirus 6B,major immediate-early protein,no,
 Human betaherpesvirus 6B,IE-A transactivator,no,
-Human betaherpesvirus 6B,probable membrane glycoprotein,yes,
+Human betaherpesvirus 6B,probable membrane glycoprotein,yes,https://doi.org/10.1093/clinids/2.1.40
 Human betaherpesvirus 6B,Parvovirus rep homolog,no,
 Human betaherpesvirus 6B,immediate-early protein IE2,no,
 Human betaherpesvirus 6B,spliced envelope glycoprotein,yes,

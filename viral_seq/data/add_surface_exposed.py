@@ -55,22 +55,19 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         "neuraminidase",  # surface exposed protein of Influenza A (https://doi.org/10.3389/fmicb.2019.00039)
     ]
     exposed: List[str] = [
-        "membrane",
-        "glycoprotein",
-        "structural",
-        "envelope",
-        "III",
-        "spike",
-        "hemagglutinin-esterase",
-        "hemagglutinin-neuraminidase",
-        "fusion",
-        "hemagglutinin",
-        "fiber",
-        "HA",
-        "NA",
-        "neuraminidase",
-        "G1",
-        "G2",
+        "glycoprotein",  # surface proteins of enveloped viruses https://doi.org/10.1093/clinids/2.1.40
+        "envelope",  # referring to proteins associated with the viral envelope https://www.uniprot.org/keywords/KW-0261
+        "spike",  # referring to coronavirus spike proteins https://doi.org/10.1146/annurev-virology-110615-042301
+        "hemagglutinin-esterase",  # surface exposed protein of influenza (https://doi.org/10.1007/s13238-015-0193-x), coronavirus (https://doi.org/10.1007/978-1-4899-1531-3_8), and torovirus (https://doi.org/10.1128/jvi.71.7.5277-5286.1997)
+        "hemagglutinin-neuraminidase",  # surface exposed protein on paramyxoviridae https://viralzone.expasy.org/556
+        "fusion",  # associated with membrane proteins that facilitate fusion of viral envelopes https://doi.org/10.1038/nsmb.1456
+        "hemagglutinin",  # viral fusion protein of influenza https://doi.org/10.1038/nsmb.1456
+        "fiber",  # referring to the viral surface protein of adenoviridae https://viralzone.expasy.org/183
+        "HA",  # abbreviation of hemagglutinin
+        "NA",  # abbreviation of neuraminidase
+        "neuraminidase",  # surface exposed protein of Influenza A (https://doi.org/10.3389/fmicb.2019.00039)
+        "G1",  # glycoprotein on the surface of hanntaviridae https://viralzone.expasy.org/7079
+        "G2",  # glycoprotein on the surface of hanntaviridae https://viralzone.expasy.org/7079
     ]
     remaining = surface_exposed_df["surface_exposed_status"].isna().sum()
     for i, row in enumerate(surface_exposed_df.itertuples()):
@@ -121,84 +118,6 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
 
 
 if __name__ == "__main__":
-    # TODO: these values (i.e. "references", "urls") are left over previous surface exposed list, consider purging
-    references = [
-        "membrane protein M",
-        "1B(VP2)",
-        "1C(VP3)",
-        "1D(VP1)",
-        "Envelope surface glycoprotein gp120",
-        "3C",
-        "3C protein",
-        "3D",
-        "3D protein",
-        "3D-POL protein",
-        "Hel protein",
-        "Lab protein",
-        "Lb protein",
-        "1A(VP4)",
-        "nucleocapsid",
-        "p1",
-        "p2",
-        "p6",
-        "p66 subunit",
-        "p7 protein",
-        "pre-membrane protein prM",
-        "protein VP0",
-        "protein pr",
-        "protien 3A",
-        "protein 1A",
-        "protein 1B",
-        "protein 1C",
-        "protein 1D",
-        "protein 2A",
-        "protein 2B",
-        "protein 2C",
-        "protien 2K",
-        "protein 3A",
-        "protein 3AB",
-        "protein 3C",
-        "protein 3D",
-    ]
-    urls = [
-        "https://doi.org/10.1099/0022-1317-69-5-1105",
-        "https://doi.org/10.3389/fmicb.2020.562768",
-        "https://doi.org/10.3389/fmicb.2020.562768",
-        "https://doi.org/10.3389/fmicb.2020.562768",
-        "https://doi.org/10.1038/31405",
-        "https://doi.org/10.3390/v15122413",
-        "https://doi.org/10.3390/v15122413",
-        "https://doi.org/10.3389/fimmu.2024.1365521",
-        "https://doi.org/10.3389/fimmu.2024.1365521",
-        "https://doi.org/10.3389/fimmu.2024.1365521",
-        "https://doi.org/10.1016/j.virusres.2024.199401",
-        "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
-        "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
-        "https://doi.org/10.3389/fmicb.2020.562768",
-        "https://doi.org/10.1007/s11904-011-0107-3",
-        "https://doi.org/10.1007/s11904-011-0107-3",
-        "https://doi.org/10.1007/s11904-011-0107-3",
-        "https://doi.org/10.1007/s11904-011-0107-3",
-        "https://doi.org/10.1002/cbic.202000263",
-        "https://doi.org/10.1038/s41598-019-44413-x",
-        "https://doi.org/10.1016/0042-6822(92)90267-S",
-        "https://doi.org/10.1128/jvi.73.11.9072-9079.1999",
-        "https://doi.org/10.1042/BJ20061136",
-        "https://doi.org/10.1128/jvi.00791-17",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-        "https://viralzone.expasy.org/99",
-    ]
-
     df_file = "surface_exposed_df.csv"
     surface_exposed_df = pd.read_csv("surface_exposed_df.csv")
     add_surface_exposed(surface_exposed_df, save_file=df_file)

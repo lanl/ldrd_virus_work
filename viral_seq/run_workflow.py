@@ -1,7 +1,13 @@
 import tempfile
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils, classifier, feature_importance, get_features
+from viral_seq.analysis import (
+    rfc_utils,
+    classifier,
+    feature_importance,
+    get_features,
+    dtra_utils,
+)
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -95,10 +101,9 @@ class kmer_data:
 
 def feature_signs(
     is_exposed: list[str],
-    topN: list[str],
     shap_values: np.ndarray,
     shap_data: np.ndarray,
-) -> dict:
+) -> tuple:
     """
     Determine the sign character of the surface exposure status and response effect of the kmer
     based on the pearson correlation coefficient of the shap feature importance values
@@ -107,8 +112,6 @@ def feature_signs(
     -----------
     is_exposed: list
         list of kmers that are surface exposed
-    topN: list
-        list of all topN kmers
     shap_values: np.ndarray
         shap feature importance values
     shap_data: np.ndarray
@@ -116,32 +119,31 @@ def feature_signs(
 
     Returns:
     --------
-    signs_dict: dict
-        dictionary containing kmer names and corresponding signs for FIC plot
-        in the form [surface_exposed_sign, response_effect_sign]
+    surface_exposed_sign: list
+        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
+    response_effect: list
+        list of +/- symbols denoting response effect from shap importance pearson-r correlation
     """
-    signs_dict = {}
+    response_effect = []
+    surface_exposed_sign = []
     # add sign of surface exposure based on comparison between lists of exposure status
-    # reverted to using `topN` in this function for building dictionary of feature signs
-    for i, kmer_name in enumerate(topN):
-        if kmer_name in is_exposed:
-            surface_exposed_sign = "+"
+    for i in range(len(is_exposed)):
+        if is_exposed[i]:
+            sign = "+"
         else:
-            surface_exposed_sign = "-"
-
+            sign = "-"
+        surface_exposed_sign.append(sign)
         # add sign of response effect based on pearson correllation coefficient
         pearson_r = pearsonr(
             shap_values[:, i],
             shap_data[:, i],
         )[0]
         if pearson_r > 0:
-            response_effect_sign = "+"
+            response_effect.append("+")
         else:
-            response_effect_sign = "-"
+            response_effect.append("-")
 
-        signs_dict[kmer_name] = [surface_exposed_sign, response_effect_sign]
-
-    return signs_dict
+    return surface_exposed_sign, response_effect
 
 
 def get_kmer_info(
@@ -149,7 +151,7 @@ def get_kmer_info(
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
-) -> pd.DataFrame:
+) -> tuple:
     """
     for topN kmers from ml classifier output, gather information regarding
     the virus and viral protein in which the kmer is found from the dataset
@@ -168,14 +170,16 @@ def get_kmer_info(
 
     Returns:
     --------
-    kmer_info_df: pd.DataFrame
-        dataframe containing kmer feature names and correspoding virus-protein pairs
-        found in dataset
+    virus_names: list
+        list of virus names corresponding to sequences where kmers were identified
+    kmer_features: list
+        list of kmers that were found in viral sequence
+    protein_names: list
+        list of viral protein names associated with the retrieved kmers
     """
-
-    kmer_info_df = pd.DataFrame(
-        {"kmer_names": [], "virus_names": [], "protein_names": []}
-    )
+    virus_names = []
+    protein_names = []
+    kmer_features = []
     kmer_mm = kmer_data.mapping_method
     topN_kmers = kmer_data.kmer_names
     # check if the mapping method to be used for translating the accession
@@ -231,63 +235,49 @@ def get_kmer_info(
                             m.start() for m in re.finditer(f"(?={k_mer})", this_seq)
                         ]
                         if kmer_idx:
-                            kmer_row = {
-                                "kmer_names": item,
-                                "virus_names": tbl.loc[
-                                    tbl["Accessions"].str.contains(record.id)
-                                ]["Species"].item(),
-                                "protein_names": str(feature.qualifiers.get("product"))[
-                                    2:-2
-                                ],
-                            }
-                            kmer_info_df = pd.concat(
-                                [kmer_info_df, pd.DataFrame([kmer_row])],
-                                ignore_index=True,
+                            virus_names.append(
+                                tbl.loc[tbl["Accessions"].str.contains(record.id)][
+                                    "Species"
+                                ].item()
                             )
+                            protein_names.append(
+                                str(feature.qualifiers.get("product"))[2:-2]
+                            )
+                            kmer_features.append(item)
 
-    return kmer_info_df
+    return virus_names, kmer_features, protein_names
 
 
 def label_surface_exposed(
-    kmer_info_df: pd.DataFrame, surface_exposed_df: pd.DataFrame
-) -> tuple:
+    list_of_kmers: Sequence[tuple], kmers_topN: list[str]
+) -> list:
     """
-    Creates lists of kmers features that are found in surface exposed proteins
+    Creates lists of kmers denoting whether or not they are
+    surface exposed ambiguous of PC or AA kmer status
 
     Parameters:
     -----------
-    kmer_info_df: pd.DataFrame
-        dataframe containing kmer feature names and correspoding virus-protein pairs
-        found in dataset
-    surface_exposed_df: pd.Dataframe
-        data structure containing all virus-protein pairs in the dataset and their corresponding
-        surface exposures status
+    list_of_kmers: list
+        list containing kmers and corresponding status of surface exposure as
+        determined by cross-referencing top-N kmers with list of known surface
+        exposed proteins
+
+    kmers_topN: list
+        list containing topN kmers from classifier
 
     Returns:
     --------
-    exposed_kmers_list: list
-        list of kmers names that are found in surface exposed proteins
-    surface_exposed_status: pd.DataFrame
-        dataframe containing kmer names, corresponding virus-protein pairs they are found within
-        and status of whether the specific protein is surface exposed
+    is_exposed: list
+        ordered list of protein kmers that are positively labeled as 'surface_exposed'
+
     """
 
-    # compare dataframe of known surface exposed virus-protein pairs with
-    # dataframe of topN kmer virus-protein associations to determine surface
-    # exposure status of topN kmer features
-    merged_df = pd.merge(
-        surface_exposed_df,
-        kmer_info_df,
-        on=["virus_names", "protein_names"],
-        how="left",
-        indicator=True,
-    )
-    shared_df = merged_df[merged_df["_merge"] == "both"]
-    exposed_kmers = shared_df[shared_df["surface_exposed_status"] == "yes"]
-    exposed_kmers_list = list(exposed_kmers["kmer_names"].unique())
-    surface_exposed_status = shared_df.loc[~shared_df["surface_exposed_status"].isna()]
+    # make lists 'is_exposed' by cross-referencing surface exposed status with protein kmers list
+    # and re-order list to align with the list of found kmers
+    is_exposed = [x[0] for x in list_of_kmers if x[1] == "yes"]
+    is_exposed = [s if s in is_exposed else "" for s in kmers_topN]
 
-    return exposed_kmers_list, surface_exposed_status
+    return is_exposed
 
 
 def FIC_plot(
@@ -295,7 +285,8 @@ def FIC_plot(
     kmer_count: np.ndarray,
     n_folds: int,
     target_column: str,
-    signs_dict: dict,
+    exposure_status_sign: list,
+    response_effect_sign: list,
     surface_exposed_dict: dict,
     path: Path,
 ):
@@ -315,10 +306,11 @@ def FIC_plot(
     n_folds: int
         number of cv folds performed by classifier
     target_column: str
-        name of column on which classifier was
-    signs_dict: dict
-        dictionary containing kmer feature names and corresponding (+/-) sign characters
-        denoting surface exposure status and response effect of feature
+        name of column on which classifier was trained
+    exposure_status_sign: list
+        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
+    response_effect_sign: list
+        list of +/- symbols denoting response effect from shap importance pearson-r correlation
     surface_exposed_dict: dict
         dictionary containing the topN kmers and their respective ratios of surface exposed to
         not surface exposed viral proteins for plotting '% surface exposed'
@@ -346,27 +338,25 @@ def FIC_plot(
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
     for kmer_idx, p in enumerate(bars):
-        # look up feature information based on kmer name
+        # calculate corresponding surface exposure %
         kmer_name = topN_kmers[kmer_idx]
         percent_exposed = surface_exposed_dict[kmer_name]
         percent_lbl = f"{percent_exposed:.2f}%"
 
         left, bottom, width, height = p.get_bbox().bounds
 
-        response_effect_sign = signs_dict[kmer_name][1]
-        exposure_status_sign = signs_dict[kmer_name][0]
-        if response_effect_sign == "+":
+        if response_effect_sign[kmer_idx] == "+":
             response_sign_color = "g"
-        elif response_effect_sign == "-":
+        elif response_effect_sign[kmer_idx] == "-":
             response_sign_color = "r"
 
-        if exposure_status_sign == "+":
+        if exposure_status_sign[kmer_idx] == "+":
             exposure_sign_color = "g"
-        elif exposure_status_sign == "-":
+        elif exposure_status_sign[kmer_idx] == "-":
             exposure_sign_color = "r"
 
         ax.annotate(
-            response_effect_sign,
+            response_effect_sign[kmer_idx],
             xy=(left + width / 4, bottom + height / 2),
             ha="center",
             va="center",
@@ -374,7 +364,7 @@ def FIC_plot(
             fontsize="xx-large",
         )
         ax.annotate(
-            exposure_status_sign,
+            exposure_status_sign[kmer_idx],
             xy=(left + 3 * width / 4, bottom + height / 2),
             ha="center",
             va="center",
@@ -434,7 +424,7 @@ def FIC_plot(
 
 
 def percent_surface_exposed(
-    kmer_info: kmer_data, surface_exposed_df: pd.DataFrame
+    k_mers_in: list[str], surface_exposed_status: list[str]
 ) -> dict:
     """
     Determine the percentage of surface exposed proteins
@@ -443,12 +433,10 @@ def percent_surface_exposed(
 
     Parameters
     ----------
-    kmer_info: kmer_data
-        object containing kmer_names and corresponding mapping method
-        used to translate sequence
-    surface_exposed_df: pd.DataFrame
-        dataframe containing kmer features, corresponding virus-protein pairs
-        and surface exposure status values
+    k_mers_in: list
+        list of important kmers that are found in the dataset of viral proteins
+    surface_exposed_status: list
+        corresponding 'Yes' or 'No' for 'is surface exposed' for each kmer
 
     Returns
     -------
@@ -458,20 +446,18 @@ def percent_surface_exposed(
     """
 
     surface_exposed_dict = {}
-    kmer_names = kmer_info.kmer_names
-    for kmer in kmer_names:
+    all_kmers = zip(k_mers_in, surface_exposed_status)
+    for kmer, kmer_status in all_kmers:
         if kmer[:8] not in ["kmer_PC_", "kmer_AA_"]:
             raise ValueError("kmer feature name missing prefix.")
 
-        kmer_status = surface_exposed_df.loc[surface_exposed_df["kmer_names"] == kmer]
-        if kmer_status.empty:
+        # check if kmer exists in dictionary already
+        if kmer not in surface_exposed_dict:
             surface_exposed_dict[kmer] = [0, 0]
-        else:
-            surface_exposed_list = kmer_status["surface_exposed_status"] == "no"
-            not_surface_exposed = int(surface_exposed_list.sum())
-            surface_exposed = int(len(surface_exposed_list) - not_surface_exposed)
-            # index ratio of [surface_exposed, not_surface_exposed] to dictionary under kmer name key
-            surface_exposed_dict[kmer] = [surface_exposed, not_surface_exposed]
+        if kmer_status == "yes":
+            surface_exposed_dict[kmer][0] += 1
+        elif kmer_status == "no":
+            surface_exposed_dict[kmer][1] += 1
 
     # calculate final percentage values based on ratio of "Yes" and "No" counts
     percent_exposed_dict = {
@@ -1822,16 +1808,23 @@ if __name__ == "__main__":
         kmer_info = kmer_data(mapping_method, array2)
 
         # gather relevant information for important kmers from classifier output
-        kmer_info_df = get_kmer_info(kmer_info, records, tbl, mapping_method)
-
-        is_exposed, surface_exposed_status = label_surface_exposed(
-            kmer_info_df, surface_exposed_df
+        virus_names, kmer_features, protein_names = get_kmer_info(
+            kmer_info, records, tbl, mapping_method
         )
+
+        # get surface exposure status of all kmers using `surface_exposed_df`
+        surface_exposed_status = dtra_utils.get_surface_exposure_status(
+            virus_names, protein_names, surface_exposed_df
+        )
+
+        temp5 = list(set(zip(kmer_features, surface_exposed_status)))
+
+        is_exposed = label_surface_exposed(temp5, array2)
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
         surface_exposed_dict = percent_surface_exposed(
-            kmer_info, surface_exposed_status
+            kmer_features, surface_exposed_status
         )
 
         ### Production of the SHAP plot
@@ -1846,9 +1839,8 @@ if __name__ == "__main__":
         )
 
         # build lists of feature exposure and response effect signs for FIC plotting
-        signs_dict = feature_signs(
+        exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            array2,
             positive_shap_values.values,
             positive_shap_values.data,
         )
@@ -1863,7 +1855,8 @@ if __name__ == "__main__":
             array1,
             n_folds,
             target_column,
-            signs_dict,
+            exposure_status_sign,
+            response_effect_sign,
             surface_exposed_dict,
             paths[-1],
         )

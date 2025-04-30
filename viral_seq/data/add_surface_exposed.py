@@ -1,25 +1,28 @@
 import pandas as pd
-from typing import List
 
 
 def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> None:
     """
-    add "surface_exposure_status" values to entries in dataframe containing
-    virus and protein names from dataset and save dataframe with new entries
+    add "surface_exposure_status" values (yes/no) and corresponding references
+    to dataframe containing virus-protein pairs and save modified dataframe
+
+    surface exposure status decisions are determined either programmatically by checking
+    against lists of known (not) surface exposed proteins/keywords or manually by
+    taking user input for individual entries one at a time where a decision is not already present
 
     Parameters:
     -----------
     surface_exposed_df: pd.DataFrame
-        dataframe containing corresponding virus-protein pairs as well as surface exposed (yes/no) status
-        and reference for decision if not determined from known lists of (not) surface-exposed proteins
+        dataframe containing corresponding virus-protein pairs for which to add surface exposure status
+        and reference for decision if not already present
     save_file: str
         file name for saving modified dataframe as csv
     """
 
-    response_list = {}
-    reference_list = {}
+    response_dict = {}
+    reference_dict = {}
     # non-exhaustive list of non-structural protein names, parts of names (i.e. 'ase' as in protease)
-    not_exposed: List[str] = [
+    not_exposed: list[str] = [
         "ase",  # https://doi.org/10.1016/j.sbi.2006.10.010
         "nonstructural",  # https://meshb.nlm.nih.gov/record/ui?name=Viral+Nonstructural+Proteins
         "RNA",  # related to RNA polymerase,
@@ -49,12 +52,12 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         "small t antigen",  # referring to regulatory proteins of polyomaviruses https://doi.org/10.3390/ijms20163914
         "large t antigen",  # referring to regulatory proteins of polyomaviruses https://doi.org/10.3390/ijms20163914
     ]
-    not_exposed_exceptions: List[str] = [
+    not_exposed_exceptions: list[str] = [
         "hemagglutinin-neuraminidase",  # surface exposed protein on paramyxoviridae https://viralzone.expasy.org/556
         "hemagglutinin-esterase",  # surface exposed protein of influenza (https://doi.org/10.1007/s13238-015-0193-x), coronavirus (https://doi.org/10.1007/978-1-4899-1531-3_8), and torovirus (https://doi.org/10.1128/jvi.71.7.5277-5286.1997)
         "neuraminidase",  # surface exposed protein of Influenza A (https://doi.org/10.3389/fmicb.2019.00039)
     ]
-    exposed: List[str] = [
+    exposed: list[str] = [
         "glycoprotein",  # surface proteins of enveloped viruses https://doi.org/10.1093/clinids/2.1.40
         "envelope",  # referring to proteins associated with the viral envelope https://www.uniprot.org/keywords/KW-0261
         "spike",  # referring to coronavirus spike proteins https://doi.org/10.1146/annurev-virology-110615-042301
@@ -79,13 +82,13 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
             if any(s.lower() in protein_query for s in not_exposed) and not any(
                 s.lower() in protein_query for s in not_exposed_exceptions
             ):
-                response_list[i] = "no"
-                reference_list[i] = "None"
+                response_dict[i] = "no"
+                reference_dict[i] = "None"
                 remaining -= 1
                 continue
             if any(s.lower() in protein_query for s in exposed):
-                response_list[i] = "yes"
-                reference_list[i] = "None"
+                response_dict[i] = "yes"
+                reference_dict[i] = "None"
                 remaining -= 1
                 continue
             else:
@@ -93,31 +96,31 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
                 response_1 = input("surface exposure status:")
                 if response_1 == "exit":
                     surface_exposed_df.loc[
-                        list(response_list.keys()), "surface_exposed_status"
-                    ] = list(response_list.values())
+                        list(response_dict.keys()), "surface_exposed_status"
+                    ] = list(response_dict.values())
                     surface_exposed_df.loc[
-                        list(reference_list.keys()), "reference"
-                    ] = list(reference_list.values())
+                        list(reference_dict.keys()), "reference"
+                    ] = list(reference_dict.values())
                     surface_exposed_df.to_csv(save_file, index=False)
                     break
                 else:
                     response_2 = input("reference:")
                     if not response_2:
                         response_2 = "None"
-                    response_list[i] = response_1
-                    reference_list[i] = response_2
+                    response_dict[i] = response_1
+                    reference_dict[i] = response_2
                 remaining -= 1
     # save responses after finishing
-    surface_exposed_df.loc[list(response_list.keys()), "surface_exposed_status"] = list(
-        response_list.values()
+    surface_exposed_df.loc[list(response_dict.keys()), "surface_exposed_status"] = list(
+        response_dict.values()
     )
-    surface_exposed_df.loc[list(reference_list.keys()), "reference"] = list(
-        reference_list.values()
+    surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
+        reference_dict.values()
     )
     surface_exposed_df.to_csv(save_file, index=False)
 
 
 if __name__ == "__main__":
     df_file = "surface_exposed_df.csv"
-    surface_exposed_df = pd.read_csv("surface_exposed_df.csv")
+    surface_exposed_df = pd.read_csv(df_file)
     add_surface_exposed(surface_exposed_df, save_file=df_file)

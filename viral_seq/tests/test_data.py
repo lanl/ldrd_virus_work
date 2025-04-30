@@ -32,20 +32,6 @@ def test_fix_virus_names():
         # this test case checks that the user input values are indexed as expected
         (
             {
-                "virus_names": {
-                    0: "Virus_1",
-                    1: "Virus_2",
-                    2: "Virus_3",
-                    3: "Virus_4",
-                    4: "Virus_5",
-                },
-                "protein_names": {
-                    0: "polymerase",
-                    1: "RNA",
-                    2: "neuraminidase",
-                    3: "surface exposed protein",
-                    4: "skip protein reference",
-                },
                 "surface_exposed_status": {
                     0: pd.NA,
                     1: pd.NA,
@@ -62,20 +48,6 @@ def test_fix_virus_names():
                 },
             },
             {
-                "virus_names": {
-                    0: "Virus_1",
-                    1: "Virus_2",
-                    2: "Virus_3",
-                    3: "Virus_4",
-                    4: "Virus_5",
-                },
-                "protein_names": {
-                    0: "polymerase",
-                    1: "RNA",
-                    2: "neuraminidase",
-                    3: "surface exposed protein",
-                    4: "skip protein reference",
-                },
                 "surface_exposed_status": {
                     0: "no",
                     1: "no",
@@ -90,46 +62,24 @@ def test_fix_virus_names():
         # this test checks that the "exit" input value works as expected
         (
             {
-                "virus_names": {
-                    0: "Virus_1",
-                    1: "Virus_2",
-                    2: "Virus_3",
-                    3: "Virus_4",
-                },
-                "protein_names": {
-                    0: "polymerase",
-                    1: "RNA",
-                    2: "neuraminidase",
-                    3: "surface exposed protein",
-                },
                 "surface_exposed_status": {
                     0: pd.NA,
                     1: pd.NA,
                     2: pd.NA,
                     3: pd.NA,
+                    4: pd.NA,
                 },
-                "reference": {0: pd.NA, 1: pd.NA, 2: pd.NA, 3: pd.NA},
+                "reference": {0: pd.NA, 1: pd.NA, 2: pd.NA, 3: pd.NA, 4: pd.NA},
             },
             {
-                "virus_names": {
-                    0: "Virus_1",
-                    1: "Virus_2",
-                    2: "Virus_3",
-                    3: "Virus_4",
-                },
-                "protein_names": {
-                    0: "polymerase",
-                    1: "RNA",
-                    2: "neuraminidase",
-                    3: "surface exposed protein",
-                },
                 "surface_exposed_status": {
                     0: "no",
                     1: "no",
                     2: "yes",
                     3: pd.NA,
+                    4: pd.NA,
                 },
-                "reference": {0: None, 1: None, 2: None, 3: np.nan},
+                "reference": {0: None, 1: None, 2: None, 3: np.nan, 4: np.nan},
             },
             ["exit"],
         ),
@@ -138,6 +88,24 @@ def test_fix_virus_names():
 def test_add_surface_exposed(
     mocker, tmpdir, surface_exposed_dict, exp_out, side_effect_in
 ):
+    virus_protein_pairs = {
+        "virus_names": {
+            0: "Virus_1",
+            1: "Virus_2",
+            2: "Virus_3",
+            3: "Virus_4",
+            4: "Virus_5",
+        },
+        "protein_names": {
+            0: "polymerase",
+            1: "RNA",
+            2: "neuraminidase",
+            3: "surface exposed protein",
+            4: "skip protein reference",
+        },
+    }
+    surface_exposed_dict = {**virus_protein_pairs, **surface_exposed_dict}
+    exp_out = {**virus_protein_pairs, **exp_out}
     exp_df = pd.DataFrame(exp_out)
     surface_exposed_df = pd.DataFrame(surface_exposed_dict)
     mocker.patch(

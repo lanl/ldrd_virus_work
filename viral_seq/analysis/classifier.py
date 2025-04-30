@@ -94,6 +94,7 @@ def get_model_arguments(
         "predict": {
             "n_estimators": 10_000,
             "n_jobs": n_jobs,
+            "random_state": random_state,
         },
     }
     model_arguments["LGBMClassifier Boost Seed:" + str(random_state)] = {
@@ -120,6 +121,7 @@ def get_model_arguments(
         },
         "predict": {
             "n_jobs": n_jobs,
+            "random_state": random_state,
         },
     }
     model_arguments["XGBClassifier Boost Seed:" + str(random_state)] = {
@@ -141,6 +143,7 @@ def get_model_arguments(
         },
         "predict": {
             "n_jobs": n_jobs,
+            "random_state": random_state,
         },
     }
     model_arguments["ExtraTreesClassifier Seed:" + str(random_state)] = {
@@ -175,6 +178,7 @@ def get_model_arguments(
         "predict": {
             "n_estimators": 10_000,
             "n_jobs": n_jobs,
+            "random_state": random_state,
         },
     }
     model_arguments["LGBMClassifier Dart Seed:" + str(random_state)] = {
@@ -204,6 +208,7 @@ def get_model_arguments(
         },
         "predict": {
             "n_jobs": n_jobs,
+            "random_state": random_state,
         },
     }
     return model_arguments

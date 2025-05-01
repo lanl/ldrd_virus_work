@@ -29,18 +29,13 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         "DNA",  # related to DNA polymerase
         "polyprotein",  # viral polyproteins are proteolytically cleaved during the viral maturation cycle and may contain
         # mature products that are surface exposed (i.e. prM) but are not considered "surface-exposed" proteins https://doi.org/10.1016/j.coviro.2013.03.009
-        "NS",  # acronym meaning ``non-structural``
-        "nsp",  # acronym for ``non-structural protein``
         "Hel",  # abbreviation of ``helicase`` https://doi.org/10.1016/S0959-440X(02)00298-1
-        "pol",  # abbreviation of ``Polymerase`` https://doi.org/10.1007/978-1-4614-0980-9_12
         "3C",  # refers to ``3C proteinase`` of picornaviridae https://doi.org/10.3390/v8030082
         "hypothetical",  # proteins for which the function is  unknown. https://doi.org/10.1002/cfg.66
         "pTP",  # precursor terminal protein, involved in viral replication https://doi.org/10.1128/jvi.69.7.4079-4085.1995
-        "TP",  # terminal protein, involved in viral replication https://doi.org/10.1128/jvi.69.7.4079-4085.1995
         "100k",  # https://www.uniprot.org/uniprotkb/P24932/entry
         "IVa2",  # https://www.uniprot.org/uniprotkb/P03272/entry
         "tegument",  # the proteins of herpesviruses that lie between the capsid and viral envelope https://doi.org/10.1128/mmbr.00040-07
-        "nsP",  # aka non-structural protein
         "nuclear",  # associating with the host nucleus
         "nucleocapsid",  # referring to the capsid of enveloped viruses, specifically HIV-1 https://viralzone.expasy.org/7
         "transcription",  # relating to ``transcription factor`` or ``transcription regulator`` https://doi.org/10.1016/j.cell.2020.06.023
@@ -66,8 +61,6 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         "fusion",  # associated with membrane proteins that facilitate fusion of viral envelopes https://doi.org/10.1038/nsmb.1456
         "hemagglutinin",  # viral fusion protein of influenza https://doi.org/10.1038/nsmb.1456
         "fiber",  # referring to the viral surface protein of adenoviridae https://viralzone.expasy.org/183
-        "HA",  # abbreviation of hemagglutinin
-        "NA",  # abbreviation of neuraminidase
         "neuraminidase",  # surface exposed protein of Influenza A (https://doi.org/10.3389/fmicb.2019.00039)
         "G1",  # glycoprotein on the surface of hanntaviridae https://viralzone.expasy.org/7079
         "G2",  # glycoprotein on the surface of hanntaviridae https://viralzone.expasy.org/7079

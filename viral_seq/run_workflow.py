@@ -1828,6 +1828,7 @@ if __name__ == "__main__":
         )
 
         ### Production of the SHAP plot
+
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(X)
         positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]

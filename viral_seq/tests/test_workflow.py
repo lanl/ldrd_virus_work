@@ -282,7 +282,6 @@ def test_fic_plot(tmp_path):
 
     response_effect_sign = ["+", "-", "+", "+", "+", "+", "+", "-", "+", "-"]
     exposure_status_sign = ["+", "-", "-", "+", "+", "+", "+", "+", "+", "+"]
-
     surface_exposed_dict = {
         "kmer_PC_CDDEEC": 42.86,
         "kmer_PC_CCGDEA": 0.00,

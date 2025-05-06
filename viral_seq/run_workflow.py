@@ -1955,7 +1955,7 @@ if __name__ == "__main__":
 
         # calculate hydrophobicity scores
         hydro_scores = ba.hydrophobicity_score(array2, mapping_method)
-        hydro_scores.to_csv("hyrdophbicity_scores.csv")
+        hydro_scores.to_csv("hydrophobicity_scores.csv", header=False)
 
         # Production of the FIC plot
         FIC_plot(

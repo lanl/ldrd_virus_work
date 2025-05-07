@@ -50,16 +50,20 @@ def get_kmers(
         raise ValueError("Please specify mapping method for PC-kmers.")
     kmers: dict = defaultdict(int)
     for record in records:
+        # for a given record, determine if the accession contains a single polyprotein product
+        # and allow for kmer features to be extracted by setting ``single_polyprotein = True``
         single_polyprotein = False
+        if kmer_info is not None:
+            all_products = []
+            for feat in record.features:
+                if feat.type in ["CDS", "mat_peptide"]:
+                    nuc_seq = feat.location.extract(record.seq)
+                    if len(nuc_seq) % 3 == 0:
+                        all_products.append(feat.qualifiers["product"][0])
+            single_polyprotein = (
+                len(all_products) == 1 and all_products[0] == "polyprotein"
+            )
         for feature in record.features:
-            if kmer_info is not None:
-                all_products = [
-                    feat.qualifiers["product"][0]
-                    for feat in record.features
-                    if feat.type in ["CDS", "mat_peptide"]
-                ]
-                if len(all_products) == 1 and all_products[0] == "polyprotein":
-                    single_polyprotein = True
             if feature.type in ["CDS", "mat_peptide"]:
                 nuc_seq = feature.location.extract(record.seq)
                 if len(nuc_seq) % 3 != 0:

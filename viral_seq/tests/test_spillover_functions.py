@@ -639,16 +639,25 @@ def test_check_cache_tarball(wf, tar_file):
 
 
 def test_build_table_kmer_info(tmpdir):
-    exp_kmer_info = {
-        "mapping_method": "None",
-        "kmer_names": ["kmer_AA_MA"],
-        "virus_name": "Karshi virus",
-        "protein_name": "polyprotein",
-    }
     with tmpdir.as_cwd():
-        this_cache = files("viral_seq.tests") / "cache"
+        kmer_info_exp = pd.read_csv(
+            files("viral_seq.tests.expected") / "kmer_info_exp.csv"
+        ).replace({pd.NA: "None"})
+        this_cache = files("viral_seq.tests") / "cache_syn"
         cache_str = str(this_cache.resolve())
-        df = pd.read_csv(csv_train)
+        train_dict = {
+            "Unnamed: 0": {0: 0},
+            "Species": {
+                0: "Alenquer virus",
+            },
+            "Human Host": {
+                0: False,
+            },
+            "Accessions": {
+                0: "HM119403",
+            },
+        }
+        df = pd.DataFrame.from_dict(train_dict)
         df_test, kmer_info = sp.build_table(
             df=df,
             cache=cache_str,
@@ -659,10 +668,10 @@ def test_build_table_kmer_info(tmpdir):
             kmers_pc=True,
             kmer_k_pc=[2],
             gc=False,
-            uni_select=True,
             num_select=10,
             mapping_method="jurgen_schmidt",
             kmer_info=[],
         )
-        assert kmer_info[0].__dict__ == exp_kmer_info
-        assert len(kmer_info) == 52166
+        kmer_info_all = pd.DataFrame([k.__dict__ for k in kmer_info])
+        kmer_info_all["kmer_names"] = kmer_info_all["kmer_names"].apply(repr)
+        assert_frame_equal(kmer_info_all, kmer_info_exp)

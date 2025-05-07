@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import functools
 from importlib.resources import files
+import polars as pl
+from collections import defaultdict
 
 
 def get_surface_exposure_status(
@@ -176,3 +178,84 @@ def _merge_and_convert_tbl(train_file: str, merge_file: str, temp_file: str):
     converted_tbl = convert_merged_tbl(merged_tbl)
     converted_tbl.to_csv(temp_file)
     return converted_tbl
+
+
+def transform_kmer_data(kmer_list: list) -> pd.DataFrame:
+    """
+    convert list of KmerData objects to dataframe by
+    casting each object in the list to a dictionary
+
+    Parameters:
+    -----------
+    kmer_list: list
+        list of KmerData objects
+
+    Returns:
+    --------
+    kmer_dict_df: pd.DataFrame
+        converted and transformed dataframe
+    """
+
+    kmer_dict_df = pd.DataFrame([k.__dict__ for k in kmer_list])
+    return kmer_dict_df
+
+
+def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
+    """
+    Lookup and store the virus-protein pairs associated with a list of kmers
+
+    Parameters:
+    -----------
+    topN_kmers: list
+        list of kmer features for which to find associated virus-protein pairs
+    all_kmer_info: pd.DataFrame
+        dataframe holding virus-protein information for kmers
+
+    Returns:
+    --------
+    kmer_viruses: dict
+        dictionary of kmer names and corresponding virus-protein pairs from all_kmer_info
+    """
+    kmer_viruses = defaultdict(list)
+    for kmer in topN_kmers:
+        all_kmer_data = all_kmer_info[
+            all_kmer_info["kmer_names"].apply(lambda x: x[0]) == kmer
+        ]
+        for i, kmer_data in all_kmer_data.iterrows():
+            if kmer_data is not None:
+                kmer_viruses[kmer].append(
+                    (kmer_data.virus_name, kmer_data.protein_name)
+                )
+
+    return kmer_viruses
+
+
+def load_kmer_info(file_name: str) -> pd.DataFrame:
+    """
+    load parquet file containing 'all_kmer_info'
+
+    Parameters:
+    -----------
+    file_name: str
+        file name to load
+
+    Return:
+    -------
+    all_kmer_info_df: pd.DataFrame
+        dataframe containing KmerData class objects
+    """
+    print(f"Loading {file_name}...")
+    all_kmer_info = pl.read_parquet(file_name).to_pandas()
+    return all_kmer_info
+
+
+def save_kmer_info(kmer_info_df: pd.DataFrame, save_file: str) -> None:
+    """
+    save dataframe containing 'all_kmer_info' to parquet file
+
+    Parameters:
+    -----------
+    kmer_info_df: pd.DataFrame
+        list of KmerData class objects
+    """
+    kmer_info_df.to_parquet(save_file)

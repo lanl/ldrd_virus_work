@@ -1151,7 +1151,7 @@ Human mastadenovirus D,protein 13.6K,no,https://doi.org/10.1016/0092-8674(80)901
 Human mastadenovirus D,core protein V,no,
 Human mastadenovirus D,capsid protein precursor pVI,no,https://doi.org/10.1128/jvi.79.4.2559-2572.2005
 Human mastadenovirus D,protease,no,
-Human mastadenovirus D,hexon assembly protein 100K,yes,
+Human mastadenovirus D,hexon assembly protein 100K,no,https://viralzone.expasy.org/4
 Human mastadenovirus D,encapsidation protein 22K,no,https://doi.org/10.1128/jvi.00859-13
 Human mastadenovirus D,capsid protein precursor pVIII,no,https://viralzone.expasy.org/4
 Human mastadenovirus D,control protein E3 12.5K,no,https://doi.org/10.1002/1873-3468.13848
@@ -1467,7 +1467,7 @@ bat adenovirus 3,capsid protein precursor pVI,no,https://www.uniprot.org/uniprot
 bat adenovirus 3,hexon capsid protein,yes,
 bat adenovirus 3,capsid protein 23K,no,
 bat adenovirus 3,single stranded DNA-binding protein,no,
-bat adenovirus 3,hexon assembly protein 100K,yes,
+bat adenovirus 3,hexon assembly protein 100K,no,https://viralzone.expasy.org/4
 bat adenovirus 3,protein 33K,no,https://www.uniprot.org/uniprotkb/D3X7C6/entry
 bat adenovirus 3,encapsidation protein 22K,no,https://www.uniprot.org/uniprotkb/A0A163HJX4/entry
 bat adenovirus 3,capsid protein precursor pVIII,no,https://viralzone.expasy.org/4

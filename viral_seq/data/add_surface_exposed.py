@@ -1,7 +1,13 @@
 import pandas as pd
+from typing import Optional
 
 
-def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> None:
+def add_surface_exposed(
+    surface_exposed_df: pd.DataFrame,
+    save_file: str,
+    check_entries: Optional[list[str]] = None,
+    explicit: bool = False,
+) -> None:
     """
     add "surface_exposure_status" values (yes/no) and corresponding references
     to dataframe containing virus-protein pairs and save modified dataframe
@@ -10,6 +16,10 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
     against lists of known (not) surface exposed proteins/keywords or manually by
     taking user input for individual entries one at a time where a decision is not already present
 
+    providing a list of string values representing keywords or specific proteins in the dataset
+    to ``check_entries`` allows the user to double-check entries either explicitly matching the
+    strings (``explicit=True``) or containing a given keyword (``explicit=False``)
+
     Parameters:
     -----------
     surface_exposed_df: pd.DataFrame
@@ -17,6 +27,13 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         and reference for decision if not already present
     save_file: str
         file name for saving modified dataframe as csv
+    check_entries: Optional[list[str]]
+        flag for checking/changing specific entries. this option provides the capability to change
+        viral entries based on cross-reference of the surface_exposed_df ``protein_names`` against
+        an input list of values using either keyword search (with ``explicit=False``) or explicit
+        string search (with ``explicit=True``)
+    explicit: bool
+        whether or not to check entries explicitly or to search using keywords when using ``check_entries``
     """
 
     response_dict = {}
@@ -65,44 +82,85 @@ def add_surface_exposed(surface_exposed_df: pd.DataFrame, save_file: str) -> Non
         "G1",  # glycoprotein on the surface of hanntaviridae https://viralzone.expasy.org/7079
         "G2",  # glycoprotein on the surface of hanntaviridae https://viralzone.expasy.org/7079
     ]
-    remaining = surface_exposed_df["surface_exposed_status"].isna().sum()
-    for i, row in enumerate(surface_exposed_df.itertuples()):
-        if pd.isna(row.surface_exposed_status):
+    # cross-reference dataframe entries if provided
+    # a list of protein keywords/names to check
+    if check_entries:
+        check_column = "protein_names"
+        # either check explicitly if they exist in the protein names
+        if explicit:
+            cross_reference = surface_exposed_df[
+                surface_exposed_df[check_column].isin(check_entries)
+            ]
+        # or search for them as keywords in each string
+        else:
+            all_terms = "|".join(check_entries)
+            cross_reference = surface_exposed_df[
+                surface_exposed_df[check_column].str.contains(
+                    all_terms, case=False, na=False
+                )
+            ]
+        remaining = len(cross_reference)
+    else:
+        cross_reference = surface_exposed_df
+        remaining = surface_exposed_df["surface_exposed_status"].isna().sum()
+    for i, row in enumerate(cross_reference.itertuples()):
+        # if there is no surface exposure status or if ``check_entries``
+        # is not an empty list, perform labeling
+        if pd.isna(row.surface_exposed_status) or check_entries:
             if isinstance(row.protein_names, str):
                 protein_query: str = row.protein_names.lower()
             else:
                 raise TypeError("Invalid protein query type: expected 'str' value.")
-            if any(s.lower() in protein_query for s in not_exposed) and not any(
-                s.lower() in protein_query for s in not_exposed_exceptions
-            ):
-                response_dict[i] = "no"
-                reference_dict[i] = "None"
+            # only perform programmatic labeling if not checking entries
+            if not check_entries:
+                if any(s.lower() in protein_query for s in not_exposed) and not any(
+                    s.lower() in protein_query for s in not_exposed_exceptions
+                ):
+                    response_dict[i] = "no"
+                    reference_dict[
+                        i
+                    ] = "labeling performed programmatically using 'not_exposed' list"
+                    remaining -= 1
+                    continue
+                if any(s.lower() in protein_query for s in exposed):
+                    response_dict[i] = "yes"
+                    reference_dict[
+                        i
+                    ] = "labeling performed programmatically using 'exposed' list"
+                    remaining -= 1
+                    continue
+            print(
+                f"{row.Index}, ({remaining}), Virus Name: {row.virus_names}, Protein Name: {row.protein_names}, Status: {row.surface_exposed_status}, Reference: {row.reference}"
+            )
+            response_1 = input("surface exposure status:")
+            # if empty response, skip entry
+            if response_1 == "":
+                continue
+            if response_1 == "fix":
+                print("Enter new surface exposure status and reference...")
+                new_status = input("Surface exposure status: ")
+                surface_exposed_df.iloc[row.Index].surface_exposed_status = new_status  # type: ignore
+                # give reference for change
+                reference = input("Reference: ")
+                surface_exposed_df.iloc[row.Index].reference = reference  # type:ignore
                 remaining -= 1
                 continue
-            if any(s.lower() in protein_query for s in exposed):
-                response_dict[i] = "yes"
-                reference_dict[i] = "None"
-                remaining -= 1
-                continue
+            elif response_1 == "exit":
+                surface_exposed_df.loc[
+                    list(response_dict.keys()), "surface_exposed_status"
+                ] = list(response_dict.values())
+                surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
+                    reference_dict.values()
+                )
+                surface_exposed_df.to_csv(save_file, index=False)
+                break
             else:
-                print(f"{row.Index}, ({remaining}), {row.virus_names}, {protein_query}")
-                response_1 = input("surface exposure status:")
-                if response_1 == "exit":
-                    surface_exposed_df.loc[
-                        list(response_dict.keys()), "surface_exposed_status"
-                    ] = list(response_dict.values())
-                    surface_exposed_df.loc[
-                        list(reference_dict.keys()), "reference"
-                    ] = list(reference_dict.values())
-                    surface_exposed_df.to_csv(save_file, index=False)
-                    break
-                else:
-                    response_2 = input("reference:")
-                    if not response_2:
-                        response_2 = "None"
-                    response_dict[i] = response_1
-                    reference_dict[i] = response_2
-                remaining -= 1
+                response_2 = input("reference:")
+                if not response_2:
+                    response_2 = "None"
+                response_dict[i] = response_1
+                reference_dict[i] = response_2
+            remaining -= 1
     # save responses after finishing
     surface_exposed_df.loc[list(response_dict.keys()), "surface_exposed_status"] = list(
         response_dict.values()

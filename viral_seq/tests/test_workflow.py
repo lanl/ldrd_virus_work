@@ -109,7 +109,7 @@ def test_csv_conversion():
                 "kmer_AA_CADAFFE",
                 "kmer_PC_ECDGDE",
             ],
-            ["yes", "no", "no", "no", "no", "yes", "yes", "no", "no", "yes"],
+            ["Yes", "No", "No", "No", "No", "Yes", "Yes", "No", "No", "Yes"],
             [
                 "kmer_PC_CADAFFE",
                 "kmer_AA_CCABDAC",
@@ -130,7 +130,7 @@ def test_csv_conversion():
                 "kmer_AA_HIJKL",
                 "kmer_AA_HIJKL",
             ],
-            ["yes", "no", "yes", "yes", "no", "no"],
+            ["Yes", "No", "Yes", "Yes", "No", "No"],
             [
                 "kmer_PC_01234",
                 "kmer_AA_ABCDE",
@@ -142,7 +142,7 @@ def test_csv_conversion():
     ],
 )
 def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_exp):
-    kmers_list_status = list(set(zip(kmers_list, kmers_status)))
+    kmers_list_status = list(set(zip(kmers_list, [s.lower() for s in kmers_status])))
     is_exposed = workflow.label_surface_exposed(kmers_list_status, kmers_topN)
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
 
@@ -391,7 +391,7 @@ def test_feature_sign(
                 "kmer_PC_FEAGAD",
                 "kmer_PC_GACADA",
             ],
-            ["yes", "no", "yes", "yes", "yes", "no", "no"],
+            ["Yes", "No", "Yes", "Yes", "Yes", "No", "No"],
             [50.0, 75.0, 0.0],
         ],
         [
@@ -404,7 +404,7 @@ def test_feature_sign(
                 "kmer_PC_741065",
                 "kmer_PC_741065",
             ],
-            ["yes", "yes", "yes", "yes", "no", "no", "no"],
+            ["Yes", "Yes", "Yes", "Yes", "No", "No", "No"],
             [100.0, 0.0],
         ],
         [
@@ -417,7 +417,7 @@ def test_feature_sign(
                 "kmer_AA_ILGNMCS",
                 "kmer_AA_ILGNMCS",
             ],
-            ["no", "no", "yes", "no", "no", "yes", "no"],
+            ["No", "No", "Yes", "No", "No", "Yes", "No"],
             [33.333333, 0.0, 33.333333],
         ],
         [
@@ -432,13 +432,15 @@ def test_feature_sign(
                 "kmer_AA_ILGNMCS",
                 "kmer_AA_ILGNMCS",
             ],
-            ["no", "no", "no", "no", "yes", "no", "no", "yes", "no"],
+            ["No", "No", "No", "No", "Yes", "No", "No", "Yes", "No"],
             [0.0, 0.0, 0.0, 50.0, 0.0, 50.0],
         ],
     ),
 )
 def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
-    out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
+    out_dict = workflow.percent_surface_exposed(
+        syn_kmers, [s.lower() for s in syn_status]
+    )
 
     assert_allclose(list(out_dict.values()), percent_values)
 

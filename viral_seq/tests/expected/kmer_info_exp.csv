@@ -1,5 +1,0 @@
-mapping_method,kmer_names,virus_name,protein_name
-None,['kmer_AA_MS'],Alenquer virus,nucleocapsid
-None,['kmer_AA_SF'],Alenquer virus,nucleocapsid
-jurgen_schmidt,['kmer_PC_62'],Alenquer virus,nucleocapsid
-jurgen_schmidt,['kmer_PC_27'],Alenquer virus,nucleocapsid

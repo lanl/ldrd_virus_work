@@ -63,7 +63,7 @@ def test_get_kmer_viruses():
     protein_names = [f"protein{n}" for n in range(10)]
     kmer_info = []
     for kmer, virus, protein in zip(kmer_names, virus_names, protein_names):
-        kmer_info.append(workflow.KmerData(None, [kmer], virus, protein))
+        kmer_info.append(workflow.KmerData(None, kmer, virus, protein))
 
     virus_pairs_exp = {
         "kmer_PC_0": [("virus0", "protein0")],
@@ -149,7 +149,7 @@ def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
     # get information from kmer_info for sanity check
     assert all_kmer_info_df.iloc[0].protein_name == "E1A"
     assert all_kmer_info_df.iloc[0].virus_name == "Human adenovirus 5"
-    assert all_kmer_info_df.iloc[0].kmer_names == ["kmer_PC_6536613006"]
+    assert all_kmer_info_df.iloc[0].kmer_names == "kmer_PC_6536613006"
     assert all_kmer_info_df.shape == (11037, 4)
 
 

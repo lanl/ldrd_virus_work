@@ -218,9 +218,7 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     """
     kmer_viruses = defaultdict(list)
     for kmer in topN_kmers:
-        all_kmer_data = all_kmer_info[
-            all_kmer_info["kmer_names"].apply(lambda x: x[0]) == kmer
-        ]
+        all_kmer_data = all_kmer_info[all_kmer_info["kmer_names"] == kmer]
         for i, kmer_data in all_kmer_data.iterrows():
             if kmer_data is not None:
                 kmer_viruses[kmer].append(

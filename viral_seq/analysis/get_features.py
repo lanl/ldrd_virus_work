@@ -92,7 +92,7 @@ def get_kmers(
                             kmer_info.append(
                                 workflow.KmerData(
                                     mm,
-                                    [kmer_name],
+                                    kmer_name,
                                     record.annotations["organism"],
                                     feature.qualifiers["product"][0],
                                 )

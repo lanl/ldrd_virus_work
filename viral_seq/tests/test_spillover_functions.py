@@ -5,7 +5,7 @@ from viral_seq.cli.cli import cli
 import json
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from viral_seq.analysis import spillover_predict as sp
+from viral_seq.analysis import dtra_utils, spillover_predict as sp
 import numpy as np
 import numpy.testing as npt
 from sklearn.datasets import make_classification
@@ -640,10 +640,10 @@ def test_check_cache_tarball(wf, tar_file):
 
 def test_build_table_kmer_info(tmpdir):
     with tmpdir.as_cwd():
-        kmer_info_exp = pd.read_csv(
-            files("viral_seq.tests.expected") / "kmer_info_exp.csv"
-        ).replace({pd.NA: "None"})
-        this_cache = files("viral_seq.tests") / "cache_syn"
+        kmer_info_exp = dtra_utils.load_kmer_info(
+            files("viral_seq.tests.expected") / "kmer_info_exp.parquet.gzip"
+        )
+        this_cache = files("viral_seq.tests.caches") / "cache_syn"
         cache_str = str(this_cache.resolve())
         train_dict = {
             "Unnamed: 0": {0: 0},
@@ -672,6 +672,6 @@ def test_build_table_kmer_info(tmpdir):
             mapping_method="jurgen_schmidt",
             kmer_info=[],
         )
-        kmer_info_all = pd.DataFrame([k.__dict__ for k in kmer_info])
-        kmer_info_all["kmer_names"] = kmer_info_all["kmer_names"].apply(repr)
+
+        kmer_info_all = dtra_utils.transform_kmer_data(kmer_info)
         assert_frame_equal(kmer_info_all, kmer_info_exp)

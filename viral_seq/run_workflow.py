@@ -24,7 +24,7 @@ from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List
+from typing import Dict, Any, Sequence, List, Union
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -93,7 +93,7 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 
 # the KmerData class is used to organize information associated with a list of kmer features
 # this class should return:
-#     1. a list of kmer names (kmer_names)
+#     1. a list of kmer names (kmer_names) or a string with a single kmer name
 #     2. the mapping method used to translate AA-PC kmers (mapping_method)
 #     3. the name of the virus associated with a given kmer (virus_name)
 #     4. the name of the protein in which the kmer sequence is found (protein_name)
@@ -105,7 +105,7 @@ class KmerData:
     def __init__(
         self,
         mapping_method: str,
-        kmer_names: list,
+        kmer_names: Union[list, str],
         virus_name: str = "",
         protein_name: str = "",
     ):

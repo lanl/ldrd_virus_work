@@ -1,13 +1,8 @@
 import tempfile
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import (
-    rfc_utils,
-    classifier,
-    feature_importance,
-    get_features,
-    dtra_utils,
-)
+from viral_seq.analysis import rfc_utils, classifier, feature_importance, get_features
+from viral_seq.analysis import dtra_utils as du
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -248,45 +243,6 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
-def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
-    """
-    merges IgSF training dataframes and receptor_training dataframe
-    and reconciles overlapping dataframe entries by aligning accession
-    and reassigning values to a new dataframe.
-
-    Parameters:
-    -----------
-    train_file: str
-        path to receptor_training.csv
-    igsf_file: str
-        path to igsf training data
-
-    Returns:
-    --------
-    reconciled_df: pd.DataFrame
-        merged dataframe with data from train_file and igsf_file and
-        reconciled overlapping entries
-    """
-    # load igsf and receptor datasets
-    igsf_training = pd.read_csv(igsf_file)
-    receptor_training = pd.read_csv(train_file)
-
-    receptor_training["Receptor_Type"] = receptor_training["Receptor_Type"].str.replace(
-        "both", "integrin_sialic_acid"
-    )
-    reconciled_df = pd.concat([receptor_training, igsf_training], ignore_index=True)
-    existing_entries = reconciled_df.duplicated(subset="Accessions", keep="last")
-    reconciled_df.loc[existing_entries, "Receptor_Type"] = (
-        reconciled_df.loc[existing_entries, "Receptor_Type"] + "_IgSF"
-    )
-    new_entries = reconciled_df[
-        reconciled_df.duplicated(subset="Accessions", keep="first")
-    ].index
-    reconciled_df = reconciled_df.drop(new_entries).reset_index(drop=True)
-
-    return reconciled_df
-
-
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> list:
@@ -504,92 +460,6 @@ def percent_surface_exposed(
     return percent_exposed_dict
 
 
-def convert_merged_tbl(input_tbl) -> pd.DataFrame:
-    """
-    Convert the original version of the input CSV table
-    (i.e., that is merged to main) to a new DataFrame stored in memory
-    (i.e., that is compatible with the ML workflow)
-
-    Parameters
-    ----------
-    input_csv : str
-        A string representing the name of the input table that will undergo conversion.
-        Default is `receptor_training.csv`.
-
-    Returns
-    -------
-    output_df : pd.DataFrame
-        A Pandas DataFrame representing the converted form of the input table
-        that accounts for the target column(s) of interest.
-
-    """
-    table = input_tbl.drop(
-        columns=["Citation_for_receptor", "Whole_Genome", "Mammal_Host", "Primate_Host"]
-    )
-
-    table["SA_IG"] = np.where(
-        table["Receptor_Type"].isin(["sialic_acid_IgSF", "integrin_sialic_acid_IgSF"]),
-        True,
-        False,
-    )
-    table["IN_IG"] = np.where(
-        table["Receptor_Type"].isin(["integrin_IgSF", "integrin_sialic_acid_IgSF"]),
-        True,
-        False,
-    )
-    table["IN_SA"] = np.where(
-        table["Receptor_Type"] == "integrin_sialic_acid", True, False
-    )
-    table["IN_SA_IG"] = np.where(
-        table["Receptor_Type"] == "integrin_sialic_acid_IgSF", True, False
-    )
-
-    table["SA"] = np.where(
-        np.isin(
-            table["Receptor_Type"],
-            [
-                "sialic_acid",
-                "integrin_sialic_acid",
-                "sialic_acid_IgSF",
-                "integrin_sialic_acid_IgSF",
-            ],
-        ),
-        True,
-        False,
-    )
-    table["IG"] = np.where(
-        np.isin(
-            table["Receptor_Type"],
-            ["IgSF", "integrin_IgSF", "sialic_acid_IgSF", "integrin_sialic_acid_IgSF"],
-        ),
-        True,
-        False,
-    )
-    table["IN"] = np.where(
-        np.isin(
-            table["Receptor_Type"],
-            [
-                "integrin",
-                "integrin_sialic_acid",
-                "integrin_IgSF",
-                "integrin_sialic_acid_IgSF",
-            ],
-        ),
-        True,
-        False,
-    )
-    table.rename(
-        columns={
-            "Virus_Name": "Species",
-            "Human_Host": "Human Host",
-        },
-        inplace=True,
-    )
-    table.drop(columns="Receptor_Type", inplace=True)
-
-    return table
-
-
 def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
     """
     Convert the original version of the input CSV table
@@ -668,7 +538,18 @@ def check_positive_controls(
         each of the positive control sequences, and the counts for each
     """
 
-    # lists of positive controls for each binding target
+    ### lists of positive controls for each binding target
+    # Here is a list of common integrin-binding motifs. These motifs interact with
+    # specific integrins, playing critical roles in cell adhesion, signaling, and
+    # interaction with the extracellular matrix:
+    # RGD (Arg-Gly-Asp)
+    # KGE (Lys-Gly-Glu)
+    # LDV (Leu-Asp-Val)
+    # DGEA (Asp-Gly-Glu-Ala)
+    # REDV (Arg-Glu-Asp-Val)
+    # YGRK (Tyr-Gly-Arg-Lys)
+    # PHSRN (Pro-His-Ser-Arg-Asn)
+    # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
     pos_control_dict = {
         "Integrin": [
             "RGD",
@@ -1104,8 +985,8 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     igsf_path = str(data.joinpath("igsf_training.csv"))
-                    merged_tbl = merge_tables(train_file, igsf_path)
-                    convert_merged_tbl(merged_tbl).to_csv(temp_file)
+                    merged_tbl = du.merge_tables(train_file, igsf_path)
+                    du.convert_merged_tbl(merged_tbl).to_csv(temp_file)
                     file = temp_file.name
                 if i == 0:
                     prefix = "Train"
@@ -1592,8 +1473,8 @@ if __name__ == "__main__":
     if workflow == "DTRA":
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             igsf_path = str(data.joinpath("igsf_training.csv"))
-            merged_tbl = merge_tables(train_file, igsf_path)
-            convert_merged_tbl(merged_tbl).to_csv(temp_file)
+            merged_tbl = du.merge_tables(train_file, igsf_path)
+            du.convert_merged_tbl(merged_tbl).to_csv(temp_file)
             file = temp_file.name
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
     else:
@@ -1816,8 +1697,8 @@ if __name__ == "__main__":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
         igsf_path = str(data.joinpath("igsf_training.csv"))
-        merged_tbl = merge_tables(train_file, igsf_path)
-        tbl = convert_merged_tbl(merged_tbl)
+        merged_tbl = du.merge_tables(train_file, igsf_path)
+        tbl = du.convert_merged_tbl(merged_tbl)
         # TODO: this call below may be redundant because
         # X_train is returned by `feature_selection_rfc`
         X = pl.read_parquet(table_loc_train_best).to_pandas()
@@ -1966,7 +1847,7 @@ if __name__ == "__main__":
         )
 
         # get surface exposure status of all kmers using `surface_exposed_df`
-        surface_exposed_status = dtra_utils.get_surface_exposure_status(
+        surface_exposed_status = du.get_surface_exposure_status(
             virus_names, protein_names, surface_exposed_df
         )
 

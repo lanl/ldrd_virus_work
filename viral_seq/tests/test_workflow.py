@@ -150,21 +150,16 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
 @pytest.mark.parametrize(
     "syn_kmers, mapping_method, mode, target_column, expected_dict",
     [
-        # `syn_kmers` inputs have been modified (here and below) to include instances of
-        # known positive controls to test that the function finds these
-        # positive controls within PC-kmers for different mapping methods
-        #
-        # TODO: the `shen_2007` mapping method is still using alphabetic
-        # representations for PC kmers in the DTRA workflow as noted in
-        # issue #109 (as opposed to numerical representations like in LDRD workflow)
+        # this test case checks that PC positive controls are found
+        # for the integrin target when using the ``shen_2007`` mapping method
         (
             [
-                "kmer_PC_621166",
-                "kmer_PC_112616",
-                "kmer_PC_221366",
-                "kmer_PC_2162221",
-                "kmer_PC_311221",
-                "kmer_PC_1111",
+                "kmer_PC_671666",
+                "kmer_PC_136116",
+                "kmer_PC_226161",
+                "kmer_PC_87661221",
+                "kmer_PC_3417721",
+                "kmer_PC_4114137",
                 "kmer_AA_ECVGDE",
                 "kmer_AA_AARGDE",
                 "kmer_AA_CCAFEE",
@@ -176,20 +171,17 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             "PC",
             "IN",
             {
-                "221": {
-                    0: "kmer_PC_221366",
-                    1: "kmer_PC_2162221",
-                    2: "kmer_PC_311221",
-                    3: 3,
-                },
-                "621": {0: "kmer_PC_621166", 1: None, 2: None, 3: 1},
-                "1661": {0: None, 1: None, 2: None, 3: 0},
-                "1122": {0: "kmer_PC_311221", 1: None, 2: None, 3: 1},
-                "113": {0: None, 1: None, 2: None, 3: 0},
-                "2162": {0: "kmer_PC_2162221", 1: None, 2: None, 3: 1},
-                "111": {0: "kmer_PC_1111", 1: None, 2: None, 3: 1},
+                "716": {0: "kmer_PC_671666", 1: "kmer_PC_671666", 2: 2},
+                "361": {0: "kmer_PC_136116", 1: None, 2: 1},
+                "6161": {0: "kmer_PC_226161", 1: None, 2: 1},
+                "7661": {0: "kmer_PC_87661221", 1: None, 2: 1},
+                "4177": {0: "kmer_PC_3417721", 1: None, 2: 1},
+                "35475": {0: None, 1: None, 2: 0},
+                "4114137": {0: "kmer_PC_4114137", 1: None, 2: 1},
             },
         ),
+        # this test case checks that AA positive controls are found
+        # for the integrin binding target
         (
             [
                 "kmer_PC_621166",
@@ -198,27 +190,29 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "kmer_PC_2162221",
                 "kmer_PC_311221",
                 "kmer_PC_1111",
-                "kmer_AA_ECVGDE",
-                "kmer_AA_AAFDAE",
-                "kmer_AA_CCAFEE",
-                "kmer_AA_CGDCCCA",
-                "kmer_AA_FGGCCA",
-                "kmer_AA_AAAA",
+                "kmer_AA_ECRGDE",
+                "kmer_AA_AKGEAE",
+                "kmer_AA_CLDVEE",
+                "kmer_AA_CGDGEACA",
+                "kmer_AA_PHSRN",
+                "kmer_AA_SVVYGLR",
             ],
             "shen_2007",
             "AA",
             "IN",
             {
-                "RGD": {0: "kmer_AA_CRGDEE", 1: None, 2: 1},
-                "KGE": {0: "kmer_AA_AAKGEE", 1: "kmer_AA_CGDKGEA", 2: 2},
-                "LDV": {0: None, 1: None, 2: 0},
-                "DGEA": {0: "kmer_AA_FDGEA", 1: None, 2: 1},
-                "REDV": {0: None, 1: None, 2: 0},
-                "YGRK": {0: "kmer_AA_YGRKDE", 1: None, 2: 1},
-                "PHSRN": {0: None, 1: None, 2: 0},
-                "SVVYGLR": {0: None, 1: None, 2: 0},
+                "RGD": {0: "kmer_AA_ECRGDE", 1: 1},
+                "KGE": {0: "kmer_AA_AKGEAE", 1: 1},
+                "LDV": {0: "kmer_AA_CLDVEE", 1: 1},
+                "DGEA": {0: "kmer_AA_CGDGEACA", 1: 1},
+                "REDV": {0: None, 1: 0},
+                "YGRK": {0: None, 1: 0},
+                "PHSRN": {0: "kmer_AA_PHSRN", 1: 1},
+                "SVVYGLR": {0: "kmer_AA_SVVYGLR", 1: 1},
             },
         ),
+        # this test case checks that PC positive controls are found
+        # for the integrin target when using the ``jurgen_schmidt`` mapping method
         (
             [
                 "kmer_PC_454464",
@@ -312,9 +306,8 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "NYNYLY": {0: None, 1: 0},
             },
         ),
-        # this test case checks for the presence of igsf positive controls in
-        # PC kmers. Individual kmer sequences have been modified to include
-        # each of the igsf positive controls.
+        # this test case checks that PC positive controls are found
+        # for the IgSF target when using the ``jurgen_schmidt`` mapping method
         (
             [
                 "kmer_PC_484464",
@@ -371,22 +364,12 @@ def test_positive_controls(
     ],
 )
 def test_pos_con_columns(target_column, len_exp_keys):
-    kmers_in = [
-        "kmer_PC_CDDEEC",
-        "kmer_PC_CCGDEA",
-        "kmer_PC_CCCFCF",
-        "kmer_PC_CCAAACD",
-        "kmer_PC_CACDGA",
-        "kmer_PC_CFCEDD",
-        "kmer_PC_GCECFD",
-        "kmer_PC_ECDGDE",
-        "kmer_PC_CCACAD",
-        "kmer_PC_FECAEA",
-    ]
-
+    # this test checks that the correct positive controls
+    # are aggregated for a given target column or combination
+    # of target columns
     out_df = workflow.check_positive_controls(
         target_column=target_column,
-        kmers_list=kmers_in,
+        kmers_list=["test_kmer"],
         mapping_method="jurgen_schmidt",
         mode="PC",
     )
@@ -873,21 +856,3 @@ def test_print_pos_con(
 
         captured = capsys.readouterr()
         assert captured.out == exp_output
-
-
-def test_merge_convert_tbl():
-    igsf_data = files("viral_seq.data") / "igsf_training.csv"
-    input_csv = files("viral_seq.data") / "receptor_training.csv"
-
-    merged_df = workflow.merge_tables(input_csv, igsf_data)
-    converted_df = workflow.convert_merged_tbl(merged_df)
-
-    assert merged_df.shape == (118, 8)
-    assert converted_df.shape == (118, 10)
-    assert converted_df.IN.sum() == 45
-    assert converted_df.SA.sum() == 53
-    assert converted_df.SA_IG.sum() == 6
-    assert converted_df.IN_IG.sum() == 7
-    assert converted_df.IN_SA.sum() == 2
-    assert converted_df.IN_SA_IG.sum() == 2
-    assert converted_df.IG.sum() == 35

@@ -120,6 +120,9 @@ def get_model_arguments(
             },  # tunable ranges from https://docs.aws.amazon.com/sagemaker/latest/dg/lightgbm-tuning.html#lightgbm-tunable-hyperparameters
         },
         "predict": {
+            "verbose": -1,
+            "force_col_wise": True,
+            "n_estimators": 500,
             "n_jobs": n_jobs,
             "random_state": random_state,
         },
@@ -176,6 +179,7 @@ def get_model_arguments(
             },
         },
         "predict": {
+            "bootstrap": True,
             "n_estimators": 10_000,
             "n_jobs": n_jobs,
             "random_state": random_state,
@@ -207,6 +211,10 @@ def get_model_arguments(
             },  # Boost space with Dart specific drop_rate, skip_drop
         },
         "predict": {
+            "verbose": -1,
+            "force_col_wise": True,
+            "n_estimators": 500,
+            "boosting_type": "dart",
             "n_jobs": n_jobs,
             "random_state": random_state,
         },

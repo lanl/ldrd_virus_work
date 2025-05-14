@@ -274,7 +274,7 @@ def label_surface_exposed(
 
     # make lists 'is_exposed' by cross-referencing surface exposed status with protein kmers list
     # and re-order list to align with the list of found kmers
-    is_exposed = [x[0] for x in list_of_kmers if x[1] == "yes"]
+    is_exposed = [x[0] for x in list_of_kmers if x[1].lower() == "yes"]
     is_exposed = [s if s in is_exposed else "" for s in kmers_topN]
 
     return is_exposed
@@ -454,9 +454,9 @@ def percent_surface_exposed(
         # check if kmer exists in dictionary already
         if kmer not in surface_exposed_dict:
             surface_exposed_dict[kmer] = [0, 0]
-        if kmer_status == "yes":
+        if kmer_status.lower() == "yes":
             surface_exposed_dict[kmer][0] += 1
-        elif kmer_status == "no":
+        elif kmer_status.lower() == "no":
             surface_exposed_dict[kmer][1] += 1
 
     # calculate final percentage values based on ratio of "Yes" and "No" counts

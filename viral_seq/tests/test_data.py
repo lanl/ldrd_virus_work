@@ -26,7 +26,7 @@ def test_fix_virus_names():
 
 
 @pytest.mark.parametrize(
-    "surface_exposed_dict, exp_out, side_effect_in, check_entries, explicit",
+    "surface_exposed_dict, exp_out, side_effect_in, check_list, explicit",
     [
         # this test case checks that the user input values are indexed as expected
         (
@@ -45,7 +45,7 @@ def test_fix_virus_names():
                 ],
             },
             ["yes", "ref_1", "no", None],
-            False,
+            None,
             False,
         ),
         # this test checks that the "exit" input value works as expected
@@ -65,7 +65,7 @@ def test_fix_virus_names():
                 ],
             },
             ["exit"],
-            False,
+            None,
             False,
         ),
         # this test case checks that the ``check_entries`` flag works as intended
@@ -94,7 +94,13 @@ def test_fix_virus_names():
                 "ref_4",
                 "",
             ],
-            True,
+            [
+                "polymerase",
+                "RNA",
+                "neuraminidase",
+                "surface exposed protein",
+                "skip protein reference",
+            ],
             True,
         ),
         # this test case checks that the ``check_entries`` flag works as intended
@@ -123,7 +129,7 @@ def test_fix_virus_names():
                 "ref_4",
                 "",
             ],
-            True,
+            ["pol", "RNA", "neuraminidase", "exposed protein", "skip protein"],
             False,
         ),
     ],
@@ -134,7 +140,7 @@ def test_add_surface_exposed(
     surface_exposed_dict,
     exp_out,
     side_effect_in,
-    check_entries,
+    check_list,
     explicit,
 ):
     virus_protein_pairs = {
@@ -155,20 +161,6 @@ def test_add_surface_exposed(
         "builtins.input",
         side_effect=side_effect_in,
     )
-
-    if check_entries and explicit:
-        check_list = [
-            "polymerase",
-            "RNA",
-            "neuraminidase",
-            "surface exposed protein",
-            "skip protein reference",
-        ]
-    elif check_entries and not explicit:
-        check_list = ["pol", "RNA", "neuraminidase", "exposed protein", "skip protein"]
-    else:
-        check_list = None
-        explicit = False
 
     with tmpdir.as_cwd():
         add_surface_exposed(

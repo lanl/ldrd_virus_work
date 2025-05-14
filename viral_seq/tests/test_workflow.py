@@ -142,7 +142,7 @@ def test_csv_conversion():
     ],
 )
 def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_exp):
-    kmers_list_status = list(set(zip(kmers_list, [s.lower() for s in kmers_status])))
+    kmers_list_status = list(set(zip(kmers_list, kmers_status)))
     is_exposed = workflow.label_surface_exposed(kmers_list_status, kmers_topN)
     np.testing.assert_array_equal(is_exposed, is_exposed_exp)
 
@@ -438,9 +438,7 @@ def test_feature_sign(
     ),
 )
 def test_percent_surface_exposed(syn_kmers, syn_status, percent_values):
-    out_dict = workflow.percent_surface_exposed(
-        syn_kmers, [s.lower() for s in syn_status]
-    )
+    out_dict = workflow.percent_surface_exposed(syn_kmers, syn_status)
 
     assert_allclose(list(out_dict.values()), percent_values)
 

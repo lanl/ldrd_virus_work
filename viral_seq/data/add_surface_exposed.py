@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import Optional
+from importlib.resources import files
 
 
 def add_surface_exposed(
@@ -173,5 +174,6 @@ def add_surface_exposed(
 
 if __name__ == "__main__":
     df_file = "surface_exposed_df.csv"
-    surface_exposed_df = pd.read_csv(df_file)
+    df_path = files("viral_seq.data") / df_file
+    surface_exposed_df = pd.read_csv(df_path)  # type: ignore
     add_surface_exposed(surface_exposed_df, save_file=df_file)

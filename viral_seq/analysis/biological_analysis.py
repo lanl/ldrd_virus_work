@@ -104,5 +104,5 @@ def hydrophobicity_score(
         columns={0: "kmer", 1: "peptide", 2: "score"}
     )
     # reverse order of gravy scores to match FIC plot ranking
-    kmer_gravy_df = kmer_gravy_df[::-1]
+    kmer_gravy_df = kmer_gravy_df[::-1].reset_index(drop=True)
     return kmer_gravy_df

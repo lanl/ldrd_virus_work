@@ -14,7 +14,8 @@ import json
 @pytest.mark.parametrize(
     "group, random_state, get_hyperparameters_return, cv_score_return, expected_results",
     [
-        # test each classifier type gets the appropriate default params
+        # test when default parameters beat optimized parameters
+        # each classifier should get appropriate baseline parameters returned
         (
             "RandomForestClassifier",
             123,
@@ -88,7 +89,8 @@ import json
                 "params": {"n_jobs": 1, "random_state": 123},
             },
         ),
-        # optimization is better case; we are just returned the params from optimization
+        # test when optimized parameters beat default parameters
+        # optimized parameters should be returned
         (
             "RandomForestClassifier",
             123,

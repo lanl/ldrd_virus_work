@@ -477,6 +477,8 @@ def optimize_model(
             random_state=random_state,
         )
         print("Checking default score...")
+        # use untunable parameters used during optimization for baseline
+        # other parameters will not be specified (use defaults)
         default_config = {k: v for k, v in config.items() if not isinstance(v, Domain)}
         default_config["n_jobs"] = n_jobs
         default_score = classifier.cv_score(

@@ -802,7 +802,7 @@ def get_aucs(
         aucs.append(roc_auc_score(y_true, df[col]))
     auc_mean = np.mean(aucs)
     auc_std = np.std(aucs)
-    print(f"{name} mean auc = {auc_mean} std = {auc_std}")
+    print(f"{name} mean auc = {auc_mean:.3f} std = {auc_std:.3f}")
     return aucs
 
 
@@ -826,7 +826,7 @@ def compare_workflow_aucs(
     target_columns: tuple[str, str]
         column in dataset_file with the relevant truth values for each workflow
     """
-    aucs = [[], []]
+    aucs: list[list[float]] = [[], []]
     for i in range(2):
         print("========================")
         print(f"{predictions_paths[i]}:")
@@ -835,10 +835,10 @@ def compare_workflow_aucs(
             aucs[i] += get_aucs(file, dataset_files[i], target_columns[i])
         auc_mean = np.mean(aucs[i])
         auc_std = np.std(aucs[i])
-        print(f"Workflow mean auc = {auc_mean} std = {auc_std}")
+        print(f"Workflow mean auc = {auc_mean:.3f} std = {auc_std:.3f}")
     t_stat, p_val = stats.ttest_ind(aucs[0], aucs[1])
     print("")
-    print(f"Student t-test: t_stat {t_stat}, p-value {p_val}")
+    print(f"Student t-test: t_stat {t_stat:.3f}, p-value {p_val:.3f}")
 
 
 def compare_classifier_auc(
@@ -851,5 +851,5 @@ def compare_classifier_auc(
     aucs = get_aucs(predictions_file, dataset_file, target_column)
     t_stat, p_val = stats.ttest_1samp(aucs, comparison_value)
     print(
-        f"Student t-test against {comparison_value}: t_stat {t_stat}, p-value {p_val}"
+        f"Student t-test against {comparison_value}: t_stat {t_stat:.3f}, p-value {p_val:.3f}"
     )

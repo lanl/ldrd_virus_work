@@ -2,6 +2,9 @@ from viral_seq.analysis import dtra_utils
 import pandas as pd
 from numpy.testing import assert_array_equal
 from importlib.resources import files
+import pytest
+from pandas.testing import assert_frame_equal
+import os
 
 
 def test_get_surface_exposure_status():
@@ -49,3 +52,143 @@ def test_merge_convert_tbl():
     assert converted_df.IN_SA.sum() == 4
     assert converted_df.IN_SA_IG.sum() == 2
     assert converted_df.IG.sum() == 35
+
+
+@pytest.mark.parametrize(
+    "kmer_matches, syn_topN, kmer_matches_exp, mapping_methods",
+    [
+        (
+            # this case tests that the function produces matches when two mapping methods are compared
+            [
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                },
+            ],
+            {
+                "kmer_AA_0": [("kmer_PC_0", "kmer_PC_3")],
+                "kmer_AA_1": [("kmer_PC_1", "kmer_PC_4")],
+                "kmer_AA_2": [("kmer_PC_2", "kmer_PC_5")],
+            },
+            ["mm1", "mm2"],
+        ),
+        # this case tests that nothing is returned when only a single mapping method is used
+        # to generate AA kmer matches.
+        (
+            [
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+            ],
+            None,
+            ["mm1"],
+        ),
+    ],
+)
+def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_methods):
+    # test that matching AA-kmers are found between
+    # the two mapping methods with different PC-kmers
+
+    # make and save a temporary file containing the matching kmer dataframe
+    syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
+    for i, kmer_matches_N in enumerate(kmer_matches):
+        pd.DataFrame(kmer_matches_N).to_parquet(
+            f"{tmpdir}/kmer_maps_k1_{mapping_methods[i]}.parquet.gzip"
+        )
+    # run the function to generate the matches
+    with tmpdir.as_cwd():
+        kmer_matches_out = dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)
+    kmer_matches_out_df = pd.DataFrame(kmer_matches_out)
+    kmer_matches_exp_df = pd.DataFrame(kmer_matches_exp)
+    # assert that the output looks as expected and that a csv file was generated containig the dataframe
+    assert_frame_equal(kmer_matches_out_df, kmer_matches_exp_df)
+    for mm in mapping_methods:
+        assert os.path.exists(
+            os.path.join(tmpdir, f"topN_PC_AA_kmer_mappings_{mm}.csv")
+        )
+
+
+@pytest.mark.parametrize(
+    "kmer_matches, syn_topN, mapping_method, output",
+    [
+        (
+            None,
+            None,
+            ["mm1", "mm2"],
+            "Must run workflow using both mapping methods before performing kmer mapping.",
+        ),
+        (
+            [
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                },
+            ],
+            ["mm1"],
+            "No matching AA kmers found in TopN.",
+        ),
+        (
+            [
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                },
+            ],
+            ["mm1", "mm2"],
+            "Matching AA kmers between PC kmers 'kmer_PC_0' and 'kmer_PC_3': kmer_AA_0",
+        ),
+    ],
+)
+def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, output):
+    # test that the correct output is returned from ``find_matching_kmers`` for the cases where:
+    #     1. the workflow has not been run with both mapping methods
+    #     2. no matching kmers are found between the two mapping methods
+    #     3. matching kmers are found between the two mapping methods
+    with tmpdir.as_cwd():
+        if kmer_matches is not None:
+            os.mkdir("kmer_maps")
+            for i, mm in enumerate(mapping_method):
+                syn_topN_df = pd.DataFrame(syn_topN[i])
+                syn_topN_df.to_parquet(f"topN_kmers_test_{mm}.parquet.gzip")
+                pd.DataFrame(kmer_matches[i]).to_parquet(
+                    f"kmer_maps/kmer_maps_k1_{mm}.parquet.gzip"
+                )
+        result = dtra_utils.find_matching_kmers(
+            target_column="test", mapping_methods=mapping_method
+        )
+    assert result == output

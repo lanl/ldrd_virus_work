@@ -29,6 +29,7 @@ from collections import defaultdict
 from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
+from viral_seq.analysis import biological_analysis as ba
 
 matplotlib.use("Agg")
 
@@ -1951,6 +1952,10 @@ if __name__ == "__main__":
             positive_shap_values.values,
             positive_shap_values.data,
         )
+
+        # calculate hydrophobicity scores
+        hydro_scores = ba.hydrophobicity_score(array2, mapping_method)
+        hydro_scores.to_csv("hydrophobicity_scores.csv", header=False, index=False)
 
         # Production of the FIC plot
         FIC_plot(

@@ -3,6 +3,22 @@ from typing import Optional
 from importlib.resources import files
 
 
+def _save_df(df: pd.DataFrame, save_file: str):
+    """
+    save a given pandas dataframe with the provided file name/path string
+    (do not include index column in csv file)
+
+    Parameters:
+    -----------
+    df: pd.DataFrame
+        dataframe of values
+    save_file: str
+        file name for saving modified dataframe as csv
+    """
+    df.to_csv(save_file, index=False)
+    print("File Saved.")
+
+
 def add_surface_exposed(
     surface_exposed_df: pd.DataFrame,
     save_file: str,
@@ -48,11 +64,11 @@ def add_surface_exposed(
         "polyprotein",  # viral polyproteins are proteolytically cleaved during the viral maturation cycle and may contain
         # mature products that are surface exposed (i.e. prM) but are not considered "surface-exposed" proteins https://doi.org/10.1016/j.coviro.2013.03.009
         "Hel",  # abbreviation of ``helicase`` https://doi.org/10.1016/S0959-440X(02)00298-1
-        "3C",  # refers to ``3C proteinase`` of picornaviridae https://doi.org/10.3390/v8030082
+        "3C",  # refers to ``3C proteinase`` of picornaviridae https://doi.org/10.3390/v8030082 or ``nuclear antigen EBNA-3C`` of epstein-barr virus
         "hypothetical",  # proteins for which the function is  unknown. https://doi.org/10.1002/cfg.66
         "pTP",  # precursor terminal protein, involved in viral replication https://doi.org/10.1128/jvi.69.7.4079-4085.1995
-        "100k",  # https://www.uniprot.org/uniprotkb/P24932/entry
-        "IVa2",  # https://www.uniprot.org/uniprotkb/P03272/entry
+        "100k",  # https://viralzone.expasy.org/4
+        "IVa2",  # https://viralzone.expasy.org/4
         "tegument",  # the proteins of herpesviruses that lie between the capsid and viral envelope https://doi.org/10.1128/mmbr.00040-07
         "nuclear",  # associating with the host nucleus
         "nucleocapsid",  # referring to the capsid of enveloped viruses, specifically HIV-1 https://viralzone.expasy.org/7
@@ -153,7 +169,7 @@ def add_surface_exposed(
                 surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
                     reference_dict.values()
                 )
-                surface_exposed_df.to_csv(save_file, index=False)
+                _save_df(surface_exposed_df, save_file)
                 break
             else:
                 response_2 = input("reference:")
@@ -169,7 +185,7 @@ def add_surface_exposed(
     surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
         reference_dict.values()
     )
-    surface_exposed_df.to_csv(save_file, index=False)
+    _save_df(surface_exposed_df, save_file)
 
 
 if __name__ == "__main__":

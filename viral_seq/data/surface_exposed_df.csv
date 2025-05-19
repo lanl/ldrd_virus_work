@@ -353,7 +353,7 @@ Human gammaherpesvirus 8,K15,yes,https://doi.org/10.3858/emm.2008.40.5.565
 Murine adenovirus 3,pVII,no,https://www.uniprot.org/uniprotkb/C3SAU3/entry
 Vaccinia virus,DNA-dependent RNA polymerase subunit rpo147,no,labeling performed programmatically using 'not_exposed' list
 Human betaherpesvirus 5,membrane protein US15,yes,https://doi.org/10.1016/j.virol.2006.06.035
-Human gammaherpesvirus 4,nuclear antigen EBNA-3A,yes,labeling performed programmatically using 'not_exposed' list
+Human gammaherpesvirus 4,nuclear antigen EBNA-3A,no,https://doi.org/10.1099/vir.0.83414-0
 Human alphaherpesvirus 2,capsid portal protein,no,https://doi.org/10.1128/jvi.01534-20
 Human gammaherpesvirus 8,ORF17,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Equid alphaherpesvirus 1,helicase-primase primase subunit,no,labeling performed programmatically using 'not_exposed' list
@@ -549,7 +549,7 @@ Human gammaherpesvirus 4,DNA packaging protein UL33,no,labeling performed progra
 Vaccinia virus,putative viral membrane protein,yes,https://doi.org/10.4049/jimmunol.1400663
 Porcine hemagglutinating encephalomyelitis virus,hemagglutinin-esterase protein,yes,labeling performed programmatically using 'exposed' list
 Human mastadenovirus D,membrane glycoprotein E3 CR1-gamma,yes,https://doi.org/10.1093/clinids/2.1.40
-Human alphaherpesvirus 2,tegument protein VP22,yes,labeling performed programmatically using 'not_exposed' list
+Human alphaherpesvirus 2,tegument protein VP22,no,labeling performed programmatically using 'not_exposed' list
 Human gammaherpesvirus 8,ORF8,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human gammaherpesvirus 8,ORF24,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human coronavirus OC43,membrane protein,yes,https://viralzone.expasy.org/30
@@ -576,7 +576,7 @@ Human gammaherpesvirus 8,ORF70,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333
 Ross River virus,nsP1 protein,no,labeling performed programmatically using 'not_exposed' list
 Human betaherpesvirus 5,major capsid protein,no,enveloped virus with inner capsid
 Human gammaherpesvirus 8,ORF19,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
-Equid alphaherpesvirus 1,transactivating tegument protein VP16,yes,labeling performed programmatically using 'not_exposed' list
+Equid alphaherpesvirus 1,transactivating tegument protein VP16,no,labeling performed programmatically using 'not_exposed' list
 Murine adenovirus 3,22k,no,https://doi.org/10.1128/JVI.00859-13
 Human adenovirus 5,fiber,yes,"https://www.uniprot.org/uniprotkb/P11818/entry#:~:text=Fiber%20protein%20%2D%20Human%20adenovirus%20C,%2D5)%20%7C%20UniProtKB%20%7C%20UniProt"
 Japanese encephalitis virus,2K protein,no,https://doi.org/10.1007/s00705-022-05481-z
@@ -828,7 +828,7 @@ Human gammaherpesvirus 8,ORF56,no,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333
 Human gammaherpesvirus 8,K4,no,https://doi.org/10.1128/jvi.01900-13
 Human gammaherpesvirus 8,ORF39,yes,https://www.ncbi.nlm.nih.gov/nuccore/NC_009333.1
 Human betaherpesvirus 5,protein US34,no,https://doi.org/10.3389/fmicb.2020.02104
-Transmissible gastroenteritis virus,non-structural protein 7,yes,labeling performed programmatically using 'not_exposed' list
+Transmissible gastroenteritis virus,non-structural protein 7,no,labeling performed programmatically using 'not_exposed' list
 Vaccinia virus,late 16kDa putative membrane protein,yes,https://doi.org/10.4049/jimmunol.1400663
 Human betaherpesvirus 5,membrane glycoprotein UL8,yes,https://doi.org/10.1093/clinids/2.1.40
 Severe acute respiratory syndrome coronavirus 2,nsp8,no,labeling performed programmatically using 'not_exposed' list
@@ -1004,7 +1004,7 @@ porcine sapelovirus 1,capsid protein 1B,yes,https://doi.org/10.1016/j.heliyon.20
 Human betaherpesvirus 5,protein UL2,no,https://www.uniprot.org/uniprotkb/J7EH37/entry
 Porcine torovirus,spike glycoprotein,yes,labeling performed programmatically using 'exposed' list
 Mumps orthorubulavirus,nucleocapsid protein,no,labeling performed programmatically using 'not_exposed' list
-Human alphaherpesvirus 2,transactivating tegument protein VP16,yes,labeling performed programmatically using 'not_exposed' list
+Human alphaherpesvirus 2,transactivating tegument protein VP16,no,labeling performed programmatically using 'not_exposed' list
 Human adenovirus 5,E3 12.5K,no,https://doi.org/10.1016/0042-6822(92)90502-G
 Equid alphaherpesvirus 1,tegument protein UL51,no,labeling performed programmatically using 'not_exposed' list
 Human parvovirus B19,7.5 kDa protein,no,https://doi.org/10.1128/jvi.02430-05
@@ -1433,7 +1433,7 @@ Equid alphaherpesvirus 1,tegument protein VP22,no,labeling performed programmati
 Equid alphaherpesvirus 1,tegument protein UL16,no,labeling performed programmatically using 'not_exposed' list
 Equid alphaherpesvirus 1,tegument protein UL14,no,labeling performed programmatically using 'not_exposed' list
 Influenza D virus (D/swine/Oklahoma/1334/2011),P42,no,https://doi.org/10.1073/pnas.95.22.13233
-Tula virus,Glycoproteins G1 and G2 precursor,yes,labeling performed programmatically using 'not_exposed' list
+Tula virus,Glycoproteins G1 and G2 precursor,yes,labeling performed programmatically using 'exposed' list
 Porcine hemagglutinating encephalomyelitis virus,envelope protein,yes,https://viralzone.expasy.org/30
 Enterovirus D,capsid protein 1D,no,https://doi.org/10.1128/jvi.00604-22
 Enterovirus D,protein 2B,no,https://viralzone.expasy.org/99
@@ -1911,7 +1911,7 @@ Epstein-Barr virus,glycoprotein 350,yes,labeling performed programmatically usin
 Epstein-Barr virus,protein BLLF2,no,https://doi.org/10.3389/fmicb.2021.672192
 Epstein-Barr virus,nuclear antigen EBNA-3A,no,labeling performed programmatically using 'not_exposed' list
 Epstein-Barr virus,nuclear antigen EBNA-3B,no,labeling performed programmatically using 'not_exposed' list
-Epstein-Barr virus,nuclear antigen EBNA-3C,no,labeling performed programmatically using 'not_exposed' list
+Epstein-Barr virus,nuclear antigen EBNA-3C,no,https://doi.org/10.1128/jvi.69.6.3624-3630.1995
 Epstein-Barr virus,envelope glycoprotein 42,yes,labeling performed programmatically using 'exposed' list
 Epstein-Barr virus,protein Zta,no,https://doi.org/10.1128/jvi.00927-19
 Epstein-Barr virus,protein Rta,no,https://doi.org/10.1128/jvi.66.9.5500-5508.1992
@@ -1951,8 +1951,8 @@ Epstein-Barr virus,capsid maturation protease,no,labeling performed programmatic
 Epstein-Barr virus,capsid scaffold protein,no,enveloped virus with inner capsid
 Epstein-Barr virus,membrane protein BILF2,yes,https://www.uniprot.org/uniprotkb/P03218/entry
 Epstein-Barr virus,protein LF3,no,https://doi.org/10.1128/jvi.02175-10
-Epstein-Barr virus,virion protein G11,yes,labeling performed programmatically using 'exposed' list
-Epstein-Barr virus,protein G10,yes,labeling performed programmatically using 'exposed' list
+Epstein-Barr virus,virion protein G11,no,https://doi.org/10.1128/jvi.79.1.441-449.2005
+Epstein-Barr virus,protein G10,no,https://doi.org/10.3390/biom12020227
 Epstein-Barr virus,protein RPMS1,no,"https://www.ncbi.nlm.nih.gov/gene/3783757#:~:text=RPMS1%20protein%20RPMS1%20[%20(Epstein%2DBarr%20virus)]%20*,important%20role%20in%20the%20development%20of%20NPC."
 Epstein-Barr virus,membrane protein BILF1,no,https://doi.org/10.1128/jvi.79.1.536-546.2005
 Epstein-Barr virus,DNA polymerase catalytic subunit,no,labeling performed programmatically using 'not_exposed' list
@@ -2520,5 +2520,5 @@ Human betaherpesvirus 6B,immediate-early protein IE2,no,https://doi.org/10.3390/
 Human betaherpesvirus 6B,spliced envelope glycoprotein,yes,labeling performed programmatically using 'exposed' list
 Human betaherpesvirus 6B,putative DNA-directed RNA polymerase,no,labeling performed programmatically using 'not_exposed' list
 Orthohantavirus tulaense,RNA polymerase (L protein),no,labeling performed programmatically using 'not_exposed' list
-Orthohantavirus tulaense,Glycoproteins G1 and G2 precursor,yes,labeling performed programmatically using 'not_exposed' list
+Orthohantavirus tulaense,Glycoproteins G1 and G2 precursor,yes,labeling performed programmatically using 'exposed' list
 Orthohantavirus tulaense,nucleocapsid protein,no,labeling performed programmatically using 'not_exposed' list

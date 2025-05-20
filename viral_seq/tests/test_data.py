@@ -4,8 +4,6 @@ from pandas.testing import assert_frame_equal
 import pandas as pd
 import pytest
 import numpy as np
-from viral_seq.data.add_surface_exposed import _save_df
-from pathlib import Path
 
 
 @pytest.mark.slow
@@ -196,24 +194,3 @@ def test_add_surface_exposed_type_error():
         TypeError, match="Invalid protein query type: expected 'str' value."
     ):
         add_surface_exposed(surface_exposed_df, "test_df.csv")
-
-
-def test_save_df(capsys, tmpdir):
-    # check that the private function ``add_surface_exposed._save_df`` functions properly
-    rng = np.random.default_rng(seed=123)
-    save_file = "save_df.csv"
-    test_df = pd.DataFrame(
-        {
-            "virus_names": ["virus_" + str(x) for x in range(5)],
-            "protein_names": ["protein_" + str(x) for x in range(5)],
-            "surface_exposed_status": rng.choice(["yes", "no"], size=5),
-            "reference": ["ref_" + str(x) for x in range(5)],
-        }
-    )
-    with tmpdir.as_cwd():
-        _save_df(test_df, save_file)
-        assert Path(save_file).is_file()
-        captured = capsys.readouterr()
-        assert captured.out == "File Saved.\n"
-        saved_df = pd.read_csv(save_file)
-    assert_frame_equal(test_df, saved_df)

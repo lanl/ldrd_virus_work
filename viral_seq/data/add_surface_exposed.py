@@ -3,19 +3,19 @@ from typing import Optional
 from importlib.resources import files
 
 
-def _save_df(df: pd.DataFrame, save_file: str):
-    """
-    save a given pandas dataframe with the provided file name/path string
-    (do not include index column in csv file)
-
-    Parameters:
-    -----------
-    df: pd.DataFrame
-        dataframe of values
-    save_file: str
-        file name for saving modified dataframe as csv
-    """
-    df.to_csv(save_file, index=False)
+def _save_df(
+    surface_exposed_df: pd.DataFrame,
+    reference_dict: dict,
+    response_dict: dict,
+    save_file: str,
+):
+    surface_exposed_df.loc[list(response_dict.keys()), "surface_exposed_status"] = list(
+        response_dict.values()
+    )
+    surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
+        reference_dict.values()
+    )
+    surface_exposed_df.to_csv(save_file, index=False)
     print("File Saved.")
 
 
@@ -163,13 +163,7 @@ def add_surface_exposed(
                 remaining -= 1
                 continue
             elif response_1 == "exit":
-                surface_exposed_df.loc[
-                    list(response_dict.keys()), "surface_exposed_status"
-                ] = list(response_dict.values())
-                surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
-                    reference_dict.values()
-                )
-                _save_df(surface_exposed_df, save_file)
+                _save_df(surface_exposed_df, reference_dict, response_dict, save_file)
                 break
             else:
                 response_2 = input("reference:")
@@ -179,13 +173,7 @@ def add_surface_exposed(
                 reference_dict[i] = response_2
             remaining -= 1
     # save responses after finishing
-    surface_exposed_df.loc[list(response_dict.keys()), "surface_exposed_status"] = list(
-        response_dict.values()
-    )
-    surface_exposed_df.loc[list(reference_dict.keys()), "reference"] = list(
-        reference_dict.values()
-    )
-    _save_df(surface_exposed_df, save_file)
+    _save_df(surface_exposed_df, reference_dict, response_dict, save_file)
 
 
 if __name__ == "__main__":

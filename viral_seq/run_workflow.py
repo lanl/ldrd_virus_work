@@ -1,7 +1,13 @@
 import tempfile
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils, classifier, feature_importance, get_features
+from viral_seq.analysis import (
+    rfc_utils,
+    classifier,
+    feature_importance,
+    get_features,
+    dtra_utils,
+)
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -268,7 +274,7 @@ def label_surface_exposed(
 
     # make lists 'is_exposed' by cross-referencing surface exposed status with protein kmers list
     # and re-order list to align with the list of found kmers
-    is_exposed = [x[0] for x in list_of_kmers if x[1] == "Yes"]
+    is_exposed = [x[0] for x in list_of_kmers if x[1].lower() == "yes"]
     is_exposed = [s if s in is_exposed else "" for s in kmers_topN]
 
     return is_exposed
@@ -448,9 +454,9 @@ def percent_surface_exposed(
         # check if kmer exists in dictionary already
         if kmer not in surface_exposed_dict:
             surface_exposed_dict[kmer] = [0, 0]
-        if kmer_status == "Yes":
+        if kmer_status.lower() == "yes":
             surface_exposed_dict[kmer][0] += 1
-        elif kmer_status == "No":
+        elif kmer_status.lower() == "no":
             surface_exposed_dict[kmer][1] += 1
 
     # calculate final percentage values based on ratio of "Yes" and "No" counts
@@ -1350,6 +1356,8 @@ if __name__ == "__main__":
     train_file = str(data.joinpath(train_file))
     test_file = str(data.joinpath(test_file))
     cache_file = str(data.joinpath(cache_tarball))
+    surface_exposed_file = str(data.joinpath("surface_exposed_df.csv"))
+    surface_exposed_df = pd.read_csv(surface_exposed_file)
     viral_files = (
         [train_file, test_file]
         if test_file != str(data.joinpath("none"))
@@ -1804,114 +1812,10 @@ if __name__ == "__main__":
             kmer_info, records, tbl, mapping_method
         )
 
-        # manually curated on the basis of output from `np.unique(protein_names)`
-        surface_exposed = [
-            "1B(VP2)",
-            "1C(VP3)",
-            "1D(VP1)",
-            "Envelope surface glycoprotein gp120",
-            "PreM protein",
-            "VP1",
-            "VP1 protein",
-            "VP2",
-            "VP2 protein",
-            "VP3",
-            "VP3 protein",
-            "envelope glycoprotein E1",
-            "envelope glycoprotein E2",
-            "envelope protein",
-            "envelope protein E",
-            "membrane glycoprotein M",
-            "membrane glycoprotein precursor prM",
-            "membrane protein M",
-        ]
-        # list comprehension
-        surface_exposed_status = [
-            "Yes" if item in surface_exposed else "No" for item in protein_names
-        ]
-        # manually curated on the basis of links (DOIs and ViralZone urls) that I could find for a subset of items in `np.unique(protein_names)`. The curation of references is currently incomplete.
-        references = [
-            "membrane protein M",
-            "1B(VP2)",
-            "1C(VP3)",
-            "1D(VP1)",
-            "Envelope surface glycoprotein gp120",
-            "3C",
-            "3C protein",
-            "3D",
-            "3D protein",
-            "3D-POL protein",
-            "Hel protein",
-            "Lab protein",
-            "Lb protein",
-            "1A(VP4)",
-            "nucleocapsid",
-            "p1",
-            "p2",
-            "p6",
-            "p66 subunit",
-            "p7 protein",
-            "pre-membrane protein prM",
-            "protein VP0",
-            "protein pr",
-            "protien 3A",
-            "protein 1A",
-            "protein 1B",
-            "protein 1C",
-            "protein 1D",
-            "protein 2A",
-            "protein 2B",
-            "protein 2C",
-            "protien 2K",
-            "protein 3A",
-            "protein 3AB",
-            "protein 3C",
-            "protein 3D",
-        ]
-        urls = [
-            "https://doi.org/10.1099/0022-1317-69-5-1105",
-            "https://doi.org/10.3389/fmicb.2020.562768",
-            "https://doi.org/10.3389/fmicb.2020.562768",
-            "https://doi.org/10.3389/fmicb.2020.562768",
-            "https://doi.org/10.1038/31405",
-            "https://doi.org/10.3390/v15122413",
-            "https://doi.org/10.3390/v15122413",
-            "https://doi.org/10.3389/fimmu.2024.1365521",
-            "https://doi.org/10.3389/fimmu.2024.1365521",
-            "https://doi.org/10.3389/fimmu.2024.1365521",
-            "https://doi.org/10.1016/j.virusres.2024.199401",
-            "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
-            "https://doi.org/10.1128/jvi.74.24.11708-11716.2000",
-            "https://doi.org/10.3389/fmicb.2020.562768",
-            "https://doi.org/10.1007/s11904-011-0107-3",
-            "https://doi.org/10.1007/s11904-011-0107-3",
-            "https://doi.org/10.1007/s11904-011-0107-3",
-            "https://doi.org/10.1007/s11904-011-0107-3",
-            "https://doi.org/10.1002/cbic.202000263",
-            "https://doi.org/10.1038/s41598-019-44413-x",
-            "https://doi.org/10.1016/0042-6822(92)90267-S",
-            "https://doi.org/10.1128/jvi.73.11.9072-9079.1999",
-            "https://doi.org/10.1042/BJ20061136",
-            "https://doi.org/10.1128/jvi.00791-17",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-            "https://viralzone.expasy.org/99",
-        ]
-        refs_urls_dict = dict(zip(references, urls))
-        # list comprehension
-        citations = [
-            refs_urls_dict[item] if item in references else "missing"
-            for item in protein_names
-        ]
+        # get surface exposure status of all kmers using `surface_exposed_df`
+        surface_exposed_status = dtra_utils.get_surface_exposure_status(
+            virus_names, protein_names, surface_exposed_df
+        )
 
         temp5 = list(set(zip(kmer_features, surface_exposed_status)))
 
@@ -1922,17 +1826,6 @@ if __name__ == "__main__":
         surface_exposed_dict = percent_surface_exposed(
             kmer_features, surface_exposed_status
         )
-
-        ### Production of the annotated CSV file with information for each case of `target_column`
-        df = pd.DataFrame(
-            {
-                "Virus (corresponding to PC k-mer)": virus_names,
-                "Protein (corresponding to virus)": protein_names,
-                "Status of protein (surface-exposed or not)": surface_exposed_status,
-                "Citation corresponding to protein status": citations,
-            }
-        )
-        df.to_csv("annotated_" + str(target_column) + ".csv", header=True, index=False)
 
         ### Production of the SHAP plot
 

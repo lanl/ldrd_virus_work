@@ -1,8 +1,13 @@
 import tempfile
 from importlib.resources import files
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import rfc_utils, classifier, feature_importance, get_features
-from viral_seq.analysis import dtra_utils as du
+from viral_seq.analysis import (
+    rfc_utils,
+    classifier,
+    feature_importance,
+    get_features,
+    dtra_utils,
+)
 from viral_seq.cli import cli
 import pandas as pd
 import re
@@ -985,8 +990,8 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     igsf_path = str(data.joinpath("igsf_training.csv"))
-                    merged_tbl = du.merge_tables(train_file, igsf_path)
-                    du.convert_merged_tbl(merged_tbl).to_csv(temp_file)
+                    merged_tbl = dtra_utils.merge_tables(train_file, igsf_path)
+                    dtra_utils.convert_merged_tbl(merged_tbl).to_csv(temp_file)
                     file = temp_file.name
                 if i == 0:
                     prefix = "Train"
@@ -1473,8 +1478,8 @@ if __name__ == "__main__":
     if workflow == "DTRA":
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             igsf_path = str(data.joinpath("igsf_training.csv"))
-            merged_tbl = du.merge_tables(train_file, igsf_path)
-            du.convert_merged_tbl(merged_tbl).to_csv(temp_file)
+            merged_tbl = dtra_utils.merge_tables(train_file, igsf_path)
+            dtra_utils.convert_merged_tbl(merged_tbl).to_csv(temp_file)
             file = temp_file.name
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
     else:
@@ -1697,8 +1702,8 @@ if __name__ == "__main__":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
         igsf_path = str(data.joinpath("igsf_training.csv"))
-        merged_tbl = du.merge_tables(train_file, igsf_path)
-        tbl = du.convert_merged_tbl(merged_tbl)
+        merged_tbl = dtra_utils.merge_tables(train_file, igsf_path)
+        tbl = dtra_utils.convert_merged_tbl(merged_tbl)
         # TODO: this call below may be redundant because
         # X_train is returned by `feature_selection_rfc`
         X = pl.read_parquet(table_loc_train_best).to_pandas()
@@ -1847,7 +1852,7 @@ if __name__ == "__main__":
         )
 
         # get surface exposure status of all kmers using `surface_exposed_df`
-        surface_exposed_status = du.get_surface_exposure_status(
+        surface_exposed_status = dtra_utils.get_surface_exposure_status(
             virus_names, protein_names, surface_exposed_df
         )
 

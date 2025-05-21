@@ -81,6 +81,11 @@ def make_relabeled_dataset(
     mollentz_train: pd.DataFrame,
     mollentz_test: pd.DataFrame,
 ) -> tuple:
+    """
+    add new columns to train and test datasets based on relabeled
+    virus targets from ``relabeled_data.npz``, changing ``Human Host``
+    True/False target to ``human``, ``primate`` or ``mammal`` host
+    """
     targets = relabeled_data.files
     new_dataframe_train = pd.DataFrame()
     new_dataframe_test = pd.DataFrame()

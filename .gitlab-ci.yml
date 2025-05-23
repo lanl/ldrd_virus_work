@@ -16,6 +16,11 @@ ci_lint:
     - ruff check viral_seq
     - black viral_seq --check
   allow_failure: false
+  tags:
+    - kubernetes
+    - turquoise
+    - lisdi
+
 
 ci_test_linux:
   rules:
@@ -40,3 +45,7 @@ ci_test_linux:
       - IMAGE: ['python:3.10.8', 'python:3.11.9', 'python:3.12.7']
         REQ: ['ci/requirements_low.txt', 'ci/requirements_high.txt']
   allow_failure: false
+  tags:
+    - kubernetes
+    - turquoise
+    - lisdi

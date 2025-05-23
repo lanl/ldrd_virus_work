@@ -793,7 +793,7 @@ def get_aucs(
         list of ROC AUC for each set of predictions in the predictions_file
     """
     y_true = pd.read_csv(str(files("viral_seq.data") / dataset_file))[target_column]
-    df = pd.read_csv(predictions_file)
+    df = pd.read_csv(predictions_file, index_col=0)
     aucs = []
     for col in df.columns:
         if col == "Species":

@@ -665,7 +665,7 @@ def test_get_aucs(
     df = pd.DataFrame(pred_data)
     predictions_file = "Classifier_predictions.csv"
     with tmpdir.as_cwd():
-        df.to_csv(predictions_file, index=False)
+        df.to_csv(predictions_file)
         aucs = sp.get_aucs(predictions_file, dataset_file, target_column)
     cap = capsys.readouterr()
     npt.assert_allclose(aucs, exp_aucs)
@@ -687,12 +687,12 @@ def test_get_aucs(
             ("Human Host", "Human Host"),
             """========================
 /wf1:
-My Classifier mean auc = 1.000 std = 0.000
-My Classifier mean auc = 0.999 std = 0.000
+My Classifier 1 mean auc = 0.999 std = 0.000
+My Classifier 0 mean auc = 1.000 std = 0.000
 Workflow mean auc = 1.000 std = 0.000
 ========================
 /wf2:
-My Classifier mean auc = 0.474 std = 0.014
+My Classifier 0 mean auc = 0.474 std = 0.014
 Workflow mean auc = 0.474 std = 0.014
 
 Student t-test: t_stat 42.107, p-value 0.000
@@ -710,7 +710,7 @@ def test_compare_workflow_aucs(
         for j, file in enumerate(files):
             for predictions in file:
                 pred_data = {
-                    f"My Classifier: {k}": pred for k, pred in enumerate(predictions)
+                    f"My Classifier {j}: {k}": pred for k, pred in enumerate(predictions)
                 }
                 # this should be ignored by get_aucs
                 pred_data["Species"] = [
@@ -718,7 +718,7 @@ def test_compare_workflow_aucs(
                 ]
                 df = pd.DataFrame(pred_data)
                 predictions_file = f"Classifier_predictions{j}.csv"
-                df.to_csv(str(predictions_paths[i] / predictions_file), index=False)
+                df.to_csv(str(predictions_paths[i] / predictions_file))
     sp.compare_workflow_aucs(predictions_paths, dataset_files, target_columns)
     cap = capsys.readouterr()
     # remove tmp_path from output as it will vary
@@ -757,7 +757,7 @@ def test_compare_classifier_auc(
     df = pd.DataFrame(pred_data)
     predictions_file = "Classifier_predictions.csv"
     with tmpdir.as_cwd():
-        df.to_csv(predictions_file, index=False)
+        df.to_csv(predictions_file)
         sp.compare_classifier_auc(
             predictions_file, dataset_file, target_column, comparison_value
         )

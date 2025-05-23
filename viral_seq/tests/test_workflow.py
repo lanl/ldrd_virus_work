@@ -11,6 +11,7 @@ from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from sklearn.metrics import roc_curve, auc
 from sklearn.ensemble import RandomForestClassifier
+import sys
 
 
 def test_optimization_plotting(tmpdir):
@@ -980,6 +981,10 @@ def test_train_clfr():
     assert_array_equal(count_rank, count_rank_exp)
 
 
+@pytest.mark.skipif(
+    sys.platform == "darwin",
+    reason="Floating point discrepancies cause test to fail on Mac, re: https://github.com/scikit-learn/scikit-learn/issues/31415",
+)
 def test_pearson_aggregation():
     # enforce Pearson aggregation behavior, avoid reduction across folds
     random_state = 123

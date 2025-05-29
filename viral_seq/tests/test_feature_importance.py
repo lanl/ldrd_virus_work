@@ -8,6 +8,7 @@ from importlib.resources import files
 import shap
 import pytest
 import pandas as pd
+from pandas.testing import assert_frame_equal
 
 
 matplotlib.use("Agg")
@@ -235,21 +236,29 @@ def test_plot_shap_consensus(tmp_path):
 
 def test_sort_feature_counts():
     feature_df = pd.DataFrame()
-    kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_1045928", "kmer_PC_0134657"])
+    kmer_features = np.array(["kmer_" + str(i) for i in range(3)])
     feature_df["Features"] = kmer_features
-    feature_df["Clfr_0"] = [5, 1, 5]
+    feature_df["Clfr_0"] = [5, 1, 1]
     feature_df["SHAP_0"] = [4, 1, 1]
-    feature_df["Clfr_1"] = [3, 6, 3]
-    feature_df["SHAP_1"] = [1, 0, 4]
-    feature_df["Pearson R"] = [0.99, -0.99, -0.41]
+    feature_df["Clfr_1"] = [3, 6, 0]
+    feature_df["SHAP_1"] = [1, 0, 6]
+    feature_df["Pearson R"] = [0.99, 0.41, -0.42]
 
     out_df = fi.sort_feature_counts(feature_df, n_folds=5)
-    out_features = np.asarray(out_df["Features"])
-    out_exp = kmer_features[np.asarray([1, 2, 0])]
+    exp_df = pd.DataFrame.from_dict(
+        {
+            "Features": {2: "kmer_2", 1: "kmer_1", 0: "kmer_0"},
+            "Clfr_0": {2: 1, 1: 1, 0: 5},
+            "SHAP_0": {2: 1, 1: 1, 0: 4},
+            "Clfr_1": {2: 0, 1: 6, 0: 3},
+            "SHAP_1": {2: 6, 1: 0, 0: 1},
+            "Pearson R": {2: -0.42, 1: 0.41, 0: 0.99},
+            "Sum": {2: 8, 1: 8, 0: 13},
+            "Clfr_0_proportion": {2: 10.0, 1: 10.0, 0: 50.0},
+            "SHAP_0_proportion": {2: 10.0, 1: 10.0, 0: 40.0},
+            "Clfr_1_proportion": {2: 0.0, 1: 60.0, 0: 30.0},
+            "SHAP_1_proportion": {2: 60.0, 1: 0.0, 0: 10.0},
+        }
+    )
 
-    assert out_df.shape == (3, 11)
-    assert out_df.dtypes["Features"] is np.dtype(object)
-    assert out_df.dtypes["Clfr_0"] == np.int64
-    assert out_df.dtypes["Pearson R"] == np.float64
-    assert_array_equal(np.array(out_df.SHAP_0_proportion), np.array([10, 10, 40]))
-    assert_array_equal(out_features, out_exp)
+    assert_frame_equal(out_df, exp_df)

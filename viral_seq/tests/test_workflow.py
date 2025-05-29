@@ -6,7 +6,7 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
@@ -407,8 +407,12 @@ def test_pos_con_columns(target_column, len_exp_keys):
         # test case for the upper bound of the current workflow in terms of
         # number of classifiers and number of plotted features
         (
-            [],
-            [],
+            np.sort(
+                np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+            ),
+            np.sort(
+                np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+            ),
             1,
             20,
             4,
@@ -420,16 +424,6 @@ def test_fic_plot(
     tmp_path, shap_props, clfr_props, n_folds, n_feats, n_clfrs, plot_title
 ):
     rng = np.random.default_rng(seed=123)
-    # generate larger shap_props and clfr_props if given empty lists
-    # and sort them in ascending order for visualization
-    # restrict the generated values between 0-12 so that for four classifiers
-    # with two importance values the total proportion cant be greater than 100%
-    if not shap_props:
-        for a in range(n_clfrs):
-            syn_shap = np.sort(np.round(rng.uniform(0, 12, n_feats), 2))
-            syn_clfr = np.sort(np.round(rng.uniform(0, 12, n_feats), 2))
-            shap_props.append(syn_shap)
-            clfr_props.append(syn_clfr)
 
     feature_values = list(range(n_feats))
     kmer_features = ["kmer_PC_" + str(f) for f in feature_values]
@@ -967,25 +961,6 @@ def test_plot_cv_roc(tmp_path, clfr_preds):
         )
 
 
-def test_plot_shap_consensus(tmp_path):
-    rng = np.random.default_rng(seed=123)
-    syn_shap_values = rng.uniform(-1, 1, (10, 10))
-    syn_data = rng.choice([0, 1], size=[10, 10])
-    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-    syn_df = pd.DataFrame(syn_data, columns=syn_features)
-
-    np.random.seed(123)
-    workflow.plot_shap_consensus(syn_shap_values, syn_df, "Test", tmp_path)
-    assert (
-        compare_images(
-            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
-            str(tmp_path / "SHAP_Test.png"),
-            0.001,
-        )
-        is None
-    )
-
-
 def test_feature_count_consensus():
     rng = np.random.default_rng(seed=123)
     clfr_importances = rng.uniform(-1, 1, 10)
@@ -1080,7 +1055,7 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
         y,
         classifier_parameters,
         n_folds=2,
-        max_features=10,
+        max_features=3,
         random_state=random_state,
     )
     feature_rank = feature_count["Features"]

@@ -250,7 +250,7 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     """
     Sort the counts of important features in ascending order using the following qualifiers:
         1. the sum of the feature counts from classifier and shap importances
-        2. the Pearson R correlation coefficient of shap importance values
+        2. the signed Pearson R correlation coefficient between shap importance values and the data target
 
     Calculate the proportions of each count across all classifiers for generating the FIC plot
 
@@ -258,7 +258,7 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     -----------
     feature_df: pd.DataFrame
         dataframe containing kmer features with corresponding feature counts
-        and pearson correlation coefficients
+        and pearson correlation coefficients between SHAP values and data target
     n_folds: int
         number of folds over which to average counts
 
@@ -266,7 +266,7 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     --------
     feature_df_sorted: pd.DataFrame
         dataframe containing kmer feature information sorted in ascending order
-        by absolute value of pearson R values and feature counts
+        by total feature count and then signed pearson R
     """
     feature_df_sorted = feature_df.copy()
     sort_columns = feature_df_sorted.columns[

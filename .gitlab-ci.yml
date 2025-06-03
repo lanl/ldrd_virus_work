@@ -4,7 +4,7 @@ ci_lint:
     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
     - if: '$CI_COMMIT_BRANCH'
-  image: 'python:3.10.8'
+  image: 'quay.io/lib/python:3.10.8'
   script:
     - python --version
     - python -m venv venv
@@ -42,7 +42,7 @@ ci_test_linux:
 
   parallel:
     matrix:
-      - IMAGE: ['python:3.10.8', 'python:3.11.9']
+      - IMAGE: ['quay.io/lib/python:3.10.8', 'quay.io/lib/python:3.11.9']
         REQ: ['ci/requirements_low.txt', 'ci/requirements_high.txt']
   allow_failure: false
   tags:

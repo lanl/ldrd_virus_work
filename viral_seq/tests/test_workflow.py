@@ -9,7 +9,6 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
-from sklearn.metrics import roc_curve, auc
 import sys
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
@@ -473,7 +472,6 @@ def test_feature_sign(
         "kmer_PC_CCACAD",
         "kmer_PC_FECAEA",
     ]
-
     is_exposed = [
         s if i not in not_exposed_idx else "" for i, s in enumerate(found_kmers)
     ]
@@ -883,32 +881,40 @@ def test_importances_df():
 
 
 @pytest.mark.parametrize(
-    "classifier_names, n_folds",
+    "clfr_preds",
     [
-        (["RandomForestClassifier", "LGBMClassifier"], 1),
-        (["XGBoost"], 2),
+        {
+            "RandomForestClassifier": {
+                0: {
+                    "roc_curves": np.array([0.0] + [0.5] * 16 + [0.75] * 82 + [1.0]),
+                    "auc": 0.7083,
+                }
+            },
+            "LGBMClassifier": {
+                0: {
+                    "roc_curves": np.array([0.0] * 71 + [1 / 3] * 14 + [1] * 15),
+                    "auc": 0.19047,
+                }
+            },
+        },
+        {
+            "XGBoost": {
+                0: {
+                    "roc_curves": np.array([0.0] + [0.5] * 16 + [0.75] * 82 + [1.0]),
+                    "auc": 0.70833,
+                },
+                1: {
+                    "roc_curves": np.array([0.0] * 71 + [1 / 3] * 14 + [1.0] * 15),
+                    "auc": 0.19047,
+                },
+            }
+        },
     ],
 )
-def test_plot_cv_roc(tmp_path, classifier_names, n_folds):
-    mean_fpr = np.linspace(0, 1, 100)
-    rng = np.random.default_rng(seed=123)
-    clfr_preds = {}
-    # iterate over classifiers and append synthetic roc curves
-    # to the dictionary to be used to plot the cv roc plots
-    for classifier_name in classifier_names:
-        fold_preds = {}
-        for fold in range(n_folds):
-            syn_data = rng.uniform(0, 1, 10)
-            true_class = rng.choice([0, 1], size=10)
-            syn_fpr, syn_tpr, _ = roc_curve(true_class, syn_data)
-            interp_tpr = np.interp(mean_fpr, syn_fpr, syn_tpr)
-            interp_tpr[0] = 0.0
-            syn_roc_auc = auc(syn_fpr, syn_tpr)
-            fold_preds[fold] = {"roc_curves": interp_tpr, "auc": syn_roc_auc}
-        clfr_preds[classifier_name] = fold_preds
+def test_plot_cv_roc(tmp_path, clfr_preds):
     workflow.plot_cv_roc(clfr_preds, "Test", tmp_path)
     # test the individual classifier plots
-    for classifier_name in classifier_names:
+    for classifier_name in list(clfr_preds.keys()):
         assert (
             compare_images(
                 files("viral_seq.tests.expected")
@@ -919,7 +925,7 @@ def test_plot_cv_roc(tmp_path, classifier_names, n_folds):
             is None
         )
     # test the consensus plot if more than one classifier
-    if len(classifier_names) > 1:
+    if len(clfr_preds.keys()) > 1:
         assert (
             compare_images(
                 files("viral_seq.tests.expected")
@@ -1053,9 +1059,12 @@ def test_pearson_aggregation():
     train_data = pd.DataFrame(kmer_data, columns=kmer_names)
     y = pd.Series(data_target)
 
-    classifier_parameters = dict(
-        clfr_name=RandomForestClassifier, n_estimators=100, n_jobs=None
-    )
+    classifier_parameters = {
+        "RandomForestClassifier": {
+            "clfr": RandomForestClassifier(),
+            "params": {"n_estimators": 100, "n_jobs": 1},
+        }
+    }
     (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
         train_data,
         y,

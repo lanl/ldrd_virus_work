@@ -40,6 +40,7 @@ from sklearn.metrics import roc_curve
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 import os
+from tqdm import tqdm
 
 matplotlib.use("Agg")
 
@@ -267,6 +268,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     path: Path
         file path for saving figure
     """
+
     mean_fpr = np.linspace(0, 1, 100)
     all_curves: dict[str, tuple] = defaultdict(tuple)
     for clfr_name, clfr_values in clfr_preds.items():
@@ -486,15 +488,20 @@ def train_clfr(
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
-    clfr_preds = {}
     shap_values_all = []
     shap_data_all = []
     for clfr_name, subdict in classifier_parameters.items():
         clfr = subdict["clfr"]
         clfr.set_params(**subdict["params"], random_state=random_state)
 
-        clfr_preds = {}
-        for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
+        clfr_preds: Dict[int, Any] = {}
+        for fold, (train, test) in enumerate(
+            tqdm(
+                cv.split(train_data, data_target),
+                total=cv.get_n_splits(),
+                desc=f"{clfr_name} Folds",
+            )
+        ):
             # index training cv split
             train_fold = train_data.iloc[train]
             train_target = data_target[train]
@@ -552,7 +559,7 @@ def train_clfr(
     return (
         feature_count,
         (shap_values_clfr, shap_data_clfr),
-        clfr_preds,
+        clfr_preds_all,
     )
 
 
@@ -2070,7 +2077,6 @@ if __name__ == "__main__":
         }
         clfr_names = list(classifier_parameters.keys())
         n_classifiers = len(clfr_names)
-
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
             X, y, classifier_parameters, n_folds, max_features, random_state
         )

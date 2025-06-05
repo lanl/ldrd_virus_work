@@ -863,6 +863,10 @@ if __name__ == "__main__":
         elif optimize == "pre-optimized":
             print("Using hyperparameters pre-caclulated for", val["group"])
             train_file_suff = os.path.splitext(os.path.basename(train_file))[0]
+            if train_file_suff == "Relabeled_Train":
+                # this accounts for only the non-shuffled training files which contain all target columns
+                # and require special consideration to load the correct optimized parameter file
+                train_file_suff = f"{train_file_suff}_{target_column}"
             this_filename = f"params_{val['group']}_{train_file_suff}.json"
             with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
                 res = json.load(f)

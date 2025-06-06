@@ -211,11 +211,11 @@ def get_model_arguments(
 
 
 def _cv_child(
-    model, X, y, scoring, train, test, **kwargs
+    model, X, y, scoring, train, test, consensus_req: int = 2, **kwargs
 ) -> tuple[pd.Series, npt.ArrayLike, float]:
     X_train = X.iloc[train]
     # After splitting data, kmers may no longer be shared in training
-    X_train = sp.drop_unshared_kmers(X_train)
+    X_train = sp.drop_unshared_kmers(X_train, consensus_req=consensus_req)
     X_test = X.iloc[test]
     X_test = X_test[X_train.columns]
     clf = model(**kwargs)
@@ -233,6 +233,7 @@ def cross_validation(
     n_splits: int = 5,
     scoring: str = "roc_auc",
     n_jobs_cv: int = 1,
+    consensus_req: int = 2,
     **kwargs,  # classifier arguments
 ) -> CV_data:
     """Perform k-fold cross-validation stratified on target
@@ -243,6 +244,8 @@ def cross_validation(
         n_splits (int): number of folds to use
         scoring (str): scoring method accepted by `sklearn.metrics.get_scorer`
         n_jobs_cv (int): number of jobs to run in parallel
+        consensus_req (int): number of viral sequence records containing a given
+                             kmer feature for it to be retained
         **kwargs: passed to model
 
     Returns:
@@ -255,7 +258,7 @@ def cross_validation(
     y_preds = []
     y_tests = []
     r = Parallel(n_jobs=n_jobs_cv)(
-        delayed(_cv_child)(model, X, y, scoring, train, test, **kwargs)
+        delayed(_cv_child)(model, X, y, scoring, train, test, consensus_req, **kwargs)
         for train, test in cv.split(X, y)
     )
     for i, res in enumerate(r):
@@ -272,9 +275,12 @@ def cv_score(
     n_splits: int = 5,
     scoring: str = "roc_auc",
     n_jobs_cv: int = 1,
+    consensus_req: int = 2,
     **kwargs,  # classifier arguments
 ) -> float:
-    cv_data = cross_validation(model, X, y, n_splits, scoring, n_jobs_cv, **kwargs)
+    cv_data = cross_validation(
+        model, X, y, n_splits, scoring, n_jobs_cv, consensus_req, **kwargs
+    )
     return np.mean(cv_data.scores)
 
 
@@ -292,6 +298,7 @@ def get_hyperparameters(
     random_state: int = 0,
     n_jobs_cv: int = 1,
     max_concurrent_trials: int = 0,
+    consensus_req: int = 2,
 ) -> dict[str, Union[float, dict[str, Any]]]:
     """Search for the best hyperparameters using `ray.tune`
 
@@ -303,6 +310,8 @@ def get_hyperparameters(
         random_state (int): seed used when needed for repeatability
         n_jobs_cv (int): used for `sklearn.model_selection.cross_val_score`, pass n_jobs to model training with `model_parameters`
         max_concurrent_trials (int): limits concurrency, this is mostly used for testing as `optuna` is only repeatable when serial
+        consensus_req (int): number of viral sequence records that must contain a given
+        kmer feature for it to be retained.
 
     Returns:
         (dict[str, Union[float, dict[str, Any]]]): dictionary with best performing score (key 'target'), parameters (key 'params'), and target history during optimization (key 'targets')
@@ -319,6 +328,7 @@ def get_hyperparameters(
             X=put_X,
             y=put_y,
             n_jobs_cv=n_jobs_cv,
+            consensus_req=consensus_req,
             random_state=random_state,
         ),
         search_alg=algo,

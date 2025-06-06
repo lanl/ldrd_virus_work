@@ -336,11 +336,36 @@ def univariate_selection(X, y, uni_type, num_select, random_state=123456789):
     return list(X.columns[(sel_.get_support())])
 
 
-def drop_unshared_kmers(df: pd.DataFrame):
+def drop_unshared_kmers(df: pd.DataFrame, consensus_req: int = 2) -> pd.DataFrame:
+    """Drop kmers that are not shared across viral records.
+
+    kmer feature columns are dropped unless they are shared
+    by at least ``consensus_req`` viral records in the design
+    matrix.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        A DataFrame of kmer features for the design matrix. The
+        DataFrame may also contain non-kmer features, but they
+        are passed through unchanged.
+    consensus_req : int
+        An integer representing the minimum number of viral
+        sequence records containing a given kmer feature
+        for that feature column to be retained in the filtering
+        process.
+
+    Returns
+    -------
+    filtered_df : pd.DataFrame
+        A DataFrame filtered to only include kmer feature columns
+        with at least ``consensus_req`` viral records containing
+        a given kmer.
+    """
     # filter kmer columns
     candidate_df = df.filter(like="kmer_", axis=1)
     # find columns with less than 2 non-zero entries to drop
-    vals = (candidate_df == 0).sum(axis=0) > (df.shape[0] - 2)
+    vals = (candidate_df == 0).sum(axis=0) > (df.shape[0] - consensus_req)
     drop_cols = candidate_df.columns[vals]
     ret = df.drop(columns=drop_cols)
     return ret
@@ -364,6 +389,7 @@ def build_table(
     num_select: int = 1_000,
     random_state: int = 123456789,
     target_column: str = "Human Host",
+    consensus_req: int = 2,
 ):
     if kmer_k is None:
         kmer_k = [10]
@@ -437,7 +463,7 @@ def build_table(
                 # we need to pass a df of these columns to select best
                 temp_df = df.select(val).to_pandas()
                 res = univariate_selection(
-                    drop_unshared_kmers(temp_df.fillna(0)),
+                    drop_unshared_kmers(temp_df.fillna(0), consensus_req=consensus_req),
                     df[target_column].to_numpy().flatten(),
                     uni_type,
                     num_select,
@@ -470,7 +496,7 @@ def build_table(
     else:
         # if we aren't keeping specific columns from a previously trained model, we should drop shared kmers
         table.fillna(0, inplace=True)
-        table = drop_unshared_kmers(table)
+        table = drop_unshared_kmers(table, consensus_req=consensus_req)
     # required for repeatability
     if ordered:
         if df is not None:
@@ -636,6 +662,7 @@ def cross_validation(
     splits=5,
     plot: bool = False,
     prefix="cv_",
+    consensus_req: int = 2,
     **kwargs,
 ):
     # TODO: this function should be expanded to allow for hyperparameter search
@@ -646,7 +673,7 @@ def cross_validation(
         if isinstance(X, pd.DataFrame):
             X_train = X.iloc[train]
             # After splitting data, kmers may no longer be shared in training
-            X_train = drop_unshared_kmers(X_train)
+            X_train = drop_unshared_kmers(X_train, consensus_req=consensus_req)
             print(
                 "Shared features in training retained for fold",
                 fold,

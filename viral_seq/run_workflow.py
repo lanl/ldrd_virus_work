@@ -282,7 +282,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False):
+def build_tables(feature_checkpoint=0, debug=False, consensus_req=2):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -324,6 +324,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                     "--similarity-genomic",
                     "--similarity-cache",
                     cache_isg + " " + cache_hk,
+                    "--kmer-consensus",
+                    consensus_req,
                 ],
                 standalone_mode=False,
             )
@@ -352,6 +354,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                             f"--features-kmers{kmer_suff}",
                             f"--kmer-k{kmer_suff}",
                             str(k),
+                            "--kmer-consensus",
+                            consensus_req,
                         ],
                         standalone_mode=False,
                     )
@@ -421,8 +425,8 @@ def feature_selection_rfc(
                     % len(keep_feats)
                 )
             X = X[keep_feats]
-            print("Saving X_train to", table_loc_train_best)
-            X.to_parquet(table_loc_train_best)
+        print("Saving X_train to", table_loc_train_best)
+        X.to_parquet(table_loc_train_best)
     elif feature_selection == "skip":
         print("Will use previously calculated X_train stored at", table_loc_train_best)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
@@ -454,6 +458,7 @@ def optimize_model(
     random_state=123,
     n_jobs_cv=1,
     n_jobs=1,  # only used for default score
+    consensus_req=2,
 ):
     if optimize == "yes":
         print(
@@ -467,6 +472,7 @@ def optimize_model(
             y=y_train,
             n_jobs_cv=n_jobs_cv,
             random_state=random_state,
+            consensus_req=consensus_req,
         )
         print("Checking default score...")
         default_score = classifier.cv_score(
@@ -704,6 +710,16 @@ if __name__ == "__main__":
         default="Human Host",
         help="Target column to be used for binary classification.",
     )
+    parser.add_argument(
+        "-kc",
+        "--kmer-consensus",
+        default=2,
+        type=int,
+        help=(
+            "Minimum number of viral sequence records that must contain "
+            "a kmer feature for that kmer to be retained."
+        ),
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -719,6 +735,7 @@ if __name__ == "__main__":
     train_file = args.train_file
     test_file = args.test_file
     target_column = args.target_column
+    consensus_req = args.kmer_consensus
 
     if debug and (
         train_file != "Mollentze_Training.csv" or test_file != "Mollentze_Holdout.csv"
@@ -781,7 +798,9 @@ if __name__ == "__main__":
         )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    build_tables(
+        feature_checkpoint=feature_checkpoint, debug=debug, consensus_req=consensus_req
+    )
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -841,6 +860,7 @@ if __name__ == "__main__":
                 name=name,
                 n_jobs=n_jobs,
                 outfile=str(hyperparams_path / ("params_" + val["suffix"] + ".json")),
+                consensus_req=consensus_req,
                 **params,
             )
             print(

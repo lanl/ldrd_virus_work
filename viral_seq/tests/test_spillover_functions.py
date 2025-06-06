@@ -624,3 +624,24 @@ def test_issue_15():
     )
     # prior to fix this will only return a row for HM119401.1; post fix a row for each is returned
     assert_frame_equal(df_feats, df_expected)
+
+
+@pytest.mark.parametrize(
+    "nnzr, nnzc, consensus_req, exp_cols",
+    [
+        (3, 3, 3, 3),
+        (3, 3, 4, 0),
+        (8, 1, 7, 1),
+    ],
+)
+def test_drop_unshared_kmers(nnzr, nnzc, consensus_req, exp_cols):
+    # create a synthetic dataframe with
+    # a fixed number of nonzero rows (nnzr)
+    # and columns (nnzc) and verify that
+    # drop_unshared_kmers() only retains the exp_cols
+    # kmer columns
+    feature_list = ["kmer_" + str(i) for i in range(10)]
+    df = pd.DataFrame(0, index=np.arange(10), columns=feature_list)
+    df.iloc[:nnzr, :nnzc] = 1
+    df = sp.drop_unshared_kmers(df=df, consensus_req=consensus_req)
+    assert df.shape[1] == exp_cols

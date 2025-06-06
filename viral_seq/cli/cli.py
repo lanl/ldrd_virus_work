@@ -242,6 +242,16 @@ def pull_ensembl_transcripts(email, cache, file):
     default="Human Host",
     help=("Target column to be used for binary classification."),
 )
+@click.option(
+    "-kc",
+    "--kmer-consensus",
+    default=2,
+    type=int,
+    help=(
+        "Minimum number of viral sequence records that must contain "
+        "a kmer feature for that kmer to be retained."
+    ),
+)
 def calculate_table(
     cache,
     file,
@@ -260,6 +270,7 @@ def calculate_table(
     num_select,
     random_state,
     target_column,
+    kmer_consensus,
 ):
     """Build a data table from given viral species and selected features."""
     df = pd.read_csv(file)
@@ -314,6 +325,7 @@ def calculate_table(
         num_select=num_select,
         random_state=random_state,
         target_column=target_column,
+        consensus_req=kmer_consensus,
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
@@ -325,6 +337,7 @@ def calculate_table(
                 kmers=False,
                 kmers_pc=False,
                 target_column=target_column,
+                consensus_req=kmer_consensus,
             )
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)

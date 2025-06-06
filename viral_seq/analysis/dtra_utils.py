@@ -110,7 +110,11 @@ def convert_merged_tbl(input_tbl: pd.DataFrame) -> pd.DataFrame:
         False,
     )
     table["IN_SA"] = np.where(
-        table["Receptor_Type"] == "integrin_sialic_acid", True, False
+        table["Receptor_Type"].isin(
+            ["integrin_sialic_acid", "integrin_sialic_acid_IgSF"]
+        ),
+        True,
+        False,
     )
     table["IN_SA_IG"] = np.where(
         table["Receptor_Type"] == "integrin_sialic_acid_IgSF", True, False

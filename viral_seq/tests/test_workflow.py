@@ -328,6 +328,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             "IG",
             {
                 "484": {0: "kmer_PC_484464", 1: 1},
+                "540": {0: None, 1: 0},
                 "204": {0: "kmer_PC_007204", 1: 1},
                 "33602": {0: "kmer_PC_6433602", 1: 1},
                 "332": {0: "kmer_PC_764332", 1: 1},
@@ -356,11 +357,11 @@ def test_positive_controls(
     [
         ("IN", 7),
         ("SA", 3),
-        ("IG", 5),
-        ("SA_IG", 8),
-        ("IN_IG", 12),
+        ("IG", 6),
+        ("SA_IG", 9),
+        ("IN_IG", 13),
         ("IN_SA", 10),
-        ("IN_SA_IG", 15),
+        ("IN_SA_IG", 16),
     ],
 )
 def test_pos_con_columns(target_column, len_exp_keys):

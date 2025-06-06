@@ -544,6 +544,8 @@ def check_positive_controls(
     """
 
     ### lists of positive controls for each binding target
+    # TODO: provide references similar to ``Sialic_Acid`` and ``IgSF`` lists and purge
+    #       in-line comments below
     # Here is a list of common integrin-binding motifs. These motifs interact with
     # specific integrins, playing critical roles in cell adhesion, signaling, and
     # interaction with the extracellular matrix:
@@ -566,14 +568,16 @@ def check_positive_controls(
             "PHSRN",
             "SVVYGLR",
         ],
+        # TODO: update and add positive controls for more comprehensive coverage of known binding motifs (issue #86)
         "Sialic_Acid": [
             "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding (https://doi.org/10.1038/s41467-017-00836-6)
-            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with corboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
+            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with carboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
             # primary and secondary sialic acid binding sites of NA composed of non-linear binding motifs (https://doi.org/10.3389/fmicb.2019.00039)
             "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
         ],
         "IgSF": [
             "DPE",  # residues of conserved C3 region important for binding of gp120 to CD4, https://doi.org/10.1128/jvi.64.12.5701-5707.1990
+            "RDG",  # residues of the conserved C4 region of HIV-1 around residue 457, important for binding gp120 to CD4 (noted as slight permutation of known integrin binding motif ``RGD``) https://doi.org/10.1128/jvi.64.12.5701-5707.1990
             "TGD",  # mutations in this region significantly reduced sigma-1 binding to JAM-A, https://doi.org/10.1371/journal.ppat.1000235
             "NNMGT",  # (here and below) binding footprint of coxsackievirus-3 VP1 and VP2 capsid proteins with CAR D1 extracellular domain, https://doi.org/10.1128/jvi.00299-14
             "NNT",

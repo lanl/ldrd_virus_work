@@ -46,6 +46,6 @@ def test_merge_convert_tbl():
     assert converted_df.SA.sum() == 53
     assert converted_df.SA_IG.sum() == 6
     assert converted_df.IN_IG.sum() == 7
-    assert converted_df.IN_SA.sum() == 2
+    assert converted_df.IN_SA.sum() == 4
     assert converted_df.IN_SA_IG.sum() == 2
     assert converted_df.IG.sum() == 35

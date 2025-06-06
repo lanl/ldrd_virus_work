@@ -1923,7 +1923,7 @@ if __name__ == "__main__":
             topN_kmers, f"topN_kmers_{target_column}_{mapping_method}.parquet.gzip"
         )
 
-        # perform IoU matching of AA analogues for topN kmers from each mapping method
+        # perform matching of AA analogues for topN kmers from each mapping method
         matching_kmers = dtra_utils.find_matching_kmers(
             target_column,
             mapping_methods=["jurgen_schmidt", "shen_2007"],

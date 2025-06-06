@@ -78,9 +78,13 @@ def test_merge_convert_tbl():
                 },
             ],
             {
-                "kmer_AA_0": [("kmer_PC_0", "kmer_PC_3")],
-                "kmer_AA_1": [("kmer_PC_1", "kmer_PC_4")],
-                "kmer_AA_2": [("kmer_PC_2", "kmer_PC_5")],
+                "mm1": {0: "kmer_PC_0", 1: "kmer_PC_1", 2: "kmer_PC_2"},
+                "mm2": {0: "kmer_PC_3", 1: "kmer_PC_4", 2: "kmer_PC_5"},
+                "matching_AA_kmers": {
+                    0: ["kmer_AA_0"],
+                    1: ["kmer_AA_1"],
+                    2: ["kmer_AA_2"],
+                },
             },
             ["mm1", "mm2"],
         ),
@@ -104,8 +108,7 @@ def test_merge_convert_tbl():
     ],
 )
 def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_methods):
-    # test that matching AA-kmers are found between
-    # the two mapping methods with different PC-kmers
+    """test that matching AA-kmers are found between the two mapping methods with different PC-kmers"""
 
     # make and save a temporary file containing the matching kmer dataframe
     syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
@@ -118,7 +121,7 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
         kmer_matches_out = dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)
     kmer_matches_out_df = pd.DataFrame(kmer_matches_out)
     kmer_matches_exp_df = pd.DataFrame(kmer_matches_exp)
-    # assert that the output looks as expected and that a csv file was generated containig the dataframe
+    # assert that the output looks as expected and that a csv file was generated containing the dataframe
     assert_frame_equal(kmer_matches_out_df, kmer_matches_exp_df)
     for mm in mapping_methods:
         assert os.path.exists(
@@ -129,12 +132,16 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
 @pytest.mark.parametrize(
     "kmer_matches, syn_topN, mapping_method, output",
     [
+        # this test case checks that the function returns the correct string output for
+        # comparing kmer matches when the workflow has not been run using both mapping methods
         (
             None,
             None,
             ["mm1", "mm2"],
             "Must run workflow using both mapping methods before performing kmer mapping.",
         ),
+        # this test case checks that the function returns the correct string output for comparing
+        # kmer matches when there ARE NO AA matches found between PC mapping methods
         (
             [
                 {
@@ -150,6 +157,8 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
             ["mm1"],
             "No matching AA kmers found in TopN.",
         ),
+        # this test case checks that the function returns the correct string output for comparing
+        # mapping methods when there ARE AA matches found between PC mapping methods
         (
             [
                 {
@@ -170,15 +179,17 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
                 },
             ],
             ["mm1", "mm2"],
-            "Matching AA kmers between PC kmers 'kmer_PC_0' and 'kmer_PC_3': kmer_AA_0",
+            "Matching AA kmers between PC kmers:\n       mm1       mm2 matching_AA_kmers\nkmer_PC_0 kmer_PC_3       [kmer_AA_0]\nkmer_PC_1 kmer_PC_4       [kmer_AA_1]\nkmer_PC_2 kmer_PC_5       [kmer_AA_2]",
         ),
     ],
 )
 def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, output):
-    # test that the correct output is returned from ``find_matching_kmers`` for the cases where:
-    #     1. the workflow has not been run with both mapping methods
-    #     2. no matching kmers are found between the two mapping methods
-    #     3. matching kmers are found between the two mapping methods
+    """
+    test that the correct output is returned from ``find_matching_kmers`` for the cases where:
+        1. the workflow has not been run with both mapping methods
+        2. no matching kmers are found between the two mapping methods
+        3. matching kmers are found between the two mapping methods
+    """
     with tmpdir.as_cwd():
         if kmer_matches is not None:
             os.mkdir("kmer_maps")

@@ -1,10 +1,10 @@
 import pandas as pd
+from typing import Optional
 import numpy as np
 import functools
 from importlib.resources import files
 from typing import Union, Dict
 import polars as pl
-from collections import defaultdict
 
 
 def get_surface_exposure_status(
@@ -183,7 +183,7 @@ def _merge_and_convert_tbl(train_file: str, merge_file: str, temp_file: str):
 
 def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
     """
-    find the matching AA-kmers between workflow runs using different mapping methods.
+    find the matching AA-kmers between workflow runs using different PC mapping methods.
     return the appropriate string response based on the possible outputs of the function,
     which are:
         1. the workflow has not been run with both mapping methods
@@ -193,8 +193,9 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
     Parameters:
     -----------
     target_column: str
+        target column string for collecting correct features
     mapping_methods: str
-
+        list of mapping methods between which to check for matching features
     Returns:
     --------
     str
@@ -213,9 +214,8 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
             ).to_pandas()
             topN_files.append(topN_file)
         kmer_matches = match_kmers(topN_files, mapping_methods)
-        if kmer_matches:
-            for kmer_match, [kmers] in kmer_matches.items():
-                return f"Matching AA kmers between PC kmers '{kmers[0]}' and '{kmers[1]}': {kmer_match}"
+        if kmer_matches is not None and not kmer_matches.empty:
+            return f"Matching AA kmers between PC kmers:\n {kmer_matches.to_string(index=False)}"
         else:
             return "No matching AA kmers found in TopN."
     except FileNotFoundError:
@@ -224,26 +224,32 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
 
 
 def match_kmers(
-    topN_files: list, mapping_methods: list, save_dir: str = "kmer_maps"
-) -> Union[None, dict]:
+    topN_files: list[pd.DataFrame],
+    mapping_methods: list[str],
+    save_dir: str = "kmer_maps",
+) -> Optional[pd.DataFrame]:
     """
-    check the mappings from AA to PC kmers for the topN classifier kmers using each
-    mapping method and return the overlapping instances of corresponding AA kmers
+    determine matching AA kmers between different PC mappings from topN kmer features
+    using each mapping method (i.e. ``jurgen_schmidt`` and ``shen_2007``). If matches
+    exists, return dataframe containing matching AA kmer and corresponding PC kmer from
+    each mapping method.
 
     in order for this function to execute, you must run the full workflow using both
     `--mapping-method` arguments to generate the required kmer mapping files
 
     Parameters:
     -----------
-    topN_files: list
+    topN_files: list[pd.DataFrame]
         list of pandas dataframes containing topN kmers found using each mapping scheme
-    mapping_methods: list
+    mapping_methods: list[str]
         names of mapping methods to compare
+    save_dir: str
+        file name for saving kmer_maps
 
     Return:
     -------
-    kmer_matches: dict
-        dictionary of PC kmer matches and their associated AA-kmer
+    kmer_matches_df: Optional[pd.DataFrame]
+        dataframe of PC kmer matches and their associated AA-kmer
     """
     topN_str_count = []
     kmer_lists = []
@@ -251,7 +257,7 @@ def match_kmers(
         topN_list = list(topN_file["0"])
         kmer_lists.append(topN_list)
 
-        # find lengths of topN kmers strings
+        # find lengths of topN kmers strings in order to load correct PC-AA kmer map parquet files
         topN_str = [
             s.replace("kmer_PC_", "").replace("kmer_AA_", "") for s in topN_list
         ]
@@ -296,29 +302,30 @@ def match_kmers(
 
     # if comparing more than one mapping method, find and return matches, if any
     if len(topN_files) > 1:
-        # find matching PC kmers from different mapping schemes
-        kmer_matches: Dict = defaultdict(list)
-        for kmer1 in matching_kmers_df.columns:
-            for kmer2 in matching_kmers_df.columns:
-                if kmer1 != kmer2:
-                    kmer_match = matching_kmers_df[kmer1].dropna()[
-                        matching_kmers_df[kmer1]
-                        .dropna()
-                        .isin(matching_kmers_df[kmer2].dropna())
-                    ]
-                    if not kmer_match.empty:
-                        # check if tuple exists in dict already
-                        # first see if the AA kmer key is in the dictionary already
-                        kmer_pair_exist = False
-                        if kmer_match.item() in kmer_matches:
-                            # then check if the current tuple exists in the
-                            # list of tuples contained in kmer_matches already
-                            kmer_matches_list = kmer_matches[kmer_match.item()]
-                            kmer_pair_exist = any(
-                                set((kmer1, kmer2)).issubset(set(k))
-                                for k in kmer_matches_list
-                            )
-                        if not kmer_pair_exist:
-                            kmer_matches[kmer_match.item()].append((kmer1, kmer2))
-        return kmer_matches
+        # get feature columns
+        kmer_features = matching_kmers_df.columns
+        # find all kmer features in each column
+        matching_kmers_dict = {
+            kmer_feature: set(matching_kmers_df[kmer_feature].dropna())
+            for kmer_feature in kmer_features
+        }
+        # initialize list for aggregating matching kmers
+        kmer_matches = []
+        # iterate through kmer feature columns to find matching kmers
+        for i, kmer_feature in enumerate(kmer_features):
+            for j in range(i + 1, len(kmer_features)):
+                kmer_query = kmer_features[j]
+                common = (
+                    matching_kmers_dict[kmer_feature] & matching_kmers_dict[kmer_query]
+                )
+                if common:
+                    kmer_matches.append(
+                        {
+                            mapping_methods[0]: kmer_feature,
+                            mapping_methods[1]: kmer_query,
+                            "matching_AA_kmers": list(common),
+                        }
+                    )
+        kmer_matches_df = pd.DataFrame(kmer_matches)
+        return kmer_matches_df
     return None

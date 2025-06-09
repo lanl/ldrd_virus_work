@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import functools
+from importlib.resources import files
 
 
 def get_surface_exposure_status(
@@ -58,6 +60,7 @@ def merge_tables(train_file: str, igsf_file: str) -> pd.DataFrame:
         reconciled overlapping entries
     """
     # load igsf and receptor datasets
+    # TODO: allow for merging multiple data files when adding new viral entries
     igsf_training = pd.read_csv(igsf_file)
     receptor_training = pd.read_csv(train_file)
 
@@ -164,3 +167,12 @@ def convert_merged_tbl(input_tbl: pd.DataFrame) -> pd.DataFrame:
     table.drop(columns="Receptor_Type", inplace=True)
 
     return table
+
+
+@functools.lru_cache
+def _merge_and_convert_tbl(train_file: str, merge_file: str, temp_file: str):
+    merge_path = str(files("viral_seq.data").joinpath(merge_file))
+    merged_tbl = merge_tables(train_file, merge_path)
+    converted_tbl = convert_merged_tbl(merged_tbl)
+    converted_tbl.to_csv(temp_file)
+    return converted_tbl

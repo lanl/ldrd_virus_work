@@ -242,7 +242,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             },
         ),
         # the two test cases below check that the function correctly aggregates and checks
-        # the appropriate lists of positive controls when more looking at more than one binding target
+        # the appropriate lists of positive controls when looking at more than one binding target
         (
             [
                 "kmer_PC_454464",
@@ -263,12 +263,14 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             "IN_SA",
             {
                 "504": {0: None, 1: None, 2: 0},
+                # example integrin positive control, PC: ``646`` -> AA: ``LDV``
                 "646": {0: "kmer_PC_6465646", 1: "kmer_PC_764610", 2: 2},
                 "4040": {0: None, 1: None, 2: 0},
                 "5446": {0: "kmer_PC_454464", 1: None, 2: 1},
                 "2055": {0: None, 1: None, 2: 0},
                 "83253": {0: None, 1: None, 2: 0},
                 "2662065": {0: None, 1: None, 2: 0},
+                # example sialic acid positive control, PC: ``656`` -> ``LRM``
                 "656": {0: "kmer_PC_6465646", 1: None, 2: 1},
                 "756": {0: None, 1: None, 2: 0},
                 "323262": {0: None, 1: None, 2: 0},
@@ -294,6 +296,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
             "IN_SA",
             {
                 "RGD": {0: None, 1: 0},
+                # example integrin positive control, AA: ``KGE``
                 "KGE": {0: "kmer_AA_CGDKGEA", 1: 1},
                 "LDV": {0: None, 1: 0},
                 "DGEA": {0: None, 1: 0},
@@ -301,6 +304,7 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "YGRK": {0: None, 1: 0},
                 "PHSRN": {0: None, 1: 0},
                 "SVVYGLR": {0: None, 1: 0},
+                # example sialic acid positive control, AA: ``LRM``
                 "LRM": {0: "kmer_AA_FGLRMA", 1: 1},
                 "FRM": {0: None, 1: 0},
                 "NYNYLY": {0: None, 1: 0},
@@ -331,7 +335,6 @@ def test_label_surface_exposed(kmers_list, kmers_status, kmers_topN, is_exposed_
                 "540": {0: None, 1: 0},
                 "204": {0: "kmer_PC_007204", 1: 1},
                 "33602": {0: "kmer_PC_6433602", 1: 1},
-                "332": {0: "kmer_PC_764332", 1: 1},
                 "0235": {0: "kmer_PC_00235", 1: 1},
             },
         ),
@@ -357,11 +360,11 @@ def test_positive_controls(
     [
         ("IN", 7),
         ("SA", 3),
-        ("IG", 6),
-        ("SA_IG", 9),
-        ("IN_IG", 13),
+        ("IG", 5),
+        ("SA_IG", 8),
+        ("IN_IG", 12),
         ("IN_SA", 10),
-        ("IN_SA_IG", 16),
+        ("IN_SA_IG", 15),
     ],
 )
 def test_pos_con_columns(target_column, len_exp_keys):

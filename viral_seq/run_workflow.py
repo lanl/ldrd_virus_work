@@ -580,7 +580,6 @@ def check_positive_controls(
             "RDG",  # residues of the conserved C4 region of HIV-1 around residue 457, important for binding gp120 to CD4 (noted as slight permutation of known integrin binding motif ``RGD``) https://doi.org/10.1128/jvi.64.12.5701-5707.1990
             "TGD",  # mutations in this region significantly reduced sigma-1 binding to JAM-A, https://doi.org/10.1371/journal.ppat.1000235
             "NNMGT",  # (here and below) binding footprint of coxsackievirus-3 VP1 and VP2 capsid proteins with CAR D1 extracellular domain, https://doi.org/10.1128/jvi.00299-14
-            "NNT",
             "GSNK",
         ],
     }
@@ -993,9 +992,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
         if feature_checkpoint > 0:
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                    igsf_path = str(data.joinpath("igsf_training.csv"))
-                    merged_tbl = dtra_utils.merge_tables(train_file, igsf_path)
-                    dtra_utils.convert_merged_tbl(merged_tbl).to_csv(temp_file)
+                    dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
                     file = temp_file.name
                 if i == 0:
                     prefix = "Train"
@@ -1389,6 +1386,13 @@ if __name__ == "__main__":
         default="cache_mollentze.tar.gz",
         help="Cached accession files for running workflow with cli flag '--cache extract'",
     )
+    parser.add_argument(
+        "-mf",
+        "--merge-file",
+        choices=["igsf_training.csv"],
+        default="igsf_training.csv",
+        help="Training data file to merge with `--train-file` if specified",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1407,6 +1411,7 @@ if __name__ == "__main__":
     mapping_method = args.mapping_method
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
+    merge_file = args.merge_file
 
     # check to make sure the correct `cache-tarball` is being used
     # for the given workflow when calling '--cache extract'
@@ -1481,9 +1486,7 @@ if __name__ == "__main__":
 
     if workflow == "DTRA":
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            igsf_path = str(data.joinpath("igsf_training.csv"))
-            merged_tbl = dtra_utils.merge_tables(train_file, igsf_path)
-            dtra_utils.convert_merged_tbl(merged_tbl).to_csv(temp_file)
+            dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
             file = temp_file.name
         build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
     else:
@@ -1705,9 +1708,7 @@ if __name__ == "__main__":
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
-        igsf_path = str(data.joinpath("igsf_training.csv"))
-        merged_tbl = dtra_utils.merge_tables(train_file, igsf_path)
-        tbl = dtra_utils.convert_merged_tbl(merged_tbl)
+        tbl = dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
         # TODO: this call below may be redundant because
         # X_train is returned by `feature_selection_rfc`
         X = pl.read_parquet(table_loc_train_best).to_pandas()

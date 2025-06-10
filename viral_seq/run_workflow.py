@@ -317,15 +317,12 @@ def FIC_plot(
     path: Path
         path to save figure
     """
-
-    if target_column == "Is_Integrin":
-        target_name = "Integrin"
-    elif target_column == "Is_Sialic_Acid":
-        target_name = "Sialic Acid"
-    elif target_column == "Is_Both":
-        target_name = "Integrin and Sialic Acid"
-    else:
-        target_name = target_column
+    target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
+    target_columns = target_column.split("_")
+    target_names = []
+    for target in target_columns:
+        target_names.append(target_column_mappings[target])
+    target_name = ", ".join(target_names)
 
     fig, ax = plt.subplots(figsize=(10, 10))
     y_pos = np.arange(len(topN_kmers))
@@ -419,7 +416,7 @@ def FIC_plot(
         )
 
         fig.tight_layout()
-        fig.savefig(str(path) + "/" + "FIC_" + str(target_column) + ".png", dpi=300)
+        fig.savefig(str(path) + "/" + "FIC_" + "_".join(target_names) + ".png", dpi=300)
         plt.close()
 
 
@@ -518,7 +515,7 @@ def csv_conversion(input_csv: str = "receptor_training.csv") -> pd.DataFrame:
 
 
 def check_positive_controls(
-    positive_controls: Sequence[str],
+    target_column: str,
     kmers_list: list[str],
     mapping_method: str,
     mode: str,
@@ -529,8 +526,8 @@ def check_positive_controls(
 
     Parameters
     ----------
-    positive_controls: list
-        A list of strings denoting known AA-kmers associated with surface protein binding
+    target_column: str
+        target binding receptor(s)
     kmers_list: list
         A list containing kmer feature strings from either the training dataset
         or topN classifier rankings
@@ -546,6 +543,60 @@ def check_positive_controls(
         each of the positive control sequences, and the counts for each
     """
 
+    ### lists of positive controls for each binding target
+    # TODO: provide references similar to ``Sialic_Acid`` and ``IgSF`` lists and purge
+    #       in-line comments below
+    # Here is a list of common integrin-binding motifs. These motifs interact with
+    # specific integrins, playing critical roles in cell adhesion, signaling, and
+    # interaction with the extracellular matrix:
+    # RGD (Arg-Gly-Asp)
+    # KGE (Lys-Gly-Glu)
+    # LDV (Leu-Asp-Val)
+    # DGEA (Asp-Gly-Glu-Ala)
+    # REDV (Arg-Glu-Asp-Val)
+    # YGRK (Tyr-Gly-Arg-Lys)
+    # PHSRN (Pro-His-Ser-Arg-Asn)
+    # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
+    pos_control_dict = {
+        "Integrin": [
+            "RGD",
+            "KGE",
+            "LDV",
+            "DGEA",
+            "REDV",
+            "YGRK",
+            "PHSRN",
+            "SVVYGLR",
+        ],
+        # TODO: update and add positive controls for more comprehensive coverage of known binding motifs (issue #86)
+        "Sialic_Acid": [
+            "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding (https://doi.org/10.1038/s41467-017-00836-6)
+            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with carboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
+            # primary and secondary sialic acid binding sites of NA composed of non-linear binding motifs (https://doi.org/10.3389/fmicb.2019.00039)
+            "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
+        ],
+        "IgSF": [
+            "DPE",  # residues of conserved C3 region important for binding of gp120 to CD4, https://doi.org/10.1128/jvi.64.12.5701-5707.1990
+            "RDG",  # residues of the conserved C4 region of HIV-1 around residue 457, important for binding gp120 to CD4 (noted as slight permutation of known integrin binding motif ``RGD``) https://doi.org/10.1128/jvi.64.12.5701-5707.1990
+            "TGD",  # mutations in this region significantly reduced sigma-1 binding to JAM-A, https://doi.org/10.1371/journal.ppat.1000235
+            "NNMGT",  # (here and below) binding footprint of coxsackievirus-3 VP1 and VP2 capsid proteins with CAR D1 extracellular domain, https://doi.org/10.1128/jvi.00299-14
+            "GSNK",
+        ],
+    }
+
+    # combine lists of positive controls based on target_column
+    # choices "IN", "SA", "IG", "SA_IG", "IN_IG", "IN_SA", "IN_SA_IG", "Human Host",
+    # gather appropriate lists from pos_control_dict
+    # not using "Human Host" target column in DTRA workflow
+    receptor_names = target_column.split("_")
+    positive_controls = []
+    for receptor_name in receptor_names:
+        if receptor_name == "IN":
+            positive_controls.extend(pos_control_dict["Integrin"])
+        elif receptor_name == "SA":
+            positive_controls.extend(pos_control_dict["Sialic_Acid"])
+        elif receptor_name == "IG":
+            positive_controls.extend(pos_control_dict["IgSF"])
     if mode == "PC":
         # map positive_controls to PC-kmers using desired mapping method
         pc_pos_con = []
@@ -595,7 +646,7 @@ def validate_feature_table(file_name, idx, prefix):
         )
 
 
-def build_cache(cache_checkpoint=3, debug=False):
+def build_cache(cache_checkpoint=3, debug=False, data_file=None):
     """Download and store all data needed for the workflow"""
     if cache_checkpoint == "extract":
         with tarfile.open(cache_file, "r") as tar:
@@ -620,9 +671,14 @@ def build_cache(cache_checkpoint=3, debug=False):
     email = "arhall@lanl.gov"
 
     if cache_checkpoint > 2:
+        if data_file is not None:
+            print("Using Merged IgSF-Receptor Training File to build cache")
+            viral_files_in = [data_file]
+        else:
+            viral_files_in = viral_files
         print("Pulling viral sequence data to local cache...")
         try:
-            for file in viral_files:
+            for file in viral_files_in:
                 cli.pull_data(
                     [
                         "--email",
@@ -936,7 +992,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
         if feature_checkpoint > 0:
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                    csv_conversion(file).to_csv(temp_file)
+                    dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
                     file = temp_file.name
                 if i == 0:
                     prefix = "Train"
@@ -993,7 +1049,6 @@ def feature_selection_rfc(
     random_state,
     wf=None,
     mapping_method=None,
-    positive_controls=None,
     target_column="Human Host",
 ):
     """Sub-select features using best performing from a trained random forest classifier"""
@@ -1008,7 +1063,7 @@ def feature_selection_rfc(
             for mode in ["PC", "AA"]:
                 # count of PC and AA positive controls in pre-feature selection dataset
                 pos_con_all_data = check_positive_controls(
-                    positive_controls=positive_controls[target_column],
+                    target_column=target_column,
                     kmers_list=list(X.columns),
                     mapping_method=mapping_method,
                     mode=mode,
@@ -1289,9 +1344,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Is_Integrin", "Is_Sialic_Acid", "Is_Both", "Human Host"],
+        choices=[
+            "IN",
+            "SA",
+            "IG",
+            "SA_IG",
+            "IN_IG",
+            "IN_SA",
+            "IN_SA_IG",
+            "Human Host",
+        ],
         default="Human Host",
-        help="Target column to be used for binary clasification.",
+        help="Target column to be used for binary classification.",
     )
     parser.add_argument(
         "-w",
@@ -1322,6 +1386,13 @@ if __name__ == "__main__":
         default="cache_mollentze.tar.gz",
         help="Cached accession files for running workflow with cli flag '--cache extract'",
     )
+    parser.add_argument(
+        "-mf",
+        "--merge-file",
+        choices=["igsf_training.csv"],
+        default="igsf_training.csv",
+        help="Training data file to merge with `--train-file` if specified",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1340,6 +1411,7 @@ if __name__ == "__main__":
     mapping_method = args.mapping_method
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
+    merge_file = args.merge_file
 
     # check to make sure the correct `cache-tarball` is being used
     # for the given workflow when calling '--cache extract'
@@ -1412,45 +1484,16 @@ if __name__ == "__main__":
             },
         )
 
-    build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
+    if workflow == "DTRA":
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
+            file = temp_file.name
+        build_cache(cache_checkpoint=cache_checkpoint, debug=debug, data_file=file)
+    else:
+        build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(
         feature_checkpoint=feature_checkpoint, debug=debug, kmer_range=kmer_range_list
     )
-
-    # Here is a list of common integrin-binding motifs. These motifs interact with
-    # specific integrins, playing critical roles in cell adhesion, signaling, and
-    # interaction with the extracellular matrix:
-    # RGD (Arg-Gly-Asp)
-    # KGE (Lys-Gly-Glu)
-    # LDV (Leu-Asp-Val)
-    # DGEA (Asp-Gly-Glu-Ala)
-    # REDV (Arg-Glu-Asp-Val)
-    # YGRK (Tyr-Gly-Arg-Lys)
-    # PHSRN (Pro-His-Ser-Arg-Asn)
-    # SVVYGLR (Ser-Val-Val-Tyr-Gly-Leu-Arg)
-
-    pos_controls = {
-        "Is_Integrin": [
-            "RGD",
-            "KGE",
-            "LDV",
-            "DGEA",
-            "REDV",
-            "YGRK",
-            "PHSRN",
-            "SVVYGLR",
-        ],
-        "Is_Sialic_Acid": [
-            "LRM",  # R120 forms SA binding domain of CD22 which is a regulator of B cell signaling via a2,6 sialic acid binding (https://doi.org/10.1038/s41467-017-00836-6)
-            "FRM",  # conserved R109 residue in F-strand of siglec-3, 8 (FRL), 9 "forms strong interactions with corboxylate in sialic acid" (https://doi.org/10.1016/j.csbj.2023.08.014)
-            # primary and secondary sialic acid binding sites of NA composed of non-linear binding motifs (https://doi.org/10.3389/fmicb.2019.00039)
-            "NYNYLY",  # according to jurgen: low affinity sialic acid binder, "-R", "-Q" become high affinity neuraminic acid binder (needs reference)
-        ],
-    }
-    pos_controls["Is_Both"] = (
-        pos_controls["Is_Integrin"] + pos_controls["Is_Sialic_Acid"]
-    )
-
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -1458,7 +1501,6 @@ if __name__ == "__main__":
         random_state=random_state,
         wf=workflow,
         mapping_method=mapping_method,
-        positive_controls=pos_controls,
         target_column=target_column,
     )
     if workflow == "DR":
@@ -1666,8 +1708,10 @@ if __name__ == "__main__":
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
+        tbl = dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
+        # TODO: this call below may be redundant because
+        # X_train is returned by `feature_selection_rfc`
         X = pl.read_parquet(table_loc_train_best).to_pandas()
-        tbl = csv_conversion(train_file)
         y = y_train
 
         # check that none of the features in tbl have kmers outside of the range
@@ -1771,7 +1815,7 @@ if __name__ == "__main__":
 
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="PC",
@@ -1780,7 +1824,7 @@ if __name__ == "__main__":
 
         # count of PC positive controls in topN (array2)
         pos_con_topN_PC = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="PC",
@@ -1789,7 +1833,7 @@ if __name__ == "__main__":
 
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=list(X.iloc[train].columns),
             mapping_method=mapping_method,
             mode="AA",
@@ -1798,7 +1842,7 @@ if __name__ == "__main__":
 
         # count of AA positive controls in topN (array2)
         pos_con_topN_AA = check_positive_controls(
-            positive_controls=pos_controls[target_column],
+            target_column=target_column,
             kmers_list=array2,
             mapping_method=mapping_method,
             mode="AA",

@@ -3,7 +3,6 @@ from typing import Optional
 import numpy as np
 import functools
 from importlib.resources import files
-from typing import Union, Dict
 import polars as pl
 
 
@@ -196,6 +195,7 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
         target column string for collecting correct features
     mapping_methods: str
         list of mapping methods between which to check for matching features
+
     Returns:
     --------
     str
@@ -214,10 +214,15 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
             ).to_pandas()
             topN_files.append(topN_file)
         kmer_matches = match_kmers(topN_files, mapping_methods)
-        if kmer_matches is not None and not kmer_matches.empty:
-            return f"Matching AA kmers between PC kmers:\n {kmer_matches.to_string(index=False)}"
-        else:
+        if kmer_matches is None or kmer_matches.empty:
             return "No matching AA kmers found in TopN."
+        else:
+            kmer_matches.to_csv(
+                f"{mapping_methods[0]}_{mapping_methods[1]}_kmer_matches.csv",
+                index=False,
+            )
+            print("Saved matching AA kmers in topN between PC mapping methods.")
+            return f"Matching AA kmers between PC kmers:\n {kmer_matches.to_string(index=False)}"
     except FileNotFoundError:
         return_statement = "Must run workflow using both mapping methods before performing kmer mapping."
     return return_statement
@@ -246,7 +251,7 @@ def match_kmers(
     save_dir: str
         file name for saving kmer_maps
 
-    Return:
+    Returns:
     -------
     kmer_matches_df: Optional[pd.DataFrame]
         dataframe of PC kmer matches and their associated AA-kmer

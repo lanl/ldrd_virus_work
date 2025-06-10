@@ -327,7 +327,7 @@ def _grab_features(
         else:
             features.update(feat_genomic)
     if kmers:
-        _ = _populate_kmer_dict(kmer_k, records, features)
+        _populate_kmer_dict(kmer_k, records, features)
     if kmers_pc:
         kmer_maps = _populate_kmer_dict(
             kmer_k_pc, records, features, kmer_type="PC", mapping_method=mapping_method

@@ -148,13 +148,20 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
                     "0": ["kmer_AA_" + str(x) for x in range(3)],
                     "1": ["kmer_PC_" + str(x) for x in range(3)],
                 },
+                {
+                    "0": ["kmer_AA_" + str(x + 3) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                },
             ],
             [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
                 {
                     "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
                 },
             ],
-            ["mm1"],
+            ["mm1", "mm2"],
             "No matching AA kmers found in TopN.",
         ),
         # this test case checks that the function returns the correct string output for comparing
@@ -202,4 +209,11 @@ def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, out
         result = dtra_utils.find_matching_kmers(
             target_column="test", mapping_methods=mapping_method
         )
-    assert result == output
+        assert result == output
+
+    if result.startswith("Matching AA kmers"):
+        assert os.path.exists(
+            os.path.join(
+                tmpdir, f"{mapping_method[0]}_{mapping_method[1]}_kmer_matches.csv"
+            )
+        )

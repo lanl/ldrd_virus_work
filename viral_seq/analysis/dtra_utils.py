@@ -4,6 +4,7 @@ import numpy as np
 import functools
 from importlib.resources import files
 import polars as pl
+from sklearn.metrics import classification_report
 
 
 def get_surface_exposure_status(
@@ -331,3 +332,27 @@ def match_kmers(
             ).drop(columns="matching_AA_kmers")
             return kmer_matches_out
     return None
+
+
+def calculate_cv_metrics(clfr_preds: list):
+    """
+    calculate the average metrics of classifier predictions
+
+    Parameters:
+    -----------
+    clfr_preds: list
+        predictions and target values for each cross-fold
+
+    Returns: pd.DataFrame
+        dataframe containing average (std) of ``classification_report``
+        across preds
+    """
+    # TODO: support multiple classifiers
+    metrics = []
+    for pred, target in clfr_preds:
+        fold_metrics = classification_report(pred, target, output_dict=True)
+        metrics.append(pd.DataFrame(fold_metrics).T)
+    avg_metrics = pd.concat(metrics).groupby(level=0).mean()
+    std_metrics = pd.concat(metrics).groupby(level=0).std()
+    metrics_df = avg_metrics.join(std_metrics, rsuffix="_std")
+    return metrics_df

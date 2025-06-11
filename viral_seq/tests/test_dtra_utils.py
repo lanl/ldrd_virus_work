@@ -1,9 +1,9 @@
 from viral_seq.analysis import dtra_utils
 import pandas as pd
 from numpy.testing import assert_array_equal
+from pandas.testing import assert_frame_equal
 from importlib.resources import files
 import pytest
-from pandas.testing import assert_frame_equal
 import os
 
 
@@ -493,3 +493,16 @@ def test_match_kmers_error(tmpdir, kmer_matches, syn_topN, mapping_methods, erro
             )
     with pytest.raises(ValueError, match=error_msg):
         dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)
+
+
+def test_calculate_cv_metrics():
+    """test that the averaging of values using ``calculate_cv_metrics`` behaves as expected"""
+    exp_out = files("viral_seq.tests") / "cv_metrics_exp.csv"
+    exp_out_df = pd.read_csv(exp_out, index_col="Unnamed: 0")
+    y_pred = [True] * 5 + [False] * 5
+    # syn_preds contains half perfectly correlated; half inversely
+    # correlated predictions to target values, such that the
+    # output of the test should be 0.5 for all average "scores"
+    syn_preds = [(y_pred, y_pred), (y_pred, y_pred[::-1])]
+    out_metrics = dtra_utils.calculate_cv_metrics(syn_preds)
+    assert_frame_equal(out_metrics, exp_out_df)

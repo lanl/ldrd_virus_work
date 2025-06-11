@@ -1751,9 +1751,12 @@ if __name__ == "__main__":
         counter = -1
         n_features = 5
         temp1 = np.zeros((n_folds, n_features))
+        preds = []
 
         for fold, (train, test) in enumerate(cv.split(X, y)):
             clfr.fit(X.iloc[train], y[train])
+            y_pred = clfr.predict(X.iloc[train])
+            preds.append([y[train], y_pred])
             df = pd.DataFrame()
             df["Features"] = X.iloc[train].columns
             df["Importances"] = clfr.feature_importances_
@@ -1815,6 +1818,9 @@ if __name__ == "__main__":
             dpi=300,
         )
         plt.close(fig)
+
+        clfr_metrics = dtra_utils.calculate_cv_metrics(preds)
+        clfr_metrics.to_csv("cv_metrics.csv")
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots

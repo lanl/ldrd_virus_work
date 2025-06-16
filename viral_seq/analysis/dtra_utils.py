@@ -341,7 +341,7 @@ def calculate_cv_metrics(clfr_preds: list):
     Parameters:
     -----------
     clfr_preds: list
-        predictions and target values for each cross-fold
+        target values (y_true) and predictions (y_pred) for each cross-fold
 
     Returns: pd.DataFrame
         dataframe containing average (std) of ``classification_report``
@@ -349,8 +349,8 @@ def calculate_cv_metrics(clfr_preds: list):
     """
     # TODO: support multiple classifiers
     metrics = []
-    for pred, target in clfr_preds:
-        fold_metrics = classification_report(pred, target, output_dict=True)
+    for y_true, y_pred in clfr_preds:
+        fold_metrics = classification_report(y_true, y_pred, output_dict=True)
         metrics.append(pd.DataFrame(fold_metrics).T)
     avg_metrics = pd.concat(metrics).groupby(level=0).mean()
     std_metrics = pd.concat(metrics).groupby(level=0).std()

@@ -499,10 +499,11 @@ def test_calculate_cv_metrics():
     """test that the averaging of values using ``calculate_cv_metrics`` behaves as expected"""
     exp_out = files("viral_seq.tests") / "cv_metrics_exp.csv"
     exp_out_df = pd.read_csv(exp_out, index_col="Unnamed: 0")
-    y_pred = [True] * 5 + [False] * 5
+    y_true = [True] * 2 + [False] * 8
+    y_pred = [False] * 2 + [True] * 8
     # syn_preds contains half perfectly correlated; half inversely
     # correlated predictions to target values, such that the
     # output of the test should be 0.5 for all average "scores"
-    syn_preds = [(y_pred, y_pred), (y_pred, y_pred[::-1])]
+    syn_preds = [(y_true, y_true), (y_true, y_pred)]
     out_metrics = dtra_utils.calculate_cv_metrics(syn_preds)
     assert_frame_equal(out_metrics, exp_out_df)

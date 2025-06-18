@@ -78,15 +78,15 @@ def test_merge_convert_tbl():
                 },
             ],
             {
-                "mm1": {0: "kmer_PC_0", 1: "kmer_PC_1", 2: "kmer_PC_2"},
-                "mm2": {0: "kmer_PC_3", 1: "kmer_PC_4", 2: "kmer_PC_5"},
+                "jurgen_schmidt": {0: "kmer_PC_0", 1: "kmer_PC_1", 2: "kmer_PC_2"},
+                "shen_2007": {0: "kmer_PC_3", 1: "kmer_PC_4", 2: "kmer_PC_5"},
                 "matching_AA_kmers": {
                     0: ["kmer_AA_0"],
                     1: ["kmer_AA_1"],
                     2: ["kmer_AA_2"],
                 },
             },
-            ["mm1", "mm2"],
+            ["jurgen_schmidt", "shen_2007"],
         ),
         # this case tests that nothing is returned when only a single mapping method is used
         # to generate AA kmer matches.
@@ -103,7 +103,7 @@ def test_merge_convert_tbl():
                 },
             ],
             None,
-            ["mm1"],
+            ["jurgen_schmidt"],
         ),
     ],
 )
@@ -137,7 +137,7 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
         (
             None,
             None,
-            ["mm1", "mm2"],
+            ["jurgen_schmidt", "shen_2007"],
             "Must run workflow using both mapping methods before performing kmer mapping.",
         ),
         # this test case checks that the function returns the correct string output for comparing
@@ -150,30 +150,6 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
                 },
                 {
                     "0": ["kmer_AA_" + str(x + 3) for x in range(3)],
-                    "1": ["kmer_PC_" + str(x) for x in range(3)],
-                },
-            ],
-            [
-                {
-                    "0": ["kmer_PC_" + str(x) for x in range(3)],
-                },
-                {
-                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
-                },
-            ],
-            ["mm1", "mm2"],
-            "No matching AA kmers found in TopN.",
-        ),
-        # this test case checks that the function returns the correct string output for comparing
-        # mapping methods when there ARE AA matches found between PC mapping methods
-        (
-            [
-                {
-                    "0": ["kmer_AA_" + str(x) for x in range(3)],
-                    "1": ["kmer_PC_" + str(x) for x in range(3)],
-                },
-                {
-                    "0": ["kmer_AA_" + str(x) for x in range(3)],
                     "1": ["kmer_PC_" + str(x + 3) for x in range(3)],
                 },
             ],
@@ -185,8 +161,32 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
                     "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
                 },
             ],
-            ["mm1", "mm2"],
-            "Matching AA kmers between PC kmers:\n       mm1       mm2 matching_AA_kmers\nkmer_PC_0 kmer_PC_3       [kmer_AA_0]\nkmer_PC_1 kmer_PC_4       [kmer_AA_1]\nkmer_PC_2 kmer_PC_5       [kmer_AA_2]",
+            ["jurgen_schmidt", "shen_2007"],
+            "No matching AA kmers found between PC mapping schemes in TopN.",
+        ),
+        # this test case checks that the function returns the correct string output for comparing
+        # mapping methods when there ARE AA matches found between PC mapping methods
+        (
+            [
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x + 13) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x + 10) for x in range(3)],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x + 13) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_PC_" + str(x + 10) for x in range(3)],
+                },
+            ],
+            ["jurgen_schmidt", "shen_2007"],
+            "Matching AA kmers between PC kmers:\n jurgen_schmidt  shen_2007 matching_AA_kmers\n    kmer_PC_13 kmer_PC_10       [kmer_AA_0]\n    kmer_PC_14 kmer_PC_11       [kmer_AA_1]\n    kmer_PC_15 kmer_PC_12       [kmer_AA_2]",
         ),
     ],
 )
@@ -203,8 +203,11 @@ def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, out
             for i, mm in enumerate(mapping_method):
                 syn_topN_df = pd.DataFrame(syn_topN[i])
                 syn_topN_df.to_parquet(f"topN_kmers_test_{mm}.parquet.gzip")
+                k = list(
+                    set([len(s.replace("kmer_PC_", "")) for s in syn_topN[i]["0"]])
+                )
                 pd.DataFrame(kmer_matches[i]).to_parquet(
-                    f"kmer_maps/kmer_maps_k1_{mm}.parquet.gzip"
+                    f"kmer_maps/kmer_maps_k{k[0]}_{mm}.parquet.gzip"
                 )
         result = dtra_utils.find_matching_kmers(
             target_column="test", mapping_methods=mapping_method
@@ -217,3 +220,34 @@ def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, out
                 tmpdir, f"{mapping_method[0]}_{mapping_method[1]}_kmer_matches.csv"
             )
         )
+
+
+@pytest.mark.parametrize(
+    "kmer_matches, syn_topN, mapping_methods",
+    [
+        (
+            [
+                {
+                    "0": ["kmer_AA_" + str(x) for x in range(3)],
+                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+            ],
+            ["mapping_method"],
+        ),
+    ],
+)
+def test_match_kmers_error(tmpdir, kmer_matches, syn_topN, mapping_methods):
+    """test that the appropriate error is raised when function is provided incorrect mapping method"""
+    # make and save a temporary file containing the matching kmer dataframe
+    syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
+    for i, kmer_matches_N in enumerate(kmer_matches):
+        pd.DataFrame(kmer_matches_N).to_parquet(
+            f"{tmpdir}/kmer_maps_k1_{mapping_methods[i]}.parquet.gzip"
+        )
+    with pytest.raises(ValueError, match="Mapping method not recognized"):
+        dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)

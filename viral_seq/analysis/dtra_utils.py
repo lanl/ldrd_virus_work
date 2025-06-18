@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Optional
+from typing import Optional, Literal
 import numpy as np
 import functools
 from importlib.resources import files
@@ -180,7 +180,9 @@ def _merge_and_convert_tbl(train_file: str, merge_file: str, temp_file: str):
     return converted_tbl
 
 
-def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
+def find_matching_kmers(
+    target_column: str, mapping_methods: list[Literal["jurgen_schmidt", "shen_2007"]]
+) -> str:
     """
     find the matching AA-kmers between workflow runs using different PC mapping methods.
     return the appropriate string response based on the possible outputs of the function,
@@ -193,7 +195,7 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
     -----------
     target_column: str
         target column string for collecting correct features
-    mapping_methods: str
+    mapping_methods: list[Literal["jurgen_schmidt", "shen_2007"]]
         list of mapping methods between which to check for matching features
 
     Returns:
@@ -207,15 +209,15 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
         print(
             f"Will try to load topN kmer files for {mapping_methods} mapping schemes..."
         )
-        topN_files = []
+        topN_df_list = []
         for mm in mapping_methods:
-            topN_file = pl.read_parquet(
+            topN_df = pl.read_parquet(
                 f"topN_kmers_{target_column}_{mm}.parquet.gzip"
             ).to_pandas()
-            topN_files.append(topN_file)
-        kmer_matches = match_kmers(topN_files, mapping_methods)
+            topN_df_list.append(topN_df)
+        kmer_matches = match_kmers(topN_df_list, mapping_methods)
         if kmer_matches is None or kmer_matches.empty:
-            return "No matching AA kmers found in TopN."
+            return "No matching AA kmers found between PC mapping schemes in TopN."
         else:
             kmer_matches.to_csv(
                 f"{mapping_methods[0]}_{mapping_methods[1]}_kmer_matches.csv",
@@ -224,19 +226,18 @@ def find_matching_kmers(target_column: str, mapping_methods: list) -> str:
             print("Saved matching AA kmers in topN between PC mapping methods.")
             return f"Matching AA kmers between PC kmers:\n {kmer_matches.to_string(index=False)}"
     except FileNotFoundError:
-        return_statement = "Must run workflow using both mapping methods before performing kmer mapping."
-    return return_statement
+        return "Must run workflow using both mapping methods before performing kmer mapping."
 
 
 def match_kmers(
-    topN_files: list[pd.DataFrame],
-    mapping_methods: list[str],
+    topN_df_list: list[pd.DataFrame],
+    mapping_methods: list[Literal["jurgen_schmidt", "shen_2007"]],
     save_dir: str = "kmer_maps",
 ) -> Optional[pd.DataFrame]:
     """
-    determine matching AA kmers between different PC mappings from topN kmer features
+    determine matching AA kmer(s) between different PC mappings from topN kmer features
     using each mapping method (i.e. ``jurgen_schmidt`` and ``shen_2007``). If matches
-    exists, return dataframe containing matching AA kmer and corresponding PC kmer from
+    exist, return dataframe containing matching AA kmer and corresponding PC kmer from
     each mapping method.
 
     in order for this function to execute, you must run the full workflow using both
@@ -244,9 +245,9 @@ def match_kmers(
 
     Parameters:
     -----------
-    topN_files: list[pd.DataFrame]
+    topN_df_list: list[pd.DataFrame]
         list of pandas dataframes containing topN kmers found using each mapping scheme
-    mapping_methods: list[str]
+    mapping_methods: list[Literal["jurgen_schmidt", "shen_2007"]]
         names of mapping methods to compare
     save_dir: str
         file name for saving kmer_maps
@@ -254,71 +255,79 @@ def match_kmers(
     Returns:
     -------
     kmer_matches_df: Optional[pd.DataFrame]
-        dataframe of PC kmer matches and their associated AA-kmer
+        dataframe of PC kmer matches and their associated AA-kmer(s)
     """
-    topN_str_count = []
-    kmer_lists = []
-    for topN_file in topN_files:
-        topN_list = list(topN_file["0"])
-        kmer_lists.append(topN_list)
-
-        # find lengths of topN kmers strings in order to load correct PC-AA kmer map parquet files
-        topN_str = [
-            s.replace("kmer_PC_", "").replace("kmer_AA_", "") for s in topN_list
-        ]
-        topN_str_count.extend([len(s) for s in topN_str])
-
-    topN_kmer_lengths = list(set(topN_str_count))
+    full_kmer_list = [
+        " ".join(t) for topN_df in topN_df_list for t in topN_df.values.tolist()
+    ]
+    topN_kmer_lengths = list(
+        set(
+            [
+                len(s.replace("kmer_PC_", "").replace("kmer_AA_", ""))
+                for s in full_kmer_list
+            ]
+        )
+    )
 
     # load appropriate kmer-matching files
     kmer_maps_list = []
-    for mm in mapping_methods:
+    topN_kmer_mappings_all = []
+    topN_rank_len = []
+    for i, mm in enumerate(mapping_methods):
+        topN_mm = topN_df_list[i]
+        # check that mapping method is recognized
+        if mm not in ["jurgen_schmidt", "shen_2007"]:
+            raise ValueError(
+                "Mapping method not recognized from ``jurgen_schmidt``, ``shen_2007``."
+            )
+        # find the lengths of kmers in the topN and load kmer maps
+        # for the corresponding mapping method/kmer length combinations
         for kmer_len in topN_kmer_lengths:
             kmer_df = pl.read_parquet(
                 f"{save_dir}/kmer_maps_k{kmer_len}_{mm}.parquet.gzip"
             ).to_pandas()
             kmer_maps_list.append(kmer_df)
-    kmer_maps_df = pd.concat(kmer_maps_list, ignore_index=True)
-    # search for all of the corresponding AA kmers to every PC kmer in topN for each method
-    full_kmer_list: list[str] = []
-    matching_kmers: list[pd.DataFrame] = []
-    for kmer_list in kmer_lists:
-        for each_kmer in kmer_list:
-            full_kmer_list.append(each_kmer)
-            matching_kmers.append(kmer_maps_df[kmer_maps_df["1"] == each_kmer]["0"])
-
-    # make a new df holding all matching kmers with topN kmer as key
-    matching_kmers_df = pd.DataFrame(
-        np.nan, index=range(len(max(matching_kmers, key=len))), columns=["idx"]
-    )
-
-    for i, matching_kmer in enumerate(matching_kmers):
-        matching_kmer_series = pd.Series(matching_kmer.values).reindex(
-            matching_kmers_df.index
+        # concatenate all kmer maps and find the maps associated with kmers in the topN
+        all_kmer_maps = pd.concat(kmer_maps_list)
+        topN_kmer_mappings = all_kmer_maps[
+            all_kmer_maps.iloc[:, 1].isin(topN_mm.iloc[:, 0])
+        ]
+        # reorganize kmer mappings for readability and save topN mappings
+        topN_kmer_mappings = topN_kmer_mappings.assign(
+            counts=topN_kmer_mappings.groupby("1").cumcount()
         )
-        matching_kmers_df[full_kmer_list[i]] = matching_kmer_series
-
-    # drop the place holder column 'idx' from dataframe
-    matching_kmers_df.drop("idx", axis=1, inplace=True)
-
-    # save the df of matching PC and AA kmers for each mapping method
-    for mm in mapping_methods:
-        matching_kmers_df.to_csv(f"topN_PC_AA_kmer_mappings_{mm}.csv", index=False)
+        topN_kmer_order = topN_mm[topN_mm["0"].str.contains("kmer_PC_")]
+        topN_kmer_mappings = (
+            topN_kmer_mappings.pivot(index="counts", columns="1", values="0")
+            .reindex(columns=topN_kmer_order["0"])
+            .reset_index(drop=True)
+        )
+        topN_kmer_mappings.to_csv(f"topN_PC_AA_kmer_mappings_{mm}.csv", index=False)
+        topN_kmer_mappings_all.append(topN_kmer_mappings)
+        # append the length of the PC kmer list to the list of ranked kmer lengths
+        # for each mapping method because we ignore AA kmers in PC kmer matching
+        topN_rank_len.append(len(topN_kmer_mappings.columns))
+    # concatenate all kmer mappings for topN of both mapping methods
+    topN_kmer_mappings_df = pd.concat(topN_kmer_mappings_all, axis=1)
 
     # if comparing more than one mapping method, find and return matches, if any
-    if len(topN_files) > 1:
+    if len(topN_df_list) > 1:
         # get feature columns
-        kmer_features = matching_kmers_df.columns
+        kmer_features = topN_kmer_mappings_df.columns
         # find all kmer features in each column
         matching_kmers_dict = {
-            kmer_feature: set(matching_kmers_df[kmer_feature].dropna())
+            kmer_feature: set(topN_kmer_mappings_df[kmer_feature].dropna())
             for kmer_feature in kmer_features
         }
         # initialize list for aggregating matching kmers
         kmer_matches = []
-        # iterate through kmer feature columns to find matching kmers
-        for i, kmer_feature in enumerate(kmer_features):
-            for j in range(i + 1, len(kmer_features)):
+        # iterate through kmer feature columns to find matching kmers.
+        # only compare the features of the first mapping method to those
+        # of the second mapping method by slicing the kmer features
+        # based on the length of the topN from each mapping method
+        for i in range(topN_rank_len[0]):
+            kmer_feature = kmer_features[i]
+            for j in range(topN_rank_len[0], sum(topN_rank_len)):
                 kmer_query = kmer_features[j]
                 common = (
                     matching_kmers_dict[kmer_feature] & matching_kmers_dict[kmer_query]

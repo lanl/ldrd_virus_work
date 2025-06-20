@@ -1755,8 +1755,8 @@ if __name__ == "__main__":
 
         for fold, (train, test) in enumerate(cv.split(X, y)):
             clfr.fit(X.iloc[train], y[train])
-            y_pred = clfr.predict(X.iloc[train])
-            preds.append([y[train], y_pred])
+            y_pred = clfr.predict(X.iloc[test])
+            preds.append([y[test], y_pred])
             df = pd.DataFrame()
             df["Features"] = X.iloc[train].columns
             df["Importances"] = clfr.feature_importances_

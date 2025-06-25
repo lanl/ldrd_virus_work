@@ -2004,7 +2004,7 @@ if __name__ == "__main__":
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
             target_column=target_column,
-            kmers_list=list(X.iloc[train].columns),
+            kmers_list=list(X.columns),
             mapping_method=mapping_method,
             mode="PC",
         )
@@ -2013,7 +2013,7 @@ if __name__ == "__main__":
         # count of PC positive controls in topN
         pos_con_topN_PC = check_positive_controls(
             target_column=target_column,
-            kmers_list=array2,
+            kmers_list=list(top_features_array),
             mapping_method=mapping_method,
             mode="PC",
         )
@@ -2022,7 +2022,7 @@ if __name__ == "__main__":
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
             target_column=target_column,
-            kmers_list=list(X.iloc[train].columns),
+            kmers_list=list(X.columns),
             mapping_method=mapping_method,
             mode="AA",
         )
@@ -2031,7 +2031,7 @@ if __name__ == "__main__":
         # count of AA positive controls in topN
         pos_con_topN_AA = check_positive_controls(
             target_column=target_column,
-            kmers_list=array2,
+            kmers_list=list(top_features_array),
             mapping_method=mapping_method,
             mode="AA",
         )

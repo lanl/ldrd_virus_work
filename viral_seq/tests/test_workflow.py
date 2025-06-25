@@ -389,16 +389,16 @@ def test_pos_con_columns(target_column, len_exp_keys):
     # for deciding when to plot inside the bar vs outside the bar
     [
         (
-            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
-            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
+            [np.array([25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 42.5, 45.0, 47.5, 50.0])],
+            [np.array([25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 42.5, 45.0, 47.5, 50.0])],
             2,
             10,
             1,
             "test_1",
         ),
         (
-            [np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0])],
-            [np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0])],
+            [np.array([5.0, 5.0, 0.0, 5.0, 5.0, 5.0, 10.0, 0.0, 45.0, 50.0])],
+            [np.array([0.0, 0.0, 5.0, 0.0, 0.0, 5.0, 25.0, 45.0, 5.0, 25.0])],
             10,
             10,
             1,
@@ -458,7 +458,7 @@ def test_fic_plot(
     assert (
         compare_images(
             files("viral_seq.tests.expected") / f"FIC_expected_{plot_title}.png",
-            str(tmp_path / "FIC_Is_Integrin.png"),
+            str(tmp_path / "FIC_IN.png"),
             0.001,
         )
         is None

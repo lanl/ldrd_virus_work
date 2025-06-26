@@ -105,6 +105,7 @@ class kmer_data:
 def feature_signs(
     is_exposed: list,
     feature_count: pd.DataFrame,
+    max_features: int,
 ) -> tuple:
     """
     Determine the sign character of the surface exposure status and response effect of the kmer
@@ -116,6 +117,8 @@ def feature_signs(
         list of kmers that are surface exposed
     feature_count: pd.DataFrame
         data frame containing training features and corresponding information from cv
+    max_features: int
+        number of features to include in the topN
 
     Returns:
     --------
@@ -126,7 +129,7 @@ def feature_signs(
     """
     response_effect = []
     surface_exposed_sign = []
-    top_kmers = list(feature_count["Features"])
+    top_kmers = list(feature_count["Features"][:max_features])
     # add sign of surface exposure based on comparison between lists of exposure status
     for i in range(len(is_exposed)):
         if is_exposed[i]:
@@ -570,7 +573,7 @@ def train_clfr(
     )
 
     return (
-        feature_count[-max_features:],
+        feature_count,
         (shap_values_clfr, shap_data_clfr),
         clfr_preds_all,
     )
@@ -614,6 +617,7 @@ def FIC_plot(
     target_column: str,
     response_effect_sign: list,
     surface_exposed_dict: dict,
+    max_features: int,
     path: Path,
 ):
     """
@@ -636,6 +640,8 @@ def FIC_plot(
     surface_exposed_dict: dict
         dictionary containing kmer features and ratio of surface exposed
         to not surface exposed viral proteins for given kmer
+    max_features: int
+        number of features to include in topN
     path: Path
         path to save figure
     """
@@ -670,15 +676,17 @@ def FIC_plot(
         "#66A61E",  # Olive Green
         "#A1C57A",  # Lighter Olive Green
     ]
-    # grab topN features from bottom of df because
-    # plotting happens from bottom to top
-    df_plot = feature_count[-20:]
+
+    # barh plots values from bottom to top
+    top_feature_count = feature_count[:max_features].iloc[::-1]
+    response_effect_sign = response_effect_sign[::-1]
+
     fig, ax = plt.subplots(figsize=(8, 10))
     plot_columns = list(
         feature_count.columns[feature_count.columns.str.contains("proportion")]
     )
     plot_colors = colors_list[: len(plot_columns)]
-    df_plot.plot(
+    top_feature_count.plot(
         x="Features",
         y=plot_columns,
         kind="barh",
@@ -687,7 +695,7 @@ def FIC_plot(
         color=plot_colors,
     )
 
-    for idx, (_, row) in enumerate(df_plot.iterrows()):
+    for idx, (_, row) in enumerate(top_feature_count.iterrows()):
         percent = surface_exposed_dict[row["Features"]]
         response_sign = response_effect_sign[idx]
         width = row[plot_columns].sum()
@@ -732,7 +740,7 @@ def FIC_plot(
         prop={"size": 10},
         bbox_to_anchor=(0.5, -0.1),
     )
-    ax.set_xlabel(f"% ML models where ranked in top {len(df_plot)} features")
+    ax.set_xlabel(f"% ML models where ranked in top {max_features} features")
     ax.set_title(
         f"Feature importance consensus amongst\n {n_folds} folds for {target_name} binding"
     )
@@ -1715,6 +1723,13 @@ if __name__ == "__main__":
         default="igsf_training.csv",
         help="Training data file to merge with `--train-file` if specified",
     )
+    parser.add_argument(
+        "-mx",
+        "--max-features",
+        type=int,
+        default=20,
+        help="Max number of features for performing consensus for topN kmers.",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1734,6 +1749,7 @@ if __name__ == "__main__":
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
     merge_file = args.merge_file
+    max_features = args.max_features
 
     # check to make sure the correct `cache-tarball` is being used
     # for the given workflow when calling '--cache extract'
@@ -2044,7 +2060,6 @@ if __name__ == "__main__":
         # TODO: add CLI option for determining which classifiers to train
         # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
-        max_features = 20
         classifier_parameters = {
             "RandomForestClassifier": {
                 "clfr": RandomForestClassifier(),
@@ -2076,6 +2091,7 @@ if __name__ == "__main__":
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
             X, y, classifier_parameters, n_folds, max_features, random_state
         )
+        top_features_array = feature_count["Features"].values[:max_features]
 
         # plot roc curve from cv consensus
         plot_cv_roc(clfr_preds, target_column, paths[-1])
@@ -2092,7 +2108,7 @@ if __name__ == "__main__":
         # count of PC positive controls in topN
         pos_con_topN_PC = check_positive_controls(
             target_column=target_column,
-            kmers_list=list(feature_count["Features"]),
+            kmers_list=list(top_features_array),
             mapping_method=mapping_method,
             mode="PC",
         )
@@ -2110,13 +2126,13 @@ if __name__ == "__main__":
         # count of AA positive controls in topN
         pos_con_topN_AA = check_positive_controls(
             target_column=target_column,
-            kmers_list=list(feature_count["Features"]),
+            kmers_list=list(top_features_array),
             mapping_method=mapping_method,
             mode="AA",
         )
         print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
-        kmer_info = kmer_data(mapping_method, list(feature_count["Features"]))
+        kmer_info = kmer_data(mapping_method, top_features_array)
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
@@ -2130,9 +2146,7 @@ if __name__ == "__main__":
 
         temp5 = list(set(zip(kmer_features, surface_exposed_status)))
 
-        is_exposed = label_surface_exposed(
-            temp5, feature_count["Features"][-max_features:]
-        )
+        is_exposed = label_surface_exposed(temp5, top_features_array)
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
@@ -2153,13 +2167,12 @@ if __name__ == "__main__":
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            feature_count[-max_features:],
+            feature_count,
+            max_features,
         )
 
         # calculate hydrophobicity scores
-        hydro_scores = ba.hydrophobicity_score(
-            feature_count["Features"], mapping_method
-        )
+        hydro_scores = ba.hydrophobicity_score(top_features_array, mapping_method)
         hydro_scores.to_csv("hydrophobicity_scores.csv", header=False, index=False)
 
         # Production of the FIC plot
@@ -2169,6 +2182,6 @@ if __name__ == "__main__":
             target_column,
             response_effect_sign,
             surface_exposed_dict,
-            n_classifiers,
+            max_features,
             paths[-1],
         )

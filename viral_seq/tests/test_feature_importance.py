@@ -247,17 +247,17 @@ def test_sort_feature_counts():
     out_df = fi.sort_feature_counts(feature_df, n_folds=5)
     exp_df = pd.DataFrame.from_dict(
         {
-            "Features": {2: "kmer_2", 1: "kmer_1", 0: "kmer_0"},
-            "Clfr_0": {2: 1, 1: 1, 0: 5},
-            "SHAP_0": {2: 1, 1: 1, 0: 4},
-            "Clfr_1": {2: 0, 1: 6, 0: 3},
-            "SHAP_1": {2: 6, 1: 0, 0: 1},
-            "Pearson R": {2: -0.42, 1: 0.41, 0: 0.99},
-            "Sum": {2: 8, 1: 8, 0: 13},
-            "Clfr_0_proportion": {2: 10.0, 1: 10.0, 0: 50.0},
-            "SHAP_0_proportion": {2: 10.0, 1: 10.0, 0: 40.0},
-            "Clfr_1_proportion": {2: 0.0, 1: 60.0, 0: 30.0},
-            "SHAP_1_proportion": {2: 60.0, 1: 0.0, 0: 10.0},
+            "Features": {0: "kmer_0", 1: "kmer_1", 2: "kmer_2"},
+            "Clfr_0": {0: 5, 1: 1, 2: 1},
+            "SHAP_0": {0: 4, 1: 1, 2: 1},
+            "Clfr_1": {0: 3, 1: 6, 2: 0},
+            "SHAP_1": {0: 1, 1: 0, 2: 6},
+            "Pearson R": {0: 0.99, 1: 0.41, 2: -0.42},
+            "Sum": {0: 13, 1: 8, 2: 8},
+            "Clfr_0_proportion": {0: 50.0, 1: 10.0, 2: 10.0},
+            "SHAP_0_proportion": {0: 40.0, 1: 10.0, 2: 10.0},
+            "Clfr_1_proportion": {0: 30.0, 1: 60.0, 2: 0.0},
+            "SHAP_1_proportion": {0: 10.0, 1: 0.0, 2: 60.0},
         }
     )
 

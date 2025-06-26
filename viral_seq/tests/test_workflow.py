@@ -383,65 +383,65 @@ def test_pos_con_columns(target_column, len_exp_keys):
 
 
 @pytest.mark.parametrize(
-    "shap_props, clfr_props, n_folds, n_feats, n_clfrs, plot_title",
+    "shap_props, clfr_props, n_folds, n_feats, plot_title",
     # fractional values of shap and clfr counts are used to check that
     # thresholds for plotting percent surface exposure values are appropriate
     # for deciding when to plot inside the bar vs outside the bar
     [
         (
-            [np.array([25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 42.5, 45.0, 47.5, 50.0])],
-            [np.array([25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 42.5, 45.0, 47.5, 50.0])],
+            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
+            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
             2,
             10,
-            1,
             "test_1",
         ),
         (
-            [np.array([5.0, 5.0, 0.0, 5.0, 5.0, 5.0, 10.0, 0.0, 45.0, 50.0])],
-            [np.array([0.0, 0.0, 5.0, 0.0, 0.0, 5.0, 25.0, 45.0, 5.0, 25.0])],
+            [np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0])],
+            [np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0])],
             10,
             10,
-            1,
             "test_2",
         ),
         # test case for the upper bound of the current workflow in terms of
         # number of classifiers and number of plotted features
         (
-            np.sort(
-                np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+            np.flip(
+                np.sort(
+                    np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+                ),
+                axis=1,
             ),
-            np.sort(
-                np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+            np.flip(
+                np.sort(
+                    np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+                ),
+                axis=1,
             ),
             1,
             20,
-            4,
             "test_3",
         ),
     ],
 )
-def test_fic_plot(
-    tmp_path, shap_props, clfr_props, n_folds, n_feats, n_clfrs, plot_title
-):
+def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title):
     rng = np.random.default_rng(seed=123)
 
     feature_values = list(range(n_feats))
-    kmer_features = ["kmer_PC_" + str(f) for f in feature_values]
+    kmer_features = ["kmer_PC_" + str(f) for f in feature_values[::-1]]
 
     target_column = "IN"
     rng = np.random.default_rng(seed=123)
 
-    percent_exposed = np.round(rng.uniform(1, 100, n_feats), 2)
+    percent_exposed = np.flip(np.round(rng.uniform(1, 100, n_feats), 2))
 
-    response_effect_sign = rng.choice(["+", "-"], n_feats)
+    response_effect_sign = np.flip(rng.choice(["+", "-"], n_feats))
     surface_exposed_dict = {
         kmer_features[i]: percent_exposed[i] for i in range(n_feats)
     }
 
-    n_classifiers = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
-    for i in range(n_clfrs):
+    for i in range(len(clfr_props)):
         df_in[f"Classifier proportion {i}"] = clfr_props[i]
         df_in[f"SHAP proportion {i}"] = shap_props[i]
 
@@ -451,7 +451,7 @@ def test_fic_plot(
         target_column,
         response_effect_sign,
         surface_exposed_dict,
-        n_classifiers,
+        n_feats,
         tmp_path,
     )
 
@@ -506,7 +506,7 @@ def test_feature_sign(
     feature_count["Pearson R"] = pearson_values
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, feature_count
+        is_exposed, feature_count, len(found_kmers)
     )
 
     assert_array_equal(response_effect_out, response_effect_exp)

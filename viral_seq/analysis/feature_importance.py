@@ -248,7 +248,7 @@ def plot_shap_consensus(
 
 def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     """
-    Sort the counts of important features in ascending order using the following qualifiers:
+    Sort the counts of important features in descending order using the following qualifiers:
         1. the sum of the feature counts from classifier and shap importances
         2. the signed Pearson R correlation coefficient between shap importance values and the data target
 
@@ -265,7 +265,7 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     Returns:
     --------
     feature_df_sorted: pd.DataFrame
-        dataframe containing kmer feature information sorted in ascending order
+        dataframe containing kmer feature information sorted in descending order
         by total feature count and then signed pearson R
     """
     feature_df_sorted = feature_df.copy()
@@ -279,7 +279,9 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     # equal "Sum" values, the feature with greater positive SHAP correlation will be ranked
     # higher, i.e. greater "weight" on relative SHAP importance.
     # TODO: filter out negatively effecting features based on pearson R #118
-    feature_df_sorted.sort_values(by=["Sum", "Pearson R"], ascending=True, inplace=True)
+    feature_df_sorted.sort_values(
+        by=["Sum", "Pearson R"], ascending=False, inplace=True
+    )
 
     # divide total counts by number of feature types that we are aggregating over
     # to give true proportions

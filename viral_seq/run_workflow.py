@@ -645,7 +645,6 @@ def FIC_plot(
     path: Path
         path to save figure
     """
-
     target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
     target_columns = target_column.split("_")
     target_names = []

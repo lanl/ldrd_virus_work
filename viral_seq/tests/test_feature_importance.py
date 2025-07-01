@@ -235,8 +235,15 @@ def test_plot_shap_consensus(tmp_path):
 
 
 def test_sort_feature_counts():
+    """
+    the purpose of this test is to check that feature importance percentages
+    are calculated correctly and that when two features have the same number
+    of total votes the pearson value is being used correctly to break the tie,
+    such that the feature with the greater positive ``Pearson R`` value
+    is given preferential ranking
+    """
     feature_df = pd.DataFrame()
-    kmer_features = np.array(["kmer_" + str(i) for i in range(3)])
+    kmer_features = np.array([f"kmer_{i}" for i in range(3)])
     feature_df["Features"] = kmer_features
     feature_df["Clfr_0"] = [5, 1, 1]
     feature_df["SHAP_0"] = [4, 1, 1]
@@ -254,10 +261,10 @@ def test_sort_feature_counts():
             "SHAP_1": {0: 1, 1: 0, 2: 6},
             "Pearson R": {0: 0.99, 1: 0.41, 2: -0.42},
             "Sum": {0: 13, 1: 8, 2: 8},
-            "Clfr_0_proportion": {0: 50.0, 1: 10.0, 2: 10.0},
-            "SHAP_0_proportion": {0: 40.0, 1: 10.0, 2: 10.0},
-            "Clfr_1_proportion": {0: 30.0, 1: 60.0, 2: 0.0},
-            "SHAP_1_proportion": {0: 10.0, 1: 0.0, 2: 60.0},
+            "Clfr_0_percentage": {0: 50.0, 1: 10.0, 2: 10.0},
+            "SHAP_0_percentage": {0: 40.0, 1: 10.0, 2: 10.0},
+            "Clfr_1_percentage": {0: 30.0, 1: 60.0, 2: 0.0},
+            "SHAP_1_percentage": {0: 10.0, 1: 0.0, 2: 60.0},
         }
     )
 

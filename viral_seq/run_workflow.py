@@ -490,8 +490,7 @@ def train_clfr(
         dict containing fpr, tpr and auc's for cv folds for plotting the consensus ROC curve
         using the classifier name as the dictionary key
     """
-
-    cv = StratifiedKFold(n_splits=n_folds)
+    cv = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_state)
     mean_fpr = np.linspace(0, 1, 100)
     clfr_preds_all = {}
     shap_values_all: list[float] = []
@@ -564,9 +563,9 @@ def train_clfr(
     # sort feature counts by total number of votes between
     # classifier and shap importance rankings
     feature_count = feature_importance.sort_feature_counts(feature_count, n_folds)
-    # normalize feature count proportions by the number of classifiers
+    # normalize feature count percentages by the number of classifiers
     count_columns = feature_count.columns[
-        feature_count.columns.str.contains("proportion")
+        feature_count.columns.str.contains("percentage")
     ]
     feature_count[count_columns] = feature_count[count_columns] / len(
         classifier_parameters
@@ -637,6 +636,7 @@ def FIC_plot(
         name of column on which classifier was trained
     response_effect_sign: list
         list of +/- symbols denoting response effect from shap importance pearson-r correlation
+        note: a ValueError will be thrown if len(response_effect_sign) != max_features
     surface_exposed_dict: dict
         dictionary containing kmer features and ratio of surface exposed
         to not surface exposed viral proteins for given kmer
@@ -645,6 +645,12 @@ def FIC_plot(
     path: Path
         path to save figure
     """
+
+    # check that the appropriate number of feature signs exist to plot against ``max_features``
+    if len(response_effect_sign) != max_features:
+        raise ValueError(
+            f"Mismatch between number of feature signs ({len(response_effect_sign)}) and total features ({max_features}) available for plotting."
+        )
     target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
     target_columns = target_column.split("_")
     target_names = []
@@ -682,7 +688,7 @@ def FIC_plot(
 
     fig, ax = plt.subplots(figsize=(8, 10))
     plot_columns = list(
-        feature_count.columns[feature_count.columns.str.contains("proportion")]
+        feature_count.columns[feature_count.columns.str.contains("percentage")]
     )
     plot_colors = colors_list[: len(plot_columns)]
     top_feature_count.plot(

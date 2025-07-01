@@ -252,7 +252,7 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
         1. the sum of the feature counts from classifier and shap importances
         2. the signed Pearson R correlation coefficient between shap importance values and the data target
 
-    Calculate the proportions of each count across all classifiers for generating the FIC plot
+    Calculate the percentages of each count across all classifiers for generating the FIC plot
 
     Parameters:
     -----------
@@ -284,9 +284,9 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     )
 
     # divide total counts by number of feature types that we are aggregating over
-    # to give true proportions
+    # to give true percentages
     for col in sort_columns:
-        feature_df_sorted[f"{col}_proportion"] = (
+        feature_df_sorted[f"{col}_percentage"] = (
             np.array(feature_df_sorted[col].values) / (n_folds * 2) * 100
         )
 

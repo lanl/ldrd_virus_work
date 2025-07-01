@@ -427,10 +427,9 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title
     rng = np.random.default_rng(seed=123)
 
     feature_values = list(range(n_feats))
-    kmer_features = ["kmer_PC_" + str(f) for f in feature_values[::-1]]
+    kmer_features = [f"kmer_PC_{f}" for f in feature_values[::-1]]
 
     target_column = "IN"
-    rng = np.random.default_rng(seed=123)
 
     percent_exposed = np.flip(np.round(rng.uniform(1, 100, n_feats), 2))
 
@@ -463,6 +462,23 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title
         )
         is None
     )
+
+
+def test_fic_plot_error(tmp_path):
+    """
+    test that the function raises a ``ValueError`` when there is a mismatch
+    between number of features and number of response sign values
+    """
+    df_in = pd.DataFrame(
+        {
+            "Features": ["kmer_PC_0", "kmer_PC_1"],
+            "Classifier percentage": [50.0, 40.0],
+            "SHAP percentage": [50.0, 40.0],
+        }
+    )
+    surface_exposed_dict = {"kmer_PC_0": 50.00, "kmer_PC_1": 0.00}
+    with pytest.raises(ValueError, match="Mismatch between number of feature signs"):
+        workflow.FIC_plot(df_in, 2, "IN", ["+"], surface_exposed_dict, 2, tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -1012,8 +1028,7 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7]),
-            [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            np.asarray([0, 1, 7, 4, 11, 3, 9, 10])[8, 8, 4, 2, 2] + [0] * 7,
         ),
         (
             {
@@ -1026,8 +1041,7 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7]),
-            [2.0, 2.0, 1.0, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            np.asarray([0, 1, 7, 4, 11, 3, 9, 10])[8, 8, 4, 2, 2] + [0] * 7,
         ),
     ],
 )
@@ -1065,10 +1079,10 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
     feature_rank_exp = kmer_names[feature_rank_array]
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
-    assert_array_less(np.abs(pearson_rank[2:]), 0.80)
-    # lower ranked features in feature_rank have tendency to swap depending on floating
-    # point handling and are excluded from test, which is concerned with top feature ranks
-    assert_array_equal(feature_rank[:4], feature_rank_exp)
+    assert_array_less(np.abs(pearson_rank[2:]), 0.90)
+    # last four items in feature_rank have tendency to swap, and are
+    # excluded from test, which is concerned with top feature ranks
+    assert_array_equal(feature_rank[:8], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
 
 

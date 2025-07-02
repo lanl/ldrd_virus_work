@@ -337,3 +337,27 @@ def test_get_roc_curve_cv_copies():
     assert cv_roc_data.fpr_folds is None
     assert_allclose(cv_roc_data.tpr_folds, exp_tpr_folds)
     assert_allclose(cv_roc_data.tpr_std_folds, exp_tpr_std_folds)
+
+
+def test_plot_confusion_matrix(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_confusion_matrix.png"
+    )
+    rng = np.random.default_rng(123)
+    y_test = rng.integers(2, size=10)
+    y_pred = rng.integers(2, size=10)
+    with tmpdir.as_cwd():
+        classifier.plot_confusion_matrix(y_test, y_pred)
+        assert compare_images(expected_plot, "confusion_matrix.png", 0.001) is None
+
+
+def test_plot_confusion_matrix_mean(tmpdir):
+    expected_plot = files("viral_seq.tests.expected").joinpath(
+        "test_plot_confusion_matrix_mean.png"
+    )
+    rng = np.random.default_rng(123)
+    y_test = [rng.integers(2, size=10)] * 3
+    y_preds = [rng.integers(2, size=10) for i in range(3)]
+    with tmpdir.as_cwd():
+        classifier.plot_confusion_matrix_mean(y_test, y_preds)
+        assert compare_images(expected_plot, "confusion_matrix_mean.png", 0.001) is None

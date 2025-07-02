@@ -4,7 +4,13 @@ import pandas as pd
 from typing import Union, Any, Optional, NamedTuple
 from viral_seq.analysis import spillover_predict as sp
 from joblib import Parallel, delayed
-from sklearn.metrics import get_scorer, roc_curve, auc
+from sklearn.metrics import (
+    get_scorer,
+    roc_curve,
+    auc,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+)
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 import ray
@@ -494,4 +500,66 @@ def plot_roc_curve_comparison(
     ax.legend(loc="lower right")
 
     fig.savefig(filename, dpi=300)
+    plt.close()
+
+
+def plot_confusion_matrix(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    title: str = "Confusion Matrix",
+    filename: str = "confusion_matrix.png",
+):
+    """Plot confusion matrix."""
+    cm = confusion_matrix(y_true, y_pred)
+    _plot_confusion_matrix(cm, None, title, filename)
+
+
+def plot_confusion_matrix_mean(
+    y_true: list[np.ndarray],
+    y_preds: list[np.ndarray],
+    title: str = "Mean Confusion Matrix",
+    filename: str = "confusion_matrix_mean.png",
+):
+    """Plot confusion matrix with mean ± std."""
+    cm_list = [confusion_matrix(y_t, y_p) for y_t, y_p in zip(y_true, y_preds)]
+    cm_mean = np.mean(cm_list, axis=0)
+    cm_std = np.std(cm_list, axis=0)
+    _plot_confusion_matrix(cm_mean, cm_std, title, filename)
+
+
+def _plot_confusion_matrix(
+    cm: np.ndarray, cm_std: Optional[np.ndarray], title: str, filename: str
+):
+    fig, ax = plt.subplots(figsize=(6, 5))
+    conf_mat = ConfusionMatrixDisplay(
+        confusion_matrix=cm, display_labels=["False", "True"]
+    )
+    conf_mat.plot(ax=ax, include_values=False)
+    # Manual annotations to support mean ± std
+    # Use cmap for annotation colors
+    cmap = conf_mat.im_.get_cmap()
+    cmap_min, cmap_max = cmap(0), cmap(1.0)
+    thresh = (cm.max() + cm.min()) / 2.0
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            mean_val = cm[i, j]
+            label = f"{mean_val:.0f}"
+            if cm_std is not None:
+                std_val = cm_std[i, j]
+                label = f"{mean_val:.2f} ± {std_val:.2f}"
+            # make sure annotation color is readable
+            color = cmap_max if mean_val < thresh else cmap_min
+            ax.text(
+                j,
+                i,
+                label,
+                ha="center",
+                va="center",
+                color=color,
+            )
+    ax.set_title(title)
+    ax.set_xlabel("Predicted Label")
+    ax.set_ylabel("True Label")
+    fig.tight_layout()
+    fig.savefig(filename.replace(" ", "_"), dpi=300)
     plt.close()

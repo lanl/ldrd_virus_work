@@ -1819,8 +1819,15 @@ if __name__ == "__main__":
         )
         plt.close(fig)
 
+        # calculate classifier metrics and plot confusion matrix
         clfr_metrics = dtra_utils.calculate_cv_metrics(preds)
         clfr_metrics.to_csv("cv_metrics.csv")
+        classifier.plot_confusion_matrix_mean(
+            preds[0],
+            preds[1],
+            "Confusion Matrix Random Forest Classifier (Mean ± Std.)",
+            os.path.join(paths[-1], "conf_mat_rfc.png"),
+        )
 
         ### Populate 'array1' and 'array2' with useful information
         ### for the Feature Importance Consensus (FIC) and SHAP plots

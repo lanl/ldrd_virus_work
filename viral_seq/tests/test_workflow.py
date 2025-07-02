@@ -9,7 +9,6 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
-import sys
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
 
@@ -1042,10 +1041,6 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
     assert_array_equal(count_rank, count_rank_exp)
 
 
-@pytest.mark.skipif(
-    sys.platform == "darwin",
-    reason="Floating point discrepancies cause test to fail on Mac, re: https://github.com/scikit-learn/scikit-learn/issues/31415",
-)
 def test_pearson_aggregation():
     # enforce Pearson aggregation behavior, avoid reduction across folds
     random_state = 123

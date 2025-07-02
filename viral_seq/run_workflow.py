@@ -41,6 +41,7 @@ from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 import os
 from tqdm import tqdm
+from sklearn.preprocessing import normalize
 
 matplotlib.use("Agg")
 
@@ -462,6 +463,7 @@ def train_clfr(
         The feature targets for the given target column
     classifier_parameters: dict
         dictionary containing the classifier and associated parameters to initialize classifier
+        with the classifier name as the dictionary key
     n_folds: int
         number of training cross-folds to perform
     max_features: int
@@ -477,8 +479,8 @@ def train_clfr(
     shap_clfr_consensus: tuple
         aggregated shap values and model target values over multiple cross-folds
     clfr_preds: dict
-        dict containing fpr, tpr and auc's for cv folds
-        for plotting the consensus ROC curve
+        dict containing fpr, tpr and auc's for cv folds for plotting the consensus ROC curve
+        using the classifier name as the dictionary key
     """
 
     cv = StratifiedKFold(n_splits=n_folds)
@@ -531,8 +533,13 @@ def train_clfr(
                 clfr_importances, shap_importances, feature_count, max_features
             )
 
+            # normalize shap values
+            normalized_shap_values = normalize(
+                positive_shap_values.values, norm="l1", axis=1
+            )
+
             # aggregate the raw shap values and associated data targets
-            shap_values_all.append(positive_shap_values.values)
+            shap_values_all.append(normalized_shap_values)
             shap_data_all.append(positive_shap_values.data)
 
             # aggregate classifier predictions for ROC plot

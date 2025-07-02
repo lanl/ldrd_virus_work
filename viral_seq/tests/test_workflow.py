@@ -1,11 +1,11 @@
 from viral_seq import run_workflow as workflow
-from matplotlib.testing.compare import compare_images
 import numpy as np
 from importlib.resources import files
 from contextlib import ExitStack, nullcontext
 import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
+from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
@@ -1054,6 +1054,12 @@ def test_pearson_aggregation():
     data_target = np.asarray([1, 0] * 500)
     data_target[-1] = 1
 
+    # align first four features with data_target with decreasing correlation
+    kmer_data[:, 0] = data_target
+    kmer_data[:, 1] = 1 - data_target
+    kmer_data[:750, 2] = data_target[:750]
+    kmer_data[:500, 3] = data_target[:500]
+
     kmer_names = np.array([f"kmer_{i}" for i in range(12)])
 
     train_data = pd.DataFrame(kmer_data, columns=kmer_names)
@@ -1063,23 +1069,28 @@ def test_pearson_aggregation():
         "RandomForestClassifier": {
             "clfr": RandomForestClassifier(),
             "params": {"n_estimators": 100, "n_jobs": 1},
-        }
+        },
+        "ExtraTreesClassifier": {
+            "clfr": ExtraTreesClassifier(),
+            "params": {"n_estimators": 100, "n_jobs": 1},
+        },
     }
+    # train the classifier, counting the top-4 features from each classifier ranking
     (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
         train_data,
         y,
         classifier_parameters,
         n_folds=2,
-        max_features=3,
+        max_features=4,
         random_state=random_state,
     )
 
     pearson_rank = feature_count["Pearson R"]
     pearson_rank_exp = [
-        -0.11839685961062657,
-        -0.19111178312660876,
-        0.1441065507615085,
-        0.10391636402704744,
+        0.9365189346793777,
+        -0.9557083409911789,
+        0.8489642742549103,
+        0.703186127605507,
     ]
     # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
     assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)

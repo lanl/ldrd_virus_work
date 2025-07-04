@@ -18,7 +18,7 @@ import polars as pl
 import ast
 import numpy as np
 from glob import glob
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.metrics import roc_auc_score, auc
 from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
@@ -37,6 +37,11 @@ from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
 from sklearn.metrics import roc_curve
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+import os
+from tqdm import tqdm
+from sklearn.preprocessing import normalize
 
 matplotlib.use("Agg")
 
@@ -259,6 +264,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     ----------
     clfr_preds: dict
         dict containing fpr, tpr and auc's for cv folds
+        with classifier name as dictionary key
     target_column: str
         training column from dataset
     path: Path
@@ -266,72 +272,108 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     """
 
     mean_fpr = np.linspace(0, 1, 100)
-    fig, ax = plt.subplots(figsize=(8, 8))
+    all_curves: dict[str, tuple] = defaultdict(tuple)
+    for clfr_name, clfr_values in clfr_preds.items():
+        fig, ax = plt.subplots(figsize=(8, 8))
+        # plot individual fold lines
+        for i, pred in enumerate(clfr_values.values()):
+            ax.plot(
+                mean_fpr,
+                pred["roc_curves"],
+                label=f"Fold {i+1} (AUC = {pred['auc']:.2f})",
+            )
 
-    # plot individual fold lines
-    for i, pred in enumerate(clfr_preds.values()):
-        ax.plot(pred["fpr"], pred["tpr"], label=f"Fold {i+1} (AUC = {pred['auc']:.2f})")
+        # calculate and plot mean and std lines
+        mean_tpr = np.mean(
+            [pred["roc_curves"] for pred in clfr_values.values()],
+            axis=0,
+        )
+        mean_auc = np.mean([pred["auc"] for pred in clfr_values.values()])
+        std_auc = np.std([pred["auc"] for pred in clfr_values.values()])
+        std_tpr = np.std(
+            [pred["roc_curves"] for pred in clfr_values.values()],
+            axis=0,
+        )
+        ax.plot(
+            mean_fpr,
+            mean_tpr,
+            color="b",
+            label=f"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
+            lw=2,
+            alpha=0.8,
+        )
+        all_curves[clfr_name] = (mean_fpr, mean_tpr, mean_auc, std_auc)
+        # plot upper and lower bounds of mean +/- std.
+        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+        ax.fill_between(
+            mean_fpr,
+            tprs_lower,
+            tprs_upper,
+            color="grey",
+            alpha=0.2,
+            label=r"$\pm$ 1 std. dev.",
+        )
 
-    # calculate and plot mean and std lines
-    mean_tpr = np.mean(
-        [
-            np.interp(mean_fpr, fold_data["fpr"], fold_data["tpr"])
-            for fold_data in clfr_preds.values()
-        ],
-        axis=0,
-    )
-    mean_auc = np.mean([fold_data["auc"] for fold_data in clfr_preds.values()])
-    std_auc = np.std([fold_data["auc"] for fold_data in clfr_preds.values()])
-    std_tpr = np.std(
-        [
-            np.interp(mean_fpr, fold_data["fpr"], fold_data["tpr"])
-            for fold_data in clfr_preds.values()
-        ],
-        axis=0,
-    )
-    ax.plot(
-        mean_fpr,
-        mean_tpr,
-        color="b",
-        label=f"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
-        lw=2,
-        alpha=0.8,
-    )
+        # set ax titles
+        ax.set(
+            xlabel="False Positive Rate",
+            ylabel="True Positive Rate",
+            title=f"Mean ROC curve with variability for {clfr_name}\n(Positive label {target_column})",
+        )
 
-    # plot chance line
-    ax.plot(
-        [0, 1],
-        [0, 1],
-        color="black",
-        linestyle="--",
-        lw=2,
-        label="Chance level (AUC = 0.5)",
-    )
+        # plot chance line
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            color="black",
+            linestyle="--",
+            lw=2,
+            label="Chance level (AUC = 0.5)",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(str(path), f"ROC_{clfr_name}_{target_column}.png"), dpi=300
+        )
+        plt.close(fig)
 
-    # plot upper and lower bounds of mean +/- std.
-    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-    ax.fill_between(
-        mean_fpr,
-        tprs_lower,
-        tprs_upper,
-        color="grey",
-        alpha=0.2,
-        label=r"$\pm$ 1 std. dev.",
-    )
-
-    # set ax titles
-    ax.set(
-        xlabel="False Positive Rate",
-        ylabel="True Positive Rate",
-        title="Mean ROC curve with variability\n(Positive label '"
-        + str(target_column)
-        + "')",
-    )
-    ax.legend(loc="lower right")
-    fig.tight_layout()
-    fig.savefig(str(path) + "/" + "ROC_" + str(target_column) + ".png", dpi=300)
-    plt.close(fig)
+    # if more than one estimator is being used, plot all average curves on same plot
+    if len(clfr_preds) > 1:
+        fig, ax = plt.subplots(figsize=(8, 8))
+        for curve_name, (
+            fpr_curve,
+            tpr_curve,
+            auc_curve,
+            std_curve,
+        ) in all_curves.items():
+            ax.plot(
+                fpr_curve,
+                tpr_curve,
+                label=f"{curve_name} AUC: {auc_curve:0.2f} $\pm$ {std_curve:0.2f}",
+                lw=2,
+                alpha=0.8,
+            )
+            ax.set(
+                xlabel="False Positive Rate",
+                ylabel="True Positive Rate",
+                title=f"Mean ROC curves for all classifiers\n(Positive label {target_column})",
+            )
+        # plot chance line
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            color="black",
+            linestyle="--",
+            lw=2,
+            label="Chance level (AUC = 0.5)",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(str(path), f"ROC_all_classifiers_{target_column}.png"), dpi=300
+        )
+        plt.close(fig)
 
 
 def feature_count_consensus(
@@ -422,6 +464,7 @@ def train_clfr(
         The feature targets for the given target column
     classifier_parameters: dict
         dictionary containing the classifier and associated parameters to initialize classifier
+        with the classifier name as the dictionary key
     n_folds: int
         number of training cross-folds to perform
     max_features: int
@@ -437,56 +480,79 @@ def train_clfr(
     shap_clfr_consensus: tuple
         aggregated shap values and model target values over multiple cross-folds
     clfr_preds: dict
-        dict containing fpr, tpr and auc's for cv folds
-        for plotting the consensus ROC curve
+        dict containing fpr, tpr and auc's for cv folds for plotting the consensus ROC curve
+        using the classifier name as the dictionary key
     """
-    cv = StratifiedKFold(n_splits=n_folds)
-    model = classifier_parameters.get("clfr_name", RandomForestClassifier)
-    n_estimators = classifier_parameters.get("n_estimators")
-    n_jobs = classifier_parameters.get("n_jobs")
-    clfr = model(n_estimators=n_estimators, n_jobs=n_jobs, random_state=random_state)
 
+    cv = StratifiedKFold(n_splits=n_folds)
+    mean_fpr = np.linspace(0, 1, 100)
+    clfr_preds_all = {}
+    shap_values_all: list[float] = []
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
-    clfr_preds = {}
     shap_values_all = []
     shap_data_all = []
-    for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
-        # index training cv split
-        train_fold = train_data.iloc[train]
-        train_target = data_target[train]
-        test_fold = train_data.iloc[test]
-        test_target = data_target[test]
+    for clfr_name, subdict in classifier_parameters.items():
+        clfr = subdict["clfr"]
+        clfr.set_params(**subdict["params"], random_state=random_state)
 
-        # train classifier
-        clfr.fit(train_fold, train_target)
+        clfr_preds: dict[int, Any] = {}
+        for fold, (train, test) in enumerate(
+            tqdm(
+                cv.split(train_data, data_target),
+                total=cv.get_n_splits(),
+                desc=f"{clfr_name} Folds",
+            )
+        ):
+            # index training cv split
+            train_fold = train_data.iloc[train]
+            train_target = data_target[train]
+            test_fold = train_data.iloc[test]
+            test_target = data_target[test]
 
-        # index classifier importances
-        clfr_importances = importances_df(clfr.feature_importances_, train_fold.columns)
+            # train classifier
+            clfr.fit(train_fold, train_target)
 
-        # calculate shap output for training dataset and rank
-        explainer = shap.Explainer(clfr, seed=random_state)
-        shap_values = explainer(train_fold)
-        positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
+            # index classifier importances
+            clfr_importances = importances_df(
+                clfr.feature_importances_, train_fold.columns
+            )
 
-        shap_importances = importances_df(
-            positive_shap_values.abs.mean(0).values, train_fold.columns
-        )
+            # calculate shap output for training dataset and rank
+            explainer = shap.Explainer(clfr, seed=random_state)
+            shap_values = explainer(train_fold)
+            positive_shap_values = feature_importance.get_positive_shap_values(
+                shap_values
+            )
 
-        feature_count = feature_count_consensus(
-            clfr_importances, shap_importances, feature_count, max_features
-        )
+            shap_importances = importances_df(
+                positive_shap_values.abs.mean(0).values, train_fold.columns
+            )
 
-        # aggregate the raw shap values and associated data targets
-        shap_values_all.append(positive_shap_values.values)
-        shap_data_all.append(positive_shap_values.data)
+            feature_count = feature_count_consensus(
+                clfr_importances, shap_importances, feature_count, max_features
+            )
 
-        # aggregate classifier predictions for ROC plot
-        test_score = clfr.predict_proba(test_fold)[:, 1]
-        fpr, tpr, _ = roc_curve(test_target, test_score)
-        roc_auc = auc(fpr, tpr)
-        clfr_preds[fold] = {"fpr": fpr, "tpr": tpr, "auc": roc_auc}
+            # normalize shap values
+            normalized_shap_values = normalize(
+                positive_shap_values.values, norm="l1", axis=1
+            )
+
+            # aggregate the raw shap values and associated data targets
+            shap_values_all.append(normalized_shap_values)
+            shap_data_all.append(positive_shap_values.data)
+
+            # aggregate classifier predictions for ROC plot
+            test_score = clfr.predict_proba(test_fold)[:, 1]
+            fpr, tpr, thresh = roc_curve(test_target, test_score)
+            interp_tpr = np.interp(mean_fpr, fpr, tpr)
+            interp_tpr[0] = 0.0
+            roc_auc = auc(fpr, tpr)
+
+            clfr_preds[fold] = {"roc_curves": interp_tpr, "auc": roc_auc}
+
+        clfr_preds_all[clfr_name] = clfr_preds
 
     # aggregate shap values for calculating pearson R and for function return
     shap_values_clfr = np.concatenate(shap_values_all, axis=0)
@@ -496,12 +562,12 @@ def train_clfr(
     # across two feature vectors i.e. classifier features and shap features counts
     feature_count["Pearson R"] = pearsonr(shap_values_clfr, shap_data_clfr)[0]
     feature_count.sort_values(by=["Counts"], ascending=False, inplace=True)
-    feature_count["Counts"] = feature_count["Counts"] / 2
+    feature_count["Counts"] = feature_count["Counts"] / (2 * len(classifier_parameters))
 
     return (
         feature_count,
         (shap_values_clfr, shap_data_clfr),
-        clfr_preds,
+        clfr_preds_all,
     )
 
 
@@ -544,6 +610,7 @@ def FIC_plot(
     exposure_status_sign: list,
     response_effect_sign: list,
     surface_exposed_dict: dict,
+    n_classifiers: int,
     path: Path,
 ):
     """
@@ -569,6 +636,8 @@ def FIC_plot(
     surface_exposed_dict: dict
         dictionary containing the topN kmers and their respective ratios of surface exposed to
         not surface exposed viral proteins for plotting '% surface exposed'
+    n_classifiers: int
+        number of classifiers used for consensus
     path: Path
         path to save figure
     """
@@ -594,7 +663,7 @@ def FIC_plot(
     ax.set_xlim(0, 100)
     ax.set_yticks(y_pos, labels=top_features)
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
+        f"Feature importance consensus amongst {n_folds * n_classifiers} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
@@ -1987,11 +2056,38 @@ if __name__ == "__main__":
         ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
 
         # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
+        # TODO: add CLI option for determining which classifiers to train
+        # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
         max_features = 20
-        classifier_parameters = dict(
-            clfr_name=RandomForestClassifier, n_estimators=10000, n_jobs=-1
-        )
+        classifier_parameters = {
+            "RandomForestClassifier": {
+                "clfr": RandomForestClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
+            "ExtraTreesClassifier": {
+                "clfr": ExtraTreesClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
+            "XGBClassifier": {
+                "clfr": XGBClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
+            # LGBM parameters determined using suggestion from:
+            # https://stackoverflow.com/questions/71285022/why-lightgbm-python-package-gives-bad-prediction-using-for-regression-task
+            "LGBMClassifier": {
+                "clfr": LGBMClassifier(),
+                "params": {
+                    "min_data_in_bin": 1,
+                    "min_data_in_leaf": 1,
+                    "boosting_type": "dart",
+                    "n_estimators": 1000,
+                    "n_jobs": -1,
+                },
+            },
+        }
+        clfr_names = list(classifier_parameters.keys())
+        n_classifiers = len(clfr_names)
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
             X, y, classifier_parameters, n_folds, max_features, random_state
         )
@@ -2088,5 +2184,6 @@ if __name__ == "__main__":
             exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
+            n_classifiers,
             paths[-1],
         )

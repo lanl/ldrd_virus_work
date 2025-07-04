@@ -9,9 +9,7 @@ from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
 from viral_seq.analysis import get_features
-from sklearn.metrics import roc_curve, auc
-from sklearn.ensemble import RandomForestClassifier
-import sys
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
 
 def test_optimization_plotting(tmpdir):
@@ -417,6 +415,7 @@ def test_fic_plot(tmp_path):
     }
 
     n_folds = 2
+    n_classifiers = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
     df_in["Counts"] = kmer_counts
@@ -427,6 +426,7 @@ def test_fic_plot(tmp_path):
         exposure_status_sign,
         response_effect_sign,
         surface_exposed_dict,
+        n_classifiers,
         tmp_path,
     )
 
@@ -879,25 +879,61 @@ def test_importances_df():
         workflow.importances_df(importances, train_fold)
 
 
-def test_plot_cv_roc(tmp_path):
-    rng = np.random.default_rng(seed=123)
-    syn_data = rng.uniform(0, 1, 10)
-    true_class = rng.choice([0, 1], size=10)
-    syn_fpr, syn_tpr, _ = roc_curve(true_class, syn_data)
-    syn_roc_auc = auc(syn_fpr, syn_tpr)
-
-    clfr_preds = {}
-    clfr_preds[0] = {"fpr": syn_fpr, "tpr": syn_tpr, "auc": syn_roc_auc}
-
+@pytest.mark.parametrize(
+    "clfr_preds",
+    [
+        {
+            "RandomForestClassifier": {
+                0: {
+                    "roc_curves": np.array([0.0] + [0.5] * 16 + [0.75] * 82 + [1.0]),
+                    "auc": 0.7083,
+                }
+            },
+            "LGBMClassifier": {
+                0: {
+                    "roc_curves": np.array([0.0] * 71 + [1 / 3] * 14 + [1] * 15),
+                    "auc": 0.19047,
+                }
+            },
+        },
+        {
+            "XGBoost": {
+                0: {
+                    "roc_curves": np.array([0.0] + [0.5] * 16 + [0.75] * 82 + [1.0]),
+                    "auc": 0.70833,
+                },
+                1: {
+                    "roc_curves": np.array([0.0] * 71 + [1 / 3] * 14 + [1.0] * 15),
+                    "auc": 0.19047,
+                },
+            }
+        },
+    ],
+)
+def test_plot_cv_roc(tmp_path, clfr_preds):
     workflow.plot_cv_roc(clfr_preds, "Test", tmp_path)
-    assert (
-        compare_images(
-            files("viral_seq.tests.expected") / "ROC_cv_expected.png",
-            str(tmp_path / "ROC_Test.png"),
-            0.001,
+    # test the individual classifier plots
+    for classifier_name in clfr_preds.keys():
+        assert (
+            compare_images(
+                files("viral_seq.tests.expected")
+                / f"ROC_cv_{classifier_name}_expected.png",
+                str(tmp_path / f"ROC_{classifier_name}_Test.png"),
+                0.001,
+            )
+            is None
         )
-        is None
-    )
+    # test the consensus plot if more than one classifier
+    if len(clfr_preds.keys()) > 1:
+        assert (
+            compare_images(
+                files("viral_seq.tests.expected")
+                / "ROC_cv_all_classifiers_expected.png",
+                str(tmp_path / "ROC_all_classifiers_Test.png"),
+                0.001,
+            )
+            is None
+        )
 
 
 def test_feature_count_consensus():
@@ -935,7 +971,36 @@ def test_feature_count_consensus():
     assert_frame_equal(feature_count, feature_count_exp)
 
 
-def test_train_clfr():
+@pytest.mark.parametrize(
+    "classifier_parameters, feature_rank_array, count_rank_exp",
+    [
+        (
+            {
+                "RandomForestClassifier": {
+                    "clfr": RandomForestClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+            },
+            np.asarray([0, 1, 10, 7]),
+            [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ),
+        (
+            {
+                "RandomForestClassifier": {
+                    "clfr": RandomForestClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+                "ExtraTreesClassifier": {
+                    "clfr": ExtraTreesClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+            },
+            np.asarray([0, 1, 10, 7]),
+            [2.0, 2.0, 1.0, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ),
+    ],
+)
+def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
     # this test checks that the ranking of features is performed correctly during classifier training.
     # the synthetic dataset is initialized with random numbers, and then two feature columns are assigned
     # values that are correlated/inversely with the data targets, such that if the classifier aggregation
@@ -954,9 +1019,6 @@ def test_train_clfr():
     train_data = pd.DataFrame(kmer_data, columns=kmer_names)
     y = pd.Series(data_target)
 
-    classifier_parameters = dict(
-        clfr_name=RandomForestClassifier, n_estimators=100, n_jobs=None
-    )
     (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
         train_data,
         y,
@@ -969,22 +1031,16 @@ def test_train_clfr():
     count_rank = feature_count["Counts"]
     pearson_rank = feature_count["Pearson R"]
 
-    feature_rank_exp = kmer_names[np.asarray([0, 1, 10, 7, 9, 2, 3, 4])]
-
-    count_rank_exp = [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    feature_rank_exp = kmer_names[feature_rank_array]
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
     assert_array_less(np.abs(pearson_rank[2:]), 0.80)
-    # last four items in feature_rank have tendency to swap, and are
-    # excluded from test, which is concerned with top feature ranks
-    assert_array_equal(feature_rank[:8], feature_rank_exp)
+    # lower ranked features in feature_rank have tendency to swap depending on floating
+    # point handling and are excluded from test, which is concerned with top feature ranks
+    assert_array_equal(feature_rank[:4], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
 
 
-@pytest.mark.skipif(
-    sys.platform == "darwin",
-    reason="Floating point discrepancies cause test to fail on Mac, re: https://github.com/scikit-learn/scikit-learn/issues/31415",
-)
 def test_pearson_aggregation():
     # enforce Pearson aggregation behavior, avoid reduction across folds
     random_state = 123
@@ -993,29 +1049,43 @@ def test_pearson_aggregation():
     data_target = np.asarray([1, 0] * 500)
     data_target[-1] = 1
 
+    # align first four features with data_target with decreasing correlation
+    kmer_data[:, 0] = data_target
+    kmer_data[:, 1] = 1 - data_target
+    kmer_data[:750, 2] = data_target[:750]
+    kmer_data[:500, 3] = data_target[:500]
+
     kmer_names = np.array([f"kmer_{i}" for i in range(12)])
 
     train_data = pd.DataFrame(kmer_data, columns=kmer_names)
     y = pd.Series(data_target)
 
-    classifier_parameters = dict(
-        clfr_name=RandomForestClassifier, n_estimators=100, n_jobs=None
-    )
+    classifier_parameters = {
+        "RandomForestClassifier": {
+            "clfr": RandomForestClassifier(),
+            "params": {"n_estimators": 100, "n_jobs": 1},
+        },
+        "ExtraTreesClassifier": {
+            "clfr": ExtraTreesClassifier(),
+            "params": {"n_estimators": 100, "n_jobs": 1},
+        },
+    }
+    # train the classifier, counting the top-4 features from each classifier ranking
     (feature_count, shap_clfr_consensus, clfr_preds) = workflow.train_clfr(
         train_data,
         y,
         classifier_parameters,
         n_folds=2,
-        max_features=3,
+        max_features=4,
         random_state=random_state,
     )
 
     pearson_rank = feature_count["Pearson R"]
     pearson_rank_exp = [
-        -0.11839685961062657,
-        -0.19111178312660876,
-        0.1441065507615085,
-        0.10391636402704744,
+        0.9365189346793777,
+        -0.9557083409911789,
+        0.8489642742549103,
+        0.703186127605507,
     ]
     # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
     assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)

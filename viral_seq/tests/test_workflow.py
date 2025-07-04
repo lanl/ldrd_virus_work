@@ -913,7 +913,7 @@ def test_importances_df():
 def test_plot_cv_roc(tmp_path, clfr_preds):
     workflow.plot_cv_roc(clfr_preds, "Test", tmp_path)
     # test the individual classifier plots
-    for classifier_name in list(clfr_preds.keys()):
+    for classifier_name in clfr_preds.keys():
         assert (
             compare_images(
                 files("viral_seq.tests.expected")
@@ -1035,8 +1035,8 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
     assert_array_less(np.abs(pearson_rank[2:]), 0.80)
-    # lower ranked features in feature_rank have tendency to swap depending on
-    # and are excluded from test, which is concerned with top feature ranks
+    # lower ranked features in feature_rank have tendency to swap depending on floating
+    # point handling and are excluded from test, which is concerned with top feature ranks
     assert_array_equal(feature_rank[:4], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
 

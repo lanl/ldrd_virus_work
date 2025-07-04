@@ -264,6 +264,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     ----------
     clfr_preds: dict
         dict containing fpr, tpr and auc's for cv folds
+        with classifier name as dictionary key
     target_column: str
         training column from dataset
     path: Path
@@ -486,7 +487,7 @@ def train_clfr(
     cv = StratifiedKFold(n_splits=n_folds)
     mean_fpr = np.linspace(0, 1, 100)
     clfr_preds_all = {}
-    shap_values_all: List[float] = []
+    shap_values_all: list[float] = []
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
     feature_count["Counts"] = 0
@@ -496,7 +497,7 @@ def train_clfr(
         clfr = subdict["clfr"]
         clfr.set_params(**subdict["params"], random_state=random_state)
 
-        clfr_preds: Dict[int, Any] = {}
+        clfr_preds: dict[int, Any] = {}
         for fold, (train, test) in enumerate(
             tqdm(
                 cv.split(train_data, data_target),
@@ -2056,6 +2057,7 @@ if __name__ == "__main__":
 
         # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
         # TODO: add CLI option for determining which classifiers to train
+        # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
         max_features = 20
         classifier_parameters = {
@@ -2071,6 +2073,8 @@ if __name__ == "__main__":
                 "clfr": XGBClassifier(),
                 "params": {"n_estimators": 10000, "n_jobs": -1},
             },
+            # LGBM parameters determined using suggestion from:
+            # https://stackoverflow.com/questions/71285022/why-lightgbm-python-package-gives-bad-prediction-using-for-regression-task
             "LGBMClassifier": {
                 "clfr": LGBMClassifier(),
                 "params": {

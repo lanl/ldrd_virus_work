@@ -495,7 +495,7 @@ def test_build_table_bad_version(tmpdir, accession):
         [["1", accession, "Una virus"]], columns=["Unnamed: 0", "Accessions", "Species"]
     )
     with tmpdir.as_cwd():
-        table = sp.build_table(
+        table, _ = sp.build_table(
             df=df, cache=cache_str, genomic=False, kmers=False, kmers_pc=False, gc=True
         )
     assert table["GC Content"].values[0] == pytest.approx(0.5050986292209964)
@@ -508,7 +508,7 @@ def test_build_table_target_column(tmpdir, target_column):
     df = pd.read_csv(csv_train)
     df.rename({"Human Host": target_column}, inplace=True, axis=1)
     with tmpdir.as_cwd():
-        df_test = sp.build_table(
+        df_test, _ = sp.build_table(
             df=df,
             cache=cache_str,
             genomic=False,
@@ -654,7 +654,7 @@ def test_issue_15(tmpdir):
         files("viral_seq.tests.expected") / "issue_15.csv", index_col=0
     )
     with tmpdir.as_cwd():
-        df_feats = sp.build_table(
+        df_feats, _ = sp.build_table(
             df,
             cache=cache_str,
             save=False,

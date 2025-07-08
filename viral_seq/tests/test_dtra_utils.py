@@ -61,16 +61,12 @@ def test_merge_convert_tbl():
             # this case tests that the function produces matches when two mapping methods are compared
             [
                 {
-                    0: {
-                        "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y", "kmer_AA_G"],
-                        "1": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_PC_0"],
-                    },
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "1": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
                 },
                 {
-                    0: {
-                        "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_S"],
-                        "1": ["kmer_PC_" + str(x + 1) for x in range(3)],
-                    },
+                    "0": ["kmer_PC_" + str(x + 1) for x in range(3)],
+                    "1": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_S"],
                 },
             ],
             [
@@ -78,16 +74,13 @@ def test_merge_convert_tbl():
                     "0": ["kmer_PC_" + str(x) for x in range(3)],
                 },
                 {
-                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "0": ["kmer_PC_" + str(x + 1) for x in range(3)],
                 },
             ],
             {
                 "jurgen_schmidt": {0: "kmer_PC_0", 1: "kmer_PC_1"},
                 "shen_2007": {0: "kmer_PC_1", 1: "kmer_PC_2"},
-                "matching_AA_kmers": {
-                    0: ["kmer_AA_G"],
-                    1: ["kmer_AA_C"],
-                },
+                "matching AA kmer 0": {0: "kmer_AA_G", 1: "kmer_AA_C"},
             },
             ["jurgen_schmidt", "shen_2007"],
         ),
@@ -96,24 +89,25 @@ def test_merge_convert_tbl():
         (
             [
                 {
-                    0: {
-                        "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
-                        "1": ["kmer_PC_" + str(x) for x in range(3)],
-                    },
-                    1: {
-                        "0": ["kmer_AA_AG", "kmer_AA_GA"],
-                        "1": ["kmer_PC_00"] * 2,
-                    },
+                    "0": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_PC_00"] * 2,
+                    "1": [
+                        "kmer_AA_G",
+                        "kmer_AA_C",
+                        "kmer_AA_Y",
+                        "kmer_AA_AG",
+                        "kmer_AA_GA",
+                    ],
                 },
                 {
-                    0: {
-                        "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_S"],
-                        "1": ["kmer_PC_" + str(x + 1) for x in range(3)],
-                    },
-                    1: {
-                        "0": ["kmer_AA_AG", "kmer_AA_GA"],
-                        "1": ["kmer_PC_11"] * 2,
-                    },
+                    "0": ["kmer_PC_" + str(x + 1) for x in range(3)]
+                    + ["kmer_PC_11"] * 2,
+                    "1": [
+                        "kmer_AA_G",
+                        "kmer_AA_C",
+                        "kmer_AA_S",
+                        "kmer_AA_AG",
+                        "kmer_AA_GA",
+                    ],
                 },
             ],
             [
@@ -127,11 +121,8 @@ def test_merge_convert_tbl():
             {
                 "jurgen_schmidt": {0: "kmer_PC_0", 1: "kmer_PC_00", 2: "kmer_PC_1"},
                 "shen_2007": {0: "kmer_PC_1", 1: "kmer_PC_11", 2: "kmer_PC_2"},
-                "matching_AA_kmers": {
-                    0: ["kmer_AA_G"],
-                    1: ["kmer_AA_AG", "kmer_AA_GA"],
-                    2: ["kmer_AA_C"],
-                },
+                "matching AA kmer 0": {0: "kmer_AA_G", 1: "kmer_AA_AG", 2: "kmer_AA_C"},
+                "matching AA kmer 1": {0: None, 1: "kmer_AA_GA", 2: None},
             },
             ["jurgen_schmidt", "shen_2007"],
         ),
@@ -140,16 +131,12 @@ def test_merge_convert_tbl():
         (
             [
                 {
-                    0: {
-                        "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
-                        "1": ["kmer_PC_" + str(x) for x in range(3)],
-                    },
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "1": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
                 },
                 {
-                    0: {
-                        "0": ["kmer_AA_Y", "kmer_AA_C", "kmer_AA_A"],
-                        "1": ["kmer_PC_4", "kmer_PC_2", "kmer_PC_1"],
-                    },
+                    "0": ["kmer_PC_4", "kmer_PC_2", "kmer_PC_1"],
+                    "1": ["kmer_AA_Y", "kmer_AA_C", "kmer_AA_A"],
                 },
             ],
             [
@@ -163,10 +150,7 @@ def test_merge_convert_tbl():
             {
                 "jurgen_schmidt": {0: "kmer_PC_1", 1: "kmer_PC_2"},
                 "shen_2007": {0: "kmer_PC_2", 1: "kmer_PC_4"},
-                "matching_AA_kmers": {
-                    0: ["kmer_AA_C"],
-                    1: ["kmer_AA_Y"],
-                },
+                "matching AA kmer 0": {0: "kmer_AA_C", 1: "kmer_AA_Y"},
             },
             ["jurgen_schmidt", "shen_2007"],
         ),
@@ -175,10 +159,8 @@ def test_merge_convert_tbl():
         (
             [
                 {
-                    0: {
-                        "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
-                        "1": ["kmer_PC_" + str(x) for x in range(3)],
-                    },
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "1": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
                 },
             ],
             [
@@ -196,11 +178,10 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
 
     # make and save a temporary file containing the matching kmer dataframe
     syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
-    for i, kmer_matches_N in enumerate(kmer_matches):
-        for k, kmer_matches_len in kmer_matches_N.items():
-            pd.DataFrame(kmer_matches_len).to_parquet(
-                f"{tmpdir}/kmer_maps_k{k+1}_{mapping_methods[i]}.parquet.gzip"
-            )
+    for i, mm in enumerate(mapping_methods):
+        pd.DataFrame(kmer_matches[i]).to_parquet(
+            f"{tmpdir}/kmer_maps_{mapping_methods[i]}.parquet.gzip"
+        )
     # run the function to generate the matches
     with tmpdir.as_cwd():
         kmer_matches_out = dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)
@@ -231,20 +212,21 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
         (
             [
                 {
-                    "0": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
-                    "1": ["kmer_PC_" + str(x) for x in range(3)],
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "1": ["kmer_AA_G", "kmer_AA_C", "kmer_AA_Y"],
                 },
                 {
-                    "0": ["kmer_AA_F", "kmer_AA_M", "kmer_AA_H"],
-                    "1": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                    "1": ["kmer_AA_F", "kmer_AA_M", "kmer_AA_H"],
                 },
             ],
             [
                 {
-                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "0": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_AA_AGAVK"],
                 },
                 {
-                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
+                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)]
+                    + ["kmer_AA_AGAVK"],
                 },
             ],
             ["jurgen_schmidt", "shen_2007"],
@@ -255,12 +237,12 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
         (
             [
                 {
-                    "0": ["kmer_AA_F", "kmer_AA_C", "kmer_AA_K"],
-                    "1": ["kmer_PC_7", "kmer_PC_1", "kmer_PC_5"],
+                    "0": ["kmer_PC_7", "kmer_PC_1", "kmer_PC_5"],
+                    "1": ["kmer_AA_F", "kmer_AA_C", "kmer_AA_K"],
                 },
                 {
-                    "0": ["kmer_AA_F", "kmer_AA_C", "kmer_AA_K"],
-                    "1": ["kmer_PC_4", "kmer_PC_2", "kmer_PC_7"],
+                    "0": ["kmer_PC_4", "kmer_PC_2", "kmer_PC_7"],
+                    "1": ["kmer_AA_F", "kmer_AA_C", "kmer_AA_K"],
                 },
             ],
             [
@@ -272,7 +254,7 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
                 },
             ],
             ["jurgen_schmidt", "shen_2007"],
-            "Matching AA kmers between PC kmers:\n jurgen_schmidt shen_2007 matching_AA_kmers\n     kmer_PC_1 kmer_PC_2       [kmer_AA_C]\n     kmer_PC_5 kmer_PC_7       [kmer_AA_K]\n     kmer_PC_7 kmer_PC_4       [kmer_AA_F]",
+            "Matching AA kmers between PC kmers:\n jurgen_schmidt shen_2007 matching AA kmer 0\n     kmer_PC_1 kmer_PC_2          kmer_AA_C\n     kmer_PC_5 kmer_PC_7          kmer_AA_K\n     kmer_PC_7 kmer_PC_4          kmer_AA_F",
         ),
     ],
 )
@@ -289,11 +271,8 @@ def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, out
             for i, mm in enumerate(mapping_method):
                 syn_topN_df = pd.DataFrame(syn_topN[i])
                 syn_topN_df.to_parquet(f"topN_kmers_test_{mm}.parquet.gzip")
-                k = list(
-                    set([len(s.replace("kmer_PC_", "")) for s in syn_topN[i]["0"]])
-                )
                 pd.DataFrame(kmer_matches[i]).to_parquet(
-                    f"kmer_maps/kmer_maps_k{k[0]}_{mm}.parquet.gzip"
+                    f"kmer_maps/kmer_maps_{mm}.parquet.gzip"
                 )
         result = dtra_utils.find_matching_kmers(
             target_column="test", mapping_methods=mapping_method
@@ -335,7 +314,7 @@ def test_find_matching_kmers(tmpdir, kmer_matches, syn_topN, mapping_method, out
             ],
             [
                 {
-                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                    "0": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_AA_012"],
                 },
             ],
             ["jurgen_schmidt"],
@@ -347,9 +326,10 @@ def test_match_kmers_error(tmpdir, kmer_matches, syn_topN, mapping_methods, erro
     """test that the appropriate error is raised when function is provided incorrect mapping method"""
     # make and save a temporary file containing the matching kmer dataframe
     syn_topN_df = [pd.DataFrame(x) for x in syn_topN]
-    for i, kmer_matches_N in enumerate(kmer_matches):
-        pd.DataFrame(kmer_matches_N).to_parquet(
-            f"{tmpdir}/kmer_maps_k1_{mapping_methods[i]}.parquet.gzip"
-        )
+    with tmpdir.as_cwd():
+        for i, kmer_matches_N in enumerate(kmer_matches):
+            pd.DataFrame(kmer_matches_N).to_parquet(
+                f"kmer_maps_{mapping_methods[i]}.parquet.gzip"
+            )
     with pytest.raises(ValueError, match=error_msg):
         dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)

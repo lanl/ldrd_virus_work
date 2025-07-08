@@ -64,7 +64,7 @@ def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
                         Sequence(str(new_seq)).iter_kmers(k, overlap=True)
                     ):
                         new_kmer = "kmer_" + kmer_type + "_" + str(kmer)
-                        kmer_PC_list.append((kmer_AA_list[i], new_kmer))
+                        kmer_PC_list.append([new_kmer, kmer_AA_list[i]])
                         kmers[new_kmer] += 1
                 else:
                     for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):

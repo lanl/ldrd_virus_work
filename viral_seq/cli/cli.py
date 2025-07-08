@@ -305,7 +305,7 @@ def calculate_table(
         kmer_k = [int(i) for i in kmer_k.split()]
     if features_kmers_pc:
         kmer_k_pc = [int(i) for i in kmer_k_pc.split()]
-    df_feats = sp.build_table(
+    df_feats, kmer_maps = sp.build_table(
         df,
         rfc=rfc,
         cache=cache,
@@ -326,7 +326,7 @@ def calculate_table(
     )
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
-            this_table = sp.build_table(
+            this_table, _ = sp.build_table(
                 cache=sim_cache,
                 save=False,
                 genomic=similarity_genomic,
@@ -339,6 +339,7 @@ def calculate_table(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
         sp.save_files(df_feats, outfile)
+    return kmer_maps
 
 
 # --- cross-validation ---

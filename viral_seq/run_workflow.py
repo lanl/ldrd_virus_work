@@ -1011,7 +1011,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     if feature_checkpoint > kmer_range_length:
                         feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
-
+                kmer_maps_all = []
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
@@ -1023,7 +1023,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             "To restart at this point use --features",
                             this_checkpoint,
                         )
-                        cli.calculate_table(
+                        kmer_maps = cli.calculate_table(
                             [
                                 "--file",
                                 file,
@@ -1045,6 +1045,16 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             standalone_mode=False,
                         )
                         this_checkpoint -= 1
+                        kmer_maps_all.append(kmer_maps)
+                kmer_maps_df = pd.DataFrame(
+                    np.concatenate(kmer_maps_all)
+                ).drop_duplicates(subset=[0, 1])
+                kmer_map_path = Path("kmer_maps")
+                kmer_map_path.mkdir(exist_ok=True)
+                kmer_maps_df.to_parquet(
+                    f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
+                    index=False,
+                )
 
 
 def feature_selection_rfc(

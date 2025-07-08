@@ -233,7 +233,7 @@ def match_kmers(
     topN_df_list: list[pd.DataFrame],
     mapping_methods: list[Literal["jurgen_schmidt", "shen_2007"]],
     save_dir: str = "kmer_maps",
-    aa_codes: str = "ACDEFGHIKLMNPQRSTVWY",
+    aa_codes: str = "ACDEFGHIKLMNPQRSTVWYX*",
 ) -> Optional[pd.DataFrame]:
     """
     determine matching AA kmer(s) between different PC mappings from topN kmer features
@@ -272,57 +272,50 @@ def match_kmers(
         # load appropriate kmer-matching files for each mapping method individually
         # only load ``kmer_maps`` files containing the same length kmers as in topN
         topN_mm = topN_df_list[i]
-        full_kmer_list = np.array(topN_mm, dtype=object).flatten()
-        topN_kmer_lengths = list(set(len(s) - 8 for s in full_kmer_list))
-        kmer_maps_list = []
-        for kmer_len in topN_kmer_lengths:
-            kmer_df = pl.read_parquet(
-                f"{save_dir}/kmer_maps_k{kmer_len}_{mm}.parquet.gzip"
-            ).to_pandas()
-            kmer_maps_list.append(kmer_df)
-        # concatenate all kmer maps and find the maps associated with kmers in the topN
-        all_kmer_maps = pd.concat(kmer_maps_list, ignore_index=True)
-        # find kmer maps that match
-        kmer_maps_topN = all_kmer_maps[all_kmer_maps["1"].isin(topN_mm["0"])]
-        # reorganize kmer mappings for readability and save topN mappings
-        topN_kmer_mappings = kmer_maps_topN.assign(
-            counts=all_kmer_maps.groupby("1").cumcount()
-        )
-        topN_kmer_order = topN_mm[topN_mm["0"].str.contains("kmer_PC_")]
-        topN_kmer_mappings = (
-            topN_kmer_mappings.pivot(index="counts", columns="1", values="0")
-            .reindex(columns=topN_kmer_order["0"])
-            .reset_index(drop=True)
-        )
-        topN_kmer_mappings.to_csv(f"topN_PC_AA_kmer_mappings_{mm}.csv", index=False)
-        # drop duplicate mappings and rearrange kmer maps so they can be concatenated on ``kmer_AA_`` values
-        kmer_maps_topN = kmer_maps_topN.drop_duplicates(subset=["0", "1"]).T
-        kmer_maps_topN = (
-            kmer_maps_topN.rename(columns=kmer_maps_topN.iloc[0])
-            .drop(kmer_maps_topN.index[0])
-            .reset_index(drop=True)
-        )
         # check that no AA kmers contain invalid characters (outside of 20 aa single letter codes)
-        kmer_maps_columns = list(kmer_maps_topN.columns)
-        aa_kmer_values = set("".join([k[8:] for k in kmer_maps_columns]))
+        aa_kmer_values = set(
+            "".join([k[8:] for k in topN_mm["0"] if k[:8] == "kmer_AA_"])
+        )
         if not aa_kmer_values.issubset(set(aa_codes)):
             raise ValueError("AA-kmers contain incorrect values.")
+        # load PC-AA kmer maps
+        kmer_maps_df = pl.read_parquet(
+            f"{save_dir}/kmer_maps_{mm}.parquet.gzip"
+        ).to_pandas()
+        # find kmer maps that match topN features
+        kmer_maps_topN = kmer_maps_df[kmer_maps_df["0"].isin(topN_mm["0"])]
         topN_kmer_mappings_all.append(kmer_maps_topN)
+        # reorganize kmer mappings for readability and save topN mappings
+        topN_kmer_mappings = kmer_maps_topN.groupby("1")["0"].apply(list).to_frame()
+        topN_kmer_mappings = pd.DataFrame(
+            topN_kmer_mappings["0"].tolist(), index=topN_kmer_mappings.index
+        ).T
+        topN_kmer_mappings.to_csv(f"topN_PC_AA_kmer_mappings_{mm}.csv", index=False)
     # if workflow has been run with both mapping methods, match kmers between schemes
     if len(topN_kmer_mappings_all) > 1:
-        kmer_matches_df = (
-            pd.concat(topN_kmer_mappings_all).reset_index(drop=True).dropna(axis=1).T
+        kmer_matches_df = pd.merge(
+            topN_kmer_mappings_all[0], topN_kmer_mappings_all[1], on="1"
         )
-        kmer_matches_df.reset_index(inplace=True)
-        kmer_matches_df.columns = ["matching_AA_kmers"] + mapping_methods
-        kmer_matches_df = kmer_matches_df[mapping_methods + ["matching_AA_kmers"]]
-        kmer_matches_df["matching_AA_kmers"] = kmer_matches_df[
-            "matching_AA_kmers"
-        ].apply(lambda x: [x])
-        # combine PC matches with multiple AA matches into a single row with a list of AA matches
-        kmer_matches_df = kmer_matches_df.groupby(mapping_methods, as_index=False).agg(
-            {"matching_AA_kmers": lambda x: sum(x, [])}
-        )
-        return kmer_matches_df
-    else:
-        return None
+        if not kmer_matches_df.empty:
+            kmer_matches_df.columns = [
+                mapping_methods[0],
+                "matching_AA_kmers",
+                mapping_methods[1],
+            ]  # type: ignore
+            kmer_matches_df = kmer_matches_df[mapping_methods + ["matching_AA_kmers"]]
+            kmer_matches_groups = kmer_matches_df.groupby(
+                mapping_methods, as_index=False
+            )["matching_AA_kmers"].apply(list)
+            # combine PC matches with multiple AA matches into a single row with AA matches in individual columns
+            expanded_matches = pd.DataFrame(
+                kmer_matches_groups["matching_AA_kmers"].tolist(),
+                index=kmer_matches_groups.index,
+            )
+            expanded_matches.columns = [
+                f"matching AA kmer {i}" for i in range(expanded_matches.shape[1])
+            ]  # type: ignore
+            kmer_matches_out = pd.concat(
+                [kmer_matches_groups, expanded_matches], axis=1
+            ).drop(columns="matching_AA_kmers")
+            return kmer_matches_out
+    return None

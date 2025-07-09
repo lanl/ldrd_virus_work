@@ -1751,7 +1751,7 @@ if __name__ == "__main__":
         counter = -1
         n_features = 5
         temp1 = np.zeros((n_folds, n_features))
-        preds = []
+        preds: list[list[np.ndarray]] = []
 
         for fold, (train, test) in enumerate(cv.split(X, y)):
             clfr.fit(X.iloc[train], y[train])
@@ -1820,6 +1820,7 @@ if __name__ == "__main__":
         plt.close(fig)
 
         # calculate classifier metrics and plot confusion matrix
+        # TODO: add support for multiple classifiers
         clfr_metrics = dtra_utils.calculate_cv_metrics(preds)
         clfr_metrics.to_csv("cv_metrics.csv")
         classifier.plot_confusion_matrix_mean(

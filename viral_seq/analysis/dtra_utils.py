@@ -334,13 +334,13 @@ def match_kmers(
     return None
 
 
-def calculate_cv_metrics(clfr_preds: list):
+def calculate_cv_metrics(clfr_preds: list[list[np.ndarray]]):
     """
     calculate the average metrics of classifier predictions
 
     Parameters:
     -----------
-    clfr_preds: list
+    clfr_preds: list[list[np.ndarray]]
         target values (y_true) and predictions (y_pred) for each cross-fold
 
     Returns: pd.DataFrame

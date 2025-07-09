@@ -171,6 +171,61 @@ def test_merge_convert_tbl():
             None,
             ["jurgen_schmidt"],
         ),
+        # test when a pair of PC kmers matches through more than one AA kmer
+        (
+            [
+                {
+                    "0": ["kmer_PC_1", "kmer_PC_1", "kmer_PC_2"],
+                    "1": ["kmer_AA_A", "kmer_AA_C", "kmer_AA_Y"],
+                },
+                {
+                    "0": ["kmer_PC_1", "kmer_PC_1", "kmer_PC_1"],
+                    "1": ["kmer_AA_A", "kmer_AA_C", "kmer_AA_Y"],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_PC_1"],
+                },
+            ],
+            {
+                "jurgen_schmidt": {0: "kmer_PC_1", 1: "kmer_PC_2"},
+                "shen_2007": {0: "kmer_PC_1", 1: "kmer_PC_1"},
+                "matching AA kmer 0": {0: "kmer_AA_A", 1: "kmer_AA_Y"},
+                "matching AA kmer 1": {0: "kmer_AA_C", 1: None},
+            },
+            ["jurgen_schmidt", "shen_2007"],
+        ),
+        # test when a PC kmer from one scheme matches with two different PC kmers of the other scheme
+        (
+            [
+                {
+                    "0": ["kmer_PC_1", "kmer_PC_1", "kmer_PC_2"],
+                    "1": ["kmer_AA_A", "kmer_AA_C", "kmer_AA_Y"],
+                },
+                {
+                    "0": ["kmer_PC_1", "kmer_PC_2", "kmer_PC_2"],
+                    "1": ["kmer_AA_A", "kmer_AA_C", "kmer_AA_Y"],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
+                },
+            ],
+            {
+                "jurgen_schmidt": {0: "kmer_PC_1", 1: "kmer_PC_1", 2: "kmer_PC_2"},
+                "shen_2007": {0: "kmer_PC_1", 1: "kmer_PC_2", 2: "kmer_PC_2"},
+                "matching AA kmer 0": {0: "kmer_AA_A", 1: "kmer_AA_C", 2: "kmer_AA_Y"},
+            },
+            ["jurgen_schmidt", "shen_2007"],
+        ),
     ],
 )
 def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_methods):

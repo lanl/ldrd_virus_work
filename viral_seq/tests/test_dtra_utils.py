@@ -226,6 +226,33 @@ def test_merge_convert_tbl():
             },
             ["jurgen_schmidt", "shen_2007"],
         ),
+        # test support for AA kmers in the topN kmers
+        (
+            [
+                {
+                    "0": ["kmer_PC_1"],
+                    "1": ["kmer_AA_A"],
+                },
+                {
+                    "0": ["kmer_PC_2"],
+                    "1": ["kmer_AA_C"],
+                },
+            ],
+            [
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_AA_A"],
+                },
+                {
+                    "0": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_AA_A"],
+                },
+            ],
+            {
+                "jurgen_schmidt": {0: "kmer_AA_A", 1: "kmer_PC_1"},
+                "shen_2007": {0: "kmer_AA_A", 1: "kmer_AA_A"},
+                "matching AA kmer 0": {0: "kmer_AA_A", 1: "kmer_AA_A"},
+            },
+            ["jurgen_schmidt", "shen_2007"],
+        ),
     ],
 )
 def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_methods):
@@ -277,11 +304,10 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
             ],
             [
                 {
-                    "0": ["kmer_PC_" + str(x) for x in range(3)] + ["kmer_AA_AGAVK"],
+                    "0": ["kmer_PC_" + str(x) for x in range(3)],
                 },
                 {
-                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)]
-                    + ["kmer_AA_AGAVK"],
+                    "0": ["kmer_PC_" + str(x + 3) for x in range(3)],
                 },
             ],
             ["jurgen_schmidt", "shen_2007"],
@@ -309,7 +335,7 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
                 },
             ],
             ["jurgen_schmidt", "shen_2007"],
-            "Matching AA kmers between PC kmers:\n jurgen_schmidt shen_2007 matching AA kmer 0\n     kmer_PC_1 kmer_PC_2          kmer_AA_C\n     kmer_PC_5 kmer_PC_7          kmer_AA_K\n     kmer_PC_7 kmer_PC_4          kmer_AA_F",
+            "Matching AA kmers between mapping methods:\n jurgen_schmidt shen_2007 matching AA kmer 0\n     kmer_PC_1 kmer_PC_2          kmer_AA_C\n     kmer_PC_5 kmer_PC_7          kmer_AA_K\n     kmer_PC_7 kmer_PC_4          kmer_AA_F",
         ),
     ],
 )

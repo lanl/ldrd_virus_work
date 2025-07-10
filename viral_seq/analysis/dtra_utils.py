@@ -224,7 +224,7 @@ def find_matching_kmers(
                 index=False,
             )
             print("Saved matching AA kmers in topN between PC mapping methods.")
-            return f"Matching AA kmers between PC kmers:\n {kmer_matches.to_string(index=False)}"
+            return f"Matching AA kmers between mapping methods:\n {kmer_matches.to_string(index=False)}"
     except FileNotFoundError:
         return "Must run workflow using both mapping methods before performing kmer mapping."
 
@@ -238,8 +238,8 @@ def match_kmers(
     """
     determine matching AA kmer(s) between different PC mappings from topN kmer features
     using each mapping method (i.e. ``jurgen_schmidt`` and ``shen_2007``). If matches
-    exist, return dataframe containing matching AA kmer and corresponding PC kmer from
-    each mapping method.
+    exist, return dataframe containing matching AA kmers and corresponding PC kmer from
+    each mapping method (or explicit AA matches).
 
     in order for this function to execute, you must run the full workflow using both
     `--mapping-method` arguments to generate the required kmer mapping files
@@ -282,6 +282,18 @@ def match_kmers(
         kmer_maps_df = pl.read_parquet(
             f"{save_dir}/kmer_maps_{mm}.parquet.gzip"
         ).to_pandas()
+        # add identity map for AA_kmers in the topN
+        top_AA_kmers = [
+            top_kmer for top_kmer in topN_mm["0"] if top_kmer.startswith("kmer_AA_")
+        ]
+        if len(top_AA_kmers) > 0:
+            identity_map = pd.DataFrame(
+                {
+                    "0": top_AA_kmers,
+                    "1": top_AA_kmers,
+                }
+            )
+            kmer_maps_df = pd.concat([kmer_maps_df, identity_map], ignore_index=True)
         # find kmer maps that match topN features
         kmer_maps_topN = kmer_maps_df[kmer_maps_df["0"].isin(topN_mm["0"])]
         topN_kmer_mappings_all.append(kmer_maps_topN)

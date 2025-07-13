@@ -456,13 +456,14 @@ def test_load_multi_parquet(tmp_path):  # noqa: ARG001
         assert data["AUC"] == pytest.approx(0.38)
 
 
-def test_build_table_with_partial():
+def test_build_table_with_partial(tmpdir):
     """check we can calculate a feature table with an accession labeled 'partial'"""
     this_cache = files("viral_seq.tests") / "cache_unfiltered"
     cache_str = str(this_cache.resolve())
     csv_partial_str = str(csv_partial.resolve())
     df = pd.read_csv(csv_partial_str)
-    sp.build_table(df, cache=cache_str, kmers=True, kmer_k=[2])
+    with tmpdir.as_cwd():
+        sp.build_table(df, cache=cache_str, kmers=True, kmer_k=[2])
 
 
 @pytest.mark.parametrize("accession", ["HM147992", "HM147992.2"])
@@ -487,36 +488,38 @@ def test_bounce_missing_accession():
 
 
 @pytest.mark.parametrize("accession", ["HM147992", "HM147992.2"])
-def test_build_table_bad_version(accession):
+def test_build_table_bad_version(tmpdir, accession):
     this_cache = files("viral_seq.tests") / "cache_unfiltered"
     cache_str = str(this_cache.resolve())
     df = pd.DataFrame(
         [["1", accession, "Una virus"]], columns=["Unnamed: 0", "Accessions", "Species"]
     )
-    table = sp.build_table(
-        df=df, cache=cache_str, genomic=False, kmers=False, kmers_pc=False, gc=True
-    )
+    with tmpdir.as_cwd():
+        table, _ = sp.build_table(
+            df=df, cache=cache_str, genomic=False, kmers=False, kmers_pc=False, gc=True
+        )
     assert table["GC Content"].values[0] == pytest.approx(0.5050986292209964)
 
 
 @pytest.mark.parametrize("target_column", ["Column1", "Column2"])
-def test_build_table_target_column(target_column):
+def test_build_table_target_column(tmpdir, target_column):
     this_cache = files("viral_seq.tests") / "cache"
     cache_str = str(this_cache.resolve())
     df = pd.read_csv(csv_train)
     df.rename({"Human Host": target_column}, inplace=True, axis=1)
-    df_test = sp.build_table(
-        df=df,
-        cache=cache_str,
-        genomic=False,
-        kmers=True,
-        kmer_k=[2],
-        kmers_pc=False,
-        gc=False,
-        uni_select=True,
-        num_select=10,
-        target_column=target_column,
-    )
+    with tmpdir.as_cwd():
+        df_test, _ = sp.build_table(
+            df=df,
+            cache=cache_str,
+            genomic=False,
+            kmers=True,
+            kmer_k=[2],
+            kmers_pc=False,
+            gc=False,
+            uni_select=True,
+            num_select=10,
+            target_column=target_column,
+        )
     df_expected = pd.read_csv(
         files("viral_seq.tests") / "expected" / "target_column_test.csv"
     )
@@ -527,6 +530,43 @@ def test_build_table_target_column(target_column):
         rtol=1e-9,
         atol=1e-9,
     )
+
+
+def test_grab_features_kmer_maps():
+    records_dict: dict[str, list] = {}
+    accessions_dict: dict[str, str] = {}
+    row_dict: dict[str, pd.Series] = {}
+    accessions = []
+    this_cache = files("viral_seq.tests") / "cache"
+    df = pd.read_csv(csv_train)
+    df_in = df.iloc[:1]
+    for index, row in df_in.iterrows():
+        records_dict[row["Species"]] = []
+        row_dict[row["Species"]] = row
+        for accession in row["Accessions"].split():
+            accessions.append(accession)
+            accession_key = accession.split(".")[0]
+            accessions_dict[accession_key] = row["Species"]
+    # we do one call to load all records from cache
+    records_unordered = sp.load_from_cache(
+        accessions, cache=this_cache, filter=False, verbose=False
+    )
+    for record in records_unordered:
+        records_dict[accessions_dict[record.id.split(".")[0]]].append(record)
+    for species, records in records_dict.items():
+        features = row_dict[species].to_dict()
+        this_result, kmer_map = sp._grab_features(
+            features,
+            records,
+            genomic=True,
+            kmers=True,
+            kmer_k=[10],
+            gc=True,
+            kmers_pc=True,
+            kmer_k_pc=[10],
+            mapping_method="shen_2007",
+        )
+    assert len(kmer_map) == 3408
 
 
 def test_get_best_features():
@@ -604,7 +644,7 @@ def test_get_best_features_argument_guards(
         sp.get_best_features(feature_importances, feature_names, percentile)
 
 
-def test_issue_15():
+def test_issue_15(tmpdir):
     df = pd.DataFrame()
     df["Unnamed: 0"] = [0, 1]
     df["Species"] = ["No CDS Record", "Normal Record"]
@@ -613,15 +653,16 @@ def test_issue_15():
     df_expected = pd.read_csv(
         files("viral_seq.tests.expected") / "issue_15.csv", index_col=0
     )
-    df_feats = sp.build_table(
-        df,
-        cache=cache_str,
-        save=False,
-        genomic=True,
-        gc=False,
-        kmers=False,
-        kmers_pc=False,
-    )
+    with tmpdir.as_cwd():
+        df_feats, _ = sp.build_table(
+            df,
+            cache=cache_str,
+            save=False,
+            genomic=True,
+            gc=False,
+            kmers=False,
+            kmers_pc=False,
+        )
     # prior to fix this will only return a row for HM119401.1; post fix a row for each is returned
     assert_frame_equal(df_feats, df_expected)
 

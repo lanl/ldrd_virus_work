@@ -36,6 +36,7 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
+import os
 
 matplotlib.use("Agg")
 
@@ -285,6 +286,7 @@ def FIC_plot(
     kmer_count: np.ndarray,
     n_folds: int,
     target_column: str,
+    mapping_method: str,
     exposure_status_sign: list,
     response_effect_sign: list,
     surface_exposed_dict: dict,
@@ -416,7 +418,10 @@ def FIC_plot(
         )
 
         fig.tight_layout()
-        fig.savefig(str(path) + "/" + "FIC_" + "_".join(target_names) + ".png", dpi=300)
+        fig.savefig(
+            os.path.join(str(path), f"FIC_{target_column}_{mapping_method}.png"),
+            dpi=300,
+        )
         plt.close()
 
 
@@ -1006,7 +1011,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     if feature_checkpoint > kmer_range_length:
                         feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
-
+                kmer_maps_all = []
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
@@ -1018,7 +1023,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             "To restart at this point use --features",
                             this_checkpoint,
                         )
-                        cli.calculate_table(
+                        kmer_maps = cli.calculate_table(
                             [
                                 "--file",
                                 file,
@@ -1040,6 +1045,16 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             standalone_mode=False,
                         )
                         this_checkpoint -= 1
+                        kmer_maps_all.append(kmer_maps)
+                kmer_maps_df = pd.DataFrame(
+                    np.concatenate(kmer_maps_all)
+                ).drop_duplicates(subset=[0, 1])
+                kmer_map_path = Path("kmer_maps")
+                kmer_map_path.mkdir(exist_ok=True)
+                kmer_maps_df.to_parquet(
+                    f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
+                    index=False,
+                )
 
 
 def feature_selection_rfc(
@@ -1796,7 +1811,8 @@ if __name__ == "__main__":
         ax.legend(loc="lower right")
         fig.tight_layout()
         fig.savefig(
-            str(paths[-1]) + "/" + "ROC_" + str(target_column) + ".png", dpi=300
+            os.path.join(str(paths[-1]), f"ROC_{target_column}_{mapping_method}.png"),
+            dpi=300,
         )
         plt.close(fig)
 
@@ -1876,10 +1892,13 @@ if __name__ == "__main__":
         explainer = shap.Explainer(clfr, seed=random_state)
         shap_values = explainer(X)
         positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
+        fig_name = os.path.join(
+            str(paths[-1]), f"SHAP_{str(target_column)}_{mapping_method}.png"
+        )
         feature_importance.plot_shap_beeswarm(
             positive_shap_values,
             model_name="Random Forest",
-            fig_name=str(paths[-1]) + "/" + "SHAP_" + str(target_column) + ".png",
+            fig_name=fig_name,
             max_display=len(array2),
         )
 
@@ -1900,8 +1919,23 @@ if __name__ == "__main__":
             array1,
             n_folds,
             target_column,
+            mapping_method,
             exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
             paths[-1],
         )
+
+        # save top N kmers
+        array2.reverse()
+        topN_kmers = pd.DataFrame(array2)
+        sp.save_files(
+            topN_kmers, f"topN_kmers_{target_column}_{mapping_method}.parquet.gzip"
+        )
+
+        # perform matching of AA analogues for topN kmers from each mapping method
+        matching_kmers = dtra_utils.find_matching_kmers(
+            target_column,
+            mapping_methods=["jurgen_schmidt", "shen_2007"],
+        )
+        print(matching_kmers)

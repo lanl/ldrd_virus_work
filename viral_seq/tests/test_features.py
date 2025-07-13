@@ -28,7 +28,7 @@ import pytest
             "NC_007620.1",
             ",",
             "Menangle_features_kmers.csv",
-            lambda e: get_kmers(e, k=2),
+            lambda e: get_kmers(e, k=2)[0],
         ),  # bad coding sequence kmer calculation test
         (
             "HM045787.1",
@@ -126,7 +126,7 @@ def test_get_kmers(accession, kmer_type, mapping_method, exp_kmer, exp_len):
     test_record = _append_recs(tests_dir)
 
     kmers = get_kmers([test_record], kmer_type=kmer_type, mapping_method=mapping_method)
-    mapped_kmers = list(kmers.keys())
+    mapped_kmers = list(kmers[0].keys())
     test_kmer = mapped_kmers[0]
 
     assert test_kmer == exp_kmer

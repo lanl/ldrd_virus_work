@@ -1,12 +1,16 @@
+import uuid
 from viral_seq.data import make_alternate_datasets as make_alts
+import viral_seq.data.make_data_summary_plots as data_summary
 import pandas as pd
 from pandas.testing import assert_frame_equal
 from importlib.resources import files
 import pytest
 import numpy as np
+from numpy.testing import assert_allclose
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
+from matplotlib.testing.compare import compare_images
 
 
 # Utilizing some pre-existing accessions in the test folder
@@ -103,3 +107,133 @@ def test_shuffle_property(random_state, different_balance):
         by="Species", ignore_index=True
     )
     assert_frame_equal(original_data, shuffled_data)
+
+
+@pytest.mark.parametrize(
+    "df, families_exp",
+    [
+        (
+            pd.read_csv(str(files("viral_seq.tests") / "TrainingSet.csv"))[["Species"]],
+            {
+                "Flaviviridae": 3,
+                "Togaviridae": 2,
+                "Phenuiviridae": 1,
+                "Papillomaviridae": 3,
+                "Peribunyaviridae": 1,
+            },
+        ),
+        (
+            pd.DataFrame({"Species": ["Goose coronavirus CB17"]}),
+            {"Coronaviridae": 1},
+        ),  # this is in corrections
+    ],
+)
+def test_get_family_counts(df, families_exp):
+    families = data_summary._get_family_counts(df)
+    assert families == families_exp
+
+
+def test_get_family_counts_missing():
+    df = pd.DataFrame({"Species": ["Missing Virus"]})
+    with pytest.raises(
+        ValueError, match="Couldn't find taxonomy for the following viruses:"
+    ):
+        data_summary._get_family_counts(df)
+
+
+@pytest.mark.parametrize("target_column", ["Human Host", "other"])
+def test_plot_family_heatmap(tmpdir, target_column):
+    expected_plot = files("viral_seq.tests.expected") / (
+        f"test_plot_family_heatmap_{target_column}.png".replace(" ", "_")
+    )
+    expected_data = pd.read_csv(
+        files("viral_seq.tests.expected")
+        / (f"test_plot_family_heatmap_{target_column}.csv".replace(" ", "_")),
+        index_col=0,
+    )
+    rng = np.random.default_rng(12345)
+    train_file = str(files("viral_seq.tests") / "TrainingSet.csv")
+    test_file = str(files("viral_seq.tests") / "TestSet.csv")
+    df_train = pd.read_csv(train_file, index_col=0)
+    df_test = pd.read_csv(test_file, index_col=0)
+    df_train[target_column] = rng.integers(0, 2, size=len(df_train), dtype=bool)
+    df_test[target_column] = rng.integers(0, 2, size=len(df_test), dtype=bool)
+    with tmpdir.as_cwd():
+        df_train.to_csv("train_file.csv")
+        df_test.to_csv("test_file.csv")
+        data_summary.plot_family_heatmap(
+            "train_file.csv", "test_file.csv", target_column
+        )
+        assert_frame_equal(
+            pd.read_csv("plot_family_heatmap.csv", index_col=0), expected_data
+        )
+        assert compare_images(expected_plot, "plot_family_heatmap.png", 0.001) is None
+
+
+def test__plot_family_heatmap(tmpdir):
+    family_counts = pd.DataFrame(
+        {
+            "Phenuiviridae": {
+                "Train Human Host": 1,
+                "Train Not Human Host": 0,
+                "Test Human Host": 2,
+                "Test Not Human Host": 3,
+            },
+            "Flaviviridae": {
+                "Train Human Host": 2,
+                "Train Not Human Host": 1,
+                "Test Human Host": 0,
+                "Test Not Human Host": 0,
+            },
+        }
+    )
+    expected_plot = files("viral_seq.tests.expected") / "test__plot_family_heatmap.png"
+    expected_data = pd.read_csv(
+        files("viral_seq.tests.expected") / "test__plot_family_heatmap.csv", index_col=0
+    )
+    with tmpdir.as_cwd():
+        data_summary._plot_family_heatmap(family_counts)
+        assert_frame_equal(
+            pd.read_csv("plot_family_heatmap.csv", index_col=0), expected_data
+        )
+        assert compare_images(expected_plot, "plot_family_heatmap.png", 0.001) is None
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        (
+            # when one viral family is completely
+            # absent from one of the splits, the
+            # KL divergence is infinite
+            {
+                "Train Human Host": [1, 2],
+                "Train Not Human Host": [0, 1],
+                "Test Human Host": [2, 0],
+                "Test Not Human Host": [3, 0],
+            },
+            np.inf,
+        ),
+        (
+            # when the viral families are perfectly
+            # balanced across the splits, the KL
+            # divergence is zero
+            {
+                "Train Human Host": [2, 1],
+                "Train Not Human Host": [3, 1],
+                "Test Human Host": [2, 1],
+                "Test Not Human Host": [3, 1],
+            },
+            0.0,
+        ),
+    ],
+)
+def test_relative_entropy(tmpdir, data, expected):
+    df = pd.DataFrame.from_dict(
+        data, columns=["viral family 1", "viral family 2"], orient="index"
+    )
+    with tmpdir.as_cwd():
+        fname = f"{uuid.uuid4()}.csv"
+        df.to_csv(fname)
+        actual = data_summary.relative_entropy_viral_families(heatmap_csv=fname)
+    assert_allclose(actual, expected)

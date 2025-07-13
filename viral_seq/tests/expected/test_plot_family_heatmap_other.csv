@@ -1,0 +1,5 @@
+,Phenuiviridae,Flaviviridae,Papillomaviridae,Polyomaviridae,Poxviridae,Togaviridae,Peribunyaviridae,Picornaviridae
+Train other,1,2,0,0,0,2,1,0
+Train Not other,0,1,3,0,0,0,0,0
+Test other,2,0,0,1,1,0,0,1
+Test Not other,3,0,0,1,1,0,0,0

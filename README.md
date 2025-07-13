@@ -43,6 +43,25 @@ Pulling down the cache at runtime:
 As the full workflow is not automatically tested; it should be occassionally tested locally following the above procedure, but with the `--debug` flag for `viral_seq/run_workflow.py` which will run the entire workflow with assertions on generated data which are not designed to be performative. It is pertinent to test both workflow options as they require different assertions.
 
 
+Generating Heatmaps and Calculating Relative Entropy Quickly
+============================================================
+
+At the time of writing it can take longer than an hour to run
+the full workflow that supports the paper. However, generation
+of the phylogenetic heatmaps of viral family representation
+in training and test datasets, and the corresponding relative
+entropy calculation for those distributions, can be done quickly
+with an incantation like the one below. This will error out, but
+will produce the heatmap and a printout of the relative entropy
+before it does:
+
+```
+> python ../viral_seq/run_workflow.py --cache 0 --features 0 --feature-selection skip -tr Mollentze_Training_Shuffled.csv -ts Mollentze_Holdout_Shuffled.csv
+```
+
+(and similarly for other training and test datasets)
+
+
 About Licensing
 ===============
 

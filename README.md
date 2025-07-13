@@ -43,3 +43,13 @@ Pulling down the cache at runtime:
 As the full workflow is not automatically tested; it should be occassionally tested locally following the above procedure, but with the `--debug` flag for `viral_seq/run_workflow.py` which will run the entire workflow with assertions on generated data which are not designed to be performative. It is pertinent to test both workflow options as they require different assertions.
 
 
+About Licensing
+===============
+
+At the time of writing we are currently bound to the copyleft `GPL-3.0`
+license because we leverage `taxonomy-ranks` in the small corner of our
+workflow that deals with phylogenetic heatmaps,
+and `taxonomy-ranks` itself depends on the `GPL-3.0` licensed
+`ete` project. Given the minor role these libraries play in our workflow,
+we'd appreciate help in finding a more liberally-licensed alternative so
+that we can avoid copyleft requirements in the future.

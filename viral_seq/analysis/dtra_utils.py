@@ -298,9 +298,9 @@ def match_kmers(
         kmer_maps_topN = kmer_maps_df[kmer_maps_df["0"].isin(topN_mm["0"])]
         topN_kmer_mappings_all.append(kmer_maps_topN)
         # reorganize kmer mappings for readability and save topN mappings
-        topN_kmer_mappings = kmer_maps_topN.groupby("1")["0"].apply(list).to_frame()
+        topN_kmer_mappings = kmer_maps_topN.groupby("0")["1"].apply(list).to_frame()
         topN_kmer_mappings = pd.DataFrame(
-            topN_kmer_mappings["0"].tolist(), index=topN_kmer_mappings.index
+            topN_kmer_mappings["1"].tolist(), index=topN_kmer_mappings.index
         ).T
         topN_kmer_mappings.to_csv(f"topN_PC_AA_kmer_mappings_{mm}.csv", index=False)
     # if workflow has been run with both mapping methods, match kmers between schemes

@@ -54,8 +54,9 @@ def test_merge_convert_tbl():
     assert converted_df.IG.sum() == 35
 
 
+# TODO: re-parameterize this test using hypothesis (issue #140)
 @pytest.mark.parametrize(
-    "kmer_matches, syn_topN, kmer_matches_exp, mapping_methods",
+    "kmer_matches, syn_topN, kmer_matches_exp, topN_saved_exp, mapping_methods",
     [
         (
             # this case tests that the function produces matches when two mapping methods are compared
@@ -81,6 +82,18 @@ def test_merge_convert_tbl():
                 "jurgen_schmidt": {0: "kmer_PC_0", 1: "kmer_PC_1"},
                 "shen_2007": {0: "kmer_PC_1", 1: "kmer_PC_2"},
                 "matching AA kmer 0": {0: "kmer_AA_G", 1: "kmer_AA_C"},
+            },
+            {
+                "jurgen_schmidt": {
+                    "kmer_PC_0": {0: "kmer_AA_G"},
+                    "kmer_PC_1": {0: "kmer_AA_C"},
+                    "kmer_PC_2": {0: "kmer_AA_Y"},
+                },
+                "shen_2007": {
+                    "kmer_PC_1": {0: "kmer_AA_G"},
+                    "kmer_PC_2": {0: "kmer_AA_C"},
+                    "kmer_PC_3": {0: "kmer_AA_S"},
+                },
             },
             ["jurgen_schmidt", "shen_2007"],
         ),
@@ -124,6 +137,20 @@ def test_merge_convert_tbl():
                 "matching AA kmer 0": {0: "kmer_AA_G", 1: "kmer_AA_AG", 2: "kmer_AA_C"},
                 "matching AA kmer 1": {0: None, 1: "kmer_AA_GA", 2: None},
             },
+            {
+                "jurgen_schmidt": {
+                    "kmer_PC_0": {0: "kmer_AA_G", 1: None},
+                    "kmer_PC_00": {0: "kmer_AA_AG", 1: "kmer_AA_GA"},
+                    "kmer_PC_1": {0: "kmer_AA_C", 1: None},
+                    "kmer_PC_2": {0: "kmer_AA_Y", 1: None},
+                },
+                "shen_2007": {
+                    "kmer_PC_1": {0: "kmer_AA_G", 1: None},
+                    "kmer_PC_11": {0: "kmer_AA_AG", 1: "kmer_AA_GA"},
+                    "kmer_PC_2": {0: "kmer_AA_C", 1: None},
+                    "kmer_PC_3": {0: "kmer_AA_S", 1: None},
+                },
+            },
             ["jurgen_schmidt", "shen_2007"],
         ),
         # this test case checks that the correct matches are returned when
@@ -152,6 +179,18 @@ def test_merge_convert_tbl():
                 "shen_2007": {0: "kmer_PC_2", 1: "kmer_PC_4"},
                 "matching AA kmer 0": {0: "kmer_AA_C", 1: "kmer_AA_Y"},
             },
+            {
+                "jurgen_schmidt": {
+                    "kmer_PC_0": {0: "kmer_AA_G"},
+                    "kmer_PC_1": {0: "kmer_AA_C"},
+                    "kmer_PC_2": {0: "kmer_AA_Y"},
+                },
+                "shen_2007": {
+                    "kmer_PC_1": {0: "kmer_AA_A"},
+                    "kmer_PC_2": {0: "kmer_AA_C"},
+                    "kmer_PC_4": {0: "kmer_AA_Y"},
+                },
+            },
             ["jurgen_schmidt", "shen_2007"],
         ),
         # this case tests that nothing is returned when only a single mapping method is used
@@ -169,6 +208,13 @@ def test_merge_convert_tbl():
                 },
             ],
             None,
+            {
+                "jurgen_schmidt": {
+                    "kmer_PC_0": {0: "kmer_AA_G"},
+                    "kmer_PC_1": {0: "kmer_AA_C"},
+                    "kmer_PC_2": {0: "kmer_AA_Y"},
+                }
+            },
             ["jurgen_schmidt"],
         ),
         # test when a pair of PC kmers matches through more than one AA kmer
@@ -197,6 +243,15 @@ def test_merge_convert_tbl():
                 "matching AA kmer 0": {0: "kmer_AA_A", 1: "kmer_AA_Y"},
                 "matching AA kmer 1": {0: "kmer_AA_C", 1: None},
             },
+            {
+                "jurgen_schmidt": {
+                    "kmer_PC_1": {0: "kmer_AA_A", 1: "kmer_AA_C"},
+                    "kmer_PC_2": {0: "kmer_AA_Y", 1: None},
+                },
+                "shen_2007": {
+                    "kmer_PC_1": {0: "kmer_AA_A", 1: "kmer_AA_C", 2: "kmer_AA_Y"}
+                },
+            },
             ["jurgen_schmidt", "shen_2007"],
         ),
         # test when a PC kmer from one scheme matches with two different PC kmers of the other scheme
@@ -223,6 +278,16 @@ def test_merge_convert_tbl():
                 "jurgen_schmidt": {0: "kmer_PC_1", 1: "kmer_PC_1", 2: "kmer_PC_2"},
                 "shen_2007": {0: "kmer_PC_1", 1: "kmer_PC_2", 2: "kmer_PC_2"},
                 "matching AA kmer 0": {0: "kmer_AA_A", 1: "kmer_AA_C", 2: "kmer_AA_Y"},
+            },
+            {
+                "jurgen_schmidt": {
+                    "kmer_PC_1": {0: "kmer_AA_A", 1: "kmer_AA_C"},
+                    "kmer_PC_2": {0: "kmer_AA_Y", 1: None},
+                },
+                "shen_2007": {
+                    "kmer_PC_1": {0: "kmer_AA_A", 1: None},
+                    "kmer_PC_2": {0: "kmer_AA_C", 1: "kmer_AA_Y"},
+                },
             },
             ["jurgen_schmidt", "shen_2007"],
         ),
@@ -251,11 +316,23 @@ def test_merge_convert_tbl():
                 "shen_2007": {0: "kmer_AA_A", 1: "kmer_AA_A"},
                 "matching AA kmer 0": {0: "kmer_AA_A", 1: "kmer_AA_A"},
             },
+            {
+                "jurgen_schmidt": {
+                    "kmer_AA_A": {0: "kmer_AA_A"},
+                    "kmer_PC_1": {0: "kmer_AA_A"},
+                },
+                "shen_2007": {
+                    "kmer_AA_A": {0: "kmer_AA_A"},
+                    "kmer_PC_2": {0: "kmer_AA_C"},
+                },
+            },
             ["jurgen_schmidt", "shen_2007"],
         ),
     ],
 )
-def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_methods):
+def test_match_kmers(
+    tmpdir, kmer_matches, syn_topN, kmer_matches_exp, topN_saved_exp, mapping_methods
+):
     """test that matching AA-kmers are found between the two mapping methods with different PC-kmers"""
 
     # make and save a temporary file containing the matching kmer dataframe
@@ -273,9 +350,11 @@ def test_match_kmers(tmpdir, kmer_matches, syn_topN, kmer_matches_exp, mapping_m
     # assert that the output looks as expected and that a csv file was generated containing the dataframe
     assert_frame_equal(kmer_matches_out, kmer_matches_exp_df)
     for mm in mapping_methods:
-        assert os.path.exists(
+        topN_saved_exp_mm = pd.DataFrame(topN_saved_exp[mm])
+        topN_saved = pd.read_csv(
             os.path.join(tmpdir, f"topN_PC_AA_kmer_mappings_{mm}.csv")
         )
+        assert_frame_equal(topN_saved, topN_saved_exp_mm)
 
 
 @pytest.mark.parametrize(

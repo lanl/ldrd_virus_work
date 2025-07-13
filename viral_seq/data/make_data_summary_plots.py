@@ -94,7 +94,7 @@ def _get_family_counts(df: pd.DataFrame) -> dict[str, int]:
             except ValueError:
                 # if nothing is found, taxonomy_ranks throws an error, but we will keep looking
                 continue
-            # Documentation states multiple lineages could possibly returned https://github.com/linzhi2013/taxonomy_ranks/tree/master?tab=readme-ov-file#32-using-as-a-module
+            # Documentation states multiple lineages could possibly be returned https://github.com/linzhi2013/taxonomy_ranks/tree/master?tab=readme-ov-file#32-using-as-a-module
             # However, I cannot find an example of this
             if len(rank_taxon.lineages) != 1:
                 raise ValueError(

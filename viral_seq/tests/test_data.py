@@ -1,3 +1,4 @@
+import uuid
 from viral_seq.data import make_alternate_datasets as make_alts
 import viral_seq.data.make_data_summary_plots as data_summary
 import pandas as pd
@@ -5,6 +6,7 @@ from pandas.testing import assert_frame_equal
 from importlib.resources import files
 import pytest
 import numpy as np
+from numpy.testing import assert_allclose
 from hypothesis import given
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as hnp
@@ -195,3 +197,43 @@ def test__plot_family_heatmap(tmpdir):
             pd.read_csv("plot_family_heatmap.csv", index_col=0), expected_data
         )
         assert compare_images(expected_plot, "plot_family_heatmap.png", 0.001) is None
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        (
+            # when one viral family is completely
+            # absent from one of the splits, the
+            # KL divergence is infinite
+            {
+                "Train Human Host": [1, 2],
+                "Train Not Human Host": [0, 1],
+                "Test Human Host": [2, 0],
+                "Test Not Human Host": [3, 0],
+            },
+            np.inf,
+        ),
+        (
+            # when the viral families are perfectly
+            # balanced across the splits, the KL
+            # divergence is zero
+            {
+                "Train Human Host": [2, 1],
+                "Train Not Human Host": [3, 1],
+                "Test Human Host": [2, 1],
+                "Test Not Human Host": [3, 1],
+            },
+            0.0,
+        ),
+    ],
+)
+def test_relative_entropy(tmpdir, data, expected):
+    df = pd.DataFrame.from_dict(
+        data, columns=["viral family 1", "viral family 2"], orient="index"
+    )
+    with tmpdir.as_cwd():
+        fname = f"{uuid.uuid4()}.csv"
+        df.to_csv(fname)
+        actual = data_summary.relative_entropy_viral_families(heatmap_csv=fname)
+    assert_allclose(actual, expected)

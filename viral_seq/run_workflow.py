@@ -796,6 +796,12 @@ if __name__ == "__main__":
             family_heatmap_plot_figure,
             family_heatmap_plot_source,
         )
+        relative_entropy = data_summary.relative_entropy_viral_families(
+            heatmap_csv=family_heatmap_plot_source
+        )
+        print(
+            f"Relative entropy of viral family distribution between train and test datasets: {relative_entropy:.3f}"
+        )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
     build_tables(feature_checkpoint=feature_checkpoint, debug=debug)

@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 import pandas as pd
 from taxonomy_ranks import TaxonomyRanks
 import seaborn as sns
@@ -148,3 +149,31 @@ def _plot_family_heatmap(
     fig.savefig(filename_plot, dpi=300)
     plt.close()
     family_counts.to_csv(filename_data)
+
+
+def relative_entropy_viral_families(heatmap_csv: str) -> float:
+    """
+    Calculate the relative entropy (Kullback-Leibler divergence)
+    of the distribution of viral families between training and test
+    datasets.
+
+    Parameters:
+    -----------
+    heatmap_csv: str
+        filepath for the CSV file containing viral family distribution
+        data between train and test sets
+    Returns:
+    -----------
+    relative_entropy: float
+        The relative entropy (Kullback-Leibler divergence) of the distribution
+        of viral families between training and test data sets.
+    """
+    df = pd.read_csv(heatmap_csv)
+    # for the purposes of the relative entropy calculations,
+    # we sum the target infecting and non-infecting viruses
+    # to get the total viruses from each family in either train
+    # or test splits
+    train_sums = df.iloc[[0, 1]].sum().values[1:].astype(int)
+    test_sums = df.iloc[[2, 3]].sum().values[1:].astype(int)
+    kl = scipy.stats.entropy(pk=train_sums, qk=test_sums)
+    return kl

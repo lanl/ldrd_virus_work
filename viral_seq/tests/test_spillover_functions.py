@@ -687,8 +687,8 @@ def test_get_aucs(
             ("Human Host", "Human Host"),
             """========================
 /wf1:
-My Classifier 1 mean auc = 0.999 std = 0.000
 My Classifier 0 mean auc = 1.000 std = 0.000
+My Classifier 1 mean auc = 0.999 std = 0.000
 Workflow mean auc = 1.000 std = 0.000
 ========================
 /wf2:

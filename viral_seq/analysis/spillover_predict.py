@@ -830,7 +830,7 @@ def compare_workflow_aucs(
     for i in range(2):
         print("========================")
         print(f"{predictions_paths[i]}:")
-        wf_files = glob.glob(os.path.join(predictions_paths[i], "*csv"))
+        wf_files = sorted(glob.glob(os.path.join(predictions_paths[i], "*csv")))
         for file in wf_files:
             aucs[i] += get_aucs(file, dataset_files[i], target_columns[i])
         auc_mean = np.mean(aucs[i])

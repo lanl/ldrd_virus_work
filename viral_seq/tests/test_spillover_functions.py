@@ -710,7 +710,8 @@ def test_compare_workflow_aucs(
         for j, file in enumerate(files):
             for predictions in file:
                 pred_data = {
-                    f"My Classifier {j}: {k}": pred for k, pred in enumerate(predictions)
+                    f"My Classifier {j}: {k}": pred
+                    for k, pred in enumerate(predictions)
                 }
                 # this should be ignored by get_aucs
                 pred_data["Species"] = [

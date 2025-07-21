@@ -283,7 +283,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False):
+def build_tables(feature_checkpoint=0, debug=False, target_column="Human Host"):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -820,7 +820,9 @@ if __name__ == "__main__":
         )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    build_tables(
+        feature_checkpoint=feature_checkpoint, debug=debug, target_column=target_column
+    )
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -864,8 +866,7 @@ if __name__ == "__main__":
             print("Using hyperparameters pre-caclulated for", val["group"])
             train_file_suff = os.path.splitext(os.path.basename(train_file))[0]
             if train_file_suff == "Relabeled_Train":
-                # this accounts for only the non-shuffled training files which contain all target columns
-                # and require special consideration to load the correct optimized parameter file
+                # in the non-shuffled and relabeled case, cached hyperparameter files follow a different naming convention
                 train_file_suff = f"{train_file_suff}_{target_column}"
             this_filename = f"params_{val['group']}_{train_file_suff}.json"
             with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:

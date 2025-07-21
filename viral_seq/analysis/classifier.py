@@ -93,7 +93,7 @@ def get_model_arguments(
             "random_state": random_state,
         },
     }
-    model_arguments["LGBMClassifer Boost Seed:" + str(random_state)] = {
+    model_arguments["LGBMClassifier Boost Seed:" + str(random_state)] = {
         "model": LGBMClassifier,
         "suffix": "lgbm_" + str(random_state),
         "group": "LGBMClassifier_Boost",
@@ -120,10 +120,10 @@ def get_model_arguments(
             "random_state": random_state,
         },
     }
-    model_arguments["XGBClassifer Boost Seed:" + str(random_state)] = {
+    model_arguments["XGBClassifier Boost Seed:" + str(random_state)] = {
         "model": XGBClassifier,
         "suffix": "xgb_" + str(random_state),
-        "group": "XGBClassifer_Boost",
+        "group": "XGBClassifier_Boost",
         "optimize": {
             "num_samples": 350,
             "n_jobs_cv": 1,
@@ -175,7 +175,7 @@ def get_model_arguments(
             "random_state": random_state,
         },
     }
-    model_arguments["LGBMClassifer Dart Seed:" + str(random_state)] = {
+    model_arguments["LGBMClassifier Dart Seed:" + str(random_state)] = {
         "model": LGBMClassifier,
         "suffix": "lgbm_dart_" + str(random_state),
         "group": "LGBMClassifier_Dart",

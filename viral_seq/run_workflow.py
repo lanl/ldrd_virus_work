@@ -682,7 +682,7 @@ if __name__ == "__main__":
         "-cc",
         "--check-calibration",
         action="store_true",
-        help="Calibrate classifiers with `CalibratedClassiferCV`.",
+        help="Calibrate classifiers with `CalibratedClassifierCV`.",
     )
     parser.add_argument(
         "-tr",

@@ -175,8 +175,8 @@ if __name__ == "__main__":
     # split relabeled datasets and shuffle/save
     for label in labels:
         other_labels = [s for s in labels if s != label]
-        this_df_train = relabeled_df_train.drop(columns=labels)
-        this_df_test = relabeled_df_test.drop(columns=labels)
+        this_df_train = relabeled_df_train.drop(columns=other_labels)
+        this_df_test = relabeled_df_test.drop(columns=other_labels)
 
         this_df_train, this_df_test = shuffle(
             this_df_train,

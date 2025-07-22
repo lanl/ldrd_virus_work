@@ -386,7 +386,7 @@ def train(files, outfile):
 @click.option(
     "--rfc-file",
     required=True,
-    help=("Pickle file of trained RandomForestClassifer to use for prediction."),
+    help=("Pickle file of trained RandomForestClassifier to use for prediction."),
 )
 @click.option(
     "--out-prefix",

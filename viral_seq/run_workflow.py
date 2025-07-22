@@ -283,7 +283,7 @@ def build_cache(cache_checkpoint=3, debug=False):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False):
+def build_tables(feature_checkpoint=0, debug=False, target_column="Human Host"):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -325,6 +325,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                     "--similarity-genomic",
                     "--similarity-cache",
                     cache_isg + " " + cache_hk,
+                    "--target-column",
+                    target_column,
                 ],
                 standalone_mode=False,
             )
@@ -353,6 +355,8 @@ def build_tables(feature_checkpoint=0, debug=False):
                             f"--features-kmers{kmer_suff}",
                             f"--kmer-k{kmer_suff}",
                             str(k),
+                            "--target-column",
+                            target_column,
                         ],
                         standalone_mode=False,
                     )
@@ -371,7 +375,9 @@ def feature_selection_rfc(
     if feature_selection == "yes" or feature_selection == "none":
         print("Loading all feature tables for train...")
         train_files = tuple(glob(table_loc_train + "/*gzip"))
-        X, y = sp.get_training_columns(table_filename=train_files)
+        X, y = sp.get_training_columns(
+            table_filename=train_files, class_column=target_column
+        )
         if feature_selection == "none":
             print(
                 "All training features will be used as X_train in the following steps."
@@ -560,7 +566,9 @@ def get_test_features(
             )
     print("Loading all feature tables for test...")
     test_files = tuple(glob(table_loc_test + "/*gzip"))
-    X_test, y_test = sp.get_training_columns(table_filename=test_files)
+    X_test, y_test = sp.get_training_columns(
+        table_filename=test_files, class_column=target_column
+    )
     X_test = X_test.reindex(columns=X_train.columns, fill_value=0)
     print("Saving X_test to", table_loc_test_saved)
     X_test.to_parquet(table_loc_test_saved)
@@ -674,7 +682,7 @@ if __name__ == "__main__":
         "-cc",
         "--check-calibration",
         action="store_true",
-        help="Calibrate classifiers with `CalibratedClassiferCV`.",
+        help="Calibrate classifiers with `CalibratedClassifierCV`.",
     )
     parser.add_argument(
         "-tr",
@@ -683,6 +691,10 @@ if __name__ == "__main__":
             "Mollentze_Training.csv",
             "Mollentze_Training_Fixed.csv",
             "Mollentze_Training_Shuffled.csv",
+            "Relabeled_Train.csv",
+            "Relabeled_Train_Human_Shuffled.csv",
+            "Relabeled_Train_Mammal_Shuffled.csv",
+            "Relabeled_Train_Primate_Shuffled.csv",
         ],
         default="Mollentze_Training.csv",
         help="File to be used corresponding to training data.",
@@ -694,6 +706,10 @@ if __name__ == "__main__":
             "Mollentze_Holdout.csv",
             "Mollentze_Holdout_Fixed.csv",
             "Mollentze_Holdout_Shuffled.csv",
+            "Relabeled_Test.csv",
+            "Relabeled_Test_Human_Shuffled.csv",
+            "Relabeled_Test_Mammal_Shuffled.csv",
+            "Relabeled_Test_Primate_Shuffled.csv",
         ],
         default="Mollentze_Holdout.csv",
         help="File to be used corresponding to test data.",
@@ -701,7 +717,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-tc",
         "--target-column",
-        choices=["Human Host"],
+        choices=["Human Host", "human", "mammal", "primate"],
         default="Human Host",
         help="Target column to be used for binary classification.",
     )
@@ -804,7 +820,9 @@ if __name__ == "__main__":
         )
 
     build_cache(cache_checkpoint=cache_checkpoint, debug=debug)
-    build_tables(feature_checkpoint=feature_checkpoint, debug=debug)
+    build_tables(
+        feature_checkpoint=feature_checkpoint, debug=debug, target_column=target_column
+    )
     X_train, y_train = feature_selection_rfc(
         feature_selection=feature_selection,
         debug=debug,
@@ -847,6 +865,9 @@ if __name__ == "__main__":
         elif optimize == "pre-optimized":
             print("Using hyperparameters pre-caclulated for", val["group"])
             train_file_suff = os.path.splitext(os.path.basename(train_file))[0]
+            if train_file_suff == "Relabeled_Train":
+                # in the non-shuffled and relabeled case, cached hyperparameter files follow a different naming convention
+                train_file_suff = f"{train_file_suff}_{target_column}"
             this_filename = f"params_{val['group']}_{train_file_suff}.json"
             with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
                 res = json.load(f)

@@ -1,0 +1,11 @@
+Species,Accessions,human,mammal,primate
+Royal Farm virus,NC_006947.1,True,True,True
+Israel turkey meningoencephalomyelitis virus,KC734551.1,False,False,False
+Ndumu virus,NC_016959.1,False,True,False
+Uganda S virus,NC_033698.1,True,True,True
+Bujaru phlebovirus,NC_033830.1  NC_033847.1  NC_033831.1,False,True,False
+Alphapapillomavirus 7,NC_001357.1,True,True,True
+Betapapillomavirus 1,NC_001531.1,True,True,True
+Nyando orthobunyavirus,NC_034492.1  NC_034491.1  NC_034481.1,True,True,True
+Getah virus,NC_006558.1,True,True,True
+Alphapapillomavirus 3,NC_001694.1,True,True,True

@@ -3,6 +3,7 @@ from viral_seq.analysis import spillover_predict as sp
 from importlib.resources import files
 from pathlib import Path
 import tarfile
+import numpy as np
 
 
 def get_bad_indexes(df, cache, train_accessions=None):
@@ -39,37 +40,84 @@ def get_bad_indexes(df, cache, train_accessions=None):
 
 
 def shuffle(
-    df_train: pd.DataFrame, df_test: pd.DataFrame, random_state: int = 2930678936
+    df_train: pd.DataFrame,
+    df_test: pd.DataFrame,
+    random_state: int = 2930678936,
+    target_column: str = "Human Host",
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Combine data and shuffle into a new train & test set.
     Algorithm preserves:
         - Number of samples in train & test
-        - Number of 'Human Host' in train & test
+        - Number of target_column in train & test
     """
-    train_human_count = df_train["Human Host"].sum()
-    train_non_human_count = df_train.shape[0] - train_human_count
+    train_target_count = df_train[target_column].sum()
+    train_other_count = df_train.shape[0] - train_target_count
 
     # combine and shuffle data
     all_data = pd.concat([df_train, df_test])
     all_data = all_data.sample(frac=1, random_state=random_state)
 
-    # select appropriate number of human viruses for each set
-    human_data = all_data.loc[all_data["Human Host"]]
-    non_human_data = all_data.loc[~all_data["Human Host"]]
+    # select appropriate number of target viruses for each set
+    target_data = all_data.loc[all_data[target_column]]
+    other_data = all_data.loc[~all_data[target_column]]
     df_train_new = pd.concat(
         [
-            human_data.iloc[:train_human_count],
-            non_human_data.iloc[:train_non_human_count],
+            target_data.iloc[:train_target_count],
+            other_data.iloc[:train_other_count],
         ]
     ).reset_index(drop=True)
     df_test_new = pd.concat(
         [
-            human_data.iloc[train_human_count:],
-            non_human_data.iloc[train_non_human_count:],
+            target_data.iloc[train_target_count:],
+            other_data.iloc[train_other_count:],
         ]
     ).reset_index(drop=True)
 
     return df_train_new, df_test_new
+
+
+def make_relabeled_dataset(
+    relabeled_data: np.lib.npyio.NpzFile,
+    mollentze_train: pd.DataFrame,
+    mollentze_test: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    add new columns to train and test datasets based on relabeled
+    virus targets from ``relabeled_data.npz``, changing ``Human Host``
+    True/False target to ``human``, ``primate`` or ``mammal`` host
+    """
+    targets = relabeled_data.files
+    new_dataframe_train = pd.DataFrame()
+    new_dataframe_test = pd.DataFrame()
+    for t in targets:
+        if "train" in t:
+            new_dataframe_train[t] = relabeled_data[t]
+        elif "test" in t:
+            new_dataframe_test[t] = relabeled_data[t]
+
+    new_dataframe_train = new_dataframe_train.rename(
+        columns={
+            "y_human_train": "human",
+            "y_primate_train": "primate",
+            "y_mammal_train": "mammal",
+        }
+    )
+    new_dataframe_test = new_dataframe_test.rename(
+        columns={
+            "y_human_test": "human",
+            "y_primate_test": "primate",
+            "y_mammal_test": "mammal",
+        }
+    )
+
+    train_out = pd.concat([mollentze_train, new_dataframe_train], axis=1).drop(
+        columns="Human Host"
+    )
+    test_out = pd.concat([mollentze_test, new_dataframe_test], axis=1).drop(
+        columns="Human Host"
+    )
+
+    return train_out, test_out
 
 
 if __name__ == "__main__":
@@ -84,10 +132,18 @@ if __name__ == "__main__":
     test_fixed_data = Path("Mollentze_Holdout_Fixed.csv")
     train_shuffled_data = Path("Mollentze_Training_Shuffled.csv")
     test_shuffled_data = Path("Mollentze_Holdout_Shuffled.csv")
+    relabeled_data = np.load("relabeled_data.npz")
     train_accessions: set[str] = set()
 
     with tarfile.open(cache_file, "r") as tar:
         tar.extractall(cache_extract_path)
+
+    # relabel data
+    mollentze_train = pd.read_csv(train_data).drop(columns="Unnamed: 0")
+    mollentze_test = pd.read_csv(test_data).drop(columns="Unnamed: 0")
+    relabeled_df_train, relabeled_df_test = make_relabeled_dataset(
+        relabeled_data, mollentze_train, mollentze_test
+    )
 
     df_train = pd.read_csv(train_data, index_col=0)
     train_accessions = set((" ".join(df_train["Accessions"].values)).split())
@@ -101,6 +157,38 @@ if __name__ == "__main__":
         res_test["partial"] + res_test["no_good_cds"] + res_test["duplicate"]
     )
     df_test_fixed.to_csv(test_fixed_data)
+
+    relabeled_df_train.drop(
+        res_train["partial"] + res_train["no_good_cds"], inplace=True
+    )
+    relabeled_df_test.drop(
+        res_test["partial"] + res_test["no_good_cds"] + res_test["duplicate"],
+        inplace=True,
+    )
+
+    # save new dataframes
+    relabeled_df_train.to_csv("Relabeled_Train.csv", index=False)
+    relabeled_df_test.to_csv("Relabeled_Test.csv", index=False)
+
+    labels = ["human", "primate", "mammal"]
+
+    # split relabeled datasets and shuffle/save
+    for label in labels:
+        other_labels = [s for s in labels if s != label]
+        this_df_train = relabeled_df_train.drop(columns=other_labels)
+        this_df_test = relabeled_df_test.drop(columns=other_labels)
+
+        this_df_train, this_df_test = shuffle(
+            this_df_train,
+            this_df_test,
+            random_state=2930678936,
+            target_column=label,
+        )
+
+        upper_label = f"{label[0].upper()}{label[1:]}"
+
+        this_df_train.to_csv(f"Relabeled_Train_{upper_label}_Shuffled.csv")
+        this_df_test.to_csv(f"Relabeled_Test_{upper_label}_Shuffled.csv")
 
     print("=== Train Summary ===")
 

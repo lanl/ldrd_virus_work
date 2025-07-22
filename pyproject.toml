@@ -27,7 +27,7 @@ dependencies = [
     "scikit-bio>=0.5.8",
     "scipy>=1.11.4",
     "seaborn>=0.13.2",
-    "shap==0.46.0",
+    "shap==0.47.1",
     "shapely>=2.0.6",
     "taxonomy_ranks>=0.0.10",
     "tqdm>=4.65.0",

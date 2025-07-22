@@ -116,6 +116,18 @@ import json
                 },
             },
         ),
+        # test that numpy integers can be passed as a random state
+        (
+            "RandomForestClassifier",
+            np.int_(123),
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {"n_estimators": 2000, "n_jobs": 1, "random_state": 123},
+            },
+        ),
     ],
 )
 def test_optimize_model(

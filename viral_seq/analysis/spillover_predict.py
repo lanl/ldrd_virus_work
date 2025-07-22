@@ -27,6 +27,7 @@ from typing import Any, Union
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
+from typing import Optional
 
 matplotlib.use("Agg")
 
@@ -302,20 +303,40 @@ def load_from_cache(
     return records
 
 
-def _populate_kmer_dict(kmer, records, features, kmer_type="AA", mapping_method=None):
+def _populate_kmer_dict(
+    kmer,
+    records,
+    features,
+    kmer_type="AA",
+    mapping_method=None,
+    kmer_info: Optional[list] = None,
+):
     for this_k in kmer:
-        this_res, kmer_maps = get_kmers(
-            records, k=this_k, kmer_type=kmer_type, mapping_method=mapping_method
+        kmer_info, this_res, kmer_maps = get_kmers(
+            records,
+            k=this_k,
+            kmer_type=kmer_type,
+            mapping_method=mapping_method,
+            kmer_info=kmer_info,
         )
         if this_res is None:
             return None
         else:
             features.update(this_res)
-    return kmer_maps
+    return kmer_maps, kmer_info
 
 
 def _grab_features(
-    features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc, mapping_method
+    features,
+    records,
+    genomic,
+    kmers,
+    kmer_k,
+    gc,
+    kmers_pc,
+    kmer_k_pc,
+    mapping_method,
+    kmer_info: Optional[list] = None,
 ):
     feat_genomic = None
     feat_gc = None
@@ -327,10 +348,17 @@ def _grab_features(
         else:
             features.update(feat_genomic)
     if kmers:
-        _populate_kmer_dict(kmer_k, records, features)
+        _, kmer_info = _populate_kmer_dict(
+            kmer_k, records, features, kmer_info=kmer_info
+        )
     if kmers_pc:
-        kmer_maps = _populate_kmer_dict(
-            kmer_k_pc, records, features, kmer_type="PC", mapping_method=mapping_method
+        kmer_maps, kmer_info = _populate_kmer_dict(
+            kmer_k_pc,
+            records,
+            features,
+            kmer_type="PC",
+            mapping_method=mapping_method,
+            kmer_info=kmer_info,
         )
         kmer_mappings.extend(kmer_maps)
     if gc:
@@ -339,7 +367,7 @@ def _grab_features(
             return None
         else:
             features.update(feat_gc)
-    return features, kmer_mappings
+    return features, kmer_info, kmer_mappings
 
 
 def univariate_selection(X, y, uni_type, num_select, random_state=123456789):
@@ -382,6 +410,7 @@ def build_table(
     random_state: int = 123456789,
     target_column: str = "Human Host",
     mapping_method: str = "shen_2007",
+    kmer_info: Optional[list] = None,
 ):
     if kmer_k is None:
         kmer_k = [10]
@@ -413,7 +442,7 @@ def build_table(
         meta_data = list(df.columns)
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
-            this_result, kmer_map = _grab_features(
+            this_result, kmer_info, kmer_map = _grab_features(
                 features,
                 records,
                 genomic,
@@ -423,6 +452,7 @@ def build_table(
                 kmers_pc,
                 kmer_k_pc,
                 mapping_method,
+                kmer_info,
             )
             kmer_maps.extend(kmer_map)
             if this_result is not None:
@@ -433,7 +463,7 @@ def build_table(
         records = load_from_cache(cache=cache, filter=False, verbose=False)
         for record in tqdm(records):
             features = {}
-            this_result, kmer_map = _grab_features(
+            this_result, kmer_info, kmer_map = _grab_features(
                 features,
                 [record],
                 genomic,
@@ -517,7 +547,7 @@ def build_table(
     table.reset_index(drop=True, inplace=True)
     if save:
         save_files(table, filename)
-    return table, kmer_maps
+    return table, kmer_info, kmer_maps
 
 
 def save_files(table: pd.DataFrame, filename):

@@ -755,7 +755,7 @@ def test_get_kmer_info(
             new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
         else:
             new_kmers.append("kmer_AA_" + topN_kmer)
-    data_in = workflow.kmer_data(mapping_method, new_kmers)
+    data_in = get_features.KmerData(mapping_method, new_kmers)
 
     viruses, kmers, protein_name = workflow.get_kmer_info(
         data_in, records, tbl, mapping_method
@@ -784,9 +784,7 @@ def test_get_kmer_info(
         ),
     ],
 )
-def test_get_kmer_info_error(
-    accession: str, kmer: list[str], mapping_method: str, mismatch_method: str
-):
+def test_get_kmer_info_error(accession, kmer, mapping_method, mismatch_method):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
     records = sp.load_from_cache(
@@ -801,7 +799,7 @@ def test_get_kmer_info_error(
         },
     }
     tbl = pd.DataFrame(data_table)
-    data_in = workflow.kmer_data(mapping_method, kmer)
+    data_in = get_features.KmerData(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)
 

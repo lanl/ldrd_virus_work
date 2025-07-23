@@ -15,11 +15,14 @@ for codon in standard_dna_table.stop_codons:
 
 # the KmerData class is used to organize information associated with a list of kmer features
 # this class should consist of:
-#     1. a list of kmer names (kmer_names) or a string with a single kmer name
-#     2. the mapping method used to translate AA-PC kmers (mapping_method)
-#     3. the name of the virus associated with a given kmer (virus_name)
-#     4. the name of the protein in which the kmer sequence is found (protein_name)
-#     5. TODO: other important information
+#     1. the mapping method used to translate AA-PC kmers (mapping_method)
+#     2. a list of kmer names (kmer_names) or a string with a single kmer name
+#     3. a list of matching AA kmer names (kmer_maps) with the same length as kmer_names,
+#        or a string with a single matching AA kmer name
+#     4. the name of the virus associated with a given kmer (virus_name)
+#     5. the name of the protein in which the kmer sequence is found (protein_name)
+#     6. a boolean indicating if this virus <--> protein pairing should be saved
+#     7. TODO: other important information
 # ...and should
 #     a. use the kmers as dictionary keys that store the associated information
 #     b. be used to lookup the virus/protein names associated with a specific kmer

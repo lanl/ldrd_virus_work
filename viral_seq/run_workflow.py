@@ -984,7 +984,6 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                 if debug:
                     idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
                     validate_feature_table(this_outfile, idx, prefix)
-        return None
     elif workflow == "DTRA":
         if feature_checkpoint > 0:
             all_kmer_info = []

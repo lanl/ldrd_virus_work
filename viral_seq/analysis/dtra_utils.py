@@ -4,7 +4,6 @@ import numpy as np
 import functools
 from importlib.resources import files
 import polars as pl
-from collections import defaultdict
 
 
 def get_surface_exposure_status(
@@ -370,16 +369,15 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     kmer_viruses: dict
         dictionary of kmer names and corresponding virus-protein pairs from all_kmer_info
     """
-    kmer_viruses = defaultdict(list)
-    for kmer in topN_kmers:
-        all_kmer_data = all_kmer_info[all_kmer_info["kmer_names"] == kmer]
-        for i, kmer_data in all_kmer_data.iterrows():
-            if kmer_data is not None:
-                kmer_viruses[kmer].append(
-                    (kmer_data.virus_name, kmer_data.protein_name)
-                )
-
-    return kmer_viruses
+    return {
+        kmer: [
+            tuple(pair)
+            for pair in all_kmer_info[all_kmer_info["kmer_names"] == kmer][
+                ["virus_name", "protein_name"]
+            ].values
+        ]
+        for kmer in topN_kmers
+    }
 
 
 def load_kmer_info(file_name: str) -> pd.DataFrame:

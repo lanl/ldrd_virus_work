@@ -498,25 +498,15 @@ def test_match_kmers_error(tmpdir, kmer_matches, syn_topN, mapping_methods, erro
 
 
 def test_get_kmer_viruses():
-    kmer_names = [f"kmer_PC_{n}" for n in range(10)]
-    virus_names = [f"virus{n}" for n in range(10)]
-    protein_names = [f"protein{n}" for n in range(10)]
+    values = list(range(10))
+    kmer_names = [f"kmer_PC_{n}" for n in values]
+    virus_names = [f"virus{n}" for n in values]
+    protein_names = [f"protein{n}" for n in values]
     kmer_info = []
     for kmer, virus, protein in zip(kmer_names, virus_names, protein_names):
         kmer_info.append(KmerData(None, kmer, virus, protein))
 
-    virus_pairs_exp = {
-        "kmer_PC_0": [("virus0", "protein0")],
-        "kmer_PC_1": [("virus1", "protein1")],
-        "kmer_PC_2": [("virus2", "protein2")],
-        "kmer_PC_3": [("virus3", "protein3")],
-        "kmer_PC_4": [("virus4", "protein4")],
-        "kmer_PC_5": [("virus5", "protein5")],
-        "kmer_PC_6": [("virus6", "protein6")],
-        "kmer_PC_7": [("virus7", "protein7")],
-        "kmer_PC_8": [("virus8", "protein8")],
-        "kmer_PC_9": [("virus9", "protein9")],
-    }
+    virus_pairs_exp = {f"kmer_PC_{i}": [(f"virus{i}", f"protein{i}")] for i in values}
     kmer_info_df = pd.DataFrame([k.__dict__ for k in kmer_info])
     virus_pairs = dtra_utils.get_kmer_viruses(kmer_names, kmer_info_df)
 
@@ -621,28 +611,10 @@ def test_transform_kmer_data():
     # expected dictionary
     df_exp = pd.DataFrame(
         {
-            "mapping_method": {0: "test", 1: "test", 2: "test", 3: "test", 4: "test"},
-            "kmer_names": {
-                0: ["kmer_0"],
-                1: ["kmer_1"],
-                2: ["kmer_2"],
-                3: ["kmer_3"],
-                4: ["kmer_4"],
-            },
-            "virus_name": {
-                0: "virus_0",
-                1: "virus_1",
-                2: "virus_2",
-                3: "virus_3",
-                4: "virus_4",
-            },
-            "protein_name": {
-                0: "proteins_0",
-                1: "proteins_1",
-                2: "proteins_2",
-                3: "proteins_3",
-                4: "proteins_4",
-            },
+            "mapping_method": {i: "test" for i in values},
+            "kmer_names": {i: [f"kmer_{i}"] for i in values},
+            "virus_name": {i: f"virus_{i}" for i in values},
+            "protein_name": {i: f"proteins_{i}" for i in values},
         }
     )
     df_out = dtra_utils.transform_kmer_data(kmer_data_list)

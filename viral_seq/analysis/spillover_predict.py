@@ -23,11 +23,10 @@ from sklearn.metrics import (
 from sklearn.feature_selection import SelectKBest
 from urllib.request import HTTPError
 import time
-from typing import Any, Union
+from typing import Any, Union, Optional
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
-from typing import Optional
 
 matplotlib.use("Agg")
 

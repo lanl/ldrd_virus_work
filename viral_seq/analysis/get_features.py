@@ -3,11 +3,10 @@ from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
 from Bio.SeqUtils import gc_fraction
 from skbio import Sequence
-from typing import Any
+from typing import Any, Optional, Union
 import pandas as pd
 import numpy as np
 import scipy.stats
-from typing import Optional, Union
 
 codontab = standard_dna_table.forward_table.copy()  # type: ignore
 for codon in standard_dna_table.stop_codons:  # type: ignore
@@ -15,7 +14,7 @@ for codon in standard_dna_table.stop_codons:  # type: ignore
 
 
 # the KmerData class is used to organize information associated with a list of kmer features
-# this class should return:
+# this class should consist of:
 #     1. a list of kmer names (kmer_names) or a string with a single kmer name
 #     2. the mapping method used to translate AA-PC kmers (mapping_method)
 #     3. the name of the virus associated with a given kmer (virus_name)

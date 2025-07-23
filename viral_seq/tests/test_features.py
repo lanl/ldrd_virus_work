@@ -28,7 +28,7 @@ import pytest
             "NC_007620.1",
             ",",
             "Menangle_features_kmers.csv",
-            lambda e: get_kmers(e, k=2)[1],
+            lambda e: get_kmers(e, k=2)[0],
         ),  # bad coding sequence kmer calculation test
         (
             "HM045787.1",
@@ -125,7 +125,7 @@ def test_get_kmers(accession, kmer_type, mapping_method, exp_kmer, exp_len):
     tests_dir = files("viral_seq") / "tests" / accession
     test_record = _append_recs(tests_dir)
 
-    _, kmers, _ = get_kmers(
+    kmers, _ = get_kmers(
         [test_record], kmer_type=kmer_type, mapping_method=mapping_method
     )
     mapped_kmers = list(kmers.keys())

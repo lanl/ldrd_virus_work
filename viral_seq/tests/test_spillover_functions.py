@@ -495,7 +495,7 @@ def test_build_table_bad_version(tmpdir, accession):
         [["1", accession, "Una virus"]], columns=["Unnamed: 0", "Accessions", "Species"]
     )
     with tmpdir.as_cwd():
-        table, _, _ = sp.build_table(
+        table, _ = sp.build_table(
             df=df, cache=cache_str, genomic=False, kmers=False, kmers_pc=False, gc=True
         )
     assert table["GC Content"].values[0] == pytest.approx(0.5050986292209964)
@@ -508,7 +508,7 @@ def test_build_table_target_column(tmpdir, target_column):
     df = pd.read_csv(csv_train)
     df.rename({"Human Host": target_column}, inplace=True, axis=1)
     with tmpdir.as_cwd():
-        df_test, _, _ = sp.build_table(
+        df_test, _ = sp.build_table(
             df=df,
             cache=cache_str,
             genomic=False,
@@ -553,9 +553,11 @@ def test_grab_features_kmer_maps():
     )
     for record in records_unordered:
         records_dict[accessions_dict[record.id.split(".")[0]]].append(record)
+
+    all_kmer_info = []
     for species, records in records_dict.items():
         features = row_dict[species].to_dict()
-        this_result, _, kmer_map = sp._grab_features(
+        this_result, kmer_info = sp._grab_features(
             features,
             records,
             genomic=True,
@@ -565,8 +567,20 @@ def test_grab_features_kmer_maps():
             kmers_pc=True,
             kmer_k_pc=[10],
             mapping_method="shen_2007",
+            gather_kmer_info=True,
         )
-    assert len(kmer_map) == 3408
+        all_kmer_info.extend(kmer_info)
+
+    assert len(all_kmer_info) == 3408 * 2
+
+    kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
+    kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
+
+    assert len(kmer_maps_df) == 3408 * 2
+
+    kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]
+
+    assert len(kmer_maps_df) == 3408
 
 
 def test_get_best_features():
@@ -654,7 +668,7 @@ def test_issue_15(tmpdir):
         files("viral_seq.tests.expected") / "issue_15.csv", index_col=0
     )
     with tmpdir.as_cwd():
-        df_feats, _, _ = sp.build_table(
+        df_feats, _ = sp.build_table(
             df,
             cache=cache_str,
             save=False,
@@ -699,7 +713,7 @@ def test_build_table_kmer_info(tmpdir):
             },
         }
         df = pd.DataFrame.from_dict(train_dict)
-        df_test, kmer_info, _ = sp.build_table(
+        df_test, kmer_info = sp.build_table(
             df=df,
             cache=cache_str,
             save=False,
@@ -711,7 +725,7 @@ def test_build_table_kmer_info(tmpdir):
             gc=False,
             num_select=10,
             mapping_method="jurgen_schmidt",
-            kmer_info=[],
+            gather_kmer_info=True,
         )
 
         kmer_info_all = dtra_utils.transform_kmer_data(kmer_info)

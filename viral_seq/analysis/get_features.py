@@ -3,7 +3,7 @@ from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
 from Bio.SeqUtils import gc_fraction
 from skbio import Sequence
-from typing import Any, Optional, Union
+from typing import Any, Union
 import pandas as pd
 import numpy as np
 import scipy.stats
@@ -28,13 +28,17 @@ class KmerData:
         self,
         mapping_method: str,
         kmer_names: Union[list, str],
+        kmer_maps: Union[None, list, str] = None,
         virus_name: str = "",
         protein_name: str = "",
+        include_pair: bool = True,
     ):
         self.mapping_method = mapping_method
         self.kmer_names = kmer_names
+        self.kmer_maps = kmer_maps
         self.virus_name = virus_name
         self.protein_name = protein_name
+        self.include_pair = include_pair
 
 
 def get_similarity_features(
@@ -64,19 +68,19 @@ def get_kmers(
     k=10,
     kmer_type="AA",
     mapping_method=None,
-    kmer_info: Optional[list] = None,
-):
+    gather_kmer_info=False,
+) -> tuple[dict[str, int], list[KmerData]]:
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
     if kmer_type == "PC" and mapping_method is None:
         raise ValueError("Please specify mapping method for PC-kmers.")
     kmers: dict = defaultdict(int)
-    kmer_PC_list = []
+    kmer_info = []
     for record in records:
         # for a given record, determine if the accession contains a single polyprotein product
         # and allow for kmer features to be extracted by setting ``single_polyprotein = True``
         single_polyprotein = False
-        if kmer_info is not None:
+        if gather_kmer_info:
             all_products = []
             for feat in record.features:
                 if feat.type in ["CDS", "mat_peptide"]:
@@ -87,54 +91,45 @@ def get_kmers(
                 len(all_products) == 1 and all_products[0] == "polyprotein"
             )
         for feature in record.features:
-            if feature.type in ["CDS", "mat_peptide"]:
-                nuc_seq = feature.location.extract(record.seq)
-                if len(nuc_seq) % 3 != 0:
-                    # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
-                    continue
-                this_seq = nuc_seq.translate()
-                if kmer_type == "PC":
-                    new_seq = ""
-                    for each in this_seq:
-                        new_seq += aa_map(each, method=mapping_method)
-                    # iter over AA kmer first and store values in dictionary
-                    kmer_AA_list = []
-                    for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                        kmer_AA_list.append("kmer_AA_" + str(kmer))
-                    # iter over PC kmer sequence to add PC kmers to AA dict
-                    # and index value for building_cache
-                    for i, kmer in enumerate(
-                        Sequence(str(new_seq)).iter_kmers(k, overlap=True)
-                    ):
-                        new_kmer = "kmer_" + kmer_type + "_" + str(kmer)
-                        kmer_PC_list.append([new_kmer, kmer_AA_list[i]])
-                for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                    if kmer_type == "PC":
-                        new_kmer = ""
-                        for each in str(kmer):
-                            new_kmer += aa_map(each, method=mapping_method)
-                        new_kmer = f"kmer_PC_{new_kmer}"
-                    else:
-                        new_kmer = f"kmer_AA_{kmer}"
-                    if feature.type == "CDS":
-                        kmers[new_kmer] += 1
-                    if kmer_info is not None:
-                        if (
-                            "polyprotein" not in feature.qualifiers["product"][0]
-                            or single_polyprotein
-                        ):
-                            mm = (
-                                mapping_method if mapping_method is not None else "None"
-                            )
-                            kmer_info.append(
-                                KmerData(
-                                    mm,
-                                    new_kmer,
-                                    record.annotations["organism"],
-                                    feature.qualifiers["product"][0],
-                                )
-                            )
-    return kmer_info, kmers, kmer_PC_list
+            if feature.type not in ["CDS", "mat_peptide"]:
+                continue
+            nuc_seq = feature.location.extract(record.seq)
+            if len(nuc_seq) % 3 != 0:
+                # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
+                continue
+            this_seq = nuc_seq.translate()
+            if kmer_type == "PC":
+                new_seq = ""
+                for each in this_seq:
+                    new_seq += aa_map(each, method=mapping_method)
+            else:
+                new_seq = this_seq
+
+            record_pair = (
+                single_polyprotein
+                or "polyprotein" not in feature.qualifiers["product"][0]
+            )
+
+            for kmer, new_kmer in zip(
+                Sequence(str(this_seq)).iter_kmers(k, overlap=True),
+                Sequence(str(new_seq)).iter_kmers(k, overlap=True),
+            ):
+                kmer = f"kmer_AA_{kmer}"
+                new_kmer = f"kmer_{kmer_type}_{new_kmer}"
+                if feature.type == "CDS":
+                    kmers[new_kmer] += 1
+                if gather_kmer_info:
+                    kmer_info.append(
+                        KmerData(
+                            mapping_method if mapping_method is not None else "None",
+                            new_kmer,
+                            kmer,
+                            record.annotations["organism"],
+                            feature.qualifiers["product"][0],
+                            record_pair,
+                        )
+                    )
+    return kmers, kmer_info
 
 
 def get_gc(records):

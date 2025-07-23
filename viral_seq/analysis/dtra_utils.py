@@ -371,10 +371,11 @@ def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
     """
     return {
         kmer: [
-            tuple(pair)
+            tuple(pair[:2])
             for pair in all_kmer_info[all_kmer_info["kmer_names"] == kmer][
-                ["virus_name", "protein_name"]
+                ["virus_name", "protein_name", "include_pair"]
             ].values
+            if pair[2]
         ]
         for kmer in topN_kmers
     }

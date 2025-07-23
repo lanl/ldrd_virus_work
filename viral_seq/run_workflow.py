@@ -875,7 +875,7 @@ def build_cache(cache_checkpoint=3, debug=False, data_file=None):
                 print(missing, file=f)
 
 
-def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=None):
+def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
     """Calculate all features and store in data tables for future use in the workflow"""
 
     if feature_checkpoint > 0:
@@ -1003,7 +1003,6 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                     if feature_checkpoint > kmer_range_length:
                         feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
-                kmer_maps_all = []
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
@@ -1015,7 +1014,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                             "To restart at this point use --features",
                             this_checkpoint,
                         )
-                        kmer_info, kmer_maps = cli.calculate_table(
+                        kmer_info = cli.calculate_table(
                             [
                                 "--file",
                                 file,
@@ -1038,16 +1037,19 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None, kmer_info=N
                         )
                         all_kmer_info.extend(kmer_info)
                         this_checkpoint -= 1
-                        kmer_maps_all.append(kmer_maps)
-                kmer_maps_df = pd.DataFrame(
-                    np.concatenate(kmer_maps_all)
-                ).drop_duplicates(subset=[0, 1])
-                kmer_map_path = Path("kmer_maps")
-                kmer_map_path.mkdir(exist_ok=True)
-                kmer_maps_df.to_parquet(
-                    f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
-                    index=False,
-                )
+
+            kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
+
+            # Remove duplicates and AA-kmer identity mappings before saving
+            kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
+            kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]
+
+            kmer_map_path = Path("kmer_maps")
+            kmer_map_path.mkdir(exist_ok=True)
+            kmer_maps_df.to_parquet(
+                f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
+                index=False,
+            )
 
             # transform all_kmer_info and save as parquet file
             all_kmer_info_df = dtra_utils.transform_kmer_data(all_kmer_info)

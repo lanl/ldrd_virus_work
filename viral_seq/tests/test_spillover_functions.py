@@ -578,6 +578,7 @@ def test_grab_features_kmer_maps():
 
     assert len(kmer_maps_df) == 3408 * 2
 
+    # we expect one AA --> AA kmer identity map per PC --> AA kmer map
     kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]
 
     assert len(kmer_maps_df) == 3408

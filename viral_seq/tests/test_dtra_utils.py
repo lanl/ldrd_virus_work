@@ -2,9 +2,12 @@ from viral_seq.analysis import dtra_utils
 import pandas as pd
 from numpy.testing import assert_array_equal
 from importlib.resources import files
+from viral_seq.analysis.spillover_predict import _append_recs
+from viral_seq.analysis.get_features import get_kmers, KmerData
 import pytest
 from pandas.testing import assert_frame_equal
 import os
+import string
 
 
 def test_get_surface_exposure_status():
@@ -493,3 +496,149 @@ def test_match_kmers_error(tmpdir, kmer_matches, syn_topN, mapping_methods, erro
             )
     with pytest.raises(ValueError, match=error_msg):
         dtra_utils.match_kmers(syn_topN_df, mapping_methods, tmpdir)
+
+
+def test_get_kmer_viruses():
+    values = list(range(10))
+    kmer_names = [f"kmer_PC_{n}" for n in values]
+    kmer_map_names = [f"kmer_AA_{string.ascii_uppercase[n]}" for n in values]
+    virus_names = [f"virus{n}" for n in values]
+    protein_names = [f"protein{n}" for n in values]
+    kmer_info = []
+    for kmer, kmer_map, virus, protein in zip(
+        kmer_names, kmer_map_names, virus_names, protein_names
+    ):
+        kmer_info.append(KmerData(None, kmer, kmer_map, virus, protein))
+
+    virus_pairs_exp = {f"kmer_PC_{i}": [(f"virus{i}", f"protein{i}")] for i in values}
+    kmer_info_df = pd.DataFrame([k.__dict__ for k in kmer_info])
+    virus_pairs = dtra_utils.get_kmer_viruses(kmer_names, kmer_info_df)
+
+    assert virus_pairs == virus_pairs_exp
+
+
+@pytest.mark.parametrize(
+    "accessions, kmer_type, mapping_method",
+    [
+        (["AC_000008.1", "NC_001563.2", "NC_039210.1"], "PC", "jurgen_schmidt"),
+    ],
+)
+def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
+    kmer_info = []
+    kmer_info_list = []
+    test_records = []
+    # make a dataframe that looks like all_kmer_info
+    for accession in accessions:
+        tests_dir = files("viral_seq") / "tests" / "cache_test" / accession
+        test_records.append(_append_recs(tests_dir))
+
+    _, kmer_info = get_kmers(
+        test_records,
+        kmer_type=kmer_type,
+        mapping_method=mapping_method,
+        gather_kmer_info=True,
+    )
+    kmer_info_list.extend(kmer_info)
+
+    # recapitulate save_kmer_info dataframe handling
+    all_kmer_info_df = pd.DataFrame([k.__dict__ for k in kmer_info_list])
+
+    # save and load the file
+    with tmpdir.as_cwd():
+        dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
+        kmer_info_load = dtra_utils.load_kmer_info("all_kmer_info_test.parquet.gzip")
+
+    assert_frame_equal(all_kmer_info_df, kmer_info_load)
+
+
+@pytest.mark.parametrize(
+    "accessions, kmer_type, mapping_method",
+    [
+        (["AC_000008.1"], "PC", "jurgen_schmidt"),
+    ],
+)
+def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
+    kmer_info = []
+    all_kmer_info = []
+    test_records = []
+    # make a dataframe that looks like all_kmer_info
+    for accession in accessions:
+        tests_dir = files("viral_seq") / "tests" / "cache_test" / accession
+        test_records.append(_append_recs(tests_dir))
+
+    _, kmer_info = get_kmers(
+        test_records,
+        kmer_type=kmer_type,
+        mapping_method=mapping_method,
+        gather_kmer_info=True,
+    )
+    all_kmer_info.extend(kmer_info)
+    all_kmer_info_df = pd.DataFrame([k.__dict__ for k in all_kmer_info])
+
+    # save and load the file
+    with tmpdir.as_cwd():
+        dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
+        assert os.path.exists("all_kmer_info_test.parquet.gzip")
+
+    # get information from kmer_info for sanity check
+    assert all_kmer_info_df.iloc[0].mapping_method == "jurgen_schmidt"
+    assert all_kmer_info_df.iloc[0].protein_name == "E1A"
+    assert all_kmer_info_df.iloc[0].virus_name == "Human adenovirus 5"
+    assert all_kmer_info_df.iloc[0].kmer_names == "kmer_PC_6536613006"
+    assert all_kmer_info_df.iloc[0].kmer_maps == "kmer_AA_MRHIICHGGV"
+    assert all_kmer_info_df.iloc[0].virus_name == "Human adenovirus 5"
+    assert all_kmer_info_df.iloc[0].include_pair
+    assert all_kmer_info_df.shape == (11037, 6)
+
+
+def test_load_all_kmer_info():
+    load_file = files("viral_seq.tests.expected").joinpath(
+        "all_kmer_info_test.parquet.gzip"
+    )
+    kmer_info_load_df = dtra_utils.load_kmer_info(load_file)
+
+    # get information from kmer_info for sanity check
+    assert kmer_info_load_df.iloc[0].mapping_method == "jurgen_schmidt"
+    assert kmer_info_load_df.iloc[0].protein_name == "E1A"
+    assert kmer_info_load_df.iloc[0].virus_name == "Human adenovirus 5"
+    assert kmer_info_load_df.iloc[0].kmer_names == "kmer_PC_6536613006"
+    assert kmer_info_load_df.iloc[0].kmer_maps == "kmer_AA_MRHIICHGGV"
+    assert kmer_info_load_df.iloc[0].virus_name == "Human adenovirus 5"
+    assert kmer_info_load_df.iloc[0].include_pair
+    assert kmer_info_load_df.shape == (11037, 6)
+
+
+def test_transform_kmer_data():
+    # make a list of KmerData objects
+    values = list(range(5))
+    kmer_names = [f"kmer_PC_{v}" for v in values]
+    kmer_maps = [f"kmer_AA_{string.ascii_uppercase[v]}" for v in values]
+    viruses = [f"virus_{v}" for v in values]
+    proteins = [f"proteins_{v}" for v in values]
+    include = [bool(v % 2) for v in values]
+
+    kmer_data_list = []
+    for i in range(len(values)):
+        kmer_data_list.append(
+            KmerData(
+                "test",
+                [kmer_names[i]],
+                [kmer_maps[i]],
+                viruses[i],
+                proteins[i],
+                include[i],
+            )
+        )
+    # expected dictionary
+    df_exp = pd.DataFrame(
+        {
+            "mapping_method": {i: "test" for i in values},
+            "kmer_names": {i: [f"kmer_PC_{i}"] for i in values},
+            "kmer_maps": {i: [f"kmer_AA_{string.ascii_uppercase[i]}"] for i in values},
+            "virus_name": {i: f"virus_{i}" for i in values},
+            "protein_name": {i: f"proteins_{i}" for i in values},
+            "include_pair": {i: bool(i % 2) for i in values},
+        }
+    )
+    df_out = dtra_utils.transform_kmer_data(kmer_data_list)
+    assert_frame_equal(df_out, df_exp)

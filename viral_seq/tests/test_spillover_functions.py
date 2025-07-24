@@ -5,7 +5,7 @@ from viral_seq.cli.cli import cli
 import json
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from viral_seq.analysis import spillover_predict as sp
+from viral_seq.analysis import dtra_utils, spillover_predict as sp
 import numpy as np
 import numpy.testing as npt
 from sklearn.datasets import make_classification
@@ -553,9 +553,11 @@ def test_grab_features_kmer_maps():
     )
     for record in records_unordered:
         records_dict[accessions_dict[record.id.split(".")[0]]].append(record)
+
+    all_kmer_info = []
     for species, records in records_dict.items():
         features = row_dict[species].to_dict()
-        this_result, kmer_map = sp._grab_features(
+        this_result, kmer_info = sp._grab_features(
             features,
             records,
             genomic=True,
@@ -565,8 +567,21 @@ def test_grab_features_kmer_maps():
             kmers_pc=True,
             kmer_k_pc=[10],
             mapping_method="shen_2007",
+            gather_kmer_info=True,
         )
-    assert len(kmer_map) == 3408
+        all_kmer_info.extend(kmer_info)
+
+    assert len(all_kmer_info) == 3408 * 2
+
+    kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
+    kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
+
+    assert len(kmer_maps_df) == 3408 * 2
+
+    # we expect one AA --> AA kmer identity map per PC --> AA kmer map
+    kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]
+
+    assert len(kmer_maps_df) == 3408
 
 
 def test_get_best_features():
@@ -677,3 +692,42 @@ def test_issue_15(tmpdir):
 def test_check_cache_tarball(wf, tar_file):
     with pytest.raises(ValueError, match="Extracted cache file"):
         sp.check_cache_tarball(wf, tar_file)
+
+
+def test_build_table_kmer_info(tmpdir):
+    with tmpdir.as_cwd():
+        kmer_info_exp = dtra_utils.load_kmer_info(
+            files("viral_seq.tests.expected") / "kmer_info_exp.parquet.gzip"
+        )
+        this_cache = files("viral_seq.tests.caches") / "cache_syn"
+        cache_str = str(this_cache.resolve())
+        train_dict = {
+            "Unnamed: 0": {0: 0},
+            "Species": {
+                0: "Alenquer virus",
+            },
+            "Human Host": {
+                0: False,
+            },
+            "Accessions": {
+                0: "HM119403",
+            },
+        }
+        df = pd.DataFrame.from_dict(train_dict)
+        df_test, kmer_info = sp.build_table(
+            df=df,
+            cache=cache_str,
+            save=False,
+            genomic=False,
+            kmers=True,
+            kmer_k=[2],
+            kmers_pc=True,
+            kmer_k_pc=[2],
+            gc=False,
+            num_select=10,
+            mapping_method="jurgen_schmidt",
+            gather_kmer_info=True,
+        )
+
+        kmer_info_all = dtra_utils.transform_kmer_data(kmer_info)
+        assert_frame_equal(kmer_info_all, kmer_info_exp)

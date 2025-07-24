@@ -92,14 +92,6 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
         )
 
 
-# TODO: this class object serves as a placeholder for
-# a different class to be implemented in accordance with issue #97
-class kmer_data:
-    def __init__(self, mapping_method: str, kmer_data: list[str]):
-        self.mapping_method = mapping_method
-        self.kmer_names = kmer_data
-
-
 def feature_signs(
     is_exposed: list[str],
     shap_values: np.ndarray,
@@ -148,7 +140,7 @@ def feature_signs(
 
 
 def get_kmer_info(
-    kmer_data: kmer_data,
+    kmer_data: get_features.KmerData,
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
@@ -992,9 +984,9 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                 if debug:
                     idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
                     validate_feature_table(this_outfile, idx, prefix)
-
     elif workflow == "DTRA":
         if feature_checkpoint > 0:
+            all_kmer_info = []
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
@@ -1011,7 +1003,6 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     if feature_checkpoint > kmer_range_length:
                         feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
-                kmer_maps_all = []
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
@@ -1023,7 +1014,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             "To restart at this point use --features",
                             this_checkpoint,
                         )
-                        kmer_maps = cli.calculate_table(
+                        kmer_info = cli.calculate_table(
                             [
                                 "--file",
                                 file,
@@ -1044,17 +1035,25 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             ],
                             standalone_mode=False,
                         )
+                        all_kmer_info.extend(kmer_info)
                         this_checkpoint -= 1
-                        kmer_maps_all.append(kmer_maps)
-                kmer_maps_df = pd.DataFrame(
-                    np.concatenate(kmer_maps_all)
-                ).drop_duplicates(subset=[0, 1])
-                kmer_map_path = Path("kmer_maps")
-                kmer_map_path.mkdir(exist_ok=True)
-                kmer_maps_df.to_parquet(
-                    f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
-                    index=False,
-                )
+
+            kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
+
+            # Remove duplicates and AA-kmer identity mappings before saving
+            kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
+            kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]
+
+            kmer_map_path = Path("kmer_maps")
+            kmer_map_path.mkdir(exist_ok=True)
+            kmer_maps_df.to_parquet(
+                f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
+                index=False,
+            )
+
+            # transform all_kmer_info and save as parquet file
+            all_kmer_info_df = dtra_utils.transform_kmer_data(all_kmer_info)
+            dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info.parquet.gzip")
 
 
 def feature_selection_rfc(
@@ -1723,6 +1722,14 @@ if __name__ == "__main__":
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
+        # load 'all_kmer_info.parquet.gzip' file for finding relevant virus-protein information
+        try:
+            all_kmer_info = dtra_utils.load_kmer_info("all_kmer_info.parquet.gzip")
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "File 'all_kmer_info.parquet.gzip' not found. Feature tables must be built to generate file."
+            )
+
         tbl = dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
         # TODO: this call below may be redundant because
         # X_train is returned by `feature_selection_rfc`
@@ -1865,7 +1872,7 @@ if __name__ == "__main__":
         )
         print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
-        kmer_info = kmer_data(mapping_method, array2)
+        kmer_info = get_features.KmerData(mapping_method, array2)
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
@@ -1939,3 +1946,7 @@ if __name__ == "__main__":
             mapping_methods=["jurgen_schmidt", "shen_2007"],
         )
         print(matching_kmers)
+        # find and save virus-protein pairs associated with topN kmers
+        top_viruses = dtra_utils.get_kmer_viruses(array2, all_kmer_info)
+        top_viruses_df = pd.DataFrame.from_dict(top_viruses, orient="index").T
+        top_viruses_df.to_csv("topN_virus_protein_pairs.csv", index=False)

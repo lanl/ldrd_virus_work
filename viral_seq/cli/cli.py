@@ -270,6 +270,7 @@ def calculate_table(
     mapping_method,
 ):
     """Build a data table from given viral species and selected features."""
+    all_kmer_info = []
     df = pd.read_csv(file)
     rfc = None
     if rfc_file is not None:
@@ -305,7 +306,7 @@ def calculate_table(
         kmer_k = [int(i) for i in kmer_k.split()]
     if features_kmers_pc:
         kmer_k_pc = [int(i) for i in kmer_k_pc.split()]
-    df_feats, kmer_maps = sp.build_table(
+    df_feats, kmer_info = sp.build_table(
         df,
         rfc=rfc,
         cache=cache,
@@ -323,7 +324,9 @@ def calculate_table(
         random_state=random_state,
         target_column=target_column,
         mapping_method=mapping_method,
+        gather_kmer_info=True,
     )
+    all_kmer_info.extend(kmer_info)
     if similarity_genomic:
         for sim_cache in similarity_cache.split():
             this_table, _ = sp.build_table(
@@ -334,12 +337,13 @@ def calculate_table(
                 kmers=False,
                 kmers_pc=False,
                 target_column=target_column,
+                gather_kmer_info=False,
             )
             df_feats = gf.get_similarity_features(
                 this_table, df_feats, suffix=os.path.basename(sim_cache)
             )
         sp.save_files(df_feats, outfile)
-    return kmer_maps
+    return all_kmer_info
 
 
 # --- cross-validation ---

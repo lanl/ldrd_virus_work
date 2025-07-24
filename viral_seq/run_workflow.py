@@ -25,6 +25,7 @@ import tarfile
 import shap
 from collections import defaultdict
 import os
+from ray.tune.search.sample import Domain
 
 matplotlib.use("Agg")
 
@@ -476,13 +477,12 @@ def optimize_model(
             random_state=random_state,
         )
         print("Checking default score...")
+        # use untunable parameters used during optimization for baseline
+        # other parameters will not be specified (use defaults)
+        default_config = {k: v for k, v in config.items() if not isinstance(v, Domain)}
+        default_config["n_jobs"] = n_jobs
         default_score = classifier.cv_score(
-            model,
-            X=X_train,
-            y=y_train,
-            random_state=random_state,
-            n_estimators=2_000,
-            n_jobs=n_jobs,
+            model, X=X_train, y=y_train, **default_config
         )
         print("ROC AUC with default settings:", default_score)
         res["targets"] = [default_score] + res["targets"]
@@ -491,7 +491,7 @@ def optimize_model(
                 "Will use default settings since we weren't able to improve with optimization."
             )
             res["target"] = default_score
-            res["params"] = {}
+            res["params"] = default_config
         print("Saving results to", outfile)
         with open(outfile, "w") as f:
             json.dump(res, f)

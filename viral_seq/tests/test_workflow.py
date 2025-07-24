@@ -1,4 +1,5 @@
 from viral_seq import run_workflow as workflow
+from viral_seq.analysis import classifier
 import numpy as np
 from importlib.resources import files
 from contextlib import ExitStack
@@ -6,6 +7,250 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
+import os
+import json
+
+
+@pytest.mark.parametrize(
+    "group, random_state, get_hyperparameters_return, cv_score_return, expected_results",
+    [
+        # test when default parameters beat optimized parameters
+        # each classifier should get appropriate baseline parameters returned
+        (
+            "RandomForestClassifier",
+            123,
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {"n_estimators": 2000, "n_jobs": 1, "random_state": 123},
+            },
+        ),
+        (
+            "ExtraTreesClassifier",
+            123,
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {
+                    "bootstrap": True,
+                    "n_estimators": 2000,
+                    "n_jobs": 1,
+                    "random_state": 123,
+                },
+            },
+        ),
+        (
+            "LGBMClassifier Dart",
+            123,
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {
+                    "verbose": -1,
+                    "force_col_wise": True,
+                    "n_estimators": 500,
+                    "n_jobs": 1,
+                    "boosting_type": "dart",
+                    "random_state": 123,
+                },
+            },
+        ),
+        (
+            "LGBMClassifier Boost",
+            123,
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {
+                    "verbose": -1,
+                    "force_col_wise": True,
+                    "n_estimators": 500,
+                    "n_jobs": 1,
+                    "random_state": 123,
+                },
+            },
+        ),
+        (
+            "XGBClassifier Boost",
+            123,
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {"n_jobs": 1, "random_state": 123},
+            },
+        ),
+        # test when optimized parameters beat default parameters
+        # optimized parameters should be returned
+        (
+            "RandomForestClassifier",
+            123,
+            {
+                "targets": [0.8],
+                "target": 0.8,
+                "params": {
+                    "n_estimators": 2000,
+                    "n_jobs": 1,
+                    "random_state": 123,
+                    "max_features": 0.5,
+                },
+            },
+            0.5,
+            {
+                "targets": [0.5, 0.8],
+                "target": 0.8,
+                "params": {
+                    "n_estimators": 2000,
+                    "n_jobs": 1,
+                    "random_state": 123,
+                    "max_features": 0.5,
+                },
+            },
+        ),
+        # test that numpy integers can be passed as a random state
+        (
+            "RandomForestClassifier",
+            np.int_(123),
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.8,
+            {
+                "targets": [0.8, 0.5],
+                "target": 0.8,
+                "params": {"n_estimators": 2000, "n_jobs": 1, "random_state": 123},
+            },
+        ),
+    ],
+)
+def test_optimize_model(
+    tmpdir,
+    mocker,
+    group,
+    random_state,
+    get_hyperparameters_return,
+    cv_score_return,
+    expected_results,
+):
+    name = f"{group} Seed:{random_state}"
+    optimize_args = classifier.get_model_arguments(1, random_state, 1, 1)[name][
+        "optimize"
+    ]
+    # these will not be used
+    model = mocker.MagicMock()
+    X_train = mocker.MagicMock()
+    y_train = mocker.MagicMock()
+    # these functions would be slow to run and are separately tested
+    mocker.patch(
+        "viral_seq.analysis.classifier.get_hyperparameters",
+        return_value=get_hyperparameters_return,
+    )
+    mocker.patch("viral_seq.analysis.classifier.cv_score", return_value=cv_score_return)
+    with tmpdir.as_cwd():
+        results = workflow.optimize_model(
+            model=model,
+            X_train=X_train,
+            y_train=y_train,
+            outfile="outfile.json",
+            config=optimize_args["config"],
+            num_samples=optimize_args["num_samples"],
+            optimize="yes",
+            name=name,
+            debug=True,
+            random_state=random_state,
+            n_jobs_cv=optimize_args["n_jobs_cv"],
+            n_jobs=1,
+        )
+        assert os.path.exists("outfile.json")
+    assert results == expected_results
+
+
+@pytest.mark.parametrize(
+    "group, random_state, get_hyperparameters_return, cv_score_return",
+    [
+        # test each classifier type gets the appropriate default params
+        (
+            "RandomForestClassifier",
+            123,
+            {"targets": [0.5], "target": 0.5, "params": {}},
+            0.5,
+        )
+    ],
+)
+def test_optimize_model_debug_fail(
+    tmpdir,
+    mocker,
+    group,
+    random_state,
+    get_hyperparameters_return,
+    cv_score_return,
+):
+    name = f"{group} Seed:{random_state}"
+    optimize_args = classifier.get_model_arguments(1, random_state, 1, 1)[name][
+        "optimize"
+    ]
+    # these will not be used
+    model = mocker.MagicMock()
+    X_train = mocker.MagicMock()
+    y_train = mocker.MagicMock()
+    # these functions would be slow to run and are separately tested
+    mocker.patch(
+        "viral_seq.analysis.classifier.get_hyperparameters",
+        return_value=get_hyperparameters_return,
+    )
+    mocker.patch("viral_seq.analysis.classifier.cv_score", return_value=cv_score_return)
+    with tmpdir.as_cwd(), pytest.raises(
+        AssertionError, match="ROC AUC achieved is too poor"
+    ):
+        workflow.optimize_model(
+            model=model,
+            X_train=X_train,
+            y_train=y_train,
+            outfile="outfile.json",
+            config=optimize_args["config"],
+            num_samples=optimize_args["num_samples"],
+            optimize="yes",
+            name=name,
+            debug=True,
+            random_state=random_state,
+            n_jobs_cv=optimize_args["n_jobs_cv"],
+            n_jobs=1,
+        )
+
+
+def test_optimize_model_skip(tmpdir, mocker):
+    params = {
+        "targets": [0.8, 0.5],
+        "target": 0.8,
+        "params": {"n_estimators": 2000, "n_jobs": 1, "random_state": 123},
+    }
+    with tmpdir.as_cwd():
+        with open("outfile.json", "w") as f:
+            json.dump(params, f)
+        # for skip the function should just load the outfile;
+        # most of the other parameters aren't used
+        results = workflow.optimize_model(
+            model=mocker.MagicMock(),
+            X_train=mocker.MagicMock(),
+            y_train=mocker.MagicMock(),
+            outfile="outfile.json",
+            config=mocker.MagicMock(),
+            num_samples=0,
+            optimize="skip",
+            name="",
+            debug=True,
+            random_state=0,
+            n_jobs_cv=1,
+            n_jobs=1,
+        )
+    assert results == params
 
 
 def test_optimization_plotting(tmpdir):

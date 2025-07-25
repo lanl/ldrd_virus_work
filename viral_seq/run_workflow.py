@@ -39,6 +39,8 @@ from sklearn.metrics import roc_curve
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 import os
+from tqdm import tqdm
+from sklearn.preprocessing import normalize
 
 matplotlib.use("Agg")
 
@@ -270,6 +272,7 @@ def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
     path: Path
         file path for saving figures
     """
+
     mean_fpr = np.linspace(0, 1, 100)
     all_curves: dict[str, tuple] = defaultdict(tuple)
     for clfr_name, clfr_values in clfr_preds.items():
@@ -494,19 +497,23 @@ def train_clfr(
     mean_fpr = np.linspace(0, 1, 100)
     clfr_preds_all = {}
     shap_values_all: list[float] = []
+    shap_data_all: list[float] = []
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_data.columns
-    # TODO: aggregate outputs over multiple classifiers in !118
     for clfr_name, subdict in classifier_parameters.items():
         clfr = subdict["clfr"]
         clfr.set_params(**subdict["params"], random_state=random_state)
 
-        shap_values_all = []
-        shap_data_all = []
-        clfr_preds = {}
+        clfr_preds: dict[int, Any] = {}
         feature_count[f"Clfr_{clfr_name}"] = 0
         feature_count[f"SHAP_{clfr_name}"] = 0
-        for fold, (train, test) in enumerate(cv.split(train_data, data_target)):
+        for fold, (train, test) in enumerate(
+            tqdm(
+                cv.split(train_data, data_target),
+                total=cv.get_n_splits(),
+                desc=f"{clfr_name} Folds",
+            )
+        ):
             # index training cv split
             train_fold = train_data.iloc[train]
             train_target = data_target[train]
@@ -528,10 +535,6 @@ def train_clfr(
                 shap_values
             )
 
-            # aggregate the raw shap values and associated data targets
-            shap_values_all.append(positive_shap_values.values)
-            shap_data_all.append(positive_shap_values.data)
-
             shap_importances = importances_df(
                 positive_shap_values.abs.mean(0).values, train_fold.columns
             )
@@ -544,9 +547,18 @@ def train_clfr(
                 clfr_name,
             )
 
+            # normalize shap values
+            normalized_shap_values = normalize(
+                positive_shap_values.values, norm="l1", axis=1
+            )
+
+            # aggregate the raw shap values and associated data targets
+            shap_values_all.append(normalized_shap_values)
+            shap_data_all.append(positive_shap_values.data)
+
             # aggregate classifier predictions for ROC plot
             test_score = clfr.predict_proba(test_fold)[:, 1]
-            fpr, tpr, _ = roc_curve(test_target, test_score)
+            fpr, tpr, thresh = roc_curve(test_target, test_score)
             interp_tpr = np.interp(mean_fpr, fpr, tpr)
             interp_tpr[0] = 0.0
             roc_auc = auc(fpr, tpr)
@@ -555,7 +567,7 @@ def train_clfr(
 
         clfr_preds_all[clfr_name] = clfr_preds
 
-    # aggregate shap values for calculating pearson R and for function return
+    # aggregate shap values for calculating pearson R and for function
     shap_values_clfr = np.concatenate(shap_values_all, axis=0)
     shap_data_clfr = np.concatenate(shap_data_all, axis=0)
     # calculate the pearson correlation based on the aggregated shap values

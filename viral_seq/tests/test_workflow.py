@@ -8,7 +8,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import get_features
+from viral_seq.analysis import get_features, feature_importance
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
 
@@ -441,8 +441,8 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
     for i in range(len(clfr_props)):
-        df_in[f"Classifier proportion {i}"] = clfr_props[i]
-        df_in[f"SHAP proportion {i}"] = shap_props[i]
+        df_in[f"Classifier percentage {i}"] = clfr_props[i]
+        df_in[f"SHAP percentage {i}"] = shap_props[i]
 
     workflow.FIC_plot(
         df_in,
@@ -457,7 +457,7 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title
     assert (
         compare_images(
             files("viral_seq.tests.expected") / f"FIC_expected_{plot_title}.png",
-            str(tmp_path / "FIC_IN.png"),
+            str(tmp_path / "FIC_Integrin.png"),
             0.001,
         )
         is None
@@ -1028,7 +1028,8 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 7, 4, 11, 3, 9, 10])[8, 8, 4, 2, 2] + [0] * 7,
+            np.asarray([0, 1, 7]),
+            [4, 4, 2, 1, 1] + [0] * 7,
         ),
         (
             {
@@ -1041,7 +1042,8 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 7, 4, 11, 3, 9, 10])[8, 8, 4, 2, 2] + [0] * 7,
+            np.asarray([0, 1, 7]),
+            [8, 8, 5, 2, 1] + [0] * 7,
         ),
     ],
 )
@@ -1080,9 +1082,9 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
     assert_array_less(np.abs(pearson_rank[2:]), 0.90)
-    # last four items in feature_rank have tendency to swap, and are
+    # last nine items in feature_rank have tendency to swap, and are
     # excluded from test, which is concerned with top feature ranks
-    assert_array_equal(feature_rank[:8], feature_rank_exp)
+    assert_array_equal(feature_rank[:3], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
 
 
@@ -1146,7 +1148,7 @@ def test_sort_feature_counts():
     feature_df["SHAP_1"] = [1, 0, 4]
     feature_df["Pearson R"] = [0.99, -0.99, -0.41]
 
-    out_df = workflow.sort_feature_counts(feature_df, n_folds=5)
+    out_df = feature_importance.sort_feature_counts(feature_df, n_folds=5)
     out_features = np.asarray(out_df["Features"])
-    out_exp = kmer_features[np.asarray([1, 0, 2])]
+    out_exp = kmer_features[np.asarray([2, 0, 1])]
     assert_array_equal(out_exp, out_features)

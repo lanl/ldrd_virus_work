@@ -1125,15 +1125,18 @@ def test_pearson_aggregation():
         random_state=random_state,
     )
 
+    feature_rank = feature_count["Features"]
     pearson_rank = feature_count["Pearson R"]
-    pearson_rank_exp = [
-        0.9365189346793777,
-        -0.9557083409911789,
-        0.8489642742549103,
-        0.703186127605507,
-    ]
-    # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
-    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)
+    # expected property of the test is ranking kmer_0 > kmer_1 > kmer_3
+    # based on alignment of features (1.0, 0.75, 0,50) and that
+    # ``kmer_1`` should be ranked lowest because of inverse alignment (-1.0)
+    feature_rank_exp = kmer_names[np.asarray([0, 2, 3, 1])]
+    assert_array_equal(feature_rank[:4], feature_rank_exp)
+    # random sampling using in ``StratifiedKFold`` causes features with
+    # perfect/inverse/moderate alignment (1.0, -1.0, 0.75, 0.50) to have >0.99
+    # pearson correlation with noisy features having much lower correlation
+    assert np.all(np.abs(pearson_rank[:4]) > 0.99)
+    assert_array_less(np.abs(pearson_rank[4:]), 0.7)
 
 
 def test_sort_feature_counts():

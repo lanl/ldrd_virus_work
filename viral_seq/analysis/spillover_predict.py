@@ -27,6 +27,10 @@ from typing import Any, Union
 from collections import defaultdict
 from functools import partial
 from operator import itemgetter
+from importlib.resources import files
+import glob
+import os
+from scipy import stats
 
 matplotlib.use("Agg")
 
@@ -766,3 +770,86 @@ def get_best_features(
     feature_names = feature_names[mask]
     idx = np.argsort(feature_importances)[::-1]
     return feature_names[idx]
+
+
+def get_aucs(
+    predictions_file: str, dataset_file: str, target_column: str
+) -> list[float]:
+    """
+    Return ROC AUC scores for a predictions *.csv file
+
+    Parameters:
+    -----------
+    predictions_file: str
+        full path to *.csv file where each column is expected to be predictions on
+        dataset_file, except for a 'Species' column which is ignored
+    dataset_file: str
+        one of the datasets stored in `viral_seq.data`
+    target_column: str
+        column in dataset_file with the relevant truth values
+    Returns:
+    --------
+    aucs: list
+        list of ROC AUC for each set of predictions in the predictions_file
+    """
+    y_true = pd.read_csv(str(files("viral_seq.data") / dataset_file))[target_column]
+    df = pd.read_csv(predictions_file, index_col=0)
+    aucs = []
+    for col in df.columns:
+        if col == "Species":
+            continue
+        name = col.split(":")[0]
+        aucs.append(roc_auc_score(y_true, df[col]))
+    auc_mean = np.mean(aucs)
+    auc_std = np.std(aucs)
+    print(f"{name} mean auc = {auc_mean:.3f} std = {auc_std:.3f}")
+    return aucs
+
+
+def compare_workflow_aucs(
+    predictions_paths: tuple[str, str],
+    dataset_files: tuple[str, str],
+    target_columns: tuple[str, str],
+) -> None:
+    """
+    Compare the ROC AUC of two run workflows given the path of the predictions
+    folder and other needed information. Prints the mean & stdev of every
+    classifier. Then perform a student's t-test on the workflows' ROC AUC values.
+
+    Parameters:
+    -----------
+    predictions_files: tuple[str, str]
+        path for each workflow to its predictions folder which contains predictions
+        *.csv files
+    dataset_files: tuple[str, str]
+        relevant dataset stored in `viral_seq.data` for each workflow
+    target_columns: tuple[str, str]
+        column in dataset_file with the relevant truth values for each workflow
+    """
+    aucs: list[list[float]] = [[], []]
+    for i in range(2):
+        print("========================")
+        print(f"{predictions_paths[i]}:")
+        wf_files = sorted(glob.glob(os.path.join(predictions_paths[i], "*csv")))
+        for file in wf_files:
+            aucs[i] += get_aucs(file, dataset_files[i], target_columns[i])
+        auc_mean = np.mean(aucs[i])
+        auc_std = np.std(aucs[i])
+        print(f"Workflow mean auc = {auc_mean:.3f} std = {auc_std:.3f}")
+    t_stat, p_val = stats.ttest_ind(aucs[0], aucs[1])
+    print("")
+    print(f"Student t-test: t_stat {t_stat:.3f}, p-value {p_val:.3f}")
+
+
+def compare_classifier_auc(
+    predictions_file: str,
+    dataset_file: str,
+    target_column: str,
+    comparison_value: float,
+) -> None:
+    """Perform one-sample student's t-test on the results of `get_aucs`."""
+    aucs = get_aucs(predictions_file, dataset_file, target_column)
+    t_stat, p_val = stats.ttest_1samp(aucs, comparison_value)
+    print(
+        f"Student t-test against {comparison_value}: t_stat {t_stat:.3f}, p-value {p_val:.3f}"
+    )

@@ -624,3 +624,143 @@ def test_issue_15():
     )
     # prior to fix this will only return a row for HM119401.1; post fix a row for each is returned
     assert_frame_equal(df_feats, df_expected)
+
+
+rng_get_aucs = np.random.default_rng(4567890)
+rng_preds = rng_get_aucs.random(size=(3, 736))
+perfect_pred = (
+    pd.read_csv(str(files("viral_seq.data") / "Mollentze_Holdout.csv"))["Human Host"]
+    .astype(int)
+    .values
+)
+
+
+@pytest.mark.parametrize(
+    "predictions, dataset_file, target_column, exp_aucs, exp_out",
+    [
+        # if we pass truth values as prediction scores, we expect ROC AUC 1.0
+        (
+            [perfect_pred],
+            "Mollentze_Holdout.csv",
+            "Human Host",
+            [1.0],
+            "My Classifier mean auc = 1.000 std = 0.000\n",
+        ),
+        # regression test
+        (
+            rng_preds,
+            "Mollentze_Holdout_Shuffled.csv",
+            "Human Host",
+            [0.46945269108936205, 0.4920524439267604, 0.4593247063168511],
+            "My Classifier mean auc = 0.474 std = 0.014\n",
+        ),
+    ],
+)
+def test_get_aucs(
+    capsys, tmpdir, predictions, dataset_file, target_column, exp_aucs, exp_out
+):
+    pred_data = {f"My Classifier: {i}": pred for i, pred in enumerate(predictions)}
+    # this should be ignored by get_aucs
+    pred_data["Species"] = [f"Species {i}" for i in range(len(predictions[0]))]
+    df = pd.DataFrame(pred_data)
+    predictions_file = "Classifier_predictions.csv"
+    with tmpdir.as_cwd():
+        df.to_csv(predictions_file)
+        aucs = sp.get_aucs(predictions_file, dataset_file, target_column)
+    cap = capsys.readouterr()
+    npt.assert_allclose(aucs, exp_aucs)
+    assert cap.out == exp_out
+
+
+@pytest.mark.parametrize(
+    "prediction_files, dataset_files, target_columns, exp_out",
+    [
+        (
+            [
+                [
+                    [[perfect_pred]],
+                    [[np.concatenate([perfect_pred[:-1], [1 - perfect_pred[-1]]])]],
+                ],
+                [[rng_preds]],
+            ],
+            ("Mollentze_Holdout.csv", "Mollentze_Holdout_Shuffled.csv"),
+            ("Human Host", "Human Host"),
+            """========================
+/wf1:
+My Classifier 0 mean auc = 1.000 std = 0.000
+My Classifier 1 mean auc = 0.999 std = 0.000
+Workflow mean auc = 1.000 std = 0.000
+========================
+/wf2:
+My Classifier 0 mean auc = 0.474 std = 0.014
+Workflow mean auc = 0.474 std = 0.014
+
+Student t-test: t_stat 42.107, p-value 0.000
+""",
+        ),
+    ],
+)
+def test_compare_workflow_aucs(
+    capsys, tmp_path, prediction_files, dataset_files, target_columns, exp_out
+):
+    predictions_paths = (tmp_path / "wf1", tmp_path / "wf2")
+    for i in range(2):
+        predictions_paths[i].mkdir()
+        files = prediction_files[i]
+        for j, file in enumerate(files):
+            for predictions in file:
+                pred_data = {
+                    f"My Classifier {j}: {k}": pred
+                    for k, pred in enumerate(predictions)
+                }
+                # this should be ignored by get_aucs
+                pred_data["Species"] = [
+                    f"Species {k}" for k in range(len(predictions[0]))
+                ]
+                df = pd.DataFrame(pred_data)
+                predictions_file = f"Classifier_predictions{j}.csv"
+                df.to_csv(str(predictions_paths[i] / predictions_file))
+    sp.compare_workflow_aucs(predictions_paths, dataset_files, target_columns)
+    cap = capsys.readouterr()
+    # remove tmp_path from output as it will vary
+    assert cap.out.replace(str(tmp_path), "") == exp_out
+
+
+@pytest.mark.parametrize(
+    "predictions, dataset_file, target_column, comparison_value, exp_out",
+    [
+        (
+            [perfect_pred, np.concatenate([perfect_pred[:-1], [1 - perfect_pred[-1]]])],
+            "Mollentze_Holdout.csv",
+            "Human Host",
+            1.0,
+            """My Classifier mean auc = 1.000 std = 0.000
+Student t-test against 1.0: t_stat -1.000, p-value 0.500
+""",
+        ),
+        (
+            rng_preds,
+            "Mollentze_Holdout_Shuffled.csv",
+            "Human Host",
+            0.5,
+            """My Classifier mean auc = 0.474 std = 0.014
+Student t-test against 0.5: t_stat -2.728, p-value 0.112
+""",
+        ),
+    ],
+)
+def test_compare_classifier_auc(
+    capsys, tmpdir, predictions, dataset_file, target_column, comparison_value, exp_out
+):
+    pred_data = {f"My Classifier: {i}": pred for i, pred in enumerate(predictions)}
+    # this should be ignored by get_aucs
+    pred_data["Species"] = [f"Species {i}" for i in range(len(predictions[0]))]
+    df = pd.DataFrame(pred_data)
+    predictions_file = "Classifier_predictions.csv"
+    with tmpdir.as_cwd():
+        df.to_csv(predictions_file)
+        sp.compare_classifier_auc(
+            predictions_file, dataset_file, target_column, comparison_value
+        )
+    cap = capsys.readouterr()
+    assert cap.out == exp_out

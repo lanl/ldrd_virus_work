@@ -441,6 +441,7 @@ def train_clfr(
     data_target: pd.Series,
     classifier_parameters: dict,
     n_folds: int,
+    n_seeds: int,
     max_features: int,
     random_state: int,
 ) -> tuple:
@@ -458,6 +459,8 @@ def train_clfr(
         with the classifier name as the dictionary key
     n_folds: int
         number of training cross-folds to perform
+    n_seeds: int
+        total number of random seeds over which to perform averaging of classifier predictions
     max_features: int
         the number of features to consider when calculating the top feature consensus counts
     random_state: int
@@ -484,6 +487,8 @@ def train_clfr(
     feature_count["Counts"] = 0
     shap_values_all = []
     shap_data_all = []
+    rng = np.random.default_rng(random_state)
+    random_seeds = rng.integers(low=1, high=100000, size=n_seeds)
     for clfr_name, subdict in classifier_parameters.items():
         clfr = subdict["clfr"]
         clfr.set_params(**subdict["params"], random_state=random_state)
@@ -496,52 +501,61 @@ def train_clfr(
                 desc=f"{clfr_name} Folds",
             )
         ):
-            # index training cv split
-            train_fold = train_data.iloc[train]
-            train_target = data_target[train]
-            test_fold = train_data.iloc[test]
-            test_target = data_target[test]
+            seed_auc = []
+            seed_tpr = []
+            for random_seed in random_seeds:
+                # index training cv split
+                train_fold = train_data.iloc[train]
+                train_target = data_target[train]
+                test_fold = train_data.iloc[test]
+                test_target = data_target[test]
 
-            # train classifier
-            clfr.fit(train_fold, train_target)
+                # train classifier
+                clfr.set_params(random_state=random_seed)
+                clfr.fit(train_fold, train_target)
 
-            # index classifier importances
-            clfr_importances = importances_df(
-                clfr.feature_importances_, train_fold.columns
-            )
+                # index classifier importances
+                clfr_importances = importances_df(
+                    clfr.feature_importances_, train_fold.columns
+                )
 
-            # calculate shap output for training dataset and rank
-            explainer = shap.Explainer(clfr, seed=random_state)
-            shap_values = explainer(train_fold)
-            positive_shap_values = feature_importance.get_positive_shap_values(
-                shap_values
-            )
+                # calculate shap output for training dataset and rank
+                explainer = shap.Explainer(clfr, seed=random_seed)
+                shap_values = explainer(train_fold)
+                positive_shap_values = feature_importance.get_positive_shap_values(
+                    shap_values
+                )
 
-            shap_importances = importances_df(
-                positive_shap_values.abs.mean(0).values, train_fold.columns
-            )
+                shap_importances = importances_df(
+                    positive_shap_values.abs.mean(0).values, train_fold.columns
+                )
 
-            feature_count = feature_count_consensus(
-                clfr_importances, shap_importances, feature_count, max_features
-            )
+                feature_count = feature_count_consensus(
+                    clfr_importances, shap_importances, feature_count, max_features
+                )
 
-            # normalize shap values
-            normalized_shap_values = normalize(
-                positive_shap_values.values, norm="l1", axis=1
-            )
+                # normalize shap values
+                normalized_shap_values = normalize(
+                    positive_shap_values.values, norm="l1", axis=1
+                )
 
-            # aggregate the raw shap values and associated data targets
-            shap_values_all.append(normalized_shap_values)
-            shap_data_all.append(positive_shap_values.data)
+                # aggregate the raw shap values and associated data targets
+                shap_values_all.append(normalized_shap_values)
+                shap_data_all.append(positive_shap_values.data)
 
-            # aggregate classifier predictions for ROC plot
-            test_score = clfr.predict_proba(test_fold)[:, 1]
-            fpr, tpr, thresh = roc_curve(test_target, test_score)
-            interp_tpr = np.interp(mean_fpr, fpr, tpr)
-            interp_tpr[0] = 0.0
-            roc_auc = auc(fpr, tpr)
+                # aggregate classifier predictions for ROC plot
+                test_score = clfr.predict_proba(test_fold)[:, 1]
+                fpr, tpr, thresh = roc_curve(test_target, test_score)
+                interp_tpr = np.interp(mean_fpr, fpr, tpr)
+                interp_tpr[0] = 0.0
+                roc_auc = auc(fpr, tpr)
+                seed_auc.append(roc_auc)
+                seed_tpr.append(interp_tpr)
 
-            clfr_preds[fold] = {"roc_curves": interp_tpr, "auc": roc_auc}
+            clfr_preds[fold] = {
+                "roc_curves": np.mean(seed_tpr, axis=0),
+                "auc": np.mean(roc_auc),
+            }
 
         clfr_preds_all[clfr_name] = clfr_preds
 
@@ -603,6 +617,7 @@ def FIC_plot(
     response_effect_sign: list,
     surface_exposed_dict: dict,
     n_classifiers: int,
+    n_seeds: int,
     path: Path,
 ):
     """
@@ -630,6 +645,8 @@ def FIC_plot(
         not surface exposed viral proteins for plotting '% surface exposed'
     n_classifiers: int
         number of classifiers used for consensus
+    n_seeds: int
+        number of random seeds used for consensus
     path: Path
         path to save figure
     """
@@ -651,11 +668,13 @@ def FIC_plot(
 
     fig, ax = plt.subplots(figsize=(10, 10))
     y_pos = np.arange(len(top_features))
-    bars: BarContainer = ax.barh(y_pos, (top_counts / n_folds) * 100, color="k")
+    bars: BarContainer = ax.barh(
+        y_pos, (top_counts / (n_folds * n_seeds)) * 100, color="k"
+    )
     ax.set_xlim(0, 100)
     ax.set_yticks(y_pos, labels=top_features)
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds * n_classifiers} folds\n for {target_name} binding"
+        f"Feature importance consensus amongst {n_folds * n_seeds * n_classifiers} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
@@ -2078,7 +2097,8 @@ if __name__ == "__main__":
         # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
         # TODO: add CLI option for determining which classifiers to train
         # TODO: perform model parameter optimization (see issue #139)
-        n_folds = 2
+        n_folds = 5
+        n_seeds = 2
         max_features = 20
         classifier_parameters = {
             "RandomForestClassifier": {
@@ -2109,7 +2129,7 @@ if __name__ == "__main__":
         clfr_names = list(classifier_parameters.keys())
         n_classifiers = len(clfr_names)
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
-            X, y, classifier_parameters, n_folds, max_features, random_state
+            X, y, classifier_parameters, n_folds, n_seeds, max_features, random_state
         )
         top_features_array = feature_count["Features"].values[:20]
 
@@ -2206,6 +2226,7 @@ if __name__ == "__main__":
             response_effect_sign,
             surface_exposed_dict,
             n_classifiers,
+            n_seeds,
             paths[-1],
         )
 

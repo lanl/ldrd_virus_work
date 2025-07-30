@@ -1757,6 +1757,13 @@ if __name__ == "__main__":
         default="igsf_training.csv",
         help="Training data file to merge with `--train-file` if specified",
     )
+    parser.add_argument(
+        "-ns",
+        "--n_seeds",
+        type=int,
+        default=20,
+        help="number of random seeds over which to average classifier predictions",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1776,6 +1783,7 @@ if __name__ == "__main__":
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
     merge_file = args.merge_file
+    n_seeds = args.n_seeds
 
     # check to make sure the correct `cache-tarball` is being used
     # for the given workflow when calling '--cache extract'
@@ -2098,7 +2106,6 @@ if __name__ == "__main__":
         # TODO: add CLI option for determining which classifiers to train
         # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
-        n_seeds = 2
         max_features = 20
         classifier_parameters = {
             "RandomForestClassifier": {

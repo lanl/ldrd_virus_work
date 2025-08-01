@@ -8,8 +8,8 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 
-codontab = standard_dna_table.forward_table.copy()
-for codon in standard_dna_table.stop_codons:
+codontab = standard_dna_table.forward_table.copy()  # type: ignore
+for codon in standard_dna_table.stop_codons:  # type: ignore
     codontab[codon] = "STOP"
 
 

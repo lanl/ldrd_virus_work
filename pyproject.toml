@@ -12,26 +12,26 @@ viral_seq = "viral_seq.cli.cli:cli"
 name = "viral_seq"
 dynamic = ['version']
 dependencies = [
-    "biopython==1.81",
+    "biopython==1.85",
     "fsspec>=2024.6.0",
     "lightgbm>=4.4.0",
-    "matplotlib>=3.8.4",
-    "numpy>=1.26.4",
+    "matplotlib>=3.10.5",
+    "numpy>=2.1.0",
     "pandas>=2.2.3",
     "polars>=0.19.2",
-    "pyarrow>=14.0.2",
+    "pyarrow>=18.0.0",
     "optuna>=3.6.1",
-    "ray>=2.37.0",
+    "ray>=2.48.0",
     "rich-click>=1.6.1",
-    "scikit-learn>=1.4.2",
+    "scikit-learn>=1.6.1",
     "scikit-bio>=0.5.8",
-    "scipy>=1.11.4",
+    "scipy>=1.15.3",
     "seaborn>=0.13.2",
     "shap==0.47.1",
     "shapely>=2.0.6",
     "taxonomy_ranks>=0.0.10",
     "tqdm>=4.65.0",
-    "xgboost>=2.1.1",
+    "xgboost>=3.0.3",
 ]
 [project.optional-dependencies]
 isg = ['pybiomart>=0.2.0']

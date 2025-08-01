@@ -16,7 +16,7 @@ optuna==4.0.0
 packaging==23.1
 pandas==2.2.3
 pandas-stubs==2.0.2.230605
-Pillow==10.1.0
+Pillow==11.0.0
 polars==1.11.0
 pyarrow==17.0.0
 Pygments==2.15.1

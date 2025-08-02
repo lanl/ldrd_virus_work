@@ -701,7 +701,6 @@ def FIC_plot(
         stacked=True,
         ax=ax,
         color=plot_colors,
-    )
 
     for idx, (_, row) in enumerate(top_feature_count.iterrows()):
         percent = surface_exposed_dict[row["Features"]]
@@ -2126,7 +2125,6 @@ if __name__ == "__main__":
             X, y, classifier_parameters, n_folds, max_features, random_state
         )
         top_features_array = feature_count["Features"].values[:max_features]
-
         # plot roc curve from cv consensus
         plot_cv_roc(clfr_preds, target_column, paths[-1])
 

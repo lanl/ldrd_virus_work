@@ -179,9 +179,13 @@ def test_plot_shap_meanabs(tmpdir):
 def test_plot_shap_beeswarm(tmpdir, interference):
     rng = np.random.default_rng(1984)
     values = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
-    data = np.copy(values)  # feature values
+    data = np.copy(values)
+    # synthetic base_values for passing to ``shap.Explanation``
+    # because ``shap.summary_plot`` checks ``base_values.shape``
+    # for multi-output explanationses
+    base_values = np.full(data.shape, 0.5)
     rng.shuffle(data)
-    explanation = shap.Explanation(values=values, data=data)
+    explanation = shap.Explanation(values=values, base_values=base_values, data=data)
     expected_plot = files("viral_seq.tests.expected").joinpath(
         "test_plot_shap_beeswarm.png"
     )

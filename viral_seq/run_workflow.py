@@ -701,6 +701,7 @@ def FIC_plot(
         stacked=True,
         ax=ax,
         color=plot_colors,
+    )
 
     for idx, (_, row) in enumerate(top_feature_count.iterrows()):
         percent = surface_exposed_dict[row["Features"]]

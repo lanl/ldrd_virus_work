@@ -480,6 +480,7 @@ def test_fic_plot_error(tmp_path):
     with pytest.raises(ValueError, match="Mismatch between number of feature signs"):
         workflow.FIC_plot(df_in, 2, "IN", ["+"], surface_exposed_dict, 2, tmp_path)
 
+
 @pytest.mark.parametrize(
     "not_exposed_idx, surface_exposed_exp",
     [

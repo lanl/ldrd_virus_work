@@ -57,7 +57,7 @@ def run_search(
     must: bool = False,
     attempts: int = 3,
 ) -> set[str]:
-    Entrez.email = email
+    Entrez.email = email  # type: ignore
     acc_set: set[str] = set()
     big_search = False
     if len(search_terms) > 10:
@@ -114,7 +114,7 @@ def run_search(
 
 
 def load_results(acc_set: set[str], email: str, must: bool = False, attempts: int = 3):
-    Entrez.email = email
+    Entrez.email = email  # type: ignore
     records = []
     batch_size = min(100, len(acc_set))
     numrecs = len(acc_set)

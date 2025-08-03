@@ -6,6 +6,10 @@ from sklearn.ensemble import (
     StackingClassifier,
 )
 from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 import pandas as pd
@@ -618,3 +622,34 @@ def test_roc_intersection_bug(tmpdir):
         classifier.plot_roc_curve_comparison(
             ["Test"], fprs, tprs, eer_data_list=[eer_data]
         )
+
+
+@pytest.mark.parametrize(
+    "model, expected_result",
+    [
+        (Pipeline([("scaler", StandardScaler()), ("svm", SVC())]), True),
+        (
+            CalibratedClassifierCV(
+                Pipeline([("scaler", StandardScaler()), ("svm", SVC())])
+            ),
+            True,
+        ),
+        (
+            Pipeline([("scaler", StandardScaler()), ("rf", RandomForestClassifier())]),
+            False,
+        ),
+        (
+            CalibratedClassifierCV(
+                Pipeline(
+                    [("scaler", StandardScaler()), ("rf", RandomForestClassifier())]
+                )
+            ),
+            False,
+        ),
+        (CalibratedClassifierCV(RandomForestClassifier()), False),
+        (RandomForestClassifier(), False),
+        (SVC(), True),
+    ],
+)
+def test_is_SVC(model, expected_result):
+    assert classifier.is_SVC(model) == expected_result

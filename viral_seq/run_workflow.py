@@ -36,9 +36,9 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
-import os
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+import os
 from tqdm import tqdm
 from sklearn.preprocessing import normalize
 

@@ -23,7 +23,11 @@ import time
 from tqdm import tqdm
 import pandas as pd
 from Bio import Entrez, SeqIO
-from Bio.SeqUtils import GC
+from Bio.SeqUtils import gc_fraction
+
+
+def GC(sequence):
+    return 100 * gc_fraction(sequence, ambiguous="ignore")
 
 
 def assert_mollentze_fig3_case_study_properties(df_moll_fig3):
@@ -113,7 +117,7 @@ if __name__ == "__main__":
     # we're going to want the final dataframe/dataset to include
     # the primary sequence data, because that is what the ML model
     # in the main control flow uses for classification decisions
-    Entrez.email = "treddy@lanl.gov"
+    Entrez.email = "treddy@lanl.gov"  # type: ignore
     accessions = df["SequenceID"]
     missing_taxonomies = 0
     print("retrieving records for Mollentze Figure 3 data")

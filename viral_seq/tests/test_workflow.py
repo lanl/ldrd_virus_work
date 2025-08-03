@@ -1020,6 +1020,13 @@ def test_feature_count_consensus():
     ],
 )
 def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp, n_seeds):
+=======
+            [2.0, 2.0, 1.0, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ),
+    ],
+)
+def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
+>>>>>>> github/awitmer_fix_cv_agg
     # this test checks that the ranking of features is performed correctly during classifier training.
     # the synthetic dataset is initialized with random numbers, and then two feature columns are assigned
     # values that are correlated/inversely with the data targets, such that if the classifier aggregation

@@ -1,0 +1,43 @@
+name: Linux CI
+
+on:
+  push:
+    branches:
+      - main
+      - awitmer_fix_cv_agg
+  pull_request:
+    branches:
+      - main
+      - awitmer_fix_cv_agg
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        requirements-file: ["requirements_low.txt", "requirements_high.txt"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install -U setuptools pip
+        python -m pip install -r ci/${{ matrix.requirements-file }}
+        python -m pip install -v .
+        python -m pip install black==23.3.0 ruff==0.8.1
+        python -m pip install pytest==8.3.3 mypy==1.3.0 pytest-mock==3.14.0
+    # we currently only lint with Python 3.10 and low reqs
+    - name: lint
+      if: matrix.python-version == '3.10' && matrix.requirements-file == 'requirements_low.txt'
+      run: |
+        ruff check viral_seq
+        black viral_seq --check
+        mypy -p viral_seq
+    - name: test
+      run: |
+        cd /tmp && python -m pytest -m "not slow" --pyargs viral_seq

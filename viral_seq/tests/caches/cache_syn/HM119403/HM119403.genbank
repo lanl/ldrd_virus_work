@@ -1,0 +1,18 @@
+LOCUS       HM119403                 120 bp    RNA     linear   VRL 02-APR-2011
+DEFINITION  Alenquer virus segment S, complete sequence.
+ACCESSION   HM119403
+VERSION     HM119403.1
+KEYWORDS    .
+SOURCE      Alenquer virus
+  ORGANISM  Alenquer virus
+FEATURES             Location/Qualifiers
+     CDS             54..62
+                     /codon_start=1
+                     /product="nucleocapsid"
+                     /protein_id="AEA30067.1"
+                     /translation="MSF"
+ORIGIN
+        1 acacaaagct cctcaaggat tgttaacaag tgaatatcta acattttcta ataatgtctt
+       61 ttgaagaact tgctgttgag ttggcgggag aggaagtgga tgaacaaacc attgcttctt
+//
+

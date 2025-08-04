@@ -19,7 +19,7 @@ import ast
 import numpy as np
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
-from sklearn.metrics import roc_auc_score, auc
+from sklearn.metrics import roc_auc_score, auc, roc_curve
 from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
@@ -36,7 +36,6 @@ from scipy.stats import pearsonr
 from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
-from sklearn.metrics import roc_curve
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 import os
@@ -97,14 +96,6 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
         )
 
 
-# TODO: this class object serves as a placeholder for
-# a different class to be implemented in accordance with issue #97
-class kmer_data:
-    def __init__(self, mapping_method: str, kmer_data: list[str]):
-        self.mapping_method = mapping_method
-        self.kmer_names = kmer_data
-
-
 def feature_signs(
     is_exposed: list,
     found_kmers: list,
@@ -155,7 +146,7 @@ def feature_signs(
 
 
 def get_kmer_info(
-    kmer_data: kmer_data,
+    kmer_data: get_features.KmerData,
     records: list,
     tbl: pd.DataFrame,
     mapping_method: str = "shen_2007",
@@ -450,6 +441,7 @@ def train_clfr(
     data_target: pd.Series,
     classifier_parameters: dict,
     n_folds: int,
+    n_seeds: int,
     max_features: int,
     random_state: int,
 ) -> tuple:
@@ -467,6 +459,8 @@ def train_clfr(
         with the classifier name as the dictionary key
     n_folds: int
         number of training cross-folds to perform
+    n_seeds: int
+        total number of random seeds over which to perform averaging of classifier predictions
     max_features: int
         the number of features to consider when calculating the top feature consensus counts
     random_state: int
@@ -493,6 +487,8 @@ def train_clfr(
     feature_count["Counts"] = 0
     shap_values_all = []
     shap_data_all = []
+    rng = np.random.default_rng(random_state)
+    random_seeds = rng.integers(low=1, high=100000, size=n_seeds)
     for clfr_name, subdict in classifier_parameters.items():
         clfr = subdict["clfr"]
         clfr.set_params(**subdict["params"], random_state=random_state)
@@ -505,52 +501,61 @@ def train_clfr(
                 desc=f"{clfr_name} Folds",
             )
         ):
-            # index training cv split
-            train_fold = train_data.iloc[train]
-            train_target = data_target[train]
-            test_fold = train_data.iloc[test]
-            test_target = data_target[test]
+            seed_auc = []
+            seed_tpr = []
+            for random_seed in random_seeds:
+                # index training cv split
+                train_fold = train_data.iloc[train]
+                train_target = data_target[train]
+                test_fold = train_data.iloc[test]
+                test_target = data_target[test]
 
-            # train classifier
-            clfr.fit(train_fold, train_target)
+                # train classifier
+                clfr.set_params(random_state=random_seed)
+                clfr.fit(train_fold, train_target)
 
-            # index classifier importances
-            clfr_importances = importances_df(
-                clfr.feature_importances_, train_fold.columns
-            )
+                # index classifier importances
+                clfr_importances = importances_df(
+                    clfr.feature_importances_, train_fold.columns
+                )
 
-            # calculate shap output for training dataset and rank
-            explainer = shap.Explainer(clfr, seed=random_state)
-            shap_values = explainer(train_fold)
-            positive_shap_values = feature_importance.get_positive_shap_values(
-                shap_values
-            )
+                # calculate shap output for training dataset and rank
+                explainer = shap.Explainer(clfr, seed=random_seed)
+                shap_values = explainer(train_fold)
+                positive_shap_values = feature_importance.get_positive_shap_values(
+                    shap_values
+                )
 
-            shap_importances = importances_df(
-                positive_shap_values.abs.mean(0).values, train_fold.columns
-            )
+                shap_importances = importances_df(
+                    positive_shap_values.abs.mean(0).values, train_fold.columns
+                )
 
-            feature_count = feature_count_consensus(
-                clfr_importances, shap_importances, feature_count, max_features
-            )
+                feature_count = feature_count_consensus(
+                    clfr_importances, shap_importances, feature_count, max_features
+                )
 
-            # normalize shap values
-            normalized_shap_values = normalize(
-                positive_shap_values.values, norm="l1", axis=1
-            )
+                # normalize shap values
+                normalized_shap_values = normalize(
+                    positive_shap_values.values, norm="l1", axis=1
+                )
 
-            # aggregate the raw shap values and associated data targets
-            shap_values_all.append(normalized_shap_values)
-            shap_data_all.append(positive_shap_values.data)
+                # aggregate the raw shap values and associated data targets
+                shap_values_all.append(normalized_shap_values)
+                shap_data_all.append(positive_shap_values.data)
 
-            # aggregate classifier predictions for ROC plot
-            test_score = clfr.predict_proba(test_fold)[:, 1]
-            fpr, tpr, thresh = roc_curve(test_target, test_score)
-            interp_tpr = np.interp(mean_fpr, fpr, tpr)
-            interp_tpr[0] = 0.0
-            roc_auc = auc(fpr, tpr)
+                # aggregate classifier predictions for ROC plot
+                test_score = clfr.predict_proba(test_fold)[:, 1]
+                fpr, tpr, thresh = roc_curve(test_target, test_score)
+                interp_tpr = np.interp(mean_fpr, fpr, tpr)
+                interp_tpr[0] = 0.0
+                roc_auc = auc(fpr, tpr)
+                seed_auc.append(roc_auc)
+                seed_tpr.append(interp_tpr)
 
-            clfr_preds[fold] = {"roc_curves": interp_tpr, "auc": roc_auc}
+            clfr_preds[fold] = {
+                "roc_curves": np.mean(seed_tpr, axis=0),
+                "auc": np.mean(roc_auc),
+            }
 
         clfr_preds_all[clfr_name] = clfr_preds
 
@@ -607,10 +612,12 @@ def FIC_plot(
     feature_count: pd.DataFrame,
     n_folds: int,
     target_column: str,
+    mapping_method: str,
     exposure_status_sign: list,
     response_effect_sign: list,
     surface_exposed_dict: dict,
     n_classifiers: int,
+    n_seeds: int,
     path: Path,
 ):
     """
@@ -638,6 +645,8 @@ def FIC_plot(
         not surface exposed viral proteins for plotting '% surface exposed'
     n_classifiers: int
         number of classifiers used for consensus
+    n_seeds: int
+        number of random seeds used for consensus
     path: Path
         path to save figure
     """
@@ -659,11 +668,13 @@ def FIC_plot(
 
     fig, ax = plt.subplots(figsize=(10, 10))
     y_pos = np.arange(len(top_features))
-    bars: BarContainer = ax.barh(y_pos, (top_counts / n_folds) * 100, color="k")
+    bars: BarContainer = ax.barh(
+        y_pos, (top_counts / (n_folds * n_seeds)) * 100, color="k"
+    )
     ax.set_xlim(0, 100)
     ax.set_yticks(y_pos, labels=top_features)
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds * n_classifiers} folds\n for {target_name} binding"
+        f"Feature importance consensus amongst {n_folds * n_seeds * n_classifiers} folds\n for {target_name} binding"
     )
     ax.set_xlabel("Classifier Consensus Percentage (%)")
 
@@ -749,7 +760,10 @@ def FIC_plot(
         )
 
         fig.tight_layout()
-        fig.savefig(str(path) + "/" + "FIC_" + "_".join(target_names) + ".png", dpi=300)
+        fig.savefig(
+            os.path.join(str(path), f"FIC_{target_column}_{mapping_method}.png"),
+            dpi=300,
+        )
         plt.close()
 
 
@@ -1320,9 +1334,9 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                 if debug:
                     idx = np.abs(8 - (this_checkpoint - this_checkpoint_modifier))
                     validate_feature_table(this_outfile, idx, prefix)
-
     elif workflow == "DTRA":
         if feature_checkpoint > 0:
+            all_kmer_info = []
             for i, (file, folder) in enumerate(zip(viral_files, table_locs)):
                 with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
                     dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
@@ -1339,7 +1353,6 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                     if feature_checkpoint > kmer_range_length:
                         feature_checkpoint = kmer_range_length
                     this_checkpoint = feature_checkpoint
-
                 for k in range(max_kmer - feature_checkpoint + 1, max_kmer + 1):
                     this_outfile = folder + "/" + prefix + "_k{}.parquet.gzip".format(k)
                     if feature_checkpoint >= this_checkpoint:
@@ -1351,7 +1364,7 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             "To restart at this point use --features",
                             this_checkpoint,
                         )
-                        cli.calculate_table(
+                        kmer_info = cli.calculate_table(
                             [
                                 "--file",
                                 file,
@@ -1372,7 +1385,25 @@ def build_tables(feature_checkpoint=0, debug=False, kmer_range=None):
                             ],
                             standalone_mode=False,
                         )
+                        all_kmer_info.extend(kmer_info)
                         this_checkpoint -= 1
+
+            kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
+
+            # Remove duplicates and AA-kmer identity mappings before saving
+            kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
+            kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]
+
+            kmer_map_path = Path("kmer_maps")
+            kmer_map_path.mkdir(exist_ok=True)
+            kmer_maps_df.to_parquet(
+                f"{kmer_map_path}/kmer_maps_{mapping_method}.parquet.gzip",
+                index=False,
+            )
+
+            # transform all_kmer_info and save as parquet file
+            all_kmer_info_df = dtra_utils.transform_kmer_data(all_kmer_info)
+            dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info.parquet.gzip")
 
 
 def feature_selection_rfc(
@@ -1726,6 +1757,13 @@ if __name__ == "__main__":
         default="igsf_training.csv",
         help="Training data file to merge with `--train-file` if specified",
     )
+    parser.add_argument(
+        "-ns",
+        "--n_seeds",
+        type=int,
+        default=20,
+        help="number of random seeds over which to average classifier predictions",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1745,6 +1783,7 @@ if __name__ == "__main__":
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
     merge_file = args.merge_file
+    n_seeds = args.n_seeds
 
     # check to make sure the correct `cache-tarball` is being used
     # for the given workflow when calling '--cache extract'
@@ -2041,6 +2080,14 @@ if __name__ == "__main__":
     elif workflow == "DTRA":
         records = sp.load_from_cache(cache=cache_viral, filter=False)
 
+        # load 'all_kmer_info.parquet.gzip' file for finding relevant virus-protein information
+        try:
+            all_kmer_info = dtra_utils.load_kmer_info("all_kmer_info.parquet.gzip")
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "File 'all_kmer_info.parquet.gzip' not found. Feature tables must be built to generate file."
+            )
+
         tbl = dtra_utils._merge_and_convert_tbl(train_file, merge_file, temp_file)
         # TODO: this call below may be redundant because
         # X_train is returned by `feature_selection_rfc`
@@ -2089,7 +2136,7 @@ if __name__ == "__main__":
         clfr_names = list(classifier_parameters.keys())
         n_classifiers = len(clfr_names)
         (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
-            X, y, classifier_parameters, n_folds, max_features, random_state
+            X, y, classifier_parameters, n_folds, n_seeds, max_features, random_state
         )
         top_features_array = feature_count["Features"].values[:20]
 
@@ -2133,7 +2180,7 @@ if __name__ == "__main__":
         )
         print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
-        kmer_info = kmer_data(mapping_method, top_features_array)
+        kmer_info = get_features.KmerData(mapping_method, list(top_features_array))
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
@@ -2181,9 +2228,30 @@ if __name__ == "__main__":
             feature_count,
             n_folds,
             target_column,
+            mapping_method,
             exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
             n_classifiers,
+            n_seeds,
             paths[-1],
         )
+
+        # save top N kmers
+        np.savetxt(
+            f"topN_kmers_{target_column}_{mapping_method}.csv",
+            top_features_array,
+            delimiter=",",
+            fmt="%s",
+        )
+
+        # perform matching of AA analogues for topN kmers from each mapping method
+        matching_kmers = dtra_utils.find_matching_kmers(
+            target_column,
+            mapping_methods=["jurgen_schmidt", "shen_2007"],
+        )
+        print(matching_kmers)
+        # find and save virus-protein pairs associated with topN kmers
+        top_viruses = dtra_utils.get_kmer_viruses(top_features_array, all_kmer_info)
+        top_viruses_df = pd.DataFrame.from_dict(top_viruses, orient="index").T
+        top_viruses_df.to_csv("topN_virus_protein_pairs.csv", index=False)

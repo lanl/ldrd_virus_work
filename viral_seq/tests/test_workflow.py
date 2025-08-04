@@ -398,6 +398,7 @@ def test_fic_plot(tmp_path):
 
     kmer_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     target_column = "IN"
+    mapping_method = "jurgen_schmidt"
     response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
     exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "-", "-", "+"]
 
@@ -416,6 +417,7 @@ def test_fic_plot(tmp_path):
 
     n_folds = 2
     n_classifiers = 1
+    n_seeds = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
     df_in["Counts"] = kmer_counts
@@ -423,17 +425,19 @@ def test_fic_plot(tmp_path):
         df_in,
         n_folds,
         target_column,
+        mapping_method,
         exposure_status_sign,
         response_effect_sign,
         surface_exposed_dict,
         n_classifiers,
+        n_seeds,
         tmp_path,
     )
 
     assert (
         compare_images(
             files("viral_seq.tests.expected") / "FIC_expected.png",
-            str(tmp_path / "FIC_Integrin.png"),
+            str(tmp_path / f"FIC_{target_column}_{mapping_method}.png"),
             0.001,
         )
         is None
@@ -745,7 +749,7 @@ def test_get_kmer_info(
             new_kmers.append("kmer_PC_" + "".join(topN_kmer_PC))
         else:
             new_kmers.append("kmer_AA_" + topN_kmer)
-    data_in = workflow.kmer_data(mapping_method, new_kmers)
+    data_in = get_features.KmerData(mapping_method, new_kmers)
 
     viruses, kmers, protein_name = workflow.get_kmer_info(
         data_in, records, tbl, mapping_method
@@ -774,9 +778,7 @@ def test_get_kmer_info(
         ),
     ],
 )
-def test_get_kmer_info_error(
-    accession: str, kmer: list[str], mapping_method: str, mismatch_method: str
-):
+def test_get_kmer_info_error(accession, kmer, mapping_method, mismatch_method):
     this_cache = files("viral_seq.tests") / "cache_test"
     cache_str = str(this_cache.resolve())  # type: ignore[attr-defined]
     records = sp.load_from_cache(
@@ -791,7 +793,7 @@ def test_get_kmer_info_error(
         },
     }
     tbl = pd.DataFrame(data_table)
-    data_in = workflow.kmer_data(mapping_method, kmer)
+    data_in = get_features.KmerData(mapping_method, kmer)
     with pytest.raises(ValueError, match="kmer mapping method does not match"):
         _, _, _ = workflow.get_kmer_info(data_in, records, tbl, mismatch_method)
 
@@ -972,7 +974,7 @@ def test_feature_count_consensus():
 
 
 @pytest.mark.parametrize(
-    "classifier_parameters, feature_rank_array, count_rank_exp",
+    "classifier_parameters, feature_rank_array, count_rank_exp, n_seeds",
     [
         (
             {
@@ -983,6 +985,7 @@ def test_feature_count_consensus():
             },
             np.asarray([0, 1, 10, 7]),
             [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            1,
         ),
         (
             {
@@ -996,11 +999,27 @@ def test_feature_count_consensus():
                 },
             },
             np.asarray([0, 1, 10, 7]),
-            [2.0, 2.0, 1.0, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [2.0, 2.0, 0.75, 0.5, 0.25, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+            1,
+        ),
+        (
+            {
+                "RandomForestClassifier": {
+                    "clfr": RandomForestClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+                "ExtraTreesClassifier": {
+                    "clfr": ExtraTreesClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+            },
+            np.asarray([0, 1, 10, 7]),
+            [4.0, 4.0, 1.75, 1.0, 0.5, 0.5, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+            2,
         ),
     ],
 )
-def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
+def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp, n_seeds):
     # this test checks that the ranking of features is performed correctly during classifier training.
     # the synthetic dataset is initialized with random numbers, and then two feature columns are assigned
     # values that are correlated/inversely with the data targets, such that if the classifier aggregation
@@ -1024,6 +1043,7 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
         y,
         classifier_parameters,
         n_folds=2,
+        n_seeds=n_seeds,
         max_features=3,
         random_state=random_state,
     )
@@ -1076,16 +1096,17 @@ def test_pearson_aggregation():
         y,
         classifier_parameters,
         n_folds=2,
+        n_seeds=1,
         max_features=4,
         random_state=random_state,
     )
 
     pearson_rank = feature_count["Pearson R"]
     pearson_rank_exp = [
-        0.9365189346793777,
-        -0.9557083409911789,
-        0.8489642742549103,
-        0.703186127605507,
+        0.9625443164192421,
+        -0.9455651466704694,
+        0.8684269994231254,
+        0.700139321523472,
     ]
     # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
-    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)
+    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp, rtol=6e-6)

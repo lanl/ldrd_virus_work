@@ -1109,4 +1109,4 @@ def test_pearson_aggregation():
         0.700139321523472,
     ]
     # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
-    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp)
+    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp, rtol=6e-6)

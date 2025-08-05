@@ -438,6 +438,7 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title
         kmer_features[i]: percent_exposed[i] for i in range(n_feats)
     }
 
+    n_seeds = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
     for i in range(len(clfr_props)):
@@ -451,6 +452,7 @@ def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title
         response_effect_sign,
         surface_exposed_dict,
         n_feats,
+        n_seeds,
         tmp_path,
     )
 
@@ -1017,7 +1019,7 @@ def test_feature_count_consensus():
 
 
 @pytest.mark.parametrize(
-    "classifier_parameters, feature_rank_array, count_rank_exp",
+    "classifier_parameters, feature_rank_array, count_rank_exp, n_seeds",
     [
         (
             {
@@ -1028,6 +1030,7 @@ def test_feature_count_consensus():
             },
             np.asarray([0, 1, 7]),
             [4, 4, 2, 1, 1] + [0] * 7,
+            1,
         ),
         (
             {
@@ -1042,10 +1045,26 @@ def test_feature_count_consensus():
             },
             np.asarray([0, 1, 7]),
             [8, 8, 5, 2, 1] + [0] * 7,
+            1,
+        ),
+        (
+            {
+                "RandomForestClassifier": {
+                    "clfr": RandomForestClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+                "ExtraTreesClassifier": {
+                    "clfr": ExtraTreesClassifier(),
+                    "params": {"n_estimators": 100, "n_jobs": 1},
+                },
+            },
+            np.asarray([0, 1, 10, 7]),
+            [4.0, 4.0, 1.75, 1.0, 0.5, 0.5, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+            2,
         ),
     ],
 )
-def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
+def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp, n_seeds):
     # this test checks that the ranking of features is performed correctly during classifier training.
     # the synthetic dataset is initialized with random numbers, and then two feature columns are assigned
     # values that are correlated/inversely with the data targets, such that if the classifier aggregation
@@ -1069,6 +1088,7 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp):
         y,
         classifier_parameters,
         n_folds=2,
+        n_seeds=n_seeds,
         max_features=3,
         random_state=random_state,
     )
@@ -1121,6 +1141,7 @@ def test_pearson_aggregation():
         y,
         classifier_parameters,
         n_folds=2,
+        n_seeds=1,
         max_features=4,
         random_state=random_state,
     )
@@ -1153,3 +1174,13 @@ def test_sort_feature_counts():
     out_features = np.asarray(out_df["Features"])
     out_exp = kmer_features[np.asarray([2, 0, 1])]
     assert_array_equal(out_exp, out_features)
+=======
+    pearson_rank_exp = [
+        0.9625443164192421,
+        -0.9455651466704694,
+        0.8684269994231254,
+        0.700139321523472,
+    ]
+    # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
+    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp, rtol=6e-6)
+>>>>>>> awitmer_fix_cv_agg

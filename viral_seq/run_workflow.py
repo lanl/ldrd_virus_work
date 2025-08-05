@@ -718,6 +718,10 @@ def FIC_plot(
         stacked=True,
         ax=ax,
         color=plot_colors,
+    )
+    # TODO: how to calculate `n_classifiers` here?
+    # leftover from merge conflict resolution...
+    n_classifiers = 1
     ax.set_title(
         f"Feature importance consensus amongst {n_folds * n_seeds * n_classifiers} folds\n for {target_name} binding"
     )

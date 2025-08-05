@@ -480,7 +480,7 @@ def test_fic_plot_error(tmp_path):
     )
     surface_exposed_dict = {"kmer_PC_0": 50.00, "kmer_PC_1": 0.00}
     with pytest.raises(ValueError, match="Mismatch between number of feature signs"):
-        workflow.FIC_plot(df_in, 2, "IN", ["+"], surface_exposed_dict, 2, tmp_path)
+        workflow.FIC_plot(df_in, 2, "IN", ["+"], surface_exposed_dict, 2, 1, tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -1174,13 +1174,3 @@ def test_sort_feature_counts():
     out_features = np.asarray(out_df["Features"])
     out_exp = kmer_features[np.asarray([2, 0, 1])]
     assert_array_equal(out_exp, out_features)
-=======
-    pearson_rank_exp = [
-        0.9625443164192421,
-        -0.9455651466704694,
-        0.8684269994231254,
-        0.700139321523472,
-    ]
-    # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
-    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp, rtol=6e-6)
->>>>>>> awitmer_fix_cv_agg

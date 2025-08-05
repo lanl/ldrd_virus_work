@@ -796,6 +796,7 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
     ax.legend(loc="lower right")
 
     fig.savefig(filename)
+    plt.close()
 
 
 def get_best_features(

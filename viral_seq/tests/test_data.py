@@ -142,7 +142,8 @@ def test_get_family_counts_missing():
 
 
 @pytest.mark.parametrize("target_column", ["Human Host", "other"])
-def test_plot_family_heatmap(tmpdir, target_column):
+@pytest.mark.parametrize("numeric_index", [True, False])
+def test_plot_family_heatmap(tmpdir, target_column, numeric_index):
     expected_plot = files("viral_seq.tests.expected") / (
         f"test_plot_family_heatmap_{target_column}.png".replace(" ", "_")
     )
@@ -159,8 +160,8 @@ def test_plot_family_heatmap(tmpdir, target_column):
     df_train[target_column] = rng.integers(0, 2, size=len(df_train), dtype=bool)
     df_test[target_column] = rng.integers(0, 2, size=len(df_test), dtype=bool)
     with tmpdir.as_cwd():
-        df_train.to_csv("train_file.csv")
-        df_test.to_csv("test_file.csv")
+        df_train.to_csv("train_file.csv", index=numeric_index)
+        df_test.to_csv("test_file.csv", index=numeric_index)
         data_summary.plot_family_heatmap(
             "train_file.csv", "test_file.csv", target_column
         )

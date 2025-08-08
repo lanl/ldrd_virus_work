@@ -38,10 +38,10 @@ def plot_family_heatmap(
         filepath to output generated plot's source data
     """
     # get family counts
-    df_train = pd.read_csv(train_file, index_col=0)[["Species", target_column]]
+    df_train = pd.read_csv(train_file, index_col=False)[["Species", target_column]]
     train_true = _get_family_counts(df_train.loc[df_train[target_column]])
     train_false = _get_family_counts(df_train.loc[~df_train[target_column]])
-    df_test = pd.read_csv(test_file, index_col=0)[["Species", target_column]]
+    df_test = pd.read_csv(test_file, index_col=False)[["Species", target_column]]
     test_true = _get_family_counts(df_test.loc[df_test[target_column]])
     test_false = _get_family_counts(df_test.loc[~df_test[target_column]])
     # format DataFrame

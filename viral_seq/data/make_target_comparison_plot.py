@@ -1,3 +1,9 @@
+"""
+This module contains code for generating the violin
+plot used in the LDRD manuscript. For details on
+usage, see the repo README file.
+"""
+
 import os
 import glob
 import seaborn as sns
@@ -6,7 +12,10 @@ import pandas as pd
 from itertools import product
 from viral_seq.analysis import spillover_predict as sp
 
-plt.rcParams.update({"font.size": 14})
+
+def add_data(group, method, values, data):
+    for v in values:
+        data.append({"Target": group, "Dataset": method, "ROC AUC": v})
 
 
 def plot_target_comparison(
@@ -18,11 +27,6 @@ def plot_target_comparison(
     mammal_shuffled_predictions: str,
 ):
     data = []
-
-    def add_data(group, method, values):
-        for v in values:
-            data.append({"Target": group, "Dataset": method, "ROC AUC": v})
-
     groups = ["human", "primate", "mammal"]
     methods = ["fixed", "shuffled"]
     folders = [
@@ -45,22 +49,32 @@ def plot_target_comparison(
             this_dataset_file = (
                 "Relabeled_Test.csv" if method == "fixed" else dataset_files[target]
             )
+            print(f"{target}, {method}:")
             these_aucs = sp.get_aucs(file, this_dataset_file, target)
             aucs += these_aucs
         label = "Corrected" if method == "fixed" else "Rebalanced"
-        add_data(target.capitalize(), label, aucs)
+        add_data(target.capitalize(), label, aucs, data)
 
     df = pd.DataFrame(data)
     fig, ax = plt.subplots(figsize=(8, 6))
-    sns.violinplot(
-        data=df,
-        x="Target",
-        y="ROC AUC",
-        hue="Dataset",
-        split=True,
-        gap=0.1,
-        inner="quart",
-        ax=ax,
+    ax = sns.violinplot(
+         data=df,
+         x="Target",
+         y="ROC AUC",
+         hue="Dataset",
+         split=True,
+         gap=0.1,
+         inner="quart",
+         ax=ax,
     )
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
+    ax.set_xlabel(ax.get_xlabel(), fontsize=14)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=14)
+    ax.legend(title=ax.get_legend().get_title().get_text(),
+              title_fontsize=14,
+              alignment='center')
+    for text in ax.get_legend().get_texts():
+        text.set_fontsize(14)
     fig.tight_layout()
     fig.savefig("retarget_comparison.png", dpi=300)

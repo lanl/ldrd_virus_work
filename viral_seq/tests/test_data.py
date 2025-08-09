@@ -1,6 +1,8 @@
+import os
 import uuid
 from viral_seq.data import make_alternate_datasets as make_alts
 import viral_seq.data.make_data_summary_plots as data_summary
+from viral_seq.data import make_target_comparison_plot
 import pandas as pd
 from pandas.testing import assert_frame_equal
 from importlib.resources import files
@@ -272,3 +274,42 @@ def test_relabel_dataset():
     )
     assert_frame_equal(relabeled_df_train, relabeled_train_df_exp)
     assert_frame_equal(relabeled_df_test, relabeled_test_df_exp)
+
+
+def test_violin_plot(tmpdir, capsys):
+    # regression guard for generation of the violin
+    # plot used in LDRD manuscript
+    # there are six conditions under test to mimic
+    # the real-world comparison scenario: human, mammal, and
+    # primate each in "fixed" and "shuffled" states; however,
+    # here we just test with synthetic data so their identities
+    # are not relevant (we just create six appropriate data
+    # structures/input files)
+    condition_dirs = []
+    rng = np.random.default_rng(123)
+    with tmpdir.as_cwd():
+        for condition in range(6):
+            out_dir = f"results_{condition}"
+            os.mkdir(out_dir)
+            condition_dirs.append(out_dir)
+            # also "simulate" the presence of multiple estimators per
+            # condition
+            for est_num in range(4):
+                df = pd.DataFrame(
+                    {
+                        f"Estimator {est_num} Seed: 0": rng.random(736),
+                        "Species": [f"virus {n}" for n in range(736)],
+                    }
+                )
+                df.to_csv(
+                    os.path.join(out_dir, f"predictions_{est_num}_{condition}.csv")
+                )
+        make_target_comparison_plot.plot_target_comparison(*condition_dirs)
+        expected_plot = files("viral_seq.tests.expected") / "retarget_comparison.png"
+        assert compare_images(expected_plot, "retarget_comparison.png", 0.001) is None
+        captured = capsys.readouterr().out
+        # check for improved specifity of printed output
+        # per: https://github.com/lanl/ldrd_virus_work/pull/8#issuecomment-3171076234
+        for target in ["human", "mammal", "primate"]:
+            for condition in ["fixed", "shuffled"]:
+                assert f"{target}, {condition}:" in captured

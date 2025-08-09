@@ -19,7 +19,7 @@ Linting pre-commit procedure prevents unnecessary CI/CD failures, but testing pr
 ```
 
 **Running the Workflow**
-When runnning workflow for the first time, skip to step 2.
+When running workflow for the first time, skip to step 2.
 
 1. Uninstall viral_seq with `python3 -m pip uninstall viral_seq`
 2. Ensure large files have been pulled down with `git lfs pull` from root directory (for `git-lfs` installation instructions see https://git-lfs.com/)
@@ -40,7 +40,7 @@ Pulling down the cache at runtime:
 ```
 
 **Workflow Testing**
-As the full workflow is not automatically tested; it should be occassionally tested locally following the above procedure, but with the `--debug` flag for `viral_seq/run_workflow.py` which will run the entire workflow with assertions on generated data which are not designed to be performative. It is pertinent to test both workflow options as they require different assertions.
+As the full workflow is not automatically tested; it should be occasionally tested locally following the above procedure, but with the `--debug` flag for `viral_seq/run_workflow.py` which will run the entire workflow with assertions on generated data which are not designed to be performative. It is pertinent to test both workflow options as they require different assertions.
 
 
 Generating Heatmaps and Calculating Relative Entropy Quickly
@@ -60,6 +60,52 @@ before it does:
 ```
 
 (and similarly for other training and test datasets)
+
+Producing the Violin Plot for LDRD manuscript (and related data)
+================================================================
+
+The ROC AUC violin plot in the LDRD manuscript, which compares
+relative ML model performances for human, primate, and mammal targets
+(and with vs. without shuffling/rebalancing the data), can be regenerated
+by running the six pertinent LDRD workflows and then running the post-processing
+code.
+
+For example, after installing the project locally and confirming that the
+testsuite is passing, six subfolders for the different conditions might be
+created, and the workflow incantations initiated in those directories as follows
+(10 random seeds were combined for the manuscript results):
+
+```
+# (1) at subdirectory human_fixed:
+python ../viral_seq/run_workflow.py -tr Relabeled_Train.csv -ts Relabeled_Test.csv -tc "human" -c "extract" -n 2 -cp 10
+# (2) at subdirectory human_shuffled:
+python ../viral_seq/run_workflow.py -tr Relabeled_Train_Human_Shuffled.csv -ts Relabeled_Test_Human_Shuffled.csv -tc "human" -c "extract" -n 2 -cp 10
+# (3) at subdirectory primate_fixed:
+python ../viral_seq/run_workflow.py -tr Relabeled_Train.csv -ts Relabeled_Test.csv -tc "primate" -c "extract" -n 2 -cp 10
+# (4) at subdirectory primate_shuffled:
+python ../viral_seq/run_workflow.py -tr Relabeled_Train_Primate_Shuffled.csv -ts Relabeled_Test_Primate_Shuffled.csv -tc "primate" -c "extract" -n 2 -cp 10
+# (5) at subdirectory mammal_fixed:
+python ../viral_seq/run_workflow.py -tr Relabeled_Train.csv -ts Relabeled_Test.csv -tc "mammal" -c "extract" -n 2 -cp 10
+# (6) at subdirectory mammal_shuffled:
+python ../viral_seq/run_workflow.py -tr Relabeled_Train_Mammal_Shuffled.csv -ts Relabeled_Test_Mammal_Shuffled.csv -tc "mammal" -c "extract" -n 2 -cp 10
+```
+
+After verifying that each workflow has completed normally (i.e., exit code of `0`,
+no error message), the post-processing code can be started to generate the violin
+plot and its associated raw data:
+
+```python
+from viral_seq.data.make_target_comparison_plot import plot_target_comparison
+
+plot_target_comparison(
+    human_fixed_predictions="human_fixed/data_calculated/predictions",
+    human_shuffled_predictions="human_shuffled/data_calculated/predictions",
+    primate_fixed_predictions="primate_fixed/data_calculated/predictions",
+    primate_shuffled_predictions="primate_shuffled/data_calculated/predictions",
+    mammal_fixed_predictions="mammal_fixed/data_calculated/predictions",
+    mammal_shuffled_predictions="mammal_shuffled/data_calculated/predictions",
+)   
+```
 
 
 About Licensing

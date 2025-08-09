@@ -295,9 +295,15 @@ def test_violin_plot(tmpdir, capsys):
             # also "simulate" the presence of multiple estimators per
             # condition
             for est_num in range(4):
-                df = pd.DataFrame({f'Estimator {est_num} Seed: 0': rng.random(736),
-                                   'Species': [f"virus {n}" for n in range(736)]})
-                df.to_csv(os.path.join(out_dir, f"predictions_{est_num}_{condition}.csv"))
+                df = pd.DataFrame(
+                    {
+                        f"Estimator {est_num} Seed: 0": rng.random(736),
+                        "Species": [f"virus {n}" for n in range(736)],
+                    }
+                )
+                df.to_csv(
+                    os.path.join(out_dir, f"predictions_{est_num}_{condition}.csv")
+                )
         make_target_comparison_plot.plot_target_comparison(*condition_dirs)
         expected_plot = files("viral_seq.tests.expected") / "retarget_comparison.png"
         assert compare_images(expected_plot, "retarget_comparison.png", 0.001) is None

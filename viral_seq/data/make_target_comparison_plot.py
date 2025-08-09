@@ -26,7 +26,7 @@ def plot_target_comparison(
     mammal_fixed_predictions: str,
     mammal_shuffled_predictions: str,
 ):
-    data = []
+    data: list = []
     groups = ["human", "primate", "mammal"]
     methods = ["fixed", "shuffled"]
     folders = [
@@ -58,23 +58,25 @@ def plot_target_comparison(
     df = pd.DataFrame(data)
     fig, ax = plt.subplots(figsize=(8, 6))
     ax = sns.violinplot(
-         data=df,
-         x="Target",
-         y="ROC AUC",
-         hue="Dataset",
-         split=True,
-         gap=0.1,
-         inner="quart",
-         ax=ax,
+        data=df,
+        x="Target",
+        y="ROC AUC",
+        hue="Dataset",
+        split=True,
+        gap=0.1,
+        inner="quart",
+        ax=ax,
     )
-    ax.tick_params(axis='x', labelsize=14)
-    ax.tick_params(axis='y', labelsize=14)
+    ax.tick_params(axis="x", labelsize=14)
+    ax.tick_params(axis="y", labelsize=14)
     ax.set_xlabel(ax.get_xlabel(), fontsize=14)
     ax.set_ylabel(ax.get_ylabel(), fontsize=14)
-    ax.legend(title=ax.get_legend().get_title().get_text(),
-              title_fontsize=14,
-              alignment='center')
-    for text in ax.get_legend().get_texts():
+    ax.legend(
+        title=ax.get_legend().get_title().get_text(),  # type: ignore
+        title_fontsize=14,
+        alignment="center",
+    )
+    for text in ax.get_legend().get_texts():  # type: ignore
         text.set_fontsize(14)
     fig.tight_layout()
     fig.savefig("retarget_comparison.png", dpi=300)

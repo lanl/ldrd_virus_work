@@ -867,7 +867,12 @@ if __name__ == "__main__":
             train_file_suff = os.path.splitext(os.path.basename(train_file))[0]
             if train_file_suff == "Relabeled_Train":
                 # in the non-shuffled and relabeled case, cached hyperparameter files follow a different naming convention
-                train_file_suff = f"{train_file_suff}_{target_column}"
+                if "human" not in target_column.lower():
+                    train_file_suff = f"{train_file_suff}_{target_column}"
+                else:
+                    # the cached hyperparameter files for human
+                    # target don't have a _human suffix
+                    train_file_suff = f"{train_file_suff}"
             this_filename = f"params_{val['group']}_{train_file_suff}.json"
             with open(str(hyperparams_stored_path.joinpath(this_filename)), "r") as f:
                 res = json.load(f)

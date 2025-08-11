@@ -143,6 +143,9 @@ def test_optimize_model(
     optimize_args = classifier.get_model_arguments(1, random_state, 1, 1)[name][
         "optimize"
     ]
+    default_params = classifier.get_model_arguments(1, random_state, 1, 1)[name][
+        "predict"
+    ]
     # these will not be used
     model = mocker.MagicMock()
     X_train = mocker.MagicMock()
@@ -153,6 +156,8 @@ def test_optimize_model(
         return_value=get_hyperparameters_return,
     )
     mocker.patch("viral_seq.analysis.classifier.cv_score", return_value=cv_score_return)
+    if "n_estimators" in default_params:
+        default_params["n_estimators"] = optimize_args["config"]["n_estimators"]
     with tmpdir.as_cwd():
         results = workflow.optimize_model(
             model=model,
@@ -160,13 +165,13 @@ def test_optimize_model(
             y_train=y_train,
             outfile="outfile.json",
             config=optimize_args["config"],
+            default_params=default_params,
             num_samples=optimize_args["num_samples"],
             optimize="yes",
             name=name,
             debug=True,
             random_state=random_state,
             n_jobs_cv=optimize_args["n_jobs_cv"],
-            n_jobs=1,
         )
         assert os.path.exists("outfile.json")
     assert results == expected_results
@@ -206,6 +211,7 @@ def test_optimize_model_debug_fail(
         return_value=get_hyperparameters_return,
     )
     mocker.patch("viral_seq.analysis.classifier.cv_score", return_value=cv_score_return)
+    default_params = {"n_jobs": 1}
     with tmpdir.as_cwd(), pytest.raises(
         AssertionError, match="ROC AUC achieved is too poor"
     ):
@@ -215,13 +221,13 @@ def test_optimize_model_debug_fail(
             y_train=y_train,
             outfile="outfile.json",
             config=optimize_args["config"],
+            default_params=default_params,
             num_samples=optimize_args["num_samples"],
             optimize="yes",
             name=name,
             debug=True,
             random_state=random_state,
             n_jobs_cv=optimize_args["n_jobs_cv"],
-            n_jobs=1,
         )
 
 
@@ -231,6 +237,7 @@ def test_optimize_model_skip(tmpdir, mocker):
         "target": 0.8,
         "params": {"n_estimators": 2000, "n_jobs": 1, "random_state": 123},
     }
+    default_params = {"n_jobs": 1}
     with tmpdir.as_cwd():
         with open("outfile.json", "w") as f:
             json.dump(params, f)
@@ -242,13 +249,13 @@ def test_optimize_model_skip(tmpdir, mocker):
             y_train=mocker.MagicMock(),
             outfile="outfile.json",
             config=mocker.MagicMock(),
+            default_params=default_params,
             num_samples=0,
             optimize="skip",
             name="",
             debug=True,
             random_state=0,
             n_jobs_cv=1,
-            n_jobs=1,
         )
     assert results == params
 

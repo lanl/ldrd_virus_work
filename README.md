@@ -18,6 +18,15 @@ Linting pre-commit procedure prevents unnecessary CI/CD failures, but testing pr
 >python3 -m pytest --pyargs viral_seq
 ```
 
+Workflow Memory Requirements
+============================
+
+Running the full LDRD workflow can be quite memory intensive--we have found that it
+can often be necessary to increase the amount of swap available on a Linux system
+to avoid memory-related failures during the SHAP-based determination of features
+to be retained in the workflow. Increasing swap from 2 GB to 40 GB was recently
+effective on one problematic Linux run, even for a machine with 128 GB RAM.
+
 **Running the Workflow**
 When running workflow for the first time, skip to step 2.
 

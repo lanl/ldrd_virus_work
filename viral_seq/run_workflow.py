@@ -725,6 +725,13 @@ if __name__ == "__main__":
         "--no-summary",
         action="store_true",
     )
+    parser.add_argument(
+        "-sf",
+        "--shap-feat",
+        action="store_true",
+        default=False,
+        help="Enable SHAP feature importance analysis (default: False)",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1130,63 +1137,69 @@ if __name__ == "__main__":
         comp_preds_ensembles,
         plots_path,
     )
-    # check feature importance and consensus
-    feature_importances = []
-    np.random.seed(random_state)  # used by `shap.summary_plot`
-    for name, clf in models_fitted.items():
-        print(f"Plotting feature importances for {name}")
-        # built-in importances
+    if args.shap_feat:
+        # check feature importance and consensus
+        feature_importances = []
+        np.random.seed(random_state)  # used by `shap.summary_plot`
+        for name, clf in models_fitted.items():
+            print(f"Plotting feature importances for {name}")
+            # built-in importances
+            (
+                sorted_feature_importances,
+                sorted_feature_names,
+            ) = feature_importance.sort_features(
+                clf.feature_importances_, X_train.columns
+            )
+            feature_importance.plot_feat_import(
+                sorted_feature_importances,
+                sorted_feature_names,
+                top_feat_count=10,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
+                ),
+            )
+            feature_importances.append(clf.feature_importances_)
+            # SHAP importances
+            print("Calculating & Plotting SHAP values...")
+            time_start = perf_counter()
+            shap_values = feature_importance.get_shap_values(clf, X_train, random_state)
+            print("Finished SHAP calculation in", perf_counter() - time_start)
+            positive_shap_values = feature_importance.get_positive_shap_values(
+                shap_values
+            )
+            feature_importance.plot_shap_meanabs(
+                positive_shap_values,
+                model_name=name,
+                fig_name_stem=str(
+                    plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
+                ),
+                top_feat_count=10,
+            )
+            feature_importance.plot_shap_beeswarm(
+                positive_shap_values,
+                model_name=name,
+                fig_name=str(
+                    plots_path
+                    / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
+                ),
+                max_display=10,
+            )
+            feature_importances.append(positive_shap_values)
         (
-            sorted_feature_importances,
-            sorted_feature_names,
-        ) = feature_importance.sort_features(clf.feature_importances_, X_train.columns)
-        feature_importance.plot_feat_import(
-            sorted_feature_importances,
-            sorted_feature_names,
-            top_feat_count=10,
-            model_name=name,
-            fig_name_stem=str(
-                plots_path / ("feat_imp_" + model_arguments[name]["suffix"])
-            ),
-        )
-        feature_importances.append(clf.feature_importances_)
-        # SHAP importances
-        print("Calculating & Plotting SHAP values...")
-        time_start = perf_counter()
-        shap_values = feature_importance.get_shap_values(clf, X_train, random_state)
-        print("Finished SHAP calculation in", perf_counter() - time_start)
-        positive_shap_values = feature_importance.get_positive_shap_values(shap_values)
-        feature_importance.plot_shap_meanabs(
-            positive_shap_values,
-            model_name=name,
-            fig_name_stem=str(
-                plots_path / f"feat_shap_mean_abs_{model_arguments[name]['suffix']}"
-            ),
+            ranked_feature_names,
+            ranked_feature_counts,
+            num_input_models,
+        ) = feature_importance.feature_importance_consensus(
+            pos_class_feat_imps=feature_importances,
+            feature_names=X_train.columns,
             top_feat_count=10,
         )
-        feature_importance.plot_shap_beeswarm(
-            positive_shap_values,
-            model_name=name,
-            fig_name=str(
-                plots_path / f"feat_shap_beeswarm_{model_arguments[name]['suffix']}.png"
-            ),
-            max_display=10,
+        feature_importance.plot_feat_import_consensus(
+            ranked_feature_names=ranked_feature_names,
+            ranked_feature_counts=ranked_feature_counts,
+            num_input_models=num_input_models,
+            top_feat_count=10,
+            fig_name=feature_imp_consensus_plot_figure,
+            fig_source=feature_imp_consensus_plot_source,
         )
-        feature_importances.append(positive_shap_values)
-    (
-        ranked_feature_names,
-        ranked_feature_counts,
-        num_input_models,
-    ) = feature_importance.feature_importance_consensus(
-        pos_class_feat_imps=feature_importances,
-        feature_names=X_train.columns,
-        top_feat_count=10,
-    )
-    feature_importance.plot_feat_import_consensus(
-        ranked_feature_names=ranked_feature_names,
-        ranked_feature_counts=ranked_feature_counts,
-        num_input_models=num_input_models,
-        top_feat_count=10,
-        fig_name=feature_imp_consensus_plot_figure,
-        fig_source=feature_imp_consensus_plot_source,
-    )

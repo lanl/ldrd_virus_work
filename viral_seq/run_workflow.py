@@ -25,7 +25,6 @@ import tarfile
 import shap
 from collections import defaultdict
 import os
-from ray.tune.search.sample import Domain
 
 matplotlib.use("Agg")
 
@@ -455,13 +454,13 @@ def optimize_model(
     y_train,
     outfile,
     config,
+    default_params,
     num_samples,
     optimize="skip",
     name="Classifier",
     debug=False,
     random_state=123,
     n_jobs_cv=1,
-    n_jobs=1,  # only used for default score
 ):
     if optimize == "yes":
         print(
@@ -477,12 +476,8 @@ def optimize_model(
             random_state=random_state,
         )
         print("Checking default score...")
-        # use untunable parameters used during optimization for baseline
-        # other parameters will not be specified (use defaults)
-        default_config = {k: v for k, v in config.items() if not isinstance(v, Domain)}
-        default_config["n_jobs"] = n_jobs
         default_score = classifier.cv_score(
-            model, X=X_train, y=y_train, **default_config
+            model, X=X_train, y=y_train, **default_params
         )
         print("ROC AUC with default settings:", default_score)
         res["targets"] = [default_score] + res["targets"]
@@ -491,7 +486,7 @@ def optimize_model(
                 "Will use default settings since we weren't able to improve with optimization."
             )
             res["target"] = default_score
-            res["params"] = default_config
+            res["params"] = default_params
         print("Saving results to", outfile)
         with open(outfile, "w") as f:
             json.dump(res, f)
@@ -865,6 +860,7 @@ if __name__ == "__main__":
     # optimize first if requested
     for name, val in model_arguments.items():
         params = val["optimize"]
+        default_params = val["predict"]
         if optimize == "none":
             best_params[name] = {}
         elif val["group"] in best_params_group:
@@ -895,7 +891,7 @@ if __name__ == "__main__":
                 debug=debug,
                 random_state=random_state,
                 name=name,
-                n_jobs=n_jobs,
+                default_params=default_params,
                 outfile=str(hyperparams_path / ("params_" + val["suffix"] + ".json")),
                 **params,
             )

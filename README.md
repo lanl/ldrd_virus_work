@@ -116,6 +116,47 @@ plot_target_comparison(
 )   
 ```
 
+Generating estimator/target statistics for LDRD manuscript
+==========================================================
+
+Average ROC AUC values and their standard deviations are typically
+reported over ten different random seeds for a given condition. As
+an example of how these might be generated/reproduced, consider
+the condition of "human target" + "shuffled data" + "hyperparameter
+optimized." In this case, we run the workflow with an incantation like
+this:
+
+`python ../viral_seq/run_workflow.py -tr Relabeled_Train_Human_Shuffled.csv -ts Relabeled_Test_Human_Shuffled.csv -tc "human" -c "extract" -n 16 -cp 10`
+
+After the workflow completes, we aggregate the statistics with
+a script that looks like this:
+
+```python
+import glob
+
+
+from viral_seq.analysis import spillover_predict as sp
+
+
+for pred_file in glob.glob("human_shuffled/data_calculated/predictions/*.csv"):
+    print(f"{pred_file=}")
+    sp.get_aucs(
+                f"{pred_file}",
+                "Relabeled_Test_Human_Shuffled.csv",
+                # the above CSV file may change depending on the condition; some
+                # other typical values include: `Relabeled_Test.csv` (non-shuffled),
+                # `Relabeled_Test_Primate_Shuffled.csv` (primate shuffled),
+                # `Relabeled_Test_Mammal_Shuffled.csv` (mammal shuffled)
+                "human",
+                # the above target host may change to a value of `mammal` or
+                # `primate` or `Human Host` (for the original Mollentze data)
+                )
+    print("-" * 20)
+```
+
+That will print out the average and standard deviation ROC AUC of each estimator
+type across the ten random seeds.
+
 
 About Licensing
 ===============

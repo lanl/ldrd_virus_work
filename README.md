@@ -143,12 +143,18 @@ for pred_file in glob.glob("human_shuffled/data_calculated/predictions/*.csv"):
     sp.get_aucs(
                 f"{pred_file}",
                 "Relabeled_Test_Human_Shuffled.csv",
+                # the above CSV file may change depending on the condition; some
+                # other typical values include: `Relabeled_Test.csv` (non-shuffled),
+                # `Relabeled_Test_Primate_Shuffled.csv` (primate shuffled),
+                # `Relabeled_Test_Mammal_Shuffled.csv` (mammal shuffled)
                 "human",
+                # the above target host may change to a value of `mammal` or
+                # `primate` or `Human Host` (for the original Mollentze data)
                 )
     print("-" * 20)
 ```
 
-That will print out the average and standard deviation of each estimator
+That will print out the average and standard deviation ROC AUC of each estimator
 type across the ten random seeds.
 
 

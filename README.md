@@ -157,6 +157,45 @@ for pred_file in glob.glob("human_shuffled/data_calculated/predictions/*.csv"):
 That will print out the average and standard deviation ROC AUC of each estimator
 type across the ten random seeds.
 
+Aggregate ROC AUC statistics for LDRD manuscript
+================================================
+
+In addition to obtaining the ROC AUC statistics for each individual estimator
+across several random seeds (see above), it is also possible to calculate the
+overall ROC AUC statistics across all of the estimators and seeds combined, and to
+compare those overall ROC AUC statistics between different workflow run conditions.
+Here is an example script that covers this type of calculation/comparison,
+where the two conditions being contrasted involve the human host target
+with vs. without hyperparameter optimization:
+
+```python
+from viral_seq.analysis import spillover_predict as sp
+
+sp.compare_workflow_aucs(
+                    ("human_shuffled_no_opt/data_calculated/predictions",
+                     "human_shuffled/data_calculated/predictions"),
+                    ("Relabeled_Test_Human_Shuffled.csv",
+                     "Relabeled_Test_Human_Shuffled.csv"),
+                    ("human", "human"),
+                    )
+```
+
+This will produce overall ROC AUC stats, like those summarized in the
+abbreviated output below:
+
+```
+human_shuffled_no_opt/data_calculated/predictions:
+<snip>
+Workflow mean auc = 0.769 std = 0.014
+========================
+human_shuffled/data_calculated/predictions:
+<snip>
+Workflow mean auc = 0.784 std = 0.013
+
+Student t-test: t_stat -7.022, p-value 0.000
+
+```
+
 
 About Licensing
 ===============

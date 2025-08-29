@@ -196,6 +196,25 @@ Student t-test: t_stat -7.022, p-value 0.000
 
 ```
 
+Comparing Dataset vs. Mollentze for LDRD manuscript
+===================================================
+
+To compare the "human host" infection status changes
+for records in our new dataset vs. the original
+dataset used by Mollentze, there is a small script
+at `viral_seq/data` that can be executed:
+
+`python summarize_changes_v_mollentze.py`
+
+Which will output a summary of the human host infection
+status changes:
+
+```
+Number of records for which human infection status switched from False to True: 21
+Number of records for which human infection status switched from True to False: 0
+```
+
+
 
 About Licensing
 ===============

@@ -2,6 +2,25 @@
 
 ## LDRD DR Computational Work Repo
 
+On Cloning the Project and Retrieving the Supporting Data
+=========================================================
+
+Because the LANL GitHub organization has limited `git lfs`
+bandwidth at the time of writing, it is likely to be necessary
+to clone the repository and retrieve the supporting genetic
+data files in separate steps. The following steps sufficed
+to produce a working repo/project that passes tests locally,
+starting from a clean `git` checkout of the project:
+
+1. `GIT_LFS_SKIP_SMUDGE=1 git clone git@github.com:lanl/ldrd_virus_work.git`
+2. `cd ldrd_virus_work/viral_seq/data`
+3. Download the supporting dataset (tarball) from https://doi.org/10.6084/m9.figshare.30025597,
+replacing the placeholder file currently there.
+4. `cd ../..`
+5. In your Python environment, install the project dependencies: `uv pip install -r ci/requirements_high.txt`
+6. Then install the proper proper and some its optional dependencies: `python -m pip install -v -e .'[dev]'`
+7. If the full testsuite passes (`python -m pytest`), you should be ready to run the workflow using some of the incantations described below.
+
 **Pre-Commit Procedure**
 Linting pre-commit procedure prevents unnecessary CI/CD failures, but testing procedure is necessary as tests marked slow will not run in CI/CD. These must be run in pre-commit.
 

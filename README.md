@@ -18,7 +18,7 @@ starting from a clean `git` checkout of the project:
 replacing the placeholder file currently there.
 4. `cd ../..`
 5. In your Python environment, install the project dependencies: `uv pip install -r ci/requirements_high.txt`
-6. Then install the proper proper and some its optional dependencies: `python -m pip install -v -e .'[dev]'`
+6. Then install the package proper and some its optional dependencies: `python -m pip install -v -e .'[dev]'`
 7. If the full testsuite passes (`python -m pytest`), you should be ready to run the workflow using some of the incantations described below.
 
 **Pre-Commit Procedure**

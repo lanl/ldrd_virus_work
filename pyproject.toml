@@ -10,7 +10,7 @@ viral_seq = "viral_seq.cli.cli:cli"
 
 [project]
 name = "viral_seq"
-dynamic = ['version']
+version = "0.1.0"
 dependencies = [
     "biopython==1.85",
     "fsspec>=2024.6.0",

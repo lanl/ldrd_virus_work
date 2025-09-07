@@ -208,14 +208,15 @@ def test__plot_family_heatmap(tmpdir):
         (
             # when one viral family is completely
             # absent from one of the splits, the
-            # KL divergence is infinite
+            # KL divergence is large, but finite
+            # because we are using additive smoothing
             {
                 "Train Human Host": [1, 2],
                 "Train Not Human Host": [0, 1],
                 "Test Human Host": [2, 0],
                 "Test Not Human Host": [3, 0],
             },
-            np.inf,
+            16.187193,
         ),
         (
             # when the viral families are perfectly

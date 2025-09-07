@@ -151,9 +151,15 @@ def _plot_family_heatmap(
     family_counts.to_csv(filename_data)
 
 
-def relative_entropy_viral_families(heatmap_csv: str) -> float:
+def _laplace_smoother(arr, epsilon):
+    num = arr + epsilon
+    denom = np.sum(arr + epsilon)
+    return num / denom
+
+
+def relative_entropy_viral_families(heatmap_csv: str, epsilon: float = 1e-9) -> float:
     """
-    Calculate the relative entropy (Kullback-Leibler divergence)
+    Calculate the additively smoothed relative entropy (Kullback-Leibler divergence)
     of the distribution of viral families between training and test
     datasets.
 
@@ -162,11 +168,15 @@ def relative_entropy_viral_families(heatmap_csv: str) -> float:
     heatmap_csv: str
         filepath for the CSV file containing viral family distribution
         data between train and test sets
+    epsilon: float
+        The value to use for additive smoothing, which prevents
+        infinite return values when one category has no representation
+        of a class.
     Returns:
     -----------
     relative_entropy: float
-        The relative entropy (Kullback-Leibler divergence) of the distribution
-        of viral families between training and test data sets.
+        The additively smoothed relative entropy (Kullback-Leibler divergence)
+        of the distribution of viral families between training and test data sets.
     """
     df = pd.read_csv(heatmap_csv)
     # for the purposes of the relative entropy calculations,
@@ -175,5 +185,8 @@ def relative_entropy_viral_families(heatmap_csv: str) -> float:
     # or test splits
     train_sums = df.iloc[[0, 1]].sum().values[1:].astype(int)
     test_sums = df.iloc[[2, 3]].sum().values[1:].astype(int)
-    kl = scipy.stats.entropy(pk=train_sums, qk=test_sums)
+    kl = scipy.stats.entropy(
+        pk=_laplace_smoother(train_sums, epsilon),
+        qk=_laplace_smoother(test_sums, epsilon),
+    )
     return kl

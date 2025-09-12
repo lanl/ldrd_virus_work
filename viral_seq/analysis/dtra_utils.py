@@ -274,7 +274,7 @@ def match_kmers(
         topN_mm = topN_df_list[i]
         # check that no AA kmers contain invalid characters (outside of 20 aa single letter codes)
         aa_kmer_values = set(
-            "".join([k[8:] for k in topN_mm["0"] if k[:8] == "kmer_AA_"])
+            "".join([k[8:] for k in topN_mm["0"] if k[:8] == "kmer_AA_"])  # type: ignore
         )
         if not aa_kmer_values.issubset(set(aa_codes)):
             raise ValueError("AA-kmers contain incorrect values.")
@@ -284,7 +284,7 @@ def match_kmers(
         ).to_pandas()
         # add identity map for AA_kmers in the topN
         top_AA_kmers = [
-            top_kmer for top_kmer in topN_mm["0"] if top_kmer.startswith("kmer_AA_")
+            top_kmer for top_kmer in topN_mm["0"] if top_kmer.startswith("kmer_AA_")  # type: ignore
         ]
         if len(top_AA_kmers) > 0:
             identity_map = pd.DataFrame(
@@ -320,7 +320,7 @@ def match_kmers(
             )["matching_AA_kmers"].apply(list)
             # combine PC matches with multiple AA matches into a single row with AA matches in individual columns
             expanded_matches = pd.DataFrame(
-                kmer_matches_groups["matching_AA_kmers"].tolist(),
+                kmer_matches_groups["matching_AA_kmers"].tolist(),  # type: ignore
                 index=kmer_matches_groups.index,
             )
             expanded_matches.columns = [
@@ -331,3 +331,83 @@ def match_kmers(
             ).drop(columns="matching_AA_kmers")
             return kmer_matches_out
     return None
+
+
+def transform_kmer_data(kmer_list: list) -> pd.DataFrame:
+    """
+    convert list of KmerData objects to dataframe by
+    casting each object in the list to a dictionary
+
+    Parameters:
+    -----------
+    kmer_list: list
+        list of KmerData objects
+
+    Returns:
+    --------
+    kmer_dict_df: pd.DataFrame
+        converted and transformed dataframe
+    """
+
+    kmer_dict_df = pd.DataFrame([k.__dict__ for k in kmer_list])
+    return kmer_dict_df
+
+
+def get_kmer_viruses(topN_kmers: list, all_kmer_info: pd.DataFrame) -> dict:
+    """
+    Lookup and store the virus-protein pairs associated with a list of kmers
+
+    Parameters:
+    -----------
+    topN_kmers: list
+        list of kmer features for which to find associated virus-protein pairs
+    all_kmer_info: pd.DataFrame
+        dataframe holding virus-protein information for kmers
+
+    Returns:
+    --------
+    kmer_viruses: dict
+        dictionary of kmer names and corresponding virus-protein pairs from all_kmer_info
+    """
+    return {
+        kmer: [
+            tuple(pair[:2])
+            for pair in all_kmer_info[all_kmer_info["kmer_names"] == kmer][
+                ["virus_name", "protein_name"]
+            ].values
+        ]
+        for kmer in topN_kmers
+    }
+
+
+def load_kmer_info(file_name: str) -> pd.DataFrame:
+    """
+    load parquet file containing 'all_kmer_info'
+
+    Parameters:
+    -----------
+    file_name: str
+        file name to load
+
+    Return:
+    -------
+    all_kmer_info_df: pd.DataFrame
+        dataframe containing KmerData class objects
+    """
+    print(f"Loading {file_name}...")
+    all_kmer_info = pl.read_parquet(file_name).to_pandas()
+    return all_kmer_info
+
+
+def save_kmer_info(kmer_info_df: pd.DataFrame, save_file: str) -> None:
+    """
+    save dataframe containing 'all_kmer_info' to parquet file
+
+    Parameters:
+    -----------
+    kmer_info_df: pd.DataFrame
+        DataFrame of KmerData class objects
+    save_file: str
+        Path to parquet file that is produced
+    """
+    kmer_info_df.to_parquet(save_file)

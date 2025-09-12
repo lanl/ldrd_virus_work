@@ -1,4 +1,4 @@
-name: Linux CI
+name: Base CI
 
 on:
   push:
@@ -12,9 +12,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
         requirements-file: ["requirements_low.txt", "requirements_high.txt"]
 
@@ -24,6 +25,9 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install libomp on macOS
+      if: matrix.os == 'macos-latest'
+      run: brew install libomp
     - name: Install dependencies
       run: |
         python -m pip install -U setuptools pip

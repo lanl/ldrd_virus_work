@@ -3,14 +3,136 @@ from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
 from Bio.SeqUtils import gc_fraction
 from skbio import Sequence
-from typing import Any
+from typing import Any, Union, Literal
 import pandas as pd
 import numpy as np
 import scipy.stats
+from importlib.resources import files
+from Bio.SeqRecord import SeqRecord
 
 codontab = standard_dna_table.forward_table.copy()  # type: ignore
 for codon in standard_dna_table.stop_codons:  # type: ignore
     codontab[codon] = "STOP"
+
+
+class KmerData:
+    """
+    The KmerData class is used to organize information associated with a list
+    of kmer features.
+
+    This class should consist of:
+    1. the mapping method used to translate AA-PC kmers (mapping_method)
+    2. a list of kmer names (kmer_names) or a string with a single kmer name
+    3. a list of matching AA kmer names (kmer_maps) with the same length as kmer_names,
+       or a string with a single matching AA kmer name
+    4. the name of the virus associated with a given kmer (virus_name)
+    5. the name of the protein in which the kmer sequence is found (protein_name)
+    """
+
+    def __init__(
+        self,
+        mapping_method: str,
+        kmer_names: Union[list, str],
+        kmer_maps: Union[None, list, str] = None,
+        virus_name: str = "",
+        protein_name: str = "",
+    ):
+        self.mapping_method = mapping_method
+        self.kmer_names = kmer_names
+        self.kmer_maps = kmer_maps
+        self.virus_name = virus_name
+        self.protein_name = protein_name
+
+
+def get_feature_idx(record: SeqRecord) -> tuple:
+    """
+    get the indices of sequence records that correspond to protein products
+    of interest when filtering for (non) structural proteins in the DTRA workflow
+
+    Parameters:
+    -----------
+    record: SeqRecord
+        record of interest for filtering the appropriate features
+
+    Returns:
+    --------
+    protein_idx: tuple
+        tuple of indices indicating which record features to use for filtering
+        (non) structural proteins
+    """
+    all_products = [
+        (f, feat.qualifiers["product"][0])
+        for f, feat in enumerate(record.features)
+        if feat.type in ["CDS", "mat_peptide"]
+    ]
+    # check if all_products is empty (related to issue #103)
+    if not all_products:
+        return ()
+    # remove all "polyprotein" products if feature is not a ``single polyprotein``
+    # TODO: implement filtering using feature.location instead of product name
+    # in line with issue #102
+    if not (len(all_products) == 1 and "polyprotein" in all_products[0][1]):
+        all_products = [p for p in all_products if "polyprotein" not in p[1]]
+
+    protein_idx, _ = zip(*all_products)
+    return protein_idx
+
+
+def filter_structural_proteins(
+    virus_name: str,
+    protein_name: str,
+    filter_structural: Literal[
+        "surface_exposed",
+        "not_surface_exposed",
+    ] = "surface_exposed",
+) -> bool:
+    """
+    check if the given protein name is found within a list of known structural
+    proteins and return a boolean value depending on the result
+
+    Parameters:
+    -----------
+    virus_name: str
+        name of the virus to check
+    protein_name: str
+        name of viral protein to check
+    filter_structural: Literal["surface_exposed", "not_surface_exposed"]
+        option for the selection of surface exposed protein status.
+        if ``surface_exposed``, only surface-exposed proteins will be returned
+        if ``not_surface_exposed``, only non-surface-exposed proteins will be returned
+
+    Returns:
+    --------
+    bool:
+        return `True` if `protein_name` is found (or not) within list of
+        surface exposed proteins, depending on the value of `filter_structural`
+        return `False` otherwise
+    """
+    allowed_fs_vals = ("surface_exposed", "not_surface_exposed")
+    if filter_structural not in allowed_fs_vals:
+        raise ValueError(f"filter_structural must be one of {allowed_fs_vals}")
+    # get corresponding ``yes``, ``no`` status of surface exposure based on
+    # ``--filter-structural`` flag for checking against surface_exposed_df
+    exposure_status = "yes" if filter_structural == "surface_exposed" else "no"
+
+    # load dataframe containing all virus-protein pairs and corresponding
+    # surface exposed ("surface_exposed", "not_surface_exposed") status
+    surface_exposed_file = files("viral_seq.data").joinpath("surface_exposed_df.csv")
+    surface_exposed_df = pd.read_csv(str(surface_exposed_file))
+
+    # find the row in the dataframe that match the exact virus-protein pair query
+    df_row = surface_exposed_df[
+        (surface_exposed_df["virus_names"] == virus_name)
+        & (surface_exposed_df["protein_names"] == protein_name)
+    ]
+    # skip all 'polyprotein' products (excluded from ``surface_exposed_df``)
+    if df_row.empty:
+        return False
+    # determine surface exposed status of virus-protein pair
+    elif df_row.surface_exposed_status.item() == exposure_status:
+        return True
+    else:
+        return False
 
 
 def get_similarity_features(
@@ -35,42 +157,70 @@ def get_similarity_features(
     return df_features.join(df_simfeats, rsuffix=suffix)
 
 
-def get_kmers(records, k=10, kmer_type="AA", mapping_method=None):
+def get_kmers(
+    records,
+    k=10,
+    kmer_type="AA",
+    mapping_method=None,
+    gather_kmer_info=False,
+    filter_structural=None,
+) -> tuple[dict[str, int], list[KmerData]]:
     if kmer_type == "AA" and mapping_method is not None:
         raise ValueError("No mapping method required for AA-kmers.")
     if kmer_type == "PC" and mapping_method is None:
         raise ValueError("Please specify mapping method for PC-kmers.")
-    kmers = defaultdict(int)
-    kmer_PC_list = []
+    kmers: dict = defaultdict(int)
+    kmer_info = []
     for record in records:
-        for feature in record.features:
-            if feature.type == "CDS":
-                nuc_seq = feature.location.extract(record.seq)
-                if len(nuc_seq) % 3 != 0:
-                    # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
+        # get the appropriate record features when searching for (non) structural proteins
+        if filter_structural in [
+            "not_surface_exposed",
+            "surface_exposed",
+            "all_features",
+        ]:
+            feature_idx = get_feature_idx(record)
+            record_features = [record.features[i] for i in feature_idx]
+        else:
+            record_features = [f for f in record.features if f.type == "CDS"]
+        for feature in record_features:
+            if filter_structural in ["not_surface_exposed", "surface_exposed"]:
+                virus_name = record.annotations["organism"]
+                protein_name = feature.qualifiers.get("product")[0]
+                matches_filter = filter_structural_proteins(
+                    virus_name, protein_name, filter_structural
+                )
+                if not matches_filter:
                     continue
-                this_seq = nuc_seq.translate()
-                if kmer_type == "PC":
-                    new_seq = ""
-                    for each in this_seq:
-                        new_seq += aa_map(each, method=mapping_method)
-                    # iter over AA kmer first and store values in dictionary
-                    kmer_AA_list = []
-                    for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                        kmer_AA_list.append("kmer_AA_" + str(kmer))
-                    # iter over PC kmer sequence to add PC kmers to AA dict
-                    # and index value for building_cache
-                    for i, kmer in enumerate(
-                        Sequence(str(new_seq)).iter_kmers(k, overlap=True)
-                    ):
-                        new_kmer = "kmer_" + kmer_type + "_" + str(kmer)
-                        kmer_PC_list.append([new_kmer, kmer_AA_list[i]])
-                        kmers[new_kmer] += 1
-                else:
-                    for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
-                        kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
+            nuc_seq = feature.location.extract(record.seq)
+            if len(nuc_seq) % 3 != 0:
+                # bad cds are skipped as in https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
+                continue
+            this_seq = nuc_seq.translate()
+            if kmer_type == "PC":
+                new_seq = ""
+                for each in this_seq:
+                    new_seq += aa_map(each, method=mapping_method)
+            else:
+                new_seq = this_seq
 
-    return kmers, kmer_PC_list
+            for kmer, new_kmer in zip(
+                Sequence(str(this_seq)).iter_kmers(k, overlap=True),
+                Sequence(str(new_seq)).iter_kmers(k, overlap=True),
+            ):
+                kmer = f"kmer_AA_{kmer}"
+                new_kmer = f"kmer_{kmer_type}_{new_kmer}"
+                kmers[new_kmer] += 1
+                if gather_kmer_info:
+                    kmer_info.append(
+                        KmerData(
+                            mapping_method if mapping_method is not None else "None",
+                            new_kmer,
+                            kmer,
+                            record.annotations["organism"],
+                            feature.qualifiers["product"][0],
+                        )
+                    )
+    return kmers, kmer_info
 
 
 def get_gc(records):

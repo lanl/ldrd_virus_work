@@ -254,7 +254,8 @@ def pull_ensembl_transcripts(email, cache, file):
     "-s",
     type=click.Choice(["surface_exposed", "not_surface_exposed", "all_features"]),
     default=None,
-    help="Option for filtering dataset for only (non) structural proteins when building data tables",
+    help="Option for filtering dataset for only (non) virion surface exposed "
+    "proteins when building data tables",
 )
 def calculate_table(
     cache,

@@ -163,8 +163,11 @@ def get_kmer_info(
         training dataframe
     mapping_method:
         preferred mapping method for translating AA to PC kmers
-    filter_structural: Optional[Literal["surface_exposed", "not_surface_exposed", "all_features"]]
-        option to filter only structural proteins (i.e. "surface_exposed"), remove all structural proteins (i.e. "not_surface_exposed")
+    filter_structural: Optional[Literal["surface_exposed",
+        "not_surface_exposed", "all_features"]]
+        option to select only virion surface exposed proteins
+        (i.e. "surface_exposed"), remove all surface exposed proteins
+        (i.e. "not_surface_exposed")
         or use all proteins in dataset (i.e. ``all_features``)
 
     Returns:
@@ -241,7 +244,7 @@ def get_kmer_info(
                             ]:
                                 protein_name = feature.qualifiers.get("product")[0]
                                 is_structural = get_features.filter_structural_proteins(
-                                    virus_name, protein_name, filter_structural
+                                    virus_name, protein_name, filter_structural  # type: ignore
                                 )
                                 if not is_structural:
                                     continue
@@ -1431,7 +1434,11 @@ if __name__ == "__main__":
         type=str,
         choices=["surface_exposed", "not_surface_exposed", "all_features"],
         default=None,
-        help="Option for filtering dataset for only structural proteins when building data tables",
+        help="Option for filtering dataset to select only virion surface exposed "
+        "proteins (surface_exposed), or to select only non-surface exposed "
+        "proteins (not_surface_exposed), or to select only from `CDS` features "
+        "(None), or to select from `CDS` and `mat_peptide` features with "
+        "`polyprotein` excluded (all_features) when building data tables",
     )
     parser.add_argument(
         "-mf",

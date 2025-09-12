@@ -154,6 +154,9 @@ def test_get_kmers(accession, kmer_type, mapping_method, exp_kmer, exp_len):
         # pairs with ``filter_structural=='not_surface_exposed'``
         (
             "not_surface_exposed",
+            # NOTE: the presence of `False` values in the same positions
+            # here and in the case above is the result of `polyprotein` entries
+            # that get filtered out
             [False] + [True] * 5 + [False] + [True] * 8 + [False] + [True],
         ),
     ],
@@ -208,7 +211,7 @@ def test_get_kmers_filter_structural(filter_structural, exp_len):
 @pytest.mark.parametrize(
     "accession, exp_out",
     [
-        # this test case checks that the correct indices are returned by _get_feature_idx
+        # this test case checks that the correct indices are returned by get_feature_idx
         # for the accession corresponding to ``West Nile Virus``
         ("NC_001563.2", (5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20)),
         # this test case checks that the single polyprotein product idx is returned for ``FMDV``
@@ -221,3 +224,15 @@ def test_get_feature_idx(accession, exp_out):
     idx_out = get_feature_idx(test_record)
 
     assert idx_out == exp_out
+
+
+def test_filter_structural_proteins_err():
+    # this function only behaves properly with
+    # its two expected values of `filter_structural` argument;
+    # enforce proper error handling for other cases
+    with pytest.raises(ValueError, match="filter_structural"):
+        filter_structural_proteins(
+            virus_name="influenza A",
+            protein_name="neuraminidase",
+            filter_structural="nonstandard_input",
+        )

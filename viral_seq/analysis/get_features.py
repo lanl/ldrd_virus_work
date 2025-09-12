@@ -15,20 +15,20 @@ for codon in standard_dna_table.stop_codons:  # type: ignore
     codontab[codon] = "STOP"
 
 
-# the KmerData class is used to organize information associated with a list of kmer features
-# this class should consist of:
-#     1. the mapping method used to translate AA-PC kmers (mapping_method)
-#     2. a list of kmer names (kmer_names) or a string with a single kmer name
-#     3. a list of matching AA kmer names (kmer_maps) with the same length as kmer_names,
-#        or a string with a single matching AA kmer name
-#     4. the name of the virus associated with a given kmer (virus_name)
-#     5. the name of the protein in which the kmer sequence is found (protein_name)
-#     6. a boolean indicating if this virus <--> protein pairing should be saved
-#     7. TODO: other important information
-# ...and should
-#     a. use the kmers as dictionary keys that store the associated information
-#     b. be used to lookup the virus/protein names associated with a specific kmer
 class KmerData:
+    """
+    The KmerData class is used to organize information associated with a list
+    of kmer features.
+
+    This class should consist of:
+    1. the mapping method used to translate AA-PC kmers (mapping_method)
+    2. a list of kmer names (kmer_names) or a string with a single kmer name
+    3. a list of matching AA kmer names (kmer_maps) with the same length as kmer_names,
+       or a string with a single matching AA kmer name
+    4. the name of the virus associated with a given kmer (virus_name)
+    5. the name of the protein in which the kmer sequence is found (protein_name)
+    """
+
     def __init__(
         self,
         mapping_method: str,
@@ -82,7 +82,8 @@ def filter_structural_proteins(
     virus_name: str,
     protein_name: str,
     filter_structural: Literal[
-        "surface_exposed", "not_surface_exposed", "all_features"
+        "surface_exposed",
+        "not_surface_exposed",
     ] = "surface_exposed",
 ) -> bool:
     """
@@ -95,18 +96,21 @@ def filter_structural_proteins(
         name of the virus to check
     protein_name: str
         name of viral protein to check
-    filter_structural: Literal["surface_exposed", "not_surface_exposed", "all_features"]
+    filter_structural: Literal["surface_exposed", "not_surface_exposed"]
         option for the selection of surface exposed protein status.
         if ``surface_exposed``, only surface-exposed proteins will be returned
         if ``not_surface_exposed``, only non-surface-exposed proteins will be returned
-        function call gated on ``filter_structural in ["surface_exposed", "not_surface_exposed"]``
 
     Returns:
     --------
     bool:
-        return True if protein name is found within list of surface exposed proteins
-        return False if protein name is not found within list of surface exposed proteins
+        return `True` if `protein_name` is found (or not) within list of
+        surface exposed proteins, depending on the value of `filter_structural`
+        return `False` otherwise
     """
+    allowed_fs_vals = ("surface_exposed", "not_surface_exposed")
+    if filter_structural not in allowed_fs_vals:
+        raise ValueError(f"filter_structural must be one of {allowed_fs_vals}")
     # get corresponding ``yes``, ``no`` status of surface exposure based on
     # ``--filter-structural`` flag for checking against surface_exposed_df
     exposure_status = "yes" if filter_structural == "surface_exposed" else "no"

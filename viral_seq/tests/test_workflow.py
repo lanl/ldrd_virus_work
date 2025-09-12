@@ -679,9 +679,11 @@ def test_check_kmer_feature_lengths(kmer_features, kmer_range, exp):
             "jurgen_schmidt",
             None,
         ),
-        # the two test cases below check that the function works as intended when setting
-        # ``--filter-structural surface_exposed`` the function returns only surface exposed proteins
-        # and when ``--filter-structural not_surface_exposed`` the function returns only non-structural proteins
+        # The two test cases below check that the function works as intended:
+        # (1) when setting ``--filter-structural surface_exposed`` the function returns
+        # only surface exposed proteins
+        # and (2) when ``--filter-structural not_surface_exposed`` the function returns
+        # only non-surface exposed proteins
         (
             ["NC_001563.2"],
             2,

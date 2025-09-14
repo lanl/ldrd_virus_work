@@ -1106,19 +1106,28 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp, n
     assert_array_equal(count_rank, count_rank_exp)
 
 
-def test_pearson_aggregation():
+@pytest.mark.parametrize(
+    "random_state",
+    [
+        123,
+        321,
+        787897,
+        87640676,
+    ],
+)
+def test_pearson_aggregation(random_state):
     # enforce Pearson aggregation behavior, avoid reduction across folds
-    random_state = 123
     rng = np.random.default_rng(random_state)
-    kmer_data = rng.integers(0, 2, size=(1000, 12))
-    data_target = np.asarray([1, 0] * 500)
-    data_target[-1] = 1
+    kmer_data = rng.choice([0, 1], size=(1000, 12), p=[0.96, 0.04])
+    data_target = rng.choice([0, 1], size=1000)
 
     # align first four features with data_target with decreasing correlation
     kmer_data[:, 0] = data_target
     kmer_data[:, 1] = 1 - data_target
-    kmer_data[:750, 2] = data_target[:750]
-    kmer_data[:500, 3] = data_target[:500]
+    kmer_data[:, 2] = data_target
+    kmer_data[-100:, 2] = 0
+    kmer_data[:, 3] = data_target
+    kmer_data[-817:, 3] = 0
 
     kmer_names = np.array([f"kmer_{i}" for i in range(12)])
 
@@ -1148,16 +1157,20 @@ def test_pearson_aggregation():
 
     feature_rank = feature_count["Features"]
     pearson_rank = feature_count["Pearson R"]
-    # expected property of the test is ranking kmer_0 > kmer_1 > kmer_3
-    # based on alignment of features (1.0, 0.75, 0,50) and that
+    # only the first four features should be showing
+    # up at all in the top 4, based on synthetic correlation:
+    assert_array_equal(feature_count["Sum"][:4], 8)
+    assert_array_equal(feature_count["Sum"][4:], 0)
+    # expected property of the test is ranking kmer_0 > kmer_2 > kmer_3
+    # based on alignment of features and that
     # ``kmer_1`` should be ranked lowest because of inverse alignment (-1.0)
     feature_rank_exp = kmer_names[np.asarray([0, 2, 3, 1])]
     assert_array_equal(feature_rank[:4], feature_rank_exp)
-    # random sampling using in ``StratifiedKFold`` causes features with
-    # perfect/inverse/moderate alignment (1.0, -1.0, 0.75, 0.50) to have >0.99
-    # pearson correlation with noisy features having much lower correlation
-    assert np.all(np.abs(pearson_rank[:4]) > 0.99)
-    assert_array_less(np.abs(pearson_rank[4:]), 0.7)
+    # random sampling used in ``StratifiedKFold`` causes features with
+    # perfect/inverse/moderate alignment to have >0.92
+    # pearson correlation with noisy features having lower correlation
+    assert np.all(np.abs(pearson_rank[:4]) > 0.92)
+    assert_array_less(np.abs(pearson_rank[4:]), 0.89)
 
 
 def test_sort_feature_counts():

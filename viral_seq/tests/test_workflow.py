@@ -1029,6 +1029,8 @@ def test_feature_count_consensus():
                 },
             },
             np.asarray([0, 1, 7]),
+            # 2 folds, 2 methods (SHAP/estimator)
+            # should mean 2 ** 2 = 4 for top two counts
             [4, 4, 2, 1, 1] + [0] * 7,
             1,
         ),
@@ -1044,7 +1046,9 @@ def test_feature_count_consensus():
                 },
             },
             np.asarray([0, 1, 7]),
-            [8, 8, 5, 2, 1] + [0] * 7,
+            # 2 estimators, 2 folds, 2 methods (SHAP/estimator)
+            # should mean 2 ** 3 = 8 for top two counts
+            [8, 8, 5, 1, 1, 1] + [0] * 6,
             1,
         ),
         (
@@ -1059,7 +1063,9 @@ def test_feature_count_consensus():
                 },
             },
             np.asarray([0, 1, 7]),
-            [4.0, 4.0, 1.75, 1.0, 0.5, 0.5, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+            # 2 estimators, 2 seeds, 2 folds, 2 methods (SHAP/estimator)
+            # should mean 2 ** 4 = 16 for top two counts
+            [16, 16, 7, 4, 3, 2, 0, 0, 0, 0, 0, 0],
             2,
         ),
     ],

@@ -710,7 +710,7 @@ def FIC_plot(
     plot_columns = list(
         feature_count.columns[feature_count.columns.str.contains("percentage")]
     )
-    plot_colors = colors_list[: len(plot_columns)]
+    plot_colors = colors_list[:len(plot_columns)]  # fmt: skip
     top_feature_count.plot(
         x="Features",
         y=plot_columns,

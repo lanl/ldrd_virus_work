@@ -1058,7 +1058,7 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7]),
+            np.asarray([0, 1, 7]),
             [4.0, 4.0, 1.75, 1.0, 0.5, 0.5, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
             2,
         ),

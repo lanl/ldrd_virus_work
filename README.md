@@ -1,4 +1,4 @@
-# ldrd_virus_work (LANL copyright assertion ID: O# (O4909))
+# ldrd_virus_work (LANL copyright assertion ID: O# (O4904))
 
 ## LDRD DR Computational Work Repo
 

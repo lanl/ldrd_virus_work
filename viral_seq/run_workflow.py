@@ -719,11 +719,9 @@ def FIC_plot(
         ax=ax,
         color=plot_colors,
     )
-    # TODO: how to calculate `n_classifiers` here?
-    # leftover from merge conflict resolution...
-    n_classifiers = 1
     ax.set_title(
-        f"Feature importance consensus amongst {n_folds * n_seeds * n_classifiers} folds\n for {target_name} binding"
+        f"Feature importance consensus amongst {n_folds} folds\n"
+        f"and {n_seeds} seeds for {target_name} binding"
     )
 
     for idx, (_, row) in enumerate(top_feature_count.iterrows()):
@@ -772,9 +770,6 @@ def FIC_plot(
         bbox_to_anchor=(0.5, -0.1),
     )
     ax.set_xlabel(f"% ML models where ranked in top {max_features} features")
-    ax.set_title(
-        f"Feature importance consensus amongst\n {n_folds} folds for {target_name} binding"
-    )
     ax.set_xlim(0, 100)
     fig.tight_layout()
     fig.savefig(os.path.join(path, f"FIC_{target_name}.png"), dpi=300)

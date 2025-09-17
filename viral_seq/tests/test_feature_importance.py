@@ -269,3 +269,18 @@ def test_sort_feature_counts():
     )
 
     assert_frame_equal(out_df, exp_df)
+
+
+def test_sort_feature_counts_2():
+    feature_df = pd.DataFrame()
+    kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_GCAFGDG", "kmer_PC_0134657"])
+    feature_df["Features"] = kmer_features
+    feature_df["Clfr_0"] = [5, 1, 5]
+    feature_df["SHAP_0"] = [4, 1, 1]
+    feature_df["Clfr_1"] = [1, 6, 3]
+    feature_df["SHAP_1"] = [1, 0, 4]
+    feature_df["Pearson R"] = [0.99, -0.99, -0.41]
+
+    out_df = fi.sort_feature_counts(feature_df, n_folds=5)
+    out_exp = kmer_features[np.asarray([2, 0, 1])]
+    assert_array_equal(out_df["Features"], out_exp)

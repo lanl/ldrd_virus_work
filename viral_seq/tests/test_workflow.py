@@ -8,7 +8,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from matplotlib.testing.compare import compare_images
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from viral_seq.analysis import spillover_predict as sp
-from viral_seq.analysis import get_features, feature_importance
+from viral_seq.analysis import get_features
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 
 
@@ -1177,19 +1177,3 @@ def test_pearson_aggregation(random_state):
     # pearson correlation with noisy features having lower correlation
     assert np.all(np.abs(pearson_rank[:4]) > 0.92)
     assert_array_less(np.abs(pearson_rank[4:]), 0.89)
-
-
-def test_sort_feature_counts():
-    feature_df = pd.DataFrame()
-    kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_GCAFGDG", "kmer_PC_0134657"])
-    feature_df["Features"] = kmer_features
-    feature_df["Clfr_0"] = [5, 1, 5]
-    feature_df["SHAP_0"] = [4, 1, 1]
-    feature_df["Clfr_1"] = [1, 6, 3]
-    feature_df["SHAP_1"] = [1, 0, 4]
-    feature_df["Pearson R"] = [0.99, -0.99, -0.41]
-
-    out_df = feature_importance.sort_feature_counts(feature_df, n_folds=5)
-    out_features = np.asarray(out_df["Features"])
-    out_exp = kmer_features[np.asarray([2, 0, 1])]
-    assert_array_equal(out_exp, out_features)

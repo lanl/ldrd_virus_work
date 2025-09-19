@@ -581,11 +581,12 @@ def train_clfr(
     # classifier and shap importance rankings
     feature_count = feature_importance.sort_feature_counts(feature_count, n_folds)
     # normalize feature count percentages by the number of classifiers
+    # and seeds
     count_columns = feature_count.columns[
         feature_count.columns.str.contains("percentage")
     ]
-    feature_count[count_columns] = feature_count[count_columns] / len(
-        classifier_parameters
+    feature_count[count_columns] = feature_count[count_columns] / (
+        len(classifier_parameters) * n_seeds
     )
 
     return (

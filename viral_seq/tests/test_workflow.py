@@ -1101,6 +1101,12 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp, n
     feature_rank = feature_count["Features"]
     count_rank = feature_count["Sum"]
     pearson_rank = feature_count["Pearson R"]
+    count_columns = feature_count.columns[
+        feature_count.columns.str.contains("percentage")
+    ]
+    # a given kmer feature shouldn't show up more than 100 %
+    # of the time across the various counting methods:
+    assert_array_less(feature_count[count_columns].sum(axis=1).values, 100.1)
 
     feature_rank_exp = kmer_names[feature_rank_array]
 

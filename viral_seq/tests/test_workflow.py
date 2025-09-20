@@ -382,66 +382,105 @@ def test_pos_con_columns(target_column, len_exp_keys):
     assert len(out_df.columns) == len_exp_keys
 
 
-def test_fic_plot(tmp_path):
-    kmer_features = [
-        "kmer_PC_FECAEA",
-        "kmer_PC_CCACAD",
-        "kmer_PC_ECDGDE",
-        "kmer_PC_GCECFD",
-        "kmer_PC_CFCEDD",
-        "kmer_PC_CACDGA",
-        "kmer_PC_CCAAACD",
-        "kmer_PC_CCCFCF",
-        "kmer_PC_CCGDEA",
-        "kmer_PC_CDDEEC",
-    ]
+@pytest.mark.parametrize(
+    "shap_props, clfr_props, n_folds, n_feats, plot_title",
+    # fractional values of shap and clfr counts are used to check that
+    # thresholds for plotting percent surface exposure values are appropriate
+    # for deciding when to plot inside the bar vs outside the bar
+    [
+        (
+            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
+            [np.array([50.0, 47.5, 45.0, 42.5, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0])],
+            2,
+            10,
+            "test_1",
+        ),
+        (
+            [np.array([50.0, 45.0, 0.0, 10.0, 5.0, 5.0, 5.0, 0.0, 5.0, 5.0])],
+            [np.array([25.0, 5.0, 45.0, 25.0, 5.0, 0.0, 0.0, 5.0, 0.0, 0.0])],
+            10,
+            10,
+            "test_2",
+        ),
+        # test case for the upper bound of the current workflow in terms of
+        # number of classifiers and number of plotted features
+        (
+            np.flip(
+                np.sort(
+                    np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+                ),
+                axis=1,
+            ),
+            np.flip(
+                np.sort(
+                    np.round(np.random.default_rng(123).uniform(0, 12, size=(4, 20)), 2)
+                ),
+                axis=1,
+            ),
+            1,
+            20,
+            "test_3",
+        ),
+    ],
+)
+def test_fic_plot(tmp_path, shap_props, clfr_props, n_folds, n_feats, plot_title):
+    rng = np.random.default_rng(seed=123)
 
-    kmer_counts = np.array([2.0, 1.9, 1.8, 1.7, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    feature_values = list(range(n_feats))
+    kmer_features = [f"kmer_PC_{f}" for f in feature_values[::-1]]
+
     target_column = "IN"
-    mapping_method = "jurgen_schmidt"
-    response_effect_sign = ["-", "+", "-", "+", "+", "+", "+", "+", "-", "+"]
-    exposure_status_sign = ["+", "+", "+", "+", "+", "+", "+", "-", "-", "+"]
 
+    percent_exposed = np.flip(np.round(rng.uniform(1, 100, n_feats), 2))
+
+    response_effect_sign = np.flip(rng.choice(["+", "-"], n_feats))
     surface_exposed_dict = {
-        "kmer_PC_CDDEEC": 42.86,
-        "kmer_PC_CCGDEA": 0.00,
-        "kmer_PC_CCCFCF": 0.00,
-        "kmer_PC_CCAAACD": 21.15,
-        "kmer_PC_CACDGA": 13.04,
-        "kmer_PC_CFCEDD": 25.53,
-        "kmer_PC_GCECFD": 17.86,
-        "kmer_PC_ECDGDE": 100.0,
-        "kmer_PC_CCACAD": 17.24,
-        "kmer_PC_FECAEA": 14.29,
+        kmer_features[i]: percent_exposed[i] for i in range(n_feats)
     }
 
-    n_folds = 2
-    n_classifiers = 1
     n_seeds = 1
     df_in = pd.DataFrame()
     df_in["Features"] = kmer_features
-    df_in["Counts"] = kmer_counts
+    for i in range(len(clfr_props)):
+        df_in[f"Classifier percentage {i}"] = clfr_props[i]
+        df_in[f"SHAP percentage {i}"] = shap_props[i]
+
     workflow.FIC_plot(
         df_in,
         n_folds,
         target_column,
-        mapping_method,
-        exposure_status_sign,
         response_effect_sign,
         surface_exposed_dict,
-        n_classifiers,
+        n_feats,
         n_seeds,
         tmp_path,
     )
 
     assert (
         compare_images(
-            files("viral_seq.tests.expected") / "FIC_expected.png",
-            str(tmp_path / f"FIC_{target_column}_{mapping_method}.png"),
+            files("viral_seq.tests.expected") / f"FIC_expected_{plot_title}.png",
+            str(tmp_path / "FIC_Integrin.png"),
             0.001,
         )
         is None
     )
+
+
+def test_fic_plot_error(tmp_path):
+    """
+    test that the function raises a ``ValueError`` when there is a mismatch
+    between number of features and number of response sign values
+    """
+    df_in = pd.DataFrame(
+        {
+            "Features": ["kmer_PC_0", "kmer_PC_1"],
+            "Classifier percentage": [50.0, 40.0],
+            "SHAP percentage": [50.0, 40.0],
+        }
+    )
+    surface_exposed_dict = {"kmer_PC_0": 50.00, "kmer_PC_1": 0.00}
+    with pytest.raises(ValueError, match="Mismatch between number of feature signs"):
+        workflow.FIC_plot(df_in, 2, "IN", ["+"], surface_exposed_dict, 2, 1, tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -485,7 +524,7 @@ def test_feature_sign(
     feature_count["Pearson R"] = pearson_values
 
     surface_exposed_out, response_effect_out = workflow.feature_signs(
-        is_exposed, found_kmers, feature_count
+        is_exposed, feature_count, len(found_kmers)
     )
 
     assert_array_equal(response_effect_out, response_effect_exp)
@@ -951,11 +990,13 @@ def test_feature_count_consensus():
     shap_importances_df["Importances"] = shap_importances
     feature_count = pd.DataFrame()
     feature_count["Features"] = train_columns
-    feature_count["Counts"] = 0
+    feature_count["Clfr_test"] = 0
+    feature_count["SHAP_test"] = 0
 
     feature_count_out_exp = pd.DataFrame()
     feature_count_out_exp["Features"] = train_columns
-    feature_count_out_exp["Counts"] = [1, 0, 1, 0, 1, 2, 2, 0, 2, 1]
+    feature_count_out_exp["Clfr_test"] = [1, 0, 0, 0, 0, 1, 1, 0, 1, 1]
+    feature_count_out_exp["SHAP_test"] = [0, 0, 1, 0, 1, 1, 1, 0, 1, 0]
 
     feature_count_exp = feature_count.copy()
 
@@ -966,7 +1007,11 @@ def test_feature_count_consensus():
     shap_importances_df.reset_index(inplace=True)
 
     feature_count_out = workflow.feature_count_consensus(
-        clfr_importances_df, shap_importances_df, feature_count, n_features=5
+        clfr_importances_df,
+        shap_importances_df,
+        feature_count,
+        n_features=5,
+        clfr_name="test",
     )
 
     assert_frame_equal(feature_count_out, feature_count_out_exp)
@@ -983,8 +1028,10 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7]),
-            [2.0, 2.0, 1.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            np.asarray([0, 1, 7]),
+            # 2 folds, 2 methods (SHAP/estimator)
+            # should mean 2 ** 2 = 4 for top two counts
+            [4, 4, 2, 1, 1] + [0] * 7,
             1,
         ),
         (
@@ -998,8 +1045,10 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7]),
-            [2.0, 2.0, 0.75, 0.5, 0.25, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+            np.asarray([0, 1, 7]),
+            # 2 estimators, 2 folds, 2 methods (SHAP/estimator)
+            # should mean 2 ** 3 = 8 for top two counts
+            [8, 8, 5, 1, 1, 1] + [0] * 6,
             1,
         ),
         (
@@ -1013,8 +1062,10 @@ def test_feature_count_consensus():
                     "params": {"n_estimators": 100, "n_jobs": 1},
                 },
             },
-            np.asarray([0, 1, 10, 7]),
-            [4.0, 4.0, 1.75, 1.0, 0.5, 0.5, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+            np.asarray([0, 1, 7]),
+            # 2 estimators, 2 seeds, 2 folds, 2 methods (SHAP/estimator)
+            # should mean 2 ** 4 = 16 for top two counts
+            [16, 16, 7, 4, 3, 2, 0, 0, 0, 0, 0, 0],
             2,
         ),
     ],
@@ -1048,32 +1099,47 @@ def test_train_clfr(classifier_parameters, feature_rank_array, count_rank_exp, n
         random_state=random_state,
     )
     feature_rank = feature_count["Features"]
-    count_rank = feature_count["Counts"]
+    count_rank = feature_count["Sum"]
     pearson_rank = feature_count["Pearson R"]
+    count_columns = feature_count.columns[
+        feature_count.columns.str.contains("percentage")
+    ]
+    # a given kmer feature shouldn't show up more than 100 %
+    # of the time across the various counting methods:
+    assert_array_less(feature_count[count_columns].sum(axis=1).values, 100.1)
 
     feature_rank_exp = kmer_names[feature_rank_array]
 
     assert np.all(np.abs(pearson_rank[:2]) > 0.99)
-    assert_array_less(np.abs(pearson_rank[2:]), 0.80)
-    # lower ranked features in feature_rank have tendency to swap depending on floating
-    # point handling and are excluded from test, which is concerned with top feature ranks
-    assert_array_equal(feature_rank[:4], feature_rank_exp)
+    assert_array_less(np.abs(pearson_rank[2:]), 0.90)
+    # last nine items in feature_rank have tendency to swap, and are
+    # excluded from test, which is concerned with top feature ranks
+    assert_array_equal(feature_rank[:3], feature_rank_exp)
     assert_array_equal(count_rank, count_rank_exp)
 
 
-def test_pearson_aggregation():
+@pytest.mark.parametrize(
+    "random_state",
+    [
+        123,
+        321,
+        787897,
+        87640676,
+    ],
+)
+def test_pearson_aggregation(random_state):
     # enforce Pearson aggregation behavior, avoid reduction across folds
-    random_state = 123
     rng = np.random.default_rng(random_state)
-    kmer_data = rng.integers(0, 2, size=(1000, 12))
-    data_target = np.asarray([1, 0] * 500)
-    data_target[-1] = 1
+    kmer_data = rng.choice([0, 1], size=(1000, 12), p=[0.96, 0.04])
+    data_target = rng.choice([0, 1], size=1000)
 
     # align first four features with data_target with decreasing correlation
     kmer_data[:, 0] = data_target
     kmer_data[:, 1] = 1 - data_target
-    kmer_data[:750, 2] = data_target[:750]
-    kmer_data[:500, 3] = data_target[:500]
+    kmer_data[:, 2] = data_target
+    kmer_data[-100:, 2] = 0
+    kmer_data[:, 3] = data_target
+    kmer_data[-817:, 3] = 0
 
     kmer_names = np.array([f"kmer_{i}" for i in range(12)])
 
@@ -1101,12 +1167,19 @@ def test_pearson_aggregation():
         random_state=random_state,
     )
 
+    feature_rank = feature_count["Features"]
     pearson_rank = feature_count["Pearson R"]
-    pearson_rank_exp = [
-        0.9625443164192421,
-        -0.9455651466704694,
-        0.8684269994231254,
-        0.700139321523472,
-    ]
-    # check first four pearson values, numbers have tendency to vary slightly based on dependency versions
-    assert_allclose(pearson_rank[: len(pearson_rank_exp)], pearson_rank_exp, rtol=6e-6)
+    # only the first four features should be showing
+    # up at all in the top 4, based on synthetic correlation:
+    assert_array_equal(feature_count["Sum"][:4], 8)
+    assert_array_equal(feature_count["Sum"][4:], 0)
+    # expected property of the test is ranking kmer_0 > kmer_2 > kmer_3
+    # based on alignment of features and that
+    # ``kmer_1`` should be ranked lowest because of inverse alignment (-1.0)
+    feature_rank_exp = kmer_names[np.asarray([0, 2, 3, 1])]
+    assert_array_equal(feature_rank[:4], feature_rank_exp)
+    # random sampling used in ``StratifiedKFold`` causes features with
+    # perfect/inverse/moderate alignment to have >0.92
+    # pearson correlation with noisy features having lower correlation
+    assert np.all(np.abs(pearson_rank[:4]) > 0.92)
+    assert_array_less(np.abs(pearson_rank[4:]), 0.89)

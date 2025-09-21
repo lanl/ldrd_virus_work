@@ -174,6 +174,22 @@ def get_kmers(
     kmers: dict = defaultdict(int)
     kmer_info = []
     for record in records:
+        # for a given record, determine if the accession contains a single polyprotein product
+        # and allow for kmer features to be extracted by setting ``single_polyprotein = True``
+        single_polyprotein = False
+        if gather_kmer_info:
+            all_products = []
+            for feat in record.features:
+                if feat.type in ["CDS", "mat_peptide"]:
+                    nuc_seq = feat.location.extract(record.seq)
+                    if len(nuc_seq) % 3 == 0:
+                        all_products.append(feat.qualifiers["product"][0])
+            single_polyprotein = (
+                len(all_products) == 1 and all_products[0] == "polyprotein"
+            )
+        for feature in record.features:
+            if feature.type not in ["CDS", "mat_peptide"]:
+                continue
         # get the appropriate record features when searching for (non) structural proteins
         if filter_structural in [
             "not_surface_exposed",
@@ -205,7 +221,9 @@ def get_kmers(
             else:
                 new_seq = this_seq
 
-            record_pair = "polyprotein" not in feature.qualifiers["product"][0]
+            record_pair = single_polyprotein or (
+                "polyprotein" not in feature.qualifiers["product"][0]
+            )
 
             for kmer, new_kmer in zip(
                 Sequence(str(this_seq)).iter_kmers(k, overlap=True),
@@ -213,8 +231,7 @@ def get_kmers(
             ):
                 kmer = f"kmer_AA_{kmer}"
                 new_kmer = f"kmer_{kmer_type}_{new_kmer}"
-                if feature.type == "CDS":
-                    kmers[new_kmer] += 1
+                kmers[new_kmer] += 1
                 if gather_kmer_info:
                     kmer_info.append(
                         KmerData(

@@ -524,9 +524,9 @@ def test_get_kmer_viruses():
             ["AC_000008.1", "NC_001563.2", "NC_039210.1"],
             "PC",
             "jurgen_schmidt",
-            (17966, 5),
+            (17966, 6),
         ),
-        (["AC_000008.1"], "PC", "jurgen_schmidt", ((11037, 5))),
+        (["AC_000008.1"], "PC", "jurgen_schmidt", ((11037, 6))),
     ],
 )
 def test_save_load_all_kmer_info(

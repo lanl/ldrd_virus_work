@@ -407,6 +407,8 @@ def save_kmer_info(kmer_info_df: pd.DataFrame, save_file: str) -> None:
     Parameters:
     -----------
     kmer_info_df: pd.DataFrame
-        list of KmerData class objects
+        DataFrame of KmerData class objects
+    save_file: str
+        Path to parquet file that is produced
     """
     kmer_info_df.to_parquet(save_file)

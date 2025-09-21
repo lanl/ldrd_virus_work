@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - awitmer_fix_cv_agg
+      - amallela_test_ml_workflow_2
   pull_request:
     branches:
       - main
-      - awitmer_fix_cv_agg
+      - amallela_test_ml_workflow_2
 
 jobs:
   test:

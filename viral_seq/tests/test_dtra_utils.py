@@ -518,12 +518,20 @@ def test_get_kmer_viruses():
 
 
 @pytest.mark.parametrize(
-    "accessions, kmer_type, mapping_method",
+    "accessions, kmer_type, mapping_method, exp_shape",
     [
-        (["AC_000008.1", "NC_001563.2", "NC_039210.1"], "PC", "jurgen_schmidt"),
+        (
+            ["AC_000008.1", "NC_001563.2", "NC_039210.1"],
+            "PC",
+            "jurgen_schmidt",
+            (17966, 5),
+        ),
+        (["AC_000008.1"], "PC", "jurgen_schmidt", ((11037, 5))),
     ],
 )
-def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
+def test_save_load_all_kmer_info(
+    tmpdir, accessions, kmer_type, mapping_method, exp_shape
+):
     kmer_info = []
     kmer_info_list = []
     test_records = []
@@ -546,40 +554,10 @@ def test_save_load_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
     # save and load the file
     with tmpdir.as_cwd():
         dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
+        assert os.path.exists("all_kmer_info_test.parquet.gzip")
         kmer_info_load = dtra_utils.load_kmer_info("all_kmer_info_test.parquet.gzip")
 
     assert_frame_equal(all_kmer_info_df, kmer_info_load)
-
-
-@pytest.mark.parametrize(
-    "accessions, kmer_type, mapping_method",
-    [
-        (["AC_000008.1"], "PC", "jurgen_schmidt"),
-    ],
-)
-def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
-    kmer_info = []
-    all_kmer_info = []
-    test_records = []
-    # make a dataframe that looks like all_kmer_info
-    for accession in accessions:
-        tests_dir = files("viral_seq") / "tests" / "cache_test" / accession
-        test_records.append(_append_recs(tests_dir))
-
-    _, kmer_info = get_kmers(
-        test_records,
-        kmer_type=kmer_type,
-        mapping_method=mapping_method,
-        gather_kmer_info=True,
-    )
-    all_kmer_info.extend(kmer_info)
-    all_kmer_info_df = pd.DataFrame([k.__dict__ for k in all_kmer_info])
-
-    # save and load the file
-    with tmpdir.as_cwd():
-        dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
-        assert os.path.exists("all_kmer_info_test.parquet.gzip")
-
     # get information from kmer_info for sanity check
     assert all_kmer_info_df.iloc[0].mapping_method == "jurgen_schmidt"
     assert all_kmer_info_df.iloc[0].protein_name == "E1A"
@@ -588,7 +566,7 @@ def test_save_all_kmer_info(tmpdir, accessions, kmer_type, mapping_method):
     assert all_kmer_info_df.iloc[0].kmer_maps == "kmer_AA_MRHIICHGGV"
     assert all_kmer_info_df.iloc[0].virus_name == "Human adenovirus 5"
     assert all_kmer_info_df.iloc[0].include_pair
-    assert all_kmer_info_df.shape == (11037, 6)
+    assert all_kmer_info_df.shape == exp_shape
 
 
 def test_load_all_kmer_info():

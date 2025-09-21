@@ -249,6 +249,14 @@ def pull_ensembl_transcripts(email, cache, file):
     default="shen_2007",
     help="Preference of scheme for mapping AA-kmers to PC-kmers",
 )
+@click.option(
+    "--filter-structural",
+    "-s",
+    type=click.Choice(["surface_exposed", "not_surface_exposed", "all_features"]),
+    default=None,
+    help="Option for filtering dataset for only (non) virion surface exposed "
+    "proteins when building data tables",
+)
 def calculate_table(
     cache,
     file,
@@ -268,6 +276,7 @@ def calculate_table(
     random_state,
     target_column,
     mapping_method,
+    filter_structural,
 ):
     """Build a data table from given viral species and selected features."""
     all_kmer_info = []
@@ -325,6 +334,7 @@ def calculate_table(
         target_column=target_column,
         mapping_method=mapping_method,
         gather_kmer_info=True,
+        filter_structural=filter_structural,
     )
     all_kmer_info.extend(kmer_info)
     if similarity_genomic:

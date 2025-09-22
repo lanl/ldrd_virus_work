@@ -2164,7 +2164,6 @@ if __name__ == "__main__":
         # TODO: add CLI option for determining which classifiers to train
         # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
-        max_features = 20
         classifier_parameters = {
             "RandomForestClassifier": {
                 "clfr": RandomForestClassifier(),

@@ -240,7 +240,7 @@ def plot_shap_consensus(
         rng=rng,
     )
     # TODO: need to fix upstream `shap.summary_plot` to accept `fig` and `ax` handles per issue #89
-    plt.title(f"Effect of Top {max_features} Features\n Random Forest")
+    plt.title(f"Effect of Top {max_features} Features")
     plt.tight_layout()
     plt.savefig(str(path) + "/" + "SHAP_" + str(target_column) + ".png")
     plt.close()
@@ -287,7 +287,7 @@ def sort_feature_counts(feature_df: pd.DataFrame, n_folds: int) -> pd.DataFrame:
     # to give true percentages
     for col in sort_columns:
         feature_df_sorted[f"{col}_percentage"] = (
-            np.array(feature_df_sorted[col].values) / (n_folds * 2) * 100
+            feature_df_sorted[col].values / (n_folds * 2) * 100
         )
 
     return feature_df_sorted

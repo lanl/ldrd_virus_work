@@ -7,6 +7,8 @@ from matplotlib.testing.compare import compare_images
 from importlib.resources import files
 import shap
 import pytest
+import pandas as pd
+from pandas.testing import assert_frame_equal
 
 
 matplotlib.use("Agg")
@@ -179,11 +181,10 @@ def test_plot_shap_meanabs(tmpdir):
 def test_plot_shap_beeswarm(tmpdir, interference):
     rng = np.random.default_rng(1984)
     values = rng.uniform(-1.0, 1.0, (5, 2))  # 5 samples, 2 features
-    data = np.copy(values)
-    # synthetic base_values for passing to ``shap.Explanation``
-    # because ``shap.summary_plot`` checks ``base_values.shape``
-    # for multi-output explanationses
-    base_values = np.full(data.shape, 0.5)
+    data = np.copy(values)  # feature values
+    base_values = np.full(
+        data.shape, 0.5
+    )  # synthetic base_values for passing to ``shap.Explanation`` because ``shap.summary_plot`` checks ``base_values.shape`` for multi-output explanations
     rng.shuffle(data)
     explanation = shap.Explanation(values=values, base_values=base_values, data=data)
     expected_plot = files("viral_seq.tests.expected").joinpath(
@@ -205,3 +206,81 @@ def test_plot_shap_beeswarm(tmpdir, interference):
     with tmpdir.as_cwd():
         fi.plot_shap_beeswarm(explanation)
         assert compare_images(expected_plot, "feat_shap_beeswarm.png", 0.001) is None
+
+
+def test_plot_shap_consensus(tmp_path):
+    rng = np.random.default_rng(seed=123)
+    syn_shap_values = rng.uniform(-1, 1, (10, 10))
+    syn_data = rng.choice([0, 1], size=[10, 10])
+    syn_features = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    syn_df = pd.DataFrame(syn_data, columns=syn_features)
+    max_features = len(syn_data)
+
+    fi.plot_shap_consensus(
+        (syn_shap_values, syn_data),
+        syn_df,
+        "Test",
+        max_features,
+        tmp_path,
+        random_state=123,
+    )
+    assert (
+        compare_images(
+            files("viral_seq.tests.expected") / "SHAP_consensus_exp.png",
+            str(tmp_path / "SHAP_Test.png"),
+            0.001,
+        )
+        is None
+    )
+
+
+def test_sort_feature_counts():
+    """
+    the purpose of this test is to check that feature importance percentages
+    are calculated correctly and that when two features have the same number
+    of total votes the pearson value is being used correctly to break the tie,
+    such that the feature with the greater positive ``Pearson R`` value
+    is given preferential ranking
+    """
+    feature_df = pd.DataFrame()
+    kmer_features = np.array([f"kmer_{i}" for i in range(3)])
+    feature_df["Features"] = kmer_features
+    feature_df["Clfr_0"] = [5, 1, 1]
+    feature_df["SHAP_0"] = [4, 1, 1]
+    feature_df["Clfr_1"] = [3, 6, 0]
+    feature_df["SHAP_1"] = [1, 0, 6]
+    feature_df["Pearson R"] = [0.99, 0.41, -0.42]
+
+    out_df = fi.sort_feature_counts(feature_df, n_folds=5)
+    exp_df = pd.DataFrame.from_dict(
+        {
+            "Features": {0: "kmer_0", 1: "kmer_1", 2: "kmer_2"},
+            "Clfr_0": {0: 5, 1: 1, 2: 1},
+            "SHAP_0": {0: 4, 1: 1, 2: 1},
+            "Clfr_1": {0: 3, 1: 6, 2: 0},
+            "SHAP_1": {0: 1, 1: 0, 2: 6},
+            "Pearson R": {0: 0.99, 1: 0.41, 2: -0.42},
+            "Sum": {0: 13, 1: 8, 2: 8},
+            "Clfr_0_percentage": {0: 50.0, 1: 10.0, 2: 10.0},
+            "SHAP_0_percentage": {0: 40.0, 1: 10.0, 2: 10.0},
+            "Clfr_1_percentage": {0: 30.0, 1: 60.0, 2: 0.0},
+            "SHAP_1_percentage": {0: 10.0, 1: 0.0, 2: 60.0},
+        }
+    )
+
+    assert_frame_equal(out_df, exp_df)
+
+
+def test_sort_feature_counts_2():
+    feature_df = pd.DataFrame()
+    kmer_features = np.array(["kmer_AA_ABCDEFG", "kmer_PC_GCAFGDG", "kmer_PC_0134657"])
+    feature_df["Features"] = kmer_features
+    feature_df["Clfr_0"] = [5, 1, 5]
+    feature_df["SHAP_0"] = [4, 1, 1]
+    feature_df["Clfr_1"] = [1, 6, 3]
+    feature_df["SHAP_1"] = [1, 0, 4]
+    feature_df["Pearson R"] = [0.99, -0.99, -0.41]
+
+    out_df = fi.sort_feature_counts(feature_df, n_folds=5)
+    out_exp = kmer_features[np.asarray([2, 0, 1])]
+    assert_array_equal(out_df["Features"], out_exp)

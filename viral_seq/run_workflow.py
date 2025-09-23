@@ -18,13 +18,13 @@ import polars as pl
 import ast
 import numpy as np
 from glob import glob
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, RocCurveDisplay, auc
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
+from sklearn.metrics import roc_auc_score, auc, roc_curve
 from sklearn.model_selection import StratifiedKFold
 from pathlib import Path
 from warnings import warn
 import json
-from typing import Dict, Any, Sequence, List, Literal, Optional
+from typing import Dict, Any, Sequence, List, Literal, Optional, Union
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -33,10 +33,13 @@ import tarfile
 import shap
 from collections import defaultdict
 from scipy.stats import pearsonr
-from matplotlib.container import BarContainer
 import matplotlib.patches as mpatches
 from viral_seq.analysis import biological_analysis as ba
 import os
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+from tqdm import tqdm
+from sklearn.preprocessing import normalize
 
 matplotlib.use("Agg")
 
@@ -93,9 +96,9 @@ def check_kmer_feature_lengths(kmer_features: list[str], kmer_range: str) -> Non
 
 
 def feature_signs(
-    is_exposed: list[str],
-    shap_values: np.ndarray,
-    shap_data: np.ndarray,
+    is_exposed: list,
+    feature_count: pd.DataFrame,
+    max_features: int,
 ) -> tuple:
     """
     Determine the sign character of the surface exposure status and response effect of the kmer
@@ -105,10 +108,10 @@ def feature_signs(
     -----------
     is_exposed: list
         list of kmers that are surface exposed
-    shap_values: np.ndarray
-        shap feature importance values
-    shap_data: np.ndarray
-        shap expected values from dataset
+    feature_count: pd.DataFrame
+        data frame containing training features and corresponding information from cv
+    max_features: int
+        number of features to include in the topN
 
     Returns:
     --------
@@ -119,18 +122,21 @@ def feature_signs(
     """
     response_effect = []
     surface_exposed_sign = []
+    top_kmers = list(feature_count["Features"][:max_features])
     # add sign of surface exposure based on comparison between lists of exposure status
     for i in range(len(is_exposed)):
         if is_exposed[i]:
             sign = "+"
         else:
             sign = "-"
+
         surface_exposed_sign.append(sign)
+
         # add sign of response effect based on pearson correllation coefficient
-        pearson_r = pearsonr(
-            shap_values[:, i],
-            shap_data[:, i],
-        )[0]
+        pearson_r = feature_count.loc[feature_count["Features"] == top_kmers[i]][
+            "Pearson R"
+        ].values[0]
+
         if pearson_r > 0:
             response_effect.append("+")
         else:
@@ -261,6 +267,355 @@ def get_kmer_info(
     return virus_names, kmer_features, protein_names
 
 
+def plot_cv_roc(clfr_preds: dict, target_column: str, path: Path):
+    """
+    Plot ROC curve from ml cross-validation predictions
+
+    Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
+
+    Parameters
+    ----------
+    clfr_preds: dict
+        dict containing fpr, tpr and auc's for cv folds
+        with classifier name as dictionary key
+    target_column: str
+        training column from dataset
+    path: Path
+        file path for saving figures
+    """
+
+    mean_fpr = np.linspace(0, 1, 100)
+    all_curves: dict[str, tuple] = defaultdict(tuple)
+    for clfr_name, clfr_values in clfr_preds.items():
+        fig, ax = plt.subplots(figsize=(8, 8))
+        # plot individual fold lines
+        for i, pred in enumerate(clfr_values.values()):
+            ax.plot(
+                mean_fpr,
+                pred["roc_curves"],
+                label=f"Fold {i+1} (AUC = {pred['auc']:.2f})",
+            )
+
+        # calculate and plot mean and std lines
+        mean_tpr = np.mean(
+            [pred["roc_curves"] for pred in clfr_values.values()],
+            axis=0,
+        )
+        mean_auc = np.mean([pred["auc"] for pred in clfr_values.values()])
+        std_auc = np.std([pred["auc"] for pred in clfr_values.values()])
+        std_tpr = np.std(
+            [pred["roc_curves"] for pred in clfr_values.values()],
+            axis=0,
+        )
+        ax.plot(
+            mean_fpr,
+            mean_tpr,
+            color="b",
+            label=f"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
+            lw=2,
+            alpha=0.8,
+        )
+        all_curves[clfr_name] = (mean_fpr, mean_tpr, mean_auc, std_auc)
+        # plot upper and lower bounds of mean +/- std.
+        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+        ax.fill_between(
+            mean_fpr,
+            tprs_lower,
+            tprs_upper,
+            color="grey",
+            alpha=0.2,
+            label=r"$\pm$ 1 std. dev.",
+        )
+
+        # set ax titles
+        ax.set(
+            xlabel="False Positive Rate",
+            ylabel="True Positive Rate",
+            title=f"Mean ROC curve with variability for {clfr_name}\n(Positive label {target_column})",
+        )
+
+        # plot chance line
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            color="black",
+            linestyle="--",
+            lw=2,
+            label="Chance level (AUC = 0.5)",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(str(path), f"ROC_{clfr_name}_{target_column}.png"), dpi=300
+        )
+        plt.close(fig)
+
+    # if more than one estimator is being used, plot all average curves on same plot
+    if len(clfr_preds) > 1:
+        fig, ax = plt.subplots(figsize=(8, 8))
+        for curve_name, (
+            fpr_curve,
+            tpr_curve,
+            auc_curve,
+            std_curve,
+        ) in all_curves.items():
+            ax.plot(
+                fpr_curve,
+                tpr_curve,
+                label=f"{curve_name} AUC: {auc_curve:0.2f} $\pm$ {std_curve:0.2f}",
+                lw=2,
+                alpha=0.8,
+            )
+            ax.set(
+                xlabel="False Positive Rate",
+                ylabel="True Positive Rate",
+                title=f"Mean ROC curves for all classifiers\n(Positive label {target_column})",
+            )
+        # plot chance line
+        ax.plot(
+            [0, 1],
+            [0, 1],
+            color="black",
+            linestyle="--",
+            lw=2,
+            label="Chance level (AUC = 0.5)",
+        )
+        ax.legend(loc="lower right")
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(str(path), f"ROC_all_classifiers_{target_column}.png"), dpi=300
+        )
+        plt.close(fig)
+
+
+def feature_count_consensus(
+    clfr_importances: pd.DataFrame,
+    shap_importances: pd.DataFrame,
+    feature_count: pd.DataFrame,
+    n_features: int,
+    clfr_name: str,
+) -> pd.DataFrame:
+    """
+    updates the number of occurrences of a feature in the top N features based
+    on classifier and shap importance feature values from each training fold
+
+    Parameters:
+    -----------
+    clfr_importances: pd.DataFrame
+        ranked features from classifier feature importance values
+    shap_importances: pd.DataFrame
+        ranked features from shap feature importance values
+    feature_count: pd.DataFrame
+        data frame containing the training features and their number of occurrences
+        in the feature importance data structures across multiple cv folds
+    n_features: int
+        number of top important features to consider from the ranked list of features
+    clfr_name: str
+        name of classifier for which to index counts
+
+    Returns:
+    --------
+    feature_count_out: pd.DataFrame
+        indexed dataframe containing feature counts
+    """
+    feature_count_out = feature_count.copy()
+    for i in range(n_features):
+        clfr_feature = clfr_importances["Features"][i]
+        shap_feature = shap_importances["Features"][i]
+        feature_count_out.loc[
+            feature_count_out["Features"] == clfr_feature, f"Clfr_{clfr_name}"
+        ] += 1
+        feature_count_out.loc[
+            feature_count_out["Features"] == shap_feature, f"SHAP_{clfr_name}"
+        ] += 1
+
+    return feature_count_out
+
+
+def importances_df(importances: np.ndarray, train_fold: pd.Index) -> pd.DataFrame:
+    """
+    converts feature importances to a pandas dataframe during cross-
+    validation and sorts based on feature importance ranking
+
+    Parameters:
+    -----------
+    importances: array
+        1-D array of feature importances
+    train_fold: pandas Index
+        training fold feature names for cross-fold
+
+    Returns:
+    --------
+    importance_df: pandas.DataFrame
+        Data frame containing sorted importance values and corresponding feature names
+    """
+
+    # check that importances and train_fold are both single columns and have the same shape
+    if importances.ndim != 1 or train_fold.ndim != 1:
+        raise ValueError("Importances and train features must be a single column.")
+    if importances.shape != train_fold.shape:
+        raise ValueError("Importances and train features must have same shape.")
+
+    importances_df = pd.DataFrame()
+    importances_df["Features"] = train_fold
+    importances_df["Importances"] = importances
+    importances_df.sort_values(by=["Importances"], ascending=False, inplace=True)
+    importances_df.reset_index(inplace=True)
+
+    return importances_df
+
+
+def train_clfr(
+    train_data: pd.DataFrame,
+    data_target: pd.Series,
+    classifier_parameters: dict,
+    n_folds: int,
+    n_seeds: int,
+    max_features: int,
+    random_state: int,
+) -> tuple:
+    """
+    train ML classifier and perform feature consensus counting across multiple cross-folds
+
+    Parameters:
+    -----------
+    train_data: pd.DataFrame
+        The feature dataset for training the ML classifiers
+    data_target: pd.Series
+        The feature targets for the given target column
+    classifier_parameters: dict
+        dictionary containing the classifier and associated parameters to initialize classifier
+        with the classifier name as the dictionary key
+    n_folds: int
+        number of training cross-folds to perform
+    n_seeds: int
+        total number of random seeds over which to perform averaging of classifier predictions
+    max_features: int
+        the number of features to consider when calculating the top feature consensus counts
+    random_state: int
+        random seed for initializing ML classifier
+
+    Returns:
+    --------
+    feature_count: pd.DataFrame
+        data structure containing training features, corresponding
+        feature consensus counts and pearsonr values
+    shap_clfr_consensus: tuple
+        aggregated shap values and model target values over multiple cross-folds
+    clfr_preds: dict
+        dict containing fpr, tpr and auc's for cv folds for plotting the consensus ROC curve
+        using the classifier name as the dictionary key
+    """
+    cv = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_state)
+    mean_fpr = np.linspace(0, 1, 100)
+    clfr_preds_all = {}
+    shap_values_all: list[float] = []
+    shap_data_all: list[float] = []
+    feature_count = pd.DataFrame()
+    feature_count["Features"] = train_data.columns
+    rng = np.random.default_rng(random_state)
+    random_seeds = rng.integers(low=1, high=100000, size=n_seeds)
+    for clfr_name, subdict in classifier_parameters.items():
+        clfr = subdict["clfr"]
+        clfr.set_params(**subdict["params"], random_state=random_state)
+
+        clfr_preds: dict[int, Any] = {}
+        feature_count[f"Clfr_{clfr_name}"] = 0
+        feature_count[f"SHAP_{clfr_name}"] = 0
+        for fold, (train, test) in enumerate(
+            tqdm(
+                cv.split(train_data, data_target),
+                total=cv.get_n_splits(),
+                desc=f"{clfr_name} Folds",
+            )
+        ):
+            seed_auc = []
+            seed_tpr = []
+            for random_seed in random_seeds:
+                # index training cv split
+                train_fold = train_data.iloc[train]
+                train_target = data_target[train]
+                test_fold = train_data.iloc[test]
+                test_target = data_target[test]
+
+                # train classifier
+                clfr.set_params(random_state=random_seed)
+                clfr.fit(train_fold, train_target)
+
+                # index classifier importances
+                clfr_importances = importances_df(
+                    clfr.feature_importances_, train_fold.columns
+                )
+
+                # calculate shap output for training dataset and rank
+                explainer = shap.Explainer(clfr, seed=random_seed)
+                shap_values = explainer(train_fold)
+                positive_shap_values = feature_importance.get_positive_shap_values(
+                    shap_values
+                )
+
+                shap_importances = importances_df(
+                    positive_shap_values.abs.mean(0).values, train_fold.columns
+                )
+
+                feature_count = feature_count_consensus(
+                    clfr_importances,
+                    shap_importances,
+                    feature_count,
+                    max_features,
+                    clfr_name,
+                )
+
+                # normalize shap values
+                normalized_shap_values = normalize(
+                    positive_shap_values.values, norm="l1", axis=1
+                )
+
+                # aggregate the raw shap values and associated data targets
+                shap_values_all.append(normalized_shap_values)
+                shap_data_all.append(positive_shap_values.data)
+
+                # aggregate classifier predictions for ROC plot
+                test_score = clfr.predict_proba(test_fold)[:, 1]
+                fpr, tpr, thresh = roc_curve(test_target, test_score)
+                interp_tpr = np.interp(mean_fpr, fpr, tpr)
+                interp_tpr[0] = 0.0
+                roc_auc = auc(fpr, tpr)
+                seed_auc.append(roc_auc)
+                seed_tpr.append(interp_tpr)
+
+            clfr_preds[fold] = {
+                "roc_curves": np.mean(seed_tpr, axis=0),
+                "auc": np.mean(roc_auc),
+            }
+
+        clfr_preds_all[clfr_name] = clfr_preds
+
+    # aggregate shap values for calculating pearson R and for function
+    shap_values_clfr = np.concatenate(shap_values_all, axis=0)
+    shap_data_clfr = np.concatenate(shap_data_all, axis=0)
+    # calculate the pearson correlation based on the aggregated shap values
+    feature_count["Pearson R"] = pearsonr(shap_values_clfr, shap_data_clfr)[0]
+    # sort feature counts by total number of votes between
+    # classifier and shap importance rankings
+    feature_count = feature_importance.sort_feature_counts(feature_count, n_folds)
+    # normalize feature count percentages by the number of classifiers
+    # and seeds
+    count_columns = feature_count.columns[
+        feature_count.columns.str.contains("percentage")
+    ]
+    feature_count[count_columns] = feature_count[count_columns] / (
+        len(classifier_parameters) * n_seeds
+    )
+
+    return (
+        feature_count,
+        (shap_values_clfr, shap_data_clfr),
+        clfr_preds_all,
+    )
+
+
 def label_surface_exposed(
     list_of_kmers: Sequence[tuple], kmers_topN: list[str]
 ) -> list:
@@ -294,43 +649,49 @@ def label_surface_exposed(
 
 
 def FIC_plot(
-    topN_kmers: list,
-    kmer_count: np.ndarray,
+    feature_count: pd.DataFrame,
     n_folds: int,
     target_column: str,
-    mapping_method: str,
-    exposure_status_sign: list,
     response_effect_sign: list,
     surface_exposed_dict: dict,
+    max_features: int,
+    n_seeds: int,
     path: Path,
 ):
     """
-    Create Feature Importance Consensus (FIC) plot from SHAP explainer values and
-    native estimator feature importances using important kmers found during ML
-    classification. Include the following information for each kmer as labels on the plot:
-        1. the sign of the pearson correlation coefficient for the feature importance values (+/-)
-        2. the status of the kmer as surface exposed or not surface exposed based on the known virus (+/-)
+    Create Feature Importance Consensus (FIC) plot using SHAP explainer values and
+    native classifier feature importances of topN kmers found during ML classification.
+    Include the following information for each kmer as labels on the plot:
+        1. the sign (+/-) of the pearson correlation coefficient between the SHAP feature importance values and the data target
+        2. The percentage of proteins containing the kmer at least once that are surface exposed
 
     Parameters:
     -----------
-    topN_kmers: list
-        list of top_N kmers from ML classifiers
-    kmer_count: array
-        consensus number of classifer folds agreeing upon corresponding kmer in topN_kmers
+    feature_count: pd.DataFrame
+        data structure containing training features and corresponding metrics from cv
     n_folds: int
         number of cv folds performed by classifier
     target_column: str
         name of column on which classifier was trained
-    exposure_status_sign: list
-        list of +/- symbols denoting surface exposure status of kmer features in topN kmers
     response_effect_sign: list
         list of +/- symbols denoting response effect from shap importance pearson-r correlation
+        note: a ValueError will be thrown if len(response_effect_sign) != max_features
     surface_exposed_dict: dict
-        dictionary containing the topN kmers and their respective ratios of surface exposed to
-        not surface exposed viral proteins for plotting '% surface exposed'
+        dictionary containing kmer features and ratio of surface exposed
+        to not surface exposed viral proteins for given kmer
+    max_features: int
+        number of features to include in topN
+    n_seeds: int
+        number of random seeds used for consensus
     path: Path
         path to save figure
     """
+
+    # check that the appropriate number of feature signs exist to plot against ``max_features``
+    if len(response_effect_sign) != max_features:
+        raise ValueError(
+            f"Mismatch between number of feature signs ({len(response_effect_sign)}) and total features ({max_features}) available for plotting."
+        )
     target_column_mappings = {"IN": "Integrin", "SA": "Sialic Acid", "IG": "IgSF"}
     target_columns = target_column.split("_")
     target_names = []
@@ -338,103 +699,102 @@ def FIC_plot(
         target_names.append(target_column_mappings[target])
     target_name = ", ".join(target_names)
 
-    fig, ax = plt.subplots(figsize=(10, 10))
-    y_pos = np.arange(len(topN_kmers))
-    bars: BarContainer = ax.barh(y_pos, (kmer_count / n_folds) * 100, color="k")
-    ax.set_xlim(0, 100)
-    ax.set_yticks(y_pos, labels=topN_kmers)
-    ax.set_title(
-        f"Feature importance consensus amongst {n_folds} folds\n for {target_name} binding"
+    # this list of colors was generated by ChatGPT
+    # to be appropriate for color-blindness
+    # list has been curated manually to remove bad color combos
+    colors_list = [
+        "#56B4E9",  # Sky Blue
+        "#A8D8F2",  # Lighter Sky Blue
+        "#E69F00",  # Orange
+        "#F1C23A",  # Lighter Orange
+        "#009E73",  # Green
+        "#66C59A",  # Lighter Green
+        "#0072B2",  # Blue
+        "#66AEDD",  # Lighter Blue
+        "#D55E00",  # Vermilion
+        "#F5A57C",  # Lighter Vermilion
+        "#CC79A7",  # Reddish-Pink
+        "#E6A5C8",  # Lighter Reddish-Pink
+        "#000000",  # Black
+        "#808080",  # Lighter Grey
+        "#999999",  # Light Grey
+        "#B3B3B3",  # Lighter Light Grey
+        "#66A61E",  # Olive Green
+        "#A1C57A",  # Lighter Olive Green
+    ]
+
+    # barh plots values from bottom to top
+    top_feature_count = feature_count[:max_features].iloc[::-1]
+    response_effect_sign = response_effect_sign[::-1]
+
+    fig, ax = plt.subplots(figsize=(8, 10))
+    plot_columns = list(
+        feature_count.columns[feature_count.columns.str.contains("percentage")]
     )
-    ax.set_xlabel("Classifier Consensus Percentage (%)")
+    plot_colors = colors_list[:len(plot_columns)]  # fmt: skip
+    top_feature_count.plot(
+        x="Features",
+        y=plot_columns,
+        kind="barh",
+        stacked=True,
+        ax=ax,
+        color=plot_colors,
+    )
+    ax.set_title(
+        f"Feature importance consensus amongst {n_folds} folds\n"
+        f"and {n_seeds} seeds for {target_name} binding"
+    )
 
-    for kmer_idx, p in enumerate(bars):
-        # calculate corresponding surface exposure %
-        kmer_name = topN_kmers[kmer_idx]
-        percent_exposed = surface_exposed_dict[kmer_name]
-        percent_lbl = f"{percent_exposed:.2f}%"
-
-        left, bottom, width, height = p.get_bbox().bounds
-
-        if response_effect_sign[kmer_idx] == "+":
-            response_sign_color = "g"
-        elif response_effect_sign[kmer_idx] == "-":
-            response_sign_color = "r"
-
-        if exposure_status_sign[kmer_idx] == "+":
-            exposure_sign_color = "g"
-        elif exposure_status_sign[kmer_idx] == "-":
-            exposure_sign_color = "r"
-
-        ax.annotate(
-            response_effect_sign[kmer_idx],
-            xy=(left + width / 4, bottom + height / 2),
-            ha="center",
-            va="center",
-            color=response_sign_color,
-            fontsize="xx-large",
-        )
-        ax.annotate(
-            exposure_status_sign[kmer_idx],
-            xy=(left + 3 * width / 4, bottom + height / 2),
-            ha="center",
-            va="center",
-            color=exposure_sign_color,
-            fontsize="xx-large",
-        )
-        if width >= 90:
-            ax.annotate(
-                percent_lbl,
-                xy=(left + width - 5, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="white",
-                fontsize="large",
-            )
+    for idx, (_, row) in enumerate(top_feature_count.iterrows()):
+        percent = surface_exposed_dict[row["Features"]]
+        response_sign = response_effect_sign[idx]
+        width = row[plot_columns].sum()
+        if width >= 85:
+            position = width - 15
         else:
-            ax.annotate(
-                percent_lbl,
-                xy=(left + width + 5, bottom + height / 2),
-                ha="center",
-                va="center",
-                color="k",
-                fontsize="large",
-            )
-
-        plus_symbol = Line2D(
-            [0], [0], marker="+", color="green", markersize=9, linestyle=""
-        )
-        minus_symbol = Line2D(
-            [0], [0], marker="_", color="red", markersize=9, linestyle=""
-        )
-        blank_patch = mpatches.Patch(color="white")
-
-        ax.legend(
-            handles=[
-                plus_symbol,
-                minus_symbol,
-                plus_symbol,
-                minus_symbol,
-                blank_patch,
-            ],
-            labels=[
-                "on left: Positive effect on response",
-                "on left: Negative effect on response",
-                "on right: Protein is surface-exposed",
-                "on right: Protein is not surface-exposed",
-                "% value next to bar indicates percentage\n of kmers found in surface exposed proteins",
-            ],
-            loc="lower right",
-            prop={"size": 10},
-            bbox_to_anchor=(0.7, -0.25),
+            position = width + 1
+        ax.text(
+            position,
+            idx,
+            f"({response_sign}) {percent:.2f}%",
+            va="center",
+            color="k",
+            fontsize="medium",
         )
 
-        fig.tight_layout()
-        fig.savefig(
-            os.path.join(str(path), f"FIC_{target_column}_{mapping_method}.png"),
-            dpi=300,
-        )
-        plt.close()
+    # build lists of handles/labels
+    fig_handles: list[Union[mpatches.Patch, Line2D]] = []
+    fig_labels = []
+    for c, prop in enumerate(plot_columns):
+        fig_handles.append(mpatches.Patch(color=colors_list[c], label=prop))
+        fig_labels.append(prop)
+    fig_handles.append(
+        Line2D([0], [0], marker="+", color="k", markersize=9, linestyle="")
+    )
+    fig_handles.append(
+        Line2D([0], [0], marker="_", color="k", markersize=9, linestyle="")
+    )
+    fig_handles.append(mpatches.Patch(color="white"))
+    fig_labels.extend(
+        [
+            "Positive effect on response",
+            "Negative effect on response",
+            "% value next to bar indicates percentage of viral proteins\n containing given kmer that are surface exposed",
+        ]
+    )
+
+    ax.legend(
+        handles=fig_handles,
+        labels=fig_labels,
+        loc="upper center",
+        prop={"size": 10},
+        bbox_to_anchor=(0.5, -0.1),
+    )
+    ax.set_xlabel(f"% ML models where ranked in top {max_features} features")
+    ax.set_xlim(0, 100)
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, f"FIC_{target_name}.png"), dpi=300)
+    plt.close()
 
 
 def percent_surface_exposed(
@@ -1447,6 +1807,20 @@ if __name__ == "__main__":
         default="igsf_training.csv",
         help="Training data file to merge with `--train-file` if specified",
     )
+    parser.add_argument(
+        "-mx",
+        "--max-features",
+        type=int,
+        default=20,
+        help="Max number of features for performing consensus for topN kmers.",
+    )
+    parser.add_argument(
+        "-ns",
+        "--n_seeds",
+        type=int,
+        default=20,
+        help="number of random seeds over which to average classifier predictions",
+    )
 
     args = parser.parse_args()
     cache_checkpoint = args.cache
@@ -1466,6 +1840,8 @@ if __name__ == "__main__":
     kmer_range = args.kmer_range
     cache_tarball = args.cache_tarball
     merge_file = args.merge_file
+    max_features = args.max_features
+    n_seeds = args.n_seeds
     filter_structural = args.filter_structural
 
     # check to make sure the correct `cache-tarball` is being used
@@ -1784,115 +2160,58 @@ if __name__ == "__main__":
         # of given kmer lengths from command line option '--kmer-range'
         check_kmer_feature_lengths(list(X.columns), kmer_range)
 
-        ### Estimation and visualization of the variance of the
-        ### Receiver Operating Characteristic (ROC) metric using cross-validation.
-        ### Source: https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
-
+        # train cv classifiers and accumulate data for ROC, SHAP and FIC plots
+        # TODO: add CLI option for determining which classifiers to train
+        # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
-        cv = StratifiedKFold(n_splits=n_folds)
-        clfr = RandomForestClassifier(
-            n_estimators=10000, n_jobs=-1, random_state=random_state
+        classifier_parameters = {
+            "RandomForestClassifier": {
+                "clfr": RandomForestClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
+            "ExtraTreesClassifier": {
+                "clfr": ExtraTreesClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
+            "XGBClassifier": {
+                "clfr": XGBClassifier(),
+                "params": {"n_estimators": 10000, "n_jobs": -1},
+            },
+            # LGBM parameters determined using suggestion from:
+            # https://stackoverflow.com/questions/71285022/why-lightgbm-python-package-gives-bad-prediction-using-for-regression-task
+            "LGBMClassifier": {
+                "clfr": LGBMClassifier(),
+                "params": {
+                    "min_data_in_bin": 1,
+                    "min_data_in_leaf": 1,
+                    "boosting_type": "dart",
+                    "n_estimators": 1000,
+                    "n_jobs": -1,
+                },
+            },
+        }
+        clfr_names = list(classifier_parameters.keys())
+        n_classifiers = len(clfr_names)
+        (feature_count, shap_clfr_consensus, clfr_preds) = train_clfr(
+            X, y, classifier_parameters, n_folds, n_seeds, max_features, random_state
         )
-        tprs = []
-        aucs = []
-        mean_fpr = np.linspace(0, 1, 100)
-
-        fig, ax = plt.subplots(figsize=(8, 8))
-
-        counter = -1
-        n_features = 5
-        temp1 = np.zeros((n_folds, n_features))
-
-        for fold, (train, test) in enumerate(cv.split(X, y)):
-            clfr.fit(X.iloc[train], y[train])
-            df = pd.DataFrame()
-            df["Features"] = X.iloc[train].columns
-            df["Importances"] = clfr.feature_importances_
-            df.sort_values(by=["Importances"], ascending=False, inplace=True)
-            df.reset_index(inplace=True)
-            viz = RocCurveDisplay.from_estimator(
-                clfr,
-                X.iloc[test],
-                y[test],
-                name=f"ROC fold {fold + 1}",
-                alpha=0.3,
-                lw=1,
-                ax=ax,
-                plot_chance_level=(fold == n_folds - 1),
-            )
-            interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
-            interp_tpr[0] = 0.0
-            tprs.append(interp_tpr)
-            aucs.append(viz.roc_auc)
-            counter += 1
-            temp1[counter, :] = df["index"][:n_features].to_numpy()
-
-        mean_tpr = np.mean(tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
-        std_auc = np.std(aucs)
-        ax.plot(
-            mean_fpr,
-            mean_tpr,
-            color="b",
-            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
-            lw=2,
-            alpha=0.8,
-        )
-
-        std_tpr = np.std(tprs, axis=0)
-        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-        ax.fill_between(
-            mean_fpr,
-            tprs_lower,
-            tprs_upper,
-            color="grey",
-            alpha=0.2,
-            label=r"$\pm$ 1 std. dev.",
-        )
-
-        ax.set(
-            xlabel="False Positive Rate",
-            ylabel="True Positive Rate",
-            title="Mean ROC curve with variability\n(Positive label '"
-            + str(target_column)
-            + "')",
-        )
-        ax.legend(loc="lower right")
-        fig.tight_layout()
-        fig.savefig(
-            os.path.join(str(paths[-1]), f"ROC_{target_column}_{mapping_method}.png"),
-            dpi=300,
-        )
-        plt.close(fig)
-
-        ### Populate 'array1' and 'array2' with useful information
-        ### for the Feature Importance Consensus (FIC) and SHAP plots
-
-        (uniq, freq) = np.unique(temp1.flatten(), return_counts=True)
-        temp2 = np.column_stack((uniq, freq))
-        temp3 = temp2[temp2[:, 1].argsort()]
-        temp4 = [
-            df[df["index"] == temp3[i, 0]]["Features"].to_numpy()
-            for i in range(temp3.shape[0])
-        ]
-        array1 = temp3[:, 1]
-        array2 = [temp4[i][0] for i in range(len(temp4))]
+        top_features_array = feature_count["Features"].values[:max_features]
+        # plot roc curve from cv consensus
+        plot_cv_roc(clfr_preds, target_column, paths[-1])
 
         # count of PC positive controls in train data
         pos_con_train_PC = check_positive_controls(
             target_column=target_column,
-            kmers_list=list(X.iloc[train].columns),
+            kmers_list=list(X.columns),
             mapping_method=mapping_method,
             mode="PC",
         )
         print_pos_con(pos_con_train_PC, "PC", mapping_method, dataset_name="Train")
 
-        # count of PC positive controls in topN (array2)
+        # count of PC positive controls in topN
         pos_con_topN_PC = check_positive_controls(
             target_column=target_column,
-            kmers_list=array2,
+            kmers_list=list(top_features_array),
             mapping_method=mapping_method,
             mode="PC",
         )
@@ -1901,22 +2220,22 @@ if __name__ == "__main__":
         # count of AA positive controls in train data
         pos_con_train_AA = check_positive_controls(
             target_column=target_column,
-            kmers_list=list(X.iloc[train].columns),
+            kmers_list=list(X.columns),
             mapping_method=mapping_method,
             mode="AA",
         )
         print_pos_con(pos_con_train_AA, "AA", mapping_method, dataset_name="Train")
 
-        # count of AA positive controls in topN (array2)
+        # count of AA positive controls in topN
         pos_con_topN_AA = check_positive_controls(
             target_column=target_column,
-            kmers_list=array2,
+            kmers_list=list(top_features_array),
             mapping_method=mapping_method,
             mode="AA",
         )
         print_pos_con(pos_con_topN_AA, "AA", mapping_method, dataset_name="TopN")
 
-        kmer_info = get_features.KmerData(mapping_method, array2)
+        kmer_info = get_features.KmerData(mapping_method, list(top_features_array))
 
         # gather relevant information for important kmers from classifier output
         virus_names, kmer_features, protein_names = get_kmer_info(
@@ -1930,7 +2249,7 @@ if __name__ == "__main__":
 
         temp5 = list(set(zip(kmer_features, surface_exposed_status)))
 
-        is_exposed = label_surface_exposed(temp5, array2)
+        is_exposed = label_surface_exposed(temp5, top_features_array)
 
         # search through all the important kmers found in the viral dataset
         # and index the number of surface exposed vs. not for all proteins
@@ -1939,49 +2258,44 @@ if __name__ == "__main__":
         )
 
         ### Production of the SHAP plot
-
-        explainer = shap.Explainer(clfr, seed=random_state)
-        shap_values = explainer(X)
-        positive_shap_values = shap_values[:, np.array(temp3[:, 0][::-1], dtype=int), 1]
-        fig_name = os.path.join(
-            str(paths[-1]), f"SHAP_{str(target_column)}_{mapping_method}.png"
-        )
-        feature_importance.plot_shap_beeswarm(
-            positive_shap_values,
-            model_name="Random Forest",
-            fig_name=fig_name,
-            max_display=len(array2),
+        feature_importance.plot_shap_consensus(
+            shap_clfr_consensus,
+            X,
+            target_column,
+            max_features,
+            paths[-1],
+            random_state=random_state,
         )
 
         # build lists of feature exposure and response effect signs for FIC plotting
         exposure_status_sign, response_effect_sign = feature_signs(
             is_exposed,
-            positive_shap_values.values,
-            positive_shap_values.data,
+            feature_count,
+            max_features,
         )
 
         # calculate hydrophobicity scores
-        hydro_scores = ba.hydrophobicity_score(array2, mapping_method)
+        hydro_scores = ba.hydrophobicity_score(top_features_array, mapping_method)
         hydro_scores.to_csv("hydrophobicity_scores.csv", header=False, index=False)
 
         # Production of the FIC plot
         FIC_plot(
-            array2,
-            array1,
+            feature_count,
             n_folds,
             target_column,
-            mapping_method,
-            exposure_status_sign,
             response_effect_sign,
             surface_exposed_dict,
+            max_features,
+            n_seeds,
             paths[-1],
         )
 
         # save top N kmers
-        array2.reverse()
-        topN_kmers = pd.DataFrame(array2)
-        sp.save_files(
-            topN_kmers, f"topN_kmers_{target_column}_{mapping_method}.parquet.gzip"
+        np.savetxt(
+            f"topN_kmers_{target_column}_{mapping_method}.csv",
+            top_features_array,
+            delimiter=",",
+            fmt="%s",
         )
 
         # perform matching of AA analogues for topN kmers from each mapping method
@@ -1991,6 +2305,6 @@ if __name__ == "__main__":
         )
         print(matching_kmers)
         # find and save virus-protein pairs associated with topN kmers
-        top_viruses = dtra_utils.get_kmer_viruses(array2, all_kmer_info)
+        top_viruses = dtra_utils.get_kmer_viruses(top_features_array, all_kmer_info)
         top_viruses_df = pd.DataFrame.from_dict(top_viruses, orient="index").T
         top_viruses_df.to_csv("topN_virus_protein_pairs.csv", index=False)

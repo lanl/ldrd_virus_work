@@ -524,9 +524,9 @@ def test_get_kmer_viruses():
             ["AC_000008.1", "NC_001563.2", "NC_039210.1"],
             "PC",
             "jurgen_schmidt",
-            (17966, 5),
+            (17966, 6),
         ),
-        (["AC_000008.1"], "PC", "jurgen_schmidt", ((11037, 5))),
+        (["AC_000008.1"], "PC", "jurgen_schmidt", ((11037, 6))),
     ],
 )
 def test_save_load_all_kmer_info(
@@ -554,8 +554,8 @@ def test_save_load_all_kmer_info(
     # save and load the file
     with tmpdir.as_cwd():
         dtra_utils.save_kmer_info(all_kmer_info_df, "all_kmer_info_test.parquet.gzip")
-        kmer_info_load = dtra_utils.load_kmer_info("all_kmer_info_test.parquet.gzip")
         assert os.path.exists("all_kmer_info_test.parquet.gzip")
+        kmer_info_load = dtra_utils.load_kmer_info("all_kmer_info_test.parquet.gzip")
 
     assert_frame_equal(all_kmer_info_df, kmer_info_load)
     # get information from kmer_info for sanity check
@@ -565,6 +565,7 @@ def test_save_load_all_kmer_info(
     assert all_kmer_info_df.iloc[0].kmer_names == "kmer_PC_6536613006"
     assert all_kmer_info_df.iloc[0].kmer_maps == "kmer_AA_MRHIICHGGV"
     assert all_kmer_info_df.iloc[0].virus_name == "Human adenovirus 5"
+    assert all_kmer_info_df.iloc[0].include_pair
     assert all_kmer_info_df.shape == exp_shape
 
 
@@ -592,6 +593,7 @@ def test_transform_kmer_data():
     kmer_maps = [f"kmer_AA_{string.ascii_uppercase[v]}" for v in values]
     viruses = [f"virus_{v}" for v in values]
     proteins = [f"proteins_{v}" for v in values]
+    include = [bool(v % 2) for v in values]
 
     kmer_data_list = []
     for i in range(len(values)):
@@ -602,6 +604,7 @@ def test_transform_kmer_data():
                 [kmer_maps[i]],
                 viruses[i],
                 proteins[i],
+                include[i],
             )
         )
     # expected dictionary
@@ -612,6 +615,7 @@ def test_transform_kmer_data():
             "kmer_maps": {i: [f"kmer_AA_{string.ascii_uppercase[i]}"] for i in values},
             "virus_name": {i: f"virus_{i}" for i in values},
             "protein_name": {i: f"proteins_{i}" for i in values},
+            "include_pair": {i: bool(i % 2) for i in values},
         }
     )
     df_out = dtra_utils.transform_kmer_data(kmer_data_list)

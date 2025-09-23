@@ -359,6 +359,7 @@ def _grab_features(
             gather_kmer_info=gather_kmer_info,
             filter_structural=filter_structural,
         )
+        all_kmer_info.extend(kmer_info)
     if kmers_pc:
         kmer_info = _populate_kmer_dict(
             kmer_k_pc,
@@ -808,6 +809,7 @@ def plot_roc(roc_files, filename="roc_plot.png", title="ROC curve"):
     ax.legend(loc="lower right")
 
     fig.savefig(filename)
+    plt.close()
 
 
 def get_best_features(

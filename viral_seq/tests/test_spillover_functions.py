@@ -571,13 +571,24 @@ def test_grab_features_kmer_maps():
             filter_structural=None,
         )
         all_kmer_info.extend(kmer_info)
-
-    assert len(all_kmer_info) == 3408
+    # NOTE: Tyler Reddy notes on Sept. 21/2025 that
+    # there has been some confusion regarding an expected
+    # data structure size of 3408 vs. double that below.
+    # It appears that the extra factor of two comes from
+    # including KmerData instances for both the AA and PC
+    # versions of a given kmer separately. The first 3408
+    # elements appear to be AA kmer mapped to itself, while
+    # the last 3408 elements appear to be PC kmer mapped to
+    # AA kmer. It isn't immediately clear to me which approach
+    # is preferable, and we should probably be open to switching
+    # if there is a compelling reason to do so (i.e., evidence of
+    # "double counting" in control flow)
+    assert len(all_kmer_info) == 3408 * 2
 
     kmer_maps = [(k.kmer_names, k.kmer_maps) for k in all_kmer_info]
     kmer_maps_df = pd.DataFrame(kmer_maps).drop_duplicates(subset=[0, 1])
 
-    assert len(kmer_maps_df) == 3408
+    assert len(kmer_maps_df) == 3408 * 2
 
     # we expect one AA --> AA kmer identity map per PC --> AA kmer map
     kmer_maps_df = kmer_maps_df[kmer_maps_df[0] != kmer_maps_df[1]]

@@ -2172,11 +2172,11 @@ if __name__ == "__main__":
         classifier_parameters = {
             "RandomForestClassifier": {
                 "clfr": RandomForestClassifier(),
-                "params": {"n_estimators": 10000, "n_jobs": -1},
+                "params": {"n_estimators": 10000, "n_jobs": physical_cores},
             },
             "ExtraTreesClassifier": {
                 "clfr": ExtraTreesClassifier(),
-                "params": {"n_estimators": 10000, "n_jobs": -1},
+                "params": {"n_estimators": 10000, "n_jobs": physical_cores},
             },
             "XGBClassifier": {
                 "clfr": XGBClassifier(),

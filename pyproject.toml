@@ -36,7 +36,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 isg = ['pybiomart>=0.2.0']
-dev = ['mypy==1.3.0', 'black==23.3.0', 'ruff==0.8.1', 'pandas-stubs', 'types-seaborn', 'types-shapely', 'types-tqdm', 'pytest', 'pytest-cov', 'hypothesis', 'pytest-mock']
+dev = ['mypy==1.3.0', 'black==23.3.0', 'ruff==0.8.1', 'pandas-stubs', 'types-seaborn', 'types-shapely', 'types-tqdm', 'pytest', 'pytest-cov', 'hypothesis', 'pytest-mock', 'types-psutil']
 [tool.setuptools]
 packages=['viral_seq']
 [tool.setuptools.package-data]

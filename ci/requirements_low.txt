@@ -39,6 +39,7 @@ tensorboardX==2.6.2.2
 taxonomy_ranks==0.0.10
 threadpoolctl==3.1.0
 tqdm==4.65.0
+types-psutil=7.0.0.20251116
 types-pytz==2023.3.0.0
 types-shapely==2.0.0.20241221
 types-seaborn==0.13.2.20250111

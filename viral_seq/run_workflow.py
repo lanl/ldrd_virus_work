@@ -17,6 +17,7 @@ from urllib.error import URLError
 import polars as pl
 import ast
 import numpy as np
+import psutil
 from glob import glob
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.metrics import roc_auc_score, auc, roc_curve
@@ -2164,6 +2165,10 @@ if __name__ == "__main__":
         # TODO: add CLI option for determining which classifiers to train
         # TODO: perform model parameter optimization (see issue #139)
         n_folds = 5
+        # limit concurrency for some estimators to the number
+        # of physical cores; see:
+        # https://github.com/lanl/ldrd_virus_work/issues/39#issuecomment-3358030424
+        physical_cores = psutil.cpu_count(logical=False)
         classifier_parameters = {
             "RandomForestClassifier": {
                 "clfr": RandomForestClassifier(),
@@ -2175,7 +2180,7 @@ if __name__ == "__main__":
             },
             "XGBClassifier": {
                 "clfr": XGBClassifier(),
-                "params": {"n_estimators": 10000, "n_jobs": -1},
+                "params": {"n_estimators": 10000, "n_jobs": physical_cores},
             },
             # LGBM parameters determined using suggestion from:
             # https://stackoverflow.com/questions/71285022/why-lightgbm-python-package-gives-bad-prediction-using-for-regression-task
@@ -2186,7 +2191,7 @@ if __name__ == "__main__":
                     "min_data_in_leaf": 1,
                     "boosting_type": "dart",
                     "n_estimators": 1000,
-                    "n_jobs": -1,
+                    "n_jobs": physical_cores,
                 },
             },
         }

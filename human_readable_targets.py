@@ -13,7 +13,7 @@ with open("retarget.py") as infile:
     lines = infile.readlines()
     counter = 0
     line_idx = 0
-    while line_idx < 3151:
+    while line_idx < 3197:
         stripped_line = lines[line_idx].strip()
         if stripped_line.startswith("organism_dict"):
             started = True

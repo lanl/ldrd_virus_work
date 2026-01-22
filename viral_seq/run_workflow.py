@@ -433,6 +433,13 @@ def feature_selection_rfc(
     elif feature_selection == "skip":
         print("Will use previously calculated X_train stored at", table_loc_train_best)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
+        print("X.shape from read-in:", X.shape)
+        cols_to_drop = []
+        for col in X.columns:
+            if "kmer" in col:
+                cols_to_drop.append(col)
+        X.drop(columns=cols_to_drop, inplace=True)
+        print("X.shape after dropping kmers:", X.shape)
         y = pd.read_csv(train_file)[target_column]
     if debug and extract_cookie.is_file():
         # these might not exist if the workflow has only been run with --feature-selection none

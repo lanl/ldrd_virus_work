@@ -13,17 +13,18 @@ from taxonomy_ranks import TaxonomyRanks
 
 
 def assign_viral_families(df):
-    supersedes = {"Enhydra lutris polyomavirus 1": "Polyomaviridae" # https://www.genome.jp/virushostdb/1552409
-            }
+    supersedes = {
+        "Enhydra lutris polyomavirus 1": "Polyomaviridae"  # https://www.genome.jp/virushostdb/1552409
+    }
     corrections = {
         "Primate loriparvovirus 1": "Parvoviridae",
         "Pinniped copiparvovirus 1": "Parvoviridae",
-        "Elephantid betaherpesvirus 5": "Orthoherpesviridae", # https://en.wikipedia.org/wiki/Elephantid_betaherpesvirus_5
-        "Elephantid betaherpesvirus 4": "Orthoherpesviridae", # https://en.wikipedia.org/wiki/Elephantid_betaherpesvirus_4
-        "Carnivore protoparvovirus": "Parvoviridae", # https://en.wikipedia.org/wiki/Carnivore_protoparvovirus_1
-        "Bat mastadenovirus H": "Adenoviridae", # https://ictv.global/report/chapter/adenoviridae/adenoviridae
-        "Bat mastadenovirus J": "Adenoviridae", # https://ictv.global/report/chapter/adenoviridae/adenoviridae
-        "Avian metaavulavirus 8": "Paramyxoviridae", # https://ictv.global/report/chapter/paramyxoviridae/paramyxoviridae/metaavulavirus
+        "Elephantid betaherpesvirus 5": "Orthoherpesviridae",  # https://en.wikipedia.org/wiki/Elephantid_betaherpesvirus_5
+        "Elephantid betaherpesvirus 4": "Orthoherpesviridae",  # https://en.wikipedia.org/wiki/Elephantid_betaherpesvirus_4
+        "Carnivore protoparvovirus": "Parvoviridae",  # https://en.wikipedia.org/wiki/Carnivore_protoparvovirus_1
+        "Bat mastadenovirus H": "Adenoviridae",  # https://ictv.global/report/chapter/adenoviridae/adenoviridae
+        "Bat mastadenovirus J": "Adenoviridae",  # https://ictv.global/report/chapter/adenoviridae/adenoviridae
+        "Avian metaavulavirus 8": "Paramyxoviridae",  # https://ictv.global/report/chapter/paramyxoviridae/paramyxoviridae/metaavulavirus
         "Drosophina B birnavirus": "Birnaviridae",  # https://www.catalogueoflife.org/data/taxon/BXC4P
         "Goose coronavirus CB17": "Coronaviridae",  # https://www.catalogueoflife.org/data/taxon/6KPVH
         "Saint Valerien virus": "Caliciviridae",  # https://www.catalogueoflife.org/data/taxon/4TZKC
@@ -35,45 +36,47 @@ def assign_viral_families(df):
         "Torque teno seal virus 8": "Anelloviridae",  # https://doi.org/10.1007/s00705-021-05192-x
         "Torque teno seal virus 9": "Anelloviridae",  # https://doi.org/10.1007/s00705-021-05192-x
     }
-    unique_viral_families = ["Rhabdoviridae",
-                             "Papillomaviridae",
-                             "Picornaviridae",
-                             "Polyomaviridae",
-                             "Peribunyaviridae",
-                             "Flaviviridae",
-                             "Circoviridae",
-                             "Orthoherpesviridae",
-                             "Anelloviridae",
-                             "Adenoviridae",
-                             "Paramyxoviridae",
-                             "Genomoviridae",
-                             "Phenuiviridae",
-                             "Coronaviridae",
-                             "Poxviridae",
-                             "Arenaviridae",
-                             "Retroviridae",
-                             "Parvoviridae",
-                             "Sedoreoviridae",
-                             "Hantaviridae",
-                             "Spinareoviridae",
-                             "Togaviridae",
-                             "Arteriviridae",
-                             "Hepadnaviridae",
-                             "Astroviridae",
-                             "Nairoviridae",
-                             "Caliciviridae",
-                             "Filoviridae",
-                             "Orthomyxoviridae",
-                             "Tobaniviridae",
-                             "Birnaviridae",
-                             "Bornaviridae",
-                             "Hepeviridae",
-                             "Phasmaviridae",
-                             "Pneumoviridae",
-                             "Picobirnaviridae",
-                             "Asfarviridae",
-                             "Matonaviridae",
-                             "Sunviridae"]
+    unique_viral_families = [
+        "Rhabdoviridae",
+        "Papillomaviridae",
+        "Picornaviridae",
+        "Polyomaviridae",
+        "Peribunyaviridae",
+        "Flaviviridae",
+        "Circoviridae",
+        "Orthoherpesviridae",
+        "Anelloviridae",
+        "Adenoviridae",
+        "Paramyxoviridae",
+        "Genomoviridae",
+        "Phenuiviridae",
+        "Coronaviridae",
+        "Poxviridae",
+        "Arenaviridae",
+        "Retroviridae",
+        "Parvoviridae",
+        "Sedoreoviridae",
+        "Hantaviridae",
+        "Spinareoviridae",
+        "Togaviridae",
+        "Arteriviridae",
+        "Hepadnaviridae",
+        "Astroviridae",
+        "Nairoviridae",
+        "Caliciviridae",
+        "Filoviridae",
+        "Orthomyxoviridae",
+        "Tobaniviridae",
+        "Birnaviridae",
+        "Bornaviridae",
+        "Hepeviridae",
+        "Phasmaviridae",
+        "Pneumoviridae",
+        "Picobirnaviridae",
+        "Asfarviridae",
+        "Matonaviridae",
+        "Sunviridae",
+    ]
     record_family_assignments = []
     for record in df.iterrows():
         species_name = record[1].Species
@@ -116,10 +119,14 @@ def check_and_retain_shuffled_datasets(relative_entropy: float, trial: int):
     "Mollentze_Training_Fixed_shuffled.csv"
     if relative_entropy >= 3.0:
         print(f"{relative_entropy=} for {trial=}; retaining CSV files")
-        os.rename("Mollentze_Training_Fixed_shuffled.csv",
-                 f"Mollentze_Training_Fixed_shuffled_{trial}.csv")
-        os.rename("Mollentze_Holdout_Fixed_shuffled.csv",
-                 f"Mollentze_Holdout_Fixed_shuffled_{trial}.csv")
+        os.rename(
+            "Mollentze_Training_Fixed_shuffled.csv",
+            f"Mollentze_Training_Fixed_shuffled_{trial}.csv",
+        )
+        os.rename(
+            "Mollentze_Holdout_Fixed_shuffled.csv",
+            f"Mollentze_Holdout_Fixed_shuffled_{trial}.csv",
+        )
 
 
 def main(num_attempts: int = 10):
@@ -133,13 +140,17 @@ def main(num_attempts: int = 10):
         randomly_shuffle_data(rng=trial)
         # heatmap processing (we need the resulting CSV file
         # for relative entropy calculation)
-        plot_family_heatmap("Mollentze_Training_Fixed_shuffled.csv",
-                            "Mollentze_Holdout_Fixed_shuffled.csv")
+        plot_family_heatmap(
+            "Mollentze_Training_Fixed_shuffled.csv",
+            "Mollentze_Holdout_Fixed_shuffled.csv",
+        )
         relative_entropy = relative_entropy_viral_families("plot_family_heatmap.csv")
         # rename and retain the shuffled CSV files if they have sufficient
         # entropy of viral family distribution
-        check_and_retain_shuffled_datasets(relative_entropy=relative_entropy,
-                                           trial=trial)
+        check_and_retain_shuffled_datasets(
+            relative_entropy=relative_entropy, trial=trial
+        )
+
 
 if __name__ == "__main__":
     main(10)

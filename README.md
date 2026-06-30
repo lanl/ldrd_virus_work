@@ -245,3 +245,17 @@ and `taxonomy-ranks` itself depends on the `GPL-3.0` licensed
 `ete` project. Given the minor role these libraries play in our workflow,
 we'd appreciate help in finding a more liberally-licensed alternative so
 that we can avoid copyleft requirements in the future.
+
+
+Citing This Project
+===============
+If you used the contents of this repository, including software and dataset, as part
+of a project that results in publication, please cite the following associated manuscript
+(citation information is available in the repository "About" section under
+"Cite this repository"):
+
+```
+Reddy, T., Schneider, A., Hall, A., Witmer, A., & Hengartner, N. (2026). An improved
+dataset for predicting mammal infecting viruses from genetic sequence information.
+PLOS Computational Biology, 22(3). https://doi.org/10.1371/journal.pcbi.1014125
+```

@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the article listed in preferred-citation."
+authors:
+- given-names: "Tyler"
+  family-names: "Reddy"
+  email: "treddy@lanl.gov"
+- given-names: "Austin"
+  family-names: "Schneider"
+- given-names: "Aaron"
+  family-names: "Hall"
+- given-names: "Adam"
+  family-names: "Witmer"
+- given-names: "Nick"
+  family-names: "Hengartner"
+  email: "nickh@lanl.gov"
+title: "ldrd_virus_work"
+version: "0.1.0"
+doi: "10.5281/zenodo.17074080"
+repository-code: "https://www.github.com/lanl/ldrd_virus_work"
+date-released: "2025-09-07"
+license: GPL-3.0
+identifiers:
+- description: "Dataset"
+  type: doi 
+  value: "10.6084/m9.figshare.30025597"
+- description: "Human Readable Dataset Description"
+  type: doi
+  value: "10.6084/m9.figshare.31014793"
+preferred-citation:
+  type: article
+  title: "An improved dataset for predicting mammal infecting viruses from genetic sequence information"
+  authors:
+  - given-names: "Tyler"
+    family-names: "Reddy"
+    email: "treddy@lanl.gov"
+  - given-names: "Austin"
+    family-names: "Schneider"
+  - given-names: "Aaron"
+    family-names: "Hall"
+  - given-names: "Adam"
+    family-names: "Witmer"
+  - given-names: "Nick"
+    family-names: "Hengartner"
+    email: "nickh@lanl.gov"
+  journal: "PLOS Computational Biology"
+  doi: "10.1371/journal.pcbi.1014125"
+  volume: 22
+  issue: 3
+  pages: "e1014125"
+  year: 2026
+  publisher:
+    name: "Public Library of Science San Francisco, CA USA"

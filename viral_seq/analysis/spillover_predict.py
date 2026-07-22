@@ -1,7 +1,7 @@
 import json
 import pickle
 from pathlib import Path
-from viral_seq.analysis.get_features import get_genomic_features, get_kmers, get_gc
+from viral_seq.analysis.get_features import get_genomic_features, get_kmers, get_gc, get_bert_embeddings
 from tqdm import tqdm
 from Bio import Entrez, SeqIO
 import numpy as np
@@ -307,7 +307,20 @@ def _populate_kmer_dict(kmer, records, features, kmer_type="AA"):
             features.update(this_res)
 
 
-def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc):
+def _populate_bert_dict(records, features):
+    print("start of _populate_bert_dict")
+    mean_embeddings = get_bert_embeddings(records)
+    features["BERT_mean_pooled"] = mean_embeddings
+    print("end of _populate_bert_dict")
+            #features.update(this_res)
+
+
+def _grab_features(features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc, *, bert=False):
+    if bert:
+        # the ProtBert features are used as an alternative to
+        # all other features, so just add them in and return
+        _populate_bert_dict(records=records, features=features)
+        return features
     feat_genomic = None
     feat_gc = None
     if genomic:
@@ -368,6 +381,7 @@ def build_table(
     num_select: int = 1_000,
     random_state: int = 123456789,
     target_column: str = "Human Host",
+    bert: bool = True,
 ):
     if kmer_k is None:
         kmer_k = [10]
@@ -398,9 +412,12 @@ def build_table(
         meta_data = list(df.columns)
         for species, records in tqdm(records_dict.items()):
             features = row_dict[species].to_dict()
+            print("**species:", species)
             this_result = _grab_features(
-                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc
+                features, records, genomic, kmers, kmer_k, gc, kmers_pc, kmer_k_pc, bert=bert
             )
+            print(f"{species=} features['BERT_mean_pooled']:",
+                  features["BERT_mean_pooled"])
             if this_result is not None:
                 calculated_feature_rows.append(this_result)
     # human gene feature tables

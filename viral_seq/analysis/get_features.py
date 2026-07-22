@@ -1,3 +1,4 @@
+import re
 from functools import cache
 from collections import defaultdict
 from Bio.Data.CodonTable import standard_dna_table
@@ -7,6 +8,8 @@ from typing import Any
 import pandas as pd
 import numpy as np
 import scipy.stats
+from transformers import BertTokenizer, BertModel
+import torch
 
 codontab = standard_dna_table.forward_table.copy()  # type: ignore
 for codon in standard_dna_table.stop_codons:  # type: ignore
@@ -53,6 +56,58 @@ def get_kmers(records, k=10, kmer_type="AA"):
                 for kmer in Sequence(str(this_seq)).iter_kmers(k, overlap=True):
                     kmers["kmer_" + kmer_type + "_" + str(kmer)] += 1
     return kmers
+
+
+def get_bert_embeddings(records):
+    print("start of get_bert_embeddings")
+    MODEL_NAME = "Rostlab/prot_bert_bfd"
+    tokenizer = BertTokenizer.from_pretrained(MODEL_NAME, do_lower_case=False)
+    model = BertModel.from_pretrained(MODEL_NAME)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    model.eval()
+    protein_segments = 0
+    protein_embeddings_list = []
+    for record in records:
+        print("record:", record)
+        for feature in record.features:
+            if feature.type == "CDS":
+                nuc_seq = feature.location.extract(record.seq)
+                if len(nuc_seq) % 3 != 0:
+                    # bad cds are skipped as in
+                    # https://github.com/Nardus/zoonotic_rank/blob/main/Utils/GenomeFeatures.py#L105
+                    continue
+                this_seq = nuc_seq.translate()
+                print("this_seq:", this_seq)
+                # ProtBERT expects spaces between amino acids
+                sequence_w_spaces = " ".join(re.sub(r"[\\*~]", "", str(this_seq).upper()))
+                print("sequence_w_spaces:", sequence_w_spaces)
+                inputs = tokenizer(
+                        sequence_w_spaces,
+                        padding="max_length",
+                        max_length=2048,
+                        truncation=True,
+                        return_tensors="pt"
+                    )
+                inputs = {k: v.to(device) for k, v in inputs.items()}
+                with torch.no_grad():
+                    outputs = model(**inputs)
+                sequence_embeddings = outputs.last_hidden_state[0]
+                # Remove special tokens [CLS] and [SEP]
+                seq_len = len(this_seq)
+                token_embeddings = sequence_embeddings[1:seq_len+1]  # shape: (seq_len, 1024)
+                # perform mean pooling of the embeddings:
+                # should produce mean embeddings with shape (1024,)
+                protein_embeddings = token_embeddings.mean(dim=0)
+                protein_embeddings_list.append(protein_embeddings)
+                protein_segments += 1
+                # confirmed shape: torch.Size([1024])
+                print("protein_embeddings.shape:", protein_embeddings.shape)
+    print(f"{protein_segments=}")
+    mean_embedding_this_virus = torch.stack(protein_embeddings_list).mean(dim=0)
+    print("mean_embedding_this_virus.shape:", mean_embedding_this_virus.shape)
+    print("end of get_bert_embeddings")
+    return mean_embedding_this_virus.cpu()
 
 
 def get_gc(records):

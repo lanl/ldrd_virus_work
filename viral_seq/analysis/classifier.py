@@ -642,14 +642,14 @@ def plot_roc_curve_comparison(
             eer_next_y = tprs[i][next_idx]
             this_line = LineString([(eer_x, eer_y), (eer_next_x, eer_next_y)])
             intersection = this_line.intersection(LineString([(0, 1), (1, 0)]))
-            ax.plot(
-                intersection.x,  # type: ignore
-                intersection.y,  # type: ignore
-                marker="x",
-                label=f"{name} {eer_threshold = :.2e}",
-                alpha=1.0,
-                ms=12,
-            )
+            #ax.plot(
+                #intersection.x,  # type: ignore
+                #intersection.y,  # type: ignore
+                #marker="x",
+                #label=f"{name} {eer_threshold = :.2e}",
+                #alpha=1.0,
+                #ms=12,
+            #)
 
     # chance line
     ax.plot([0, 1], [0, 1], "r--")

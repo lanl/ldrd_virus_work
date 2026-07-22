@@ -433,6 +433,13 @@ def feature_selection_rfc(
     elif feature_selection == "skip":
         print("Will use previously calculated X_train stored at", table_loc_train_best)
         X = pl.read_parquet(table_loc_train_best).to_pandas()
+        print("X.shape from read-in:", X.shape)
+        cols_to_drop = []
+        for col in X.columns:
+            if "kmer" in col:
+                cols_to_drop.append(col)
+        X.drop(columns=cols_to_drop, inplace=True)
+        print("X.shape after dropping kmers:", X.shape)
         y = pd.read_csv(train_file)[target_column]
     if debug and extract_cookie.is_file():
         # these might not exist if the workflow has only been run with --feature-selection none
@@ -690,6 +697,16 @@ if __name__ == "__main__":
             "Relabeled_Train_Human_Shuffled.csv",
             "Relabeled_Train_Mammal_Shuffled.csv",
             "Relabeled_Train_Primate_Shuffled.csv",
+            "Mollentze_Training_Fixed_shuffled_0.csv",
+            "Mollentze_Training_Fixed_shuffled_1.csv",
+            "Mollentze_Training_Fixed_shuffled_2.csv",
+            "Mollentze_Training_Fixed_shuffled_3.csv",
+            "Mollentze_Training_Fixed_shuffled_4.csv",
+            "Mollentze_Training_Fixed_shuffled_5.csv",
+            "Mollentze_Training_Fixed_shuffled_6.csv",
+            "Mollentze_Training_Fixed_shuffled_7.csv",
+            "Mollentze_Training_Fixed_shuffled_8.csv",
+            "Mollentze_Training_Fixed_shuffled_9.csv",
         ],
         default="Mollentze_Training.csv",
         help="File to be used corresponding to training data.",
@@ -705,6 +722,16 @@ if __name__ == "__main__":
             "Relabeled_Test_Human_Shuffled.csv",
             "Relabeled_Test_Mammal_Shuffled.csv",
             "Relabeled_Test_Primate_Shuffled.csv",
+            "Mollentze_Holdout_Fixed_shuffled_0.csv",
+            "Mollentze_Holdout_Fixed_shuffled_1.csv",
+            "Mollentze_Holdout_Fixed_shuffled_2.csv",
+            "Mollentze_Holdout_Fixed_shuffled_3.csv",
+            "Mollentze_Holdout_Fixed_shuffled_4.csv",
+            "Mollentze_Holdout_Fixed_shuffled_5.csv",
+            "Mollentze_Holdout_Fixed_shuffled_6.csv",
+            "Mollentze_Holdout_Fixed_shuffled_7.csv",
+            "Mollentze_Holdout_Fixed_shuffled_8.csv",
+            "Mollentze_Holdout_Fixed_shuffled_9.csv",
         ],
         default="Mollentze_Holdout.csv",
         help="File to be used corresponding to test data.",
